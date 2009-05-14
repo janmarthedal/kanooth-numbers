@@ -20,7 +20,7 @@
 using com::sputsoft::multiprecision::NaturalNumber;
 using com::sputsoft::multiprecision::Integer;
 
-typedef unsigned short limb_t;
+typedef unsigned long limb_t;
 typedef NaturalNumber<limb_t> NatNum;
 
 /*void check1()
@@ -201,14 +201,16 @@ void check()
 
 void check2()
 {
-  NatNum u = construct("12345678901234567890", (limb_t) 10);
+  NatNum u = construct("99999999", (limb_t) 10);
+  NatNum v = construct("999", (limb_t) 10);
   //NatNum u(12345);
-  NatNum v(10);
+  //NatNum v(10);
 
   std::cout << "u  : " << u << std::endl;
   std::cout << "v  : " << v << std::endl;
   std::pair<NatNum, NatNum> divrem = NatNum::divide(u, v);
   std::cout << "u/v: " << divrem.first << ", " << divrem.second << std::endl;
+  std::cout << "u*v: " << u*v << std::endl;
 }
 
 int main()

@@ -13,7 +13,7 @@
  */
 
 #ifndef _NATURALNUMBER_HPP
-#define	_NATURALNUMBER_HPP
+#define _NATURALNUMBER_HPP
 
 #include <iostream>
 #include <vector>
@@ -51,41 +51,59 @@ class NaturalNumber {
   template <typename W>
   friend std::ostream& operator<<(std::ostream& os, const NaturalNumber<W>& n);
 private:
-  typedef SimpleLimbVector<T> V;
-  boost::shared_ptr<V> limbvec;
-  typedef T limb_type;
-  typedef typename V::size_type limbvec_size_type;
-  NaturalNumber(limbvec_size_type size, bool) : limbvec(new V(size)) {}
-  limb_type* limb_begin() { return limbvec->begin(); }
-  limb_type* limb_end() { return limbvec->end(); }
-  const limb_type* limb_begin() const { return limbvec->begin(); }
-  const limb_type* limb_end() const { return limbvec->end(); }
+  typedef SimpleLimbVector<T> CONT;
+  boost::shared_ptr<CONT> limbvec;
+  typedef typename CONT::size_type limbvec_size_type;
+  static const unsigned int halfbits = boost::integer_traits<T>::digits / 2;
+  static const T lowmask = (((T) 1) << halfbits) - 1;
+  static const T highmask = lowmask << halfbits;
+  NaturalNumber(limbvec_size_type size, bool) : limbvec(new CONT(size)) {}
+  T* limb_begin() { return limbvec->begin(); }
+  T* limb_end() { return limbvec->end(); }
+  const T* limb_begin() const { return limbvec->begin(); }
+  const T* limb_end() const { return limbvec->end(); }
+  static T multaddadd(const T u, const T v, T& w, const T k);
+  static T* multiplier(const T* ufirst, const T *ulast, const T* vfirst, const T *vlast, T* wfirst);
   NaturalNumber shift_left(size_t n) const;
   NaturalNumber shift_right(size_t n) const;
-  static std::pair<NaturalNumber,NaturalNumber> simple_divide(const NaturalNumber<T>& u, limb_type v);
+  static std::pair<NaturalNumber,NaturalNumber> simple_divide(const NaturalNumber<T>& u, T v);
   static std::pair<NaturalNumber,NaturalNumber> long_divide(const NaturalNumber<T>& u, const NaturalNumber<T>& v);
 public:
-  NaturalNumber() : limbvec(new V()) {}
-  NaturalNumber(limb_type value) : limbvec(new V(1)) {
-    if (value) {
-      *limb_begin() = value;
-      limbvec->set_size(1);
-    }
-  }
   static const NaturalNumber zero;
-  bool isZero() const { return !limbvec->size(); }
+  NaturalNumber();
+  NaturalNumber(T value);
+  bool isZero() const;
   static NaturalNumber add(const NaturalNumber<T>& u, const NaturalNumber<T>& v);
-  NaturalNumber& operator+=(const NaturalNumber<T>& v);
   static NaturalNumber subtract(const NaturalNumber<T>& u, const NaturalNumber<T>& v);
-  NaturalNumber& operator-=(const NaturalNumber<T>& v);
   static NaturalNumber multiply(const NaturalNumber<T>& u, const NaturalNumber<T>& v);
-  NaturalNumber& operator*=(const NaturalNumber<T>& v);
   static std::pair<NaturalNumber,NaturalNumber> divide(const NaturalNumber<T>& u, const NaturalNumber<T>& v);
-  int compare(const NaturalNumber<T>& v) const;
+  static int compare(const NaturalNumber<T>& u, const NaturalNumber<T>& v);
   NaturalNumber binary_shift(std::ptrdiff_t n) const;
+  NaturalNumber& operator+=(const NaturalNumber<T>& v);
+  NaturalNumber& operator-=(const NaturalNumber<T>& v);
+  NaturalNumber& operator*=(const NaturalNumber<T>& v);
 };
 
 template <typename T> const NaturalNumber<T> NaturalNumber<T>::zero;
+
+template <typename T>
+NaturalNumber<T>::NaturalNumber() : limbvec(new CONT())
+{}
+
+template <typename T>
+NaturalNumber<T>::NaturalNumber(T value) : limbvec(new CONT(1))
+{
+  if (value) {
+    *limb_begin() = value;
+    limbvec->set_size(1);
+  }
+}
+
+template <typename T>
+inline bool NaturalNumber<T>::isZero() const
+{
+  return !limbvec->size();
+}
 
 /*
  * ADDITION
@@ -136,8 +154,8 @@ NaturalNumber<T> NaturalNumber<T>::add(const NaturalNumber<T>& u, const NaturalN
   if (u.isZero()) return v;
   if (v.isZero()) return u;
   NaturalNumber<T> r(std::max(u.limbvec->size(), v.limbvec->size())+1, true);
-  limb_type* rbegin = r.limb_begin();
-  limb_type* rend = adder(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
+  T* rbegin = r.limb_begin();
+  T* rend = adder(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
   r.limbvec->set_size(rend - rbegin);
   return r;
 }
@@ -149,8 +167,8 @@ NaturalNumber<T>& NaturalNumber<T>::operator+=(const NaturalNumber<T>& x)
     *this = x;
   } else if (!x.isZero()) {
     if (limbvec.unique() && limbvec->capacity() > std::max(limbvec->size(), x.limbvec->size())) {
-      limb_type* rbegin = limb_begin();
-      limb_type* rend = adder(limb_begin(), limb_end(), x.limb_begin(), x.limb_end(), rbegin);
+      T* rbegin = limb_begin();
+      T* rend = adder(limb_begin(), limb_end(), x.limb_begin(), x.limb_end(), rbegin);
       limbvec->set_size(rend - rbegin);
     } else
       *this = add(*this, x);
@@ -203,8 +221,8 @@ NaturalNumber<T> NaturalNumber<T>::subtract(const NaturalNumber<T>& u, const Nat
   if (v.isZero()) return u;
   if (u.limbvec->size() < v.limbvec->size()) return zero;  // wrong usage
   NaturalNumber<T> r(u.limbvec->size(), true);
-  limb_type* rbegin = r.limb_begin();
-  limb_type* rend = subtracter(v.limb_begin(), v.limb_end(), u.limb_begin(), u.limb_end(), rbegin);
+  T* rbegin = r.limb_begin();
+  T* rend = subtracter(v.limb_begin(), v.limb_end(), u.limb_begin(), u.limb_end(), rbegin);
   r.limbvec->set_size(rend - rbegin);
   return r;
 }
@@ -214,8 +232,8 @@ NaturalNumber<T>& NaturalNumber<T>::operator-=(const NaturalNumber<T>& v)
 {
   if (!v.isZero() && limbvec->size() >= v.limbvec->size()) {
     if (limbvec.unique()) {
-      limb_type* rbegin = limb_begin();
-      limb_type* rend = subtracter(v.limb_begin(), v.limb_end(), rbegin, limb_end(), rbegin);
+      T* rbegin = limb_begin();
+      T* rend = subtracter(v.limb_begin(), v.limb_end(), rbegin, limb_end(), rbegin);
       limbvec->set_size(rend - rbegin);
     } else
       *this = subtract(*this, v);
@@ -228,10 +246,8 @@ NaturalNumber<T>& NaturalNumber<T>::operator-=(const NaturalNumber<T>& v)
  */
 
 template <typename T>
-T multaddadd(const T u, const T v, T& w, const T k)
+T NaturalNumber<T>::multaddadd(const T u, const T v, T& w, const T k)
 {
-  const unsigned int halfbits = boost::integer_traits<T>::digits / 2;
-  const T lowmask = (((T) 1) << halfbits) - 1;
   T u1 = u >> halfbits, u0 = u & lowmask;
   T v1 = v >> halfbits, v0 = v & lowmask;
   T r = u0*v0 + (w & lowmask) + (k & lowmask);
@@ -242,7 +258,7 @@ T multaddadd(const T u, const T v, T& w, const T k)
 }
 
 template <typename T>
-T* multiplier(const T* ufirst, const T *ulast, const T* vfirst, const T *vlast, T* wfirst)
+T* NaturalNumber<T>::multiplier(const T* ufirst, const T *ulast, const T* vfirst, const T *vlast, T* wfirst)
 {
   const T *ui;
   T *wij;
@@ -267,8 +283,8 @@ NaturalNumber<T> NaturalNumber<T>::multiply(const NaturalNumber<T>& u, const Nat
 {
   if (u.isZero() || v.isZero()) return zero;
   NaturalNumber<T> r(u.limbvec->size() + v.limbvec->size(), true);
-  limb_type* rbegin = r.limb_begin();
-  limb_type* rend = multiplier(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
+  T* rbegin = r.limb_begin();
+  T* rend = multiplier(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
   r.limbvec->set_size(rend - rbegin);
   return r;
 }
@@ -285,11 +301,9 @@ NaturalNumber<T>& NaturalNumber<T>::operator*=(const NaturalNumber<T>& v)
 
 template <typename T>
 std::pair<NaturalNumber<T>, NaturalNumber<T> >
-NaturalNumber<T>::simple_divide(const NaturalNumber<T>& u, limb_type v)
+NaturalNumber<T>::simple_divide(const NaturalNumber<T>& u, T v)
 {
-  const unsigned int halfbits = boost::integer_traits<limb_type>::digits / 2;
-  const limb_type checkmask = ((limb_type) 1) << (halfbits - 1);
-  const limb_type lowmask = (((limb_type) 1) << halfbits) - 1;
+  const T checkmask = ((T) 1) << (halfbits - 1);
   unsigned int h = 0;
 
   while (!(v & checkmask)) { v <<= 1; ++h; }
@@ -297,9 +311,9 @@ NaturalNumber<T>::simple_divide(const NaturalNumber<T>& u, limb_type v)
   NaturalNumber<T> w = u.shift_left(h);
   limbvec_size_type limbs = w.limbvec->size();
   NaturalNumber<T> q(limbs, true);
-  const limb_type *wfirst = w.limb_begin(), *wlast = w.limb_end() - 1;
-  limb_type* qlast = q.limb_begin() + limbs - 1;
-  limb_type r, t, s, z;
+  const T *wfirst = w.limb_begin(), *wlast = w.limb_end() - 1;
+  T* qlast = q.limb_begin() + limbs - 1;
+  T r, t, s, z;
 
   s = *wlast;
   t = s >> halfbits;
@@ -333,11 +347,9 @@ template <typename T>
 std::pair<NaturalNumber<T>, NaturalNumber<T> >
 NaturalNumber<T>::divide(const NaturalNumber<T>& u, const NaturalNumber<T>& v)
 {
-  if (v.isZero() || u.compare(v) < 0)
+  if (v.isZero() || compare(u, v) < 0)
     return std::pair<NaturalNumber<T>, NaturalNumber<T> >(zero, u);
 
-  const unsigned int halfbits = boost::integer_traits<limb_type>::digits / 2;
-  const limb_type highmask = ((limb_type) -1) << halfbits;
   if (v.limbvec->size() == 1 && !(*v.limb_begin() & highmask))
     return simple_divide(u, *v.limb_begin());
   else
@@ -352,19 +364,19 @@ template <typename T>
 NaturalNumber<T> NaturalNumber<T>::shift_left(size_t n) const
 {
   if (!n) return *this;
-  const unsigned int bits = boost::integer_traits<limb_type>::digits;
+  const unsigned int bits = boost::integer_traits<T>::digits;
   const unsigned int shift = n % bits;
   n /= bits;
   NaturalNumber<T> r(limbvec->size() + n + 1, true);
-  limb_type* rfirst = r.limb_begin(), *riter = rfirst;
+  T* rfirst = r.limb_begin(), *riter = rfirst;
   while (n--)
     *riter++ = 0;
-  const limb_type *first = limb_begin(), *last = limb_end();
+  const T *first = limb_begin(), *last = limb_end();
   if (shift != 0) {
     const unsigned int revshift = bits - shift;
-    limb_type k = 0;
+    T k = 0;
     while (first != last) {
-      limb_type t = *first++;
+      T t = *first++;
       *riter++ = (t << shift) | k;
       k = t >> revshift;
     }
@@ -381,18 +393,18 @@ template <typename T>
 NaturalNumber<T> NaturalNumber<T>::shift_right(size_t n) const
 {
   if (!n) return *this;
-  const unsigned int bits = boost::integer_traits<limb_type>::digits;
+  const unsigned int bits = boost::integer_traits<T>::digits;
   const unsigned int shift = n % bits;
   n /= bits;
   if (n >= limbvec->size()) return zero;
   limbvec_size_type limbs = limbvec->size() - n;
   NaturalNumber<T> r(limbs, true);
-  const limb_type *last = limb_end();
-  limb_type *rfirst = r.limb_begin(), *rlast = rfirst + limbs;
+  const T *last = limb_end();
+  T *rfirst = r.limb_begin(), *rlast = rfirst + limbs;
   if (shift != 0) {
     const unsigned int revshift = bits - shift;
-    limb_type t = *--last;
-    limb_type k = t << revshift;
+    T t = *--last;
+    T k = t << revshift;
     --rlast;
     if (t >>= shift)
       *rlast = t;
@@ -429,11 +441,11 @@ int compare_values(const T& a, const T& b) {
 }
 
 template <typename T>
-int NaturalNumber<T>::compare(const NaturalNumber<T>& v) const
+int NaturalNumber<T>::compare(const NaturalNumber<T>& u, const NaturalNumber<T>& v)
 {
-  int c = compare_values(limbvec->size(), v.limbvec->size());
+  int c = compare_values(u.limbvec->size(), v.limbvec->size());
   if (c) return c;
-  const limb_type *first1 = limb_begin(), *last1 = limb_end(), *last2 = v.limb_end();
+  const T *first1 = u.limb_begin(), *last1 = u.limb_end(), *last2 = v.limb_end();
   while (last1 != first1) {
     c = compare_values(*--last1, *--last2);
     if (c) return c;
@@ -444,37 +456,37 @@ int NaturalNumber<T>::compare(const NaturalNumber<T>& v) const
 template <typename T>
 inline bool operator==(const NaturalNumber<T>& u, const NaturalNumber<T>& v)
 {
-  return u.compare(v) == 0;
+  return NaturalNumber<T>::compare(u, v) == 0;
 }
 
 template <typename T>
-inline bool operator!=(const NaturalNumber<T>& x, const NaturalNumber<T>& y)
+inline bool operator!=(const NaturalNumber<T>& u, const NaturalNumber<T>& v)
 {
-  return x.compare(y) != 0;
+  return NaturalNumber<T>::compare(u, v) != 0;
 }
 
 template <typename T>
-inline bool operator<(const NaturalNumber<T>& x, const NaturalNumber<T>& y)
+inline bool operator<(const NaturalNumber<T>& u, const NaturalNumber<T>& v)
 {
-  return x.compare(y) < 0;
+  return NaturalNumber<T>::compare(u, v) < 0;
 }
 
 template <typename T>
-inline bool operator<=(const NaturalNumber<T>& x, const NaturalNumber<T>& y)
+inline bool operator<=(const NaturalNumber<T>& u, const NaturalNumber<T>& v)
 {
-  return x.compare(y) <= 0;
+  return NaturalNumber<T>::compare(u, v) <= 0;
 }
 
 template <typename T>
-inline bool operator>(const NaturalNumber<T>& x, const NaturalNumber<T>& y)
+inline bool operator>(const NaturalNumber<T>& u, const NaturalNumber<T>& v)
 {
-  return x.compare(y) > 0;
+  return NaturalNumber<T>::compare(u, v) > 0;
 }
 
 template <typename T>
-inline bool operator>=(const NaturalNumber<T>& x, const NaturalNumber<T>& y)
+inline bool operator>=(const NaturalNumber<T>& u, const NaturalNumber<T>& v)
 {
-  return x.compare(y) >= 0;
+  return NaturalNumber<T>::compare(u, v) >= 0;
 }
 
 /*
@@ -507,7 +519,7 @@ template <typename T>
 std::ostream& operator<<(std::ostream& os, const NaturalNumber<T>& n)
 {
   if (!n.isZero()) {
-    const int digits10 = boost::integer_traits<typename NaturalNumber<T>::limb_type>::digits10;
+    const int digits10 = boost::integer_traits<T>::digits10;
     char buffer[n.limbvec->size() * digits10];
     int digits=0;
     NaturalNumber<T> s = n, ten(10);
@@ -519,7 +531,7 @@ std::ostream& operator<<(std::ostream& os, const NaturalNumber<T>& n)
     while (digits)
       os << buffer[--digits];
     if (!n.limb_begin()[n.limbvec->size()-1]) {
-      typename NaturalNumber<T>::limb_type const* p = n.limb_end();
+      T const* p = n.limb_end();
       while (p != n.limb_begin())
         os << " " << *--p;
       os << " (" << n.limbvec.use_count() << ")";
