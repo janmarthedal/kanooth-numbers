@@ -1,6 +1,6 @@
 /* 
  * File:   test.cpp
- * Author: jmr
+ * Author: Jan Marthedal Rasmussen
  *
  * Created on 4. maj 2009, 20:02
  *
@@ -26,7 +26,7 @@ typedef unsigned short limb_t;
 //typedef unsigned long limb_t;
 //typedef unsigned long long limb_t;
 //typedef boost::uintmax_t limb_t;
-typedef NonNegativeInteger<limb_t> NatNum;
+typedef NonNegativeInteger<limb_t> NNI;
 
 /*void check1()
 {
@@ -173,11 +173,11 @@ void multaddcheck()
   multaddcheck1(m, m, m, z);
 }*/
 
-NatNum construct(const std::string& digits, const limb_t base)
+NNI construct(const std::string& digits, const limb_t base)
 {
-  NatNum r = NatNum::zero;
+  NNI r = NNI::zero;
   if (base >= 2 && base <= 36) {
-    NatNum b(base);
+    NNI b(base);
     unsigned short v;
     for (std::string::const_iterator p=digits.begin(); p != digits.end(); ++p) {
       char c = *p;
@@ -185,7 +185,7 @@ NatNum construct(const std::string& digits, const limb_t base)
       else if (c >= 'a' && c <= 'z') v = c - 'a' + 10;
       else if (c >= 'A' && c <= 'Z') v = c - 'A' + 10;
       else break;
-      r = b*r + NatNum(v);
+      r = b*r + NNI(v);
     }
   }
   return r;
@@ -193,23 +193,23 @@ NatNum construct(const std::string& digits, const limb_t base)
 
 void check()
 {
-  NatNum u = construct("200000000", (limb_t) 10);
-  NatNum v = construct("500000000", (limb_t) 10);
+  NNI u = construct("200000000", (limb_t) 10);
+  NNI v = construct("500000000", (limb_t) 10);
 
   std::cout << "u  : " << u << std::endl;
   std::cout << "v  : " << v << std::endl;
-  v = v.binary_shift(10);
+  v.binary_shift_self(10);
   std::cout << "v  : " << v << std::endl;
-  v = v.binary_shift(-10);
+  v.binary_shift_self(-30);
   std::cout << "v  : " << v << std::endl;
 }
 
 void check2()
 {
-  //NatNum u = construct("99999999", (limb_t) 10);
-  //NatNum v = construct("999", (limb_t) 10);
-  NatNum u(2);  // 2^1
-  NatNum v(1);
+  //NNI u = construct("99999999", (limb_t) 10);
+  //NNI v = construct("999", (limb_t) 10);
+  NNI u(2);  // 2^1
+  NNI v(1);
 
   std::cout << "u  : " << u << std::endl;
   std::cout << "v  : " << v << std::endl;
@@ -230,19 +230,19 @@ void check2()
 
 void check3()
 {
-  NatNum v(20000);
-  NatNum u = NatNum(19999)*NatNum(19999);
+  NNI v(20000);
+  NNI u = NNI(19999)*NNI(19999);
 
   std::cout << "u  : " << u << std::endl;
   std::cout << "v  : " << v << std::endl;
-  std::pair<NatNum,NatNum> div = u.divide(u, v);
+  std::pair<NNI,NNI> div = u.divide(u, v);
   std::cout << "u/v: " << div.first << std::endl;
   std::cout << "u%v: " << div.second << std::endl;
 }
 
 int main()
 {
-  check3();
+  check();
 
   /*NonNegativeInteger<simplevec<limb_t> > u(60000);
   NonNegativeInteger<simplevec<limb_t> > v(18345);

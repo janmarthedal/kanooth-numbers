@@ -1,6 +1,6 @@
 /* 
  * File:   Integer.hpp
- * Author: jmr
+ * Author: Jan Marthedal Rasmussen
  *
  * Created on 5. maj 2009, 15:52
  *
