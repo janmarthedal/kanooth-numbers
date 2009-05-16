@@ -16,7 +16,7 @@
 #define	_INTEGER_HPP
 
 #include <iostream>
-#include "NaturalNumber.hpp"
+#include "NonNegativeInteger.hpp"
 
 namespace com {
 namespace sputsoft {
@@ -28,9 +28,9 @@ class Integer {
   friend std::ostream& operator<<(std::ostream& os, const Integer<S>& n);
 private:
   bool positive;
-  NaturalNumber<T> number;
+  NonNegativeInteger<T> number;
 public:
-  Integer(const NaturalNumber<T>& n, const bool pos=true) : positive(pos), number(n) {}
+  Integer(const NonNegativeInteger<T>& n, const bool pos=true) : positive(pos), number(n) {}
   Integer operator-() const { return Integer(number, !positive); }
   bool isZero() const { return number.isZero(); }
   bool isPositive() const { return !isZero() && positive; }

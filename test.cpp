@@ -13,21 +13,26 @@
  */
 
 #include <iostream>
+#include <boost/cstdint.hpp>
 #include <boost/integer_traits.hpp>
-#include "NaturalNumber.hpp"
+#include "NonNegativeInteger.hpp"
 #include "Integer.hpp"
 
-using com::sputsoft::multiprecision::NaturalNumber;
+using com::sputsoft::multiprecision::NonNegativeInteger;
 using com::sputsoft::multiprecision::Integer;
 
-typedef unsigned long limb_t;
-typedef NaturalNumber<limb_t> NatNum;
+//typedef unsigned char limb_t;
+typedef unsigned short limb_t;
+//typedef unsigned long limb_t;
+//typedef unsigned long long limb_t;
+//typedef boost::uintmax_t limb_t;
+typedef NonNegativeInteger<limb_t> NatNum;
 
 /*void check1()
 {
-  NaturalNumber<limb_t> n = boost::integer_traits<limb_t>::const_max;
+  NonNegativeInteger<limb_t> n = boost::integer_traits<limb_t>::const_max;
   std::cout << "n=" << n << std::endl;
-  NaturalNumber<limb_t> m = n;
+  NonNegativeInteger<limb_t> m = n;
   std::cout << "m=" << m << std::endl;
   std::cout << "n=" << n << std::endl;
   for (int i=0; i < 5; ++i) {
@@ -42,7 +47,7 @@ typedef NaturalNumber<limb_t> NatNum;
   }
   std::cout << (m < n ? "m < n" : "m >= n") << std::endl;
   std::cout << (m == n ? "m == n" : "m != n") << std::endl;
-  std::cout << (m < NaturalNumber<limb_t>::zero ? "m < 0" : "m >= 0") << std::endl;
+  std::cout << (m < NonNegativeInteger<limb_t>::zero ? "m < 0" : "m >= 0") << std::endl;
 }
 
 template <typename T>
@@ -55,8 +60,8 @@ void addcheck(const Integer<T>& i1, const Integer<T>& i2)
 
 void addcheck1()
 {
-  NaturalNumber<limb_t> n1 = 2;
-  NaturalNumber<limb_t> n2 = 8;
+  NonNegativeInteger<limb_t> n1 = 2;
+  NonNegativeInteger<limb_t> n2 = 8;
   addcheck(Integer<limb_t>(n1, true), Integer<limb_t>(n2, true));
   addcheck(Integer<limb_t>(n1, true), Integer<limb_t>(n2, false));
   addcheck(Integer<limb_t>(n1, false), Integer<limb_t>(n2, true));
@@ -77,8 +82,8 @@ void subcheck(const Integer<T>& i1, const Integer<T>& i2)
 
 void subcheck1()
 {
-  NaturalNumber<limb_t> n1 = 2;
-  NaturalNumber<limb_t> n2 = 8;
+  NonNegativeInteger<limb_t> n1 = 2;
+  NonNegativeInteger<limb_t> n2 = 8;
   subcheck(Integer<limb_t>(n1, true), Integer<limb_t>(n2, true));
   subcheck(Integer<limb_t>(n1, true), Integer<limb_t>(n2, false));
   subcheck(Integer<limb_t>(n1, false), Integer<limb_t>(n2, true));
@@ -201,24 +206,46 @@ void check()
 
 void check2()
 {
-  NatNum u = construct("99999999", (limb_t) 10);
-  NatNum v = construct("999", (limb_t) 10);
-  //NatNum u(12345);
-  //NatNum v(10);
+  //NatNum u = construct("99999999", (limb_t) 10);
+  //NatNum v = construct("999", (limb_t) 10);
+  NatNum u(2);  // 2^1
+  NatNum v(1);
 
   std::cout << "u  : " << u << std::endl;
   std::cout << "v  : " << v << std::endl;
-  std::pair<NatNum, NatNum> divrem = NatNum::divide(u, v);
-  std::cout << "u/v: " << divrem.first << ", " << divrem.second << std::endl;
-  std::cout << "u*v: " << u*v << std::endl;
+  u *= u;  // 2^2
+  u *= u;  // 2^4
+  u *= u;  // 2^8
+  u *= u;  // 2^16
+  u *= u;  // 2^32
+  u *= u;  // 2^64
+  u *= u;  // 2^128
+  u *= u;  // 2^256
+  u *= u;  // 2^512
+  u *= u;  // 2^1024
+  v = v.binary_shift(1024);
+  std::cout << "u  : " << u << std::endl;
+  std::cout << "v  : " << v << std::endl;
+}
+
+void check3()
+{
+  NatNum v(20000);
+  NatNum u = NatNum(19999)*NatNum(19999);
+
+  std::cout << "u  : " << u << std::endl;
+  std::cout << "v  : " << v << std::endl;
+  std::pair<NatNum,NatNum> div = u.divide(u, v);
+  std::cout << "u/v: " << div.first << std::endl;
+  std::cout << "u%v: " << div.second << std::endl;
 }
 
 int main()
 {
-  check2();
+  check3();
 
-  /*NaturalNumber<simplevec<limb_t> > u(60000);
-  NaturalNumber<simplevec<limb_t> > v(18345);
+  /*NonNegativeInteger<simplevec<limb_t> > u(60000);
+  NonNegativeInteger<simplevec<limb_t> > v(18345);
 
   u += u;
 
