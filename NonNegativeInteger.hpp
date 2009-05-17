@@ -16,8 +16,10 @@
 #define _NONNEGATIVEINTEGER_HPP
 
 #include <iostream>
-#include <vector>
+#include <cassert>
 #include <boost/shared_ptr.hpp>
+#include <boost/integer_traits.hpp>
+#include <boost/static_assert.hpp>
 
 namespace com {
 namespace sputsoft {
@@ -33,7 +35,7 @@ class SimpleLimbVector {
 public:
   typedef T value_type;
   typedef size_t size_type;
-  SimpleLimbVector() : _elems(new T[2]), _capacity(2), _size(0) {}
+  SimpleLimbVector() : _capacity(2), _size(0), _elems(new T[2]) {}
   explicit SimpleLimbVector(size_type __size)
     : _capacity(std::max(__size, (size_type) 2)), _size(0), _elems(new T[_capacity]) {}
   size_type size() const { return _size; }
@@ -51,6 +53,8 @@ private:
 
 template <typename T, typename V=SimpleLimbVector<T> >
 class NonNegativeInteger {
+  BOOST_STATIC_ASSERT(boost::integer_traits<T>::is_integer);
+  BOOST_STATIC_ASSERT(!boost::integer_traits<T>::is_signed);
   template <typename S, typename W>
   friend std::ostream& operator<<(std::ostream& os, const NonNegativeInteger<S,W>& n);
 private:
@@ -65,16 +69,19 @@ private:
   T* limb_end() { return limbvec->end(); }
   const T* limb_begin() const { return limbvec->begin(); }
   const T* limb_end() const { return limbvec->end(); }
+  NonNegativeInteger copy(limbvec_size_type extra) const;
   static T multaddadd(const T u, const T v, T& w, const T k);
   static T* multiplier(const T* ufirst, const T *ulast, const T* vfirst, const T *vlast, T* wfirst);
-  static T* shift_left_helper(const T* ufirst, const T* ulast, T* vfirst, size_t n);
-  static T* shift_right_helper(const T* ufirst, const T* ulast, T* vfirst, size_t n);
+  static T* left_shifter(const T* ufirst, const T* ulast, T* vfirst, size_t n);
+  static T* right_shifter(const T* ufirst, const T* ulast, T* vfirst, std::ptrdiff_t n);
   NonNegativeInteger shift_left(size_t n) const;
   NonNegativeInteger shift_right(size_t n) const;
-  NonNegativeInteger& shift_left_self(size_t n);
-  NonNegativeInteger& shift_right_self(size_t n);
+  NonNegativeInteger& shift_left_this(size_t n);
+  NonNegativeInteger& shift_right_this(size_t n);
   static bool long_divide_multsub_even(const T* vbegin, const T* vend, T* ubegin, const T q);
   static bool long_divide_multsub_odd(const T* vbegin, const T* vend, T* ubegin, const T q);
+  static void long_divide_addback_even(const T* vbegin, const T* vend, T* ubegin);
+  static void long_divide_addback_odd(const T* vbegin, const T* vend, T* ubegin);
   static std::pair<NonNegativeInteger,NonNegativeInteger>
     long_divide(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   static std::pair<NonNegativeInteger,NonNegativeInteger>
@@ -91,7 +98,7 @@ public:
     divide(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   static int compare(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   NonNegativeInteger binary_shift(std::ptrdiff_t n) const;
-  NonNegativeInteger& binary_shift_self(std::ptrdiff_t n);
+  NonNegativeInteger& binary_shift_this(std::ptrdiff_t n);
   NonNegativeInteger& operator+=(const NonNegativeInteger<T,V>& v);
   NonNegativeInteger& operator-=(const NonNegativeInteger<T,V>& v);
   NonNegativeInteger& operator*=(const NonNegativeInteger<T,V>& v);
@@ -116,6 +123,16 @@ template <typename T, typename V>
 inline bool NonNegativeInteger<T,V>::isZero() const
 {
   return !limbvec->size();
+}
+
+template <typename T, typename V>
+NonNegativeInteger<T,V> NonNegativeInteger<T,V>::copy(limbvec_size_type extra) const
+{
+  limbvec_size_type size = limbvec->size();
+  NonNegativeInteger<T,V> r(size + extra);
+  std::copy(limb_begin(), limb_end(), r.limb_begin());
+  r.limbvec->set_size(size);
+  return r;
 }
 
 /*
@@ -397,14 +414,15 @@ bool NonNegativeInteger<T,V>::long_divide_multsub_odd(const T* vbegin, const T* 
 {
   T k = 0, t, u, v;
   u = *ubegin;
-  while (vbegin != vend) {
-    v = *vbegin++;
+  for (; vbegin != vend; ++vbegin) {
+    v = *vbegin;
     t = (u >> halfbits) - q*(v & lowmask) + k;
     u = (u & lowmask) | (t << halfbits);
     k = t >> halfbits;
     if (k) k |= highmask;
     *ubegin = u;
-    u = *++ubegin;
+    ++ubegin;
+    u = *ubegin;
     t = (u & lowmask) - q*(v >> halfbits) + k;
     u = (u & highmask) | (t & lowmask);
     k = t >> halfbits;
@@ -414,6 +432,64 @@ bool NonNegativeInteger<T,V>::long_divide_multsub_odd(const T* vbegin, const T* 
   *ubegin = (u & lowmask) | (t << halfbits);
   k = t >> halfbits;
   return k;
+}
+
+template <typename T, typename V>
+void NonNegativeInteger<T,V>::long_divide_addback_even(const T* vbegin, const T* vend, T* ubegin)
+{
+  T u, v, t;
+  bool carry = false;
+  std::cout << "long_divide_addback_even" << std::endl;
+  for (; vbegin != vend; ++vbegin, ++ubegin) {
+    u = *ubegin;
+    v = *vbegin;
+    if (carry) {
+      t = u + v + 1;
+      carry = t <= u;
+    } else {
+      t = u + v;
+      carry = t < u;
+    }
+    *ubegin = t;
+  }
+  assert(carry);
+  u = *ubegin;
+  t = (u & lowmask) + 1;
+  assert(t & highmask);
+  *ubegin = (u & highmask) | (t & lowmask);
+}
+
+template <typename T, typename V>
+void NonNegativeInteger<T,V>::long_divide_addback_odd(const T* vbegin, const T* vend, T* ubegin)
+{
+  T u, v, v1, v2, t;
+  std::cout << "long_divide_addback_odd" << std::endl;
+  u = *ubegin;
+  v1 = *vbegin;
+  v = v1 << halfbits;
+  t = u + v;
+  *ubegin = t;
+  bool carry = t < u;
+  for (++vbegin, ++ubegin; vbegin != vend; ++vbegin, ++ubegin) {
+    u = *ubegin;
+    v2 = v1;
+    v1 = *vbegin;
+    v = (v2 >> halfbits) | (v1 << halfbits);
+    if (carry) {
+      t = u + v + 1;
+      carry = t <= u;
+    } else {
+      t = u + v;
+      carry = t < u;
+    }
+    *ubegin = t;
+  }
+  assert(carry);
+  u = *ubegin;
+  v = v1 >> halfbits;
+  t = u + v + 1;
+  assert(t <= u);
+  *ubegin = t;
 }
 
 template <typename T, typename V>
@@ -427,14 +503,15 @@ NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const Non
   const T checkmask = ((T) 1) << (limbbits - 1);
   while (!(s & checkmask)) { s <<= 1; ++h; }
 
-  NonNegativeInteger<T,V> w = v.shift_left(h);
-  NonNegativeInteger<T,V> r = u.shift_left(h);
+  const NonNegativeInteger<T,V> w = v.shift_left(h);
+  NonNegativeInteger<T,V> r = h == 0 ? u.copy(1) : u.shift_left(h);
 
   std::ptrdiff_t n = 2*w.limbvec->size();
   std::ptrdiff_t m = 2*u.limbvec->size() - n;
   NonNegativeInteger<T,V> q(m/2+1, true);
 
-  const T* wp = w.limb_begin();
+  const T* wfirst = w.limb_begin();
+  const T* wlast = w.limb_end();
   T* rp = r.limb_begin();
   T* qp = q.limb_begin();
 
@@ -453,17 +530,25 @@ NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const Non
       rh += vn1;
     }
     if (j%2 == 0) {
-      long_divide_multsub_even(wp, wp+n/2, rp, qh);
+      if (long_divide_multsub_even(wfirst, wlast, rp + j/2, qh)) {
+        long_divide_addback_even(wfirst, wlast, rp + j/2);
+        --qh;
+      }
     } else {
-      long_divide_multsub_odd(wp, wp+n/2, rp, qh);
+      if (long_divide_multsub_odd(wfirst, wlast, rp + j/2, qh)) {
+        long_divide_addback_odd(wfirst, wlast, rp + j/2);
+        --qh;
+      }
     }
     sethalf(qp, j, qh);
   }
   q.limbvec->set_size(qp[m/2] ? m/2+1 : m/2);
+  r.shift_right_this(h);
+  n /= 2;
   while (n != 0 && !rp[n-1]) n--;
   r.limbvec->set_size(n);
 
-  return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(q, r.shift_right(h));
+  return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(q, r);
 }
 
 template <typename T, typename V>
@@ -472,11 +557,9 @@ NonNegativeInteger<T,V>::divide(const NonNegativeInteger<T,V>& u, const NonNegat
 {
   if (v.isZero() || compare(u, v) < 0)
     return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(zero, u);
-
   if (v.limbvec->size() == 1 && !(*v.limb_begin() & highmask))
     return simple_divide(u, *v.limb_begin());
-  else
-    return long_divide(u, v);
+  return long_divide(u, v);
 }
 
 /*
@@ -484,7 +567,7 @@ NonNegativeInteger<T,V>::divide(const NonNegativeInteger<T,V>& u, const NonNegat
  */
 
 template <typename T, typename V>
-T* NonNegativeInteger<T,V>::shift_left_helper(const T* ufirst, const T* ulast, T* vfirst, size_t n)
+T* NonNegativeInteger<T,V>::left_shifter(const T* ufirst, const T* ulast, T* vfirst, size_t n)
 {
   const unsigned int shift = n % limbbits;
   n /= limbbits;
@@ -512,13 +595,13 @@ NonNegativeInteger<T,V> NonNegativeInteger<T,V>::shift_left(size_t n) const
   if (!n) return *this;
   NonNegativeInteger<T,V> r(limbvec->size() + n/limbbits + 1, true);
   T* rfirst = r.limb_begin();
-  T* rlast = shift_left_helper(limb_begin(), limb_end(), rfirst, n);
+  T* rlast = left_shifter(limb_begin(), limb_end(), rfirst, n);
   r.limbvec->set_size(rlast - rfirst);
   return r;
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::shift_left_self(size_t n)
+NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::shift_left_this(size_t n)
 {
   if (n) {
     /*if (limbvec.unique() && limbvec->capacity() >= limbvec->size() + n/limbbits + 1) {
@@ -532,7 +615,7 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::shift_left_self(size_t n)
 }
 
 template <typename T, typename V>
-T* NonNegativeInteger<T,V>::shift_right_helper(const T* ufirst, const T* ulast, T* vfirst, size_t n)
+T* NonNegativeInteger<T,V>::right_shifter(const T* ufirst, const T* ulast, T* vfirst, std::ptrdiff_t n)
 {
   const unsigned int shift = n % limbbits;
   n /= limbbits;
@@ -568,13 +651,13 @@ NonNegativeInteger<T,V> NonNegativeInteger<T,V>::shift_right(size_t n) const
   if (limbshift >= limbvec->size()) return zero;
   NonNegativeInteger<T,V> r(limbvec->size() - limbshift, true);
   T* rfirst = r.limb_begin();
-  T* rlast = shift_right_helper(limb_begin(), limb_end(), rfirst, n);
+  T* rlast = right_shifter(limb_begin(), limb_end(), rfirst, n);
   r.limbvec->set_size(rlast - rfirst);
   return r;
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::shift_right_self(size_t n)
+NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::shift_right_this(size_t n)
 {
   if (n) {
     /*if (limbvec.unique()) {
@@ -594,9 +677,9 @@ NonNegativeInteger<T,V> NonNegativeInteger<T,V>::binary_shift(std::ptrdiff_t n) 
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::binary_shift_self(std::ptrdiff_t n)
+NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::binary_shift_this(std::ptrdiff_t n)
 {
-  return n >= 0 ? shift_left_self(n) : shift_right_self(-n);
+  return n >= 0 ? shift_left_this(n) : shift_right_this(-n);
 }
 
 /*
