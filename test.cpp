@@ -51,10 +51,10 @@ NUMBER construct(const std::string& digits, const unsigned short base)
 
 void check3()
 {
-  NNI u = NNI(128).binary_shift_this(32) + NNI(128).binary_shift_this(24)
-          + NNI(128).binary_shift_this(16) + NNI(127).binary_shift_this(8);
-  /*NNI u = NNI(128).binary_shift_this(40) + NNI(128).binary_shift_this(32)
-          + NNI(128).binary_shift_this(24) + NNI(127).binary_shift_this(16);*/
+  /*NNI u = NNI(128).binary_shift_this(32) + NNI(128).binary_shift_this(24)
+          + NNI(128).binary_shift_this(16) + NNI(127).binary_shift_this(8);*/
+  NNI u = NNI(128).binary_shift_this(40) + NNI(128).binary_shift_this(32)
+          + NNI(128).binary_shift_this(24) + NNI(127).binary_shift_this(16);
   NNI v = NNI(128).binary_shift_this(24) + NNI(128).binary_shift_this(16)
           + NNI(128).binary_shift_this(8) + NNI(128);
 

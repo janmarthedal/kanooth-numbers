@@ -69,7 +69,6 @@ private:
   T* limb_end() { return limbvec->end(); }
   const T* limb_begin() const { return limbvec->begin(); }
   const T* limb_end() const { return limbvec->end(); }
-  NonNegativeInteger copy(limbvec_size_type extra) const;
   static T multaddadd(const T u, const T v, T& w, const T k);
   static T* multiplier(const T* ufirst, const T *ulast, const T* vfirst, const T *vlast, T* wfirst);
   static T* left_shifter(const T* ufirst, const T* ulast, T* vfirst, size_t n);
@@ -123,16 +122,6 @@ template <typename T, typename V>
 inline bool NonNegativeInteger<T,V>::isZero() const
 {
   return !limbvec->size();
-}
-
-template <typename T, typename V>
-NonNegativeInteger<T,V> NonNegativeInteger<T,V>::copy(limbvec_size_type extra) const
-{
-  limbvec_size_type size = limbvec->size();
-  NonNegativeInteger<T,V> r(size + extra);
-  std::copy(limb_begin(), limb_end(), r.limb_begin());
-  r.limbvec->set_size(size);
-  return r;
 }
 
 /*
@@ -333,12 +322,11 @@ template <typename T, typename V>
 std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >
 NonNegativeInteger<T,V>::simple_divide(const NonNegativeInteger<T,V>& u, T v)
 {
-  const T checkmask = ((T) 1) << (halfbits - 1);
-  unsigned int h = 0;
+  unsigned int shift = 0;
 
-  while (!(v & checkmask)) { v <<= 1; ++h; }
+  while (!(v & (((T) 1) << (halfbits - 1)))) { v <<= 1; ++shift; }
 
-  NonNegativeInteger<T,V> w = u.shift_left(h);
+  NonNegativeInteger<T,V> w = u.shift_left(shift);
   limbvec_size_type limbs = w.limbvec->size();
   NonNegativeInteger<T,V> q(limbs, true);
   const T *wfirst = w.limb_begin(), *wlast = w.limb_end() - 1;
@@ -363,14 +351,7 @@ NonNegativeInteger<T,V>::simple_divide(const NonNegativeInteger<T,V>& u, T v)
   }
   q.limbvec->set_size(limbs);
 
-  return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(q, r >> h);
-}
-
-template <typename T>
-T gethalf(const T* p, std::ptrdiff_t i)
-{
-  const int halfbits = boost::integer_traits<T>::digits/2;
-  return (i%2) ? (p[i/2] >> halfbits) : (p[i/2] & ((((T) 1) << halfbits) - 1));
+  return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(q, r >> shift);
 }
 
 template <typename T>
@@ -496,55 +477,58 @@ template <typename T, typename V>
 std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >
 NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
 {
-  T vn1, vn2, s, qh, rh;
-  unsigned int h = 0;
+  unsigned int shift = 0;
+  T s = *(v.limb_end() - 1);
+  while (!(s & (((T) 1) << (limbbits - 1)))) { s <<= 1; ++shift; }
+  T vn1 = s >> halfbits;
+  T vn2 = s & lowmask;
 
-  s = *(v.limb_end() - 1);
-  const T checkmask = ((T) 1) << (limbbits - 1);
-  while (!(s & checkmask)) { s <<= 1; ++h; }
+  std::ptrdiff_t n = v.limbvec->size();
+  std::ptrdiff_t m = u.limbvec->size() - n;
 
-  const NonNegativeInteger<T,V> w = v.shift_left(h);
-  NonNegativeInteger<T,V> r = h == 0 ? u.copy(1) : u.shift_left(h);
+  const NonNegativeInteger<T,V> w = v.shift_left(shift);
+  NonNegativeInteger<T,V> r(m+n+1, true);
+  *(r.limb_begin() + m+n) = 0;
+  left_shifter(u.limb_begin(), u.limb_end(), r.limb_begin(), shift);
 
-  std::ptrdiff_t n = 2*w.limbvec->size();
-  std::ptrdiff_t m = 2*u.limbvec->size() - n;
-  NonNegativeInteger<T,V> q(m/2+1, true);
+  NonNegativeInteger<T,V> q(m+1, true);
 
   const T* wfirst = w.limb_begin();
   const T* wlast = w.limb_end();
   T* rp = r.limb_begin();
   T* qp = q.limb_begin();
 
-  vn1 = s >> halfbits;
-  vn2 = s & lowmask;
-
-  if (r.limbvec->size() == u.limbvec->size())
-    sethalf(rp, m+n, (T) 0);
-
+  T qh1, qh2, rh, t;
   for (int j=m; j >= 0; --j) {
-    s = (gethalf(rp, j+n) << halfbits) | gethalf(rp, j+n-1);
-    qh = s / vn1;
-    rh = s % vn1;
-    while ((qh & highmask) || (qh*vn2 > ((rh << halfbits) | gethalf(rp, j+n-2)))) {
-      --qh;
+    s = rp[j+n];
+    t = rp[j+n-1] >> halfbits;
+    qh1 = s / vn1;
+    rh  = s % vn1;
+    while ((qh1 & highmask) || (qh1*vn2 > ((rh << halfbits) | t))) {
+      --qh1;
       rh += vn1;
     }
-    if (j%2 == 0) {
-      if (long_divide_multsub_even(wfirst, wlast, rp + j/2, qh)) {
-        long_divide_addback_even(wfirst, wlast, rp + j/2);
-        --qh;
-      }
-    } else {
-      if (long_divide_multsub_odd(wfirst, wlast, rp + j/2, qh)) {
-        long_divide_addback_odd(wfirst, wlast, rp + j/2);
-        --qh;
-      }
+    if (long_divide_multsub_odd(wfirst, wlast, rp + j, qh1)) {
+      long_divide_addback_odd(wfirst, wlast, rp + j);
+      --qh1;
     }
-    sethalf(qp, j, qh);
+    t = rp[j+n-1];
+    s = (rp[j+n] << halfbits) | (t >> halfbits);
+    t &= lowmask;
+    qh2 = s / vn1;
+    rh  = s % vn1;
+    while ((qh2 & highmask) || (qh2*vn2 > ((rh << halfbits) | t))) {
+      --qh2;
+      rh += vn1;
+    }
+    if (long_divide_multsub_even(wfirst, wlast, rp + j, qh2)) {
+      long_divide_addback_even(wfirst, wlast, rp + j);
+      --qh2;
+    }
+    qp[j] = (qh1 << halfbits) | qh2;
   }
-  q.limbvec->set_size(qp[m/2] ? m/2+1 : m/2);
-  r.shift_right_this(h);
-  n /= 2;
+  q.limbvec->set_size(qp[m] ? m+1 : m);
+  r.shift_right_this(shift);
   while (n != 0 && !rp[n-1]) n--;
   r.limbvec->set_size(n);
 
