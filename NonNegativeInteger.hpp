@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   NonNegativeInteger.hpp
  * Author: Jan Marthedal Rasmussen
  *
@@ -12,6 +12,14 @@
  * $Id$
  */
 
+/*
+ * TODO:
+ * - Self shifts
+ * - Inner loops without conditionals
+ * - Division on full limbs faster?
+ * - Binary operations
+ */
+
 #ifndef _NONNEGATIVEINTEGER_HPP
 #define _NONNEGATIVEINTEGER_HPP
 
@@ -20,6 +28,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/integer_traits.hpp>
 #include <boost/static_assert.hpp>
+#include "lowlevel.hpp"
 
 namespace com {
 namespace sputsoft {
@@ -128,45 +137,6 @@ inline bool NonNegativeInteger<T,V>::isZero() const
  * ADDITION
  */
 
-template <typename T>
-T* adder(const T* first1, const T* last1, const T* first2, const T* last2, T* dst)
-{
-  T lx, ly, lz;
-  bool carry = false;
-  if (last1-first1 > last2-first2) {
-    swap(first1, first2);
-    swap(last1, last2);
-  }
-  while (first1 != last1) {
-    lx = *first1;
-    ly = *first2;
-    if (carry) {
-      lz = lx + ly + 1;
-      carry = lz <= lx;
-    } else {
-      lz = lx + ly;
-      carry = lz < lx;
-    }
-    *dst = lz;
-    ++first1; ++first2; ++dst;
-  }
-  while (first2 != last2 && carry) {
-    ly = *first2;
-    lz = ly + 1;
-    carry = lz <= ly;
-    *dst = lz;
-    ++first2; ++dst;
-  }
-  if (!carry) {
-    while (first2 != last2) {
-      *dst = *first2;
-      ++first2; ++dst;
-    }
-  } else
-    *dst++ = 1;
-  return dst;
-}
-
 template <typename T, typename V>
 NonNegativeInteger<T,V> NonNegativeInteger<T,V>::add(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
 {
@@ -174,7 +144,7 @@ NonNegativeInteger<T,V> NonNegativeInteger<T,V>::add(const NonNegativeInteger<T,
   if (v.isZero()) return u;
   NonNegativeInteger<T,V> r(std::max(u.limbvec->size(), v.limbvec->size())+1, true);
   T* rbegin = r.limb_begin();
-  T* rend = adder(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
+  T* rend = lowlevel::adder(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
   r.limbvec->set_size(rend - rbegin);
   return r;
 }
@@ -187,7 +157,7 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator+=(const NonNegativeIn
   } else if (!x.isZero()) {
     if (limbvec.unique() && limbvec->capacity() > std::max(limbvec->size(), x.limbvec->size())) {
       T* rbegin = limb_begin();
-      T* rend = adder(limb_begin(), limb_end(), x.limb_begin(), x.limb_end(), rbegin);
+      T* rend = lowlevel::adder(limb_begin(), limb_end(), x.limb_begin(), x.limb_end(), rbegin);
       limbvec->set_size(rend - rbegin);
     } else
       *this = add(*this, x);
@@ -265,7 +235,7 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator-=(const NonNegativeIn
  */
 
 template <typename T, typename V>
-T NonNegativeInteger<T,V>::multaddadd(const T u, const T v, T& w, const T k)
+inline T NonNegativeInteger<T,V>::multaddadd(const T u, const T v, T& w, const T k)
 {
   T u1 = u >> halfbits, u0 = u & lowmask;
   T v1 = v >> halfbits, v0 = v & lowmask;

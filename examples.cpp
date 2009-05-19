@@ -1,5 +1,5 @@
-/* 
- * File:   test.cpp
+/*
+ * File:   examples.cpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created on 4. maj 2009, 20:02
@@ -51,10 +51,10 @@ NUMBER construct(const std::string& digits, const unsigned short base)
 
 void check3()
 {
-  /*NNI u = NNI(128).binary_shift_this(32) + NNI(128).binary_shift_this(24)
-          + NNI(128).binary_shift_this(16) + NNI(127).binary_shift_this(8);*/
-  NNI u = NNI(128).binary_shift_this(40) + NNI(128).binary_shift_this(32)
-          + NNI(128).binary_shift_this(24) + NNI(127).binary_shift_this(16);
+  NNI u = NNI(128).binary_shift_this(32) + NNI(128).binary_shift_this(24)
+          + NNI(128).binary_shift_this(16) + NNI(127).binary_shift_this(8);
+  /*NNI u = NNI(128).binary_shift_this(40) + NNI(128).binary_shift_this(32)
+          + NNI(128).binary_shift_this(24) + NNI(127).binary_shift_this(16);*/
   NNI v = NNI(128).binary_shift_this(24) + NNI(128).binary_shift_this(16)
           + NNI(128).binary_shift_this(8) + NNI(128);
 
@@ -65,10 +65,45 @@ void check3()
   std::cout << "u%v: " << div.second << std::endl;
 }
 
+template <typename T>
+std::pair<T,T> double_div(const T uhigh, const T ulow, const T v)
+{
+  const unsigned int limbbits = boost::integer_traits<T>::digits;
+  const unsigned int halfbits = limbbits / 2;
+  const T lowmask = (((T) 1) << halfbits) - 1;
+  const T highmask = lowmask << halfbits;
+
+  const T v1 = v >> halfbits;
+  const T v0 = v & lowmask;
+  const T u1 = ulow >> halfbits;
+  const T u0 = ulow & lowmask;
+  T q1, q0, r;
+
+  q1 = uhigh / v1;
+  r  = uhigh % v1;
+  while ((q1 & highmask) || q1*v0 > ((r << halfbits) | u1)) {
+    --q1;
+    r += v1;
+  }
+  r = ((r << halfbits) | u1) - q1*v0;
+
+  q0 = r / v1;
+  r = r % v1;
+  while ((q0 & highmask) || q0*v0 > ((r << halfbits) | u0)) {
+    --q0;
+    r += v1;
+  }
+  r = ((r << halfbits) | u0) - q0*v0;
+
+  return std::pair<T,T>((q1 << halfbits) | q0, r);
+}
+
 int main()
 {
-  std::cout << construct<NNI>("1234", 10) << std::endl;
+  std::pair<limb_t,limb_t> qr = double_div<limb_t>(128*256, 0, 128*256);
 
-  check3();
+  std::cout << qr.first << std::endl;
+  std::cout << qr.second << std::endl;
 
+  //check3();
 }
