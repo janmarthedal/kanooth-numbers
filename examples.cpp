@@ -2,7 +2,7 @@
  * File:   examples.cpp
  * Author: Jan Marthedal Rasmussen
  *
- * Created on 4. maj 2009, 20:02
+ * Created 2009-05-04 18:02Z
  *
  * (C) Copyright SputSoft 2009
  * Use, modification and distribution are subject to the
@@ -30,7 +30,7 @@ typedef unsigned short limb_t;
 typedef NonNegativeInteger<limb_t> NNI;
 
 template <typename NUMBER>
-NUMBER construct(const std::string& digits, const unsigned short base)
+NUMBER construct(const std::string& digits, unsigned short base=10)
 {
   NUMBER r = NUMBER::zero;
   if (base >= 2 && base <= 36) {
@@ -65,45 +65,47 @@ void check3()
   std::cout << "u%v: " << div.second << std::endl;
 }
 
-template <typename T>
-std::pair<T,T> double_div(const T uhigh, const T ulow, const T v)
+inline unsigned asmadd(unsigned a, unsigned b)
 {
-  const unsigned int limbbits = boost::integer_traits<T>::digits;
-  const unsigned int halfbits = limbbits / 2;
-  const T lowmask = (((T) 1) << halfbits) - 1;
-  const T highmask = lowmask << halfbits;
+  unsigned sum;
+  __asm__ ("addl %1, %0"
+           : "=r" (sum)
+           : "r" (a), "0" (b)
+           : );
+  return sum;
+}
 
-  const T v1 = v >> halfbits;
-  const T v0 = v & lowmask;
-  const T u1 = ulow >> halfbits;
-  const T u0 = ulow & lowmask;
-  T q1, q0, r;
-
-  q1 = uhigh / v1;
-  r  = uhigh % v1;
-  while ((q1 & highmask) || q1*v0 > ((r << halfbits) | u1)) {
-    --q1;
-    r += v1;
-  }
-  r = ((r << halfbits) | u1) - q1*v0;
-
-  q0 = r / v1;
-  r = r % v1;
-  while ((q0 & highmask) || q0*v0 > ((r << halfbits) | u0)) {
-    --q0;
-    r += v1;
-  }
-  r = ((r << halfbits) | u0) - q0*v0;
-
-  return std::pair<T,T>((q1 << halfbits) | q0, r);
+inline std::pair<unsigned, unsigned> asmdiv(unsigned uhigh, unsigned ulow, unsigned v)
+{
+  unsigned q, r;
+  __asm__ ("divl %%ebx"
+           : "=a" (q), "=d" (r)
+           : "d" (uhigh), "a" (ulow), "b" (v)
+           : );
+  return std::make_pair(q, r);
 }
 
 int main()
 {
-  std::pair<limb_t,limb_t> qr = double_div<limb_t>(128*256, 0, 128*256);
+  /*std::pair<limb_t,limb_t> qr = com::sputsoft::multiprecision::lowlevel::double_div<limb_t>(128*256, 0, 128*256);
 
   std::cout << qr.first << std::endl;
   std::cout << qr.second << std::endl;
 
-  //check3();
+  NNI u = construct<NNI>("12345678");
+  NNI v = construct<NNI>("87654321");
+
+  std::cout << "u  : " << u << std::endl;
+  std::cout << "v  : " << v << std::endl;
+  std::cout << "u+v: " << u+v << std::endl;
+  std::cout << "v-u: " << v-u << std::endl;
+  std::cout << "u*v: " << u*v << std::endl;
+
+  check3();*/
+
+  /*unsigned sum = asmadd(1, 3);
+  std::cout << sum << std::endl;*/
+  std::pair<unsigned, unsigned> qr = asmdiv(((unsigned) 1 << 31)-1, 2, (unsigned) 1 << 31);
+  std::cout << qr.first << std::endl;
+  std::cout << qr.second << std::endl;
 }

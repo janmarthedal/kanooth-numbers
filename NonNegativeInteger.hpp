@@ -2,7 +2,7 @@
  * File:   NonNegativeInteger.hpp
  * Author: Jan Marthedal Rasmussen
  *
- * Created on 5. maj 2009, 14:43
+ * Created 2009-05-05 12:43Z
  *
  * (C) Copyright SputSoft 2009
  * Use, modification and distribution are subject to the
@@ -34,7 +34,6 @@ namespace com {
 namespace sputsoft {
 namespace multiprecision {
 
-template <typename T> void swap(T& a, T& b) { T t = a;  a = b;  b = t; }
 template <typename T> int compare_values(const T& a, const T& b) {
   return (a < b) ? -1 : (a > b) ? 1 : 0;
 }
@@ -78,8 +77,6 @@ private:
   T* limb_end() { return limbvec->end(); }
   const T* limb_begin() const { return limbvec->begin(); }
   const T* limb_end() const { return limbvec->end(); }
-  static T multaddadd(const T u, const T v, T& w, const T k);
-  static T* multiplier(const T* ufirst, const T *ulast, const T* vfirst, const T *vlast, T* wfirst);
   static T* left_shifter(const T* ufirst, const T* ulast, T* vfirst, size_t n);
   static T* right_shifter(const T* ufirst, const T* ulast, T* vfirst, std::ptrdiff_t n);
   NonNegativeInteger shift_left(size_t n) const;
@@ -144,7 +141,7 @@ NonNegativeInteger<T,V> NonNegativeInteger<T,V>::add(const NonNegativeInteger<T,
   if (v.isZero()) return u;
   NonNegativeInteger<T,V> r(std::max(u.limbvec->size(), v.limbvec->size())+1, true);
   T* rbegin = r.limb_begin();
-  T* rend = lowlevel::adder(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
+  T* rend = lowlevel::add_sequences(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
   r.limbvec->set_size(rend - rbegin);
   return r;
 }
@@ -157,7 +154,7 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator+=(const NonNegativeIn
   } else if (!x.isZero()) {
     if (limbvec.unique() && limbvec->capacity() > std::max(limbvec->size(), x.limbvec->size())) {
       T* rbegin = limb_begin();
-      T* rend = lowlevel::adder(limb_begin(), limb_end(), x.limb_begin(), x.limb_end(), rbegin);
+      T* rend = lowlevel::add_sequences(limb_begin(), limb_end(), x.limb_begin(), x.limb_end(), rbegin);
       limbvec->set_size(rend - rbegin);
     } else
       *this = add(*this, x);
@@ -169,41 +166,6 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator+=(const NonNegativeIn
  * SUBTRACTION
  */
 
-// Requires last1-first1 <= last2-first2
-template <typename T>
-T* subtracter(const T* first1, const T* last1, const T* first2, const T* last2, T* dst)
-{
-  T* pr = dst;
-  T lx, ly, lz;
-  bool borrow = false;
-  while (first1 != last1) {
-    lx = *first2;
-    ly = *first1;
-    if (borrow) {
-      lz = lx - ly - 1;
-      borrow = lx <= ly;
-    } else {
-      lz = lx - ly;
-      borrow = lx < ly;
-    }
-    *pr = lz;
-    ++first1; ++first2; ++pr;
-  }
-  while (first2 != last2 && borrow) {
-    lx = *first2;
-    borrow = lx == 0;
-    *pr = lx - 1;
-    ++first2; ++pr;
-  }
-  while (first2 != last2) {
-    *pr = *first2;
-    ++first2; ++pr;
-  }
-  while (pr != dst && *(pr-1) == 0)
-    --pr;
-  return pr;
-}
-
 template <typename T, typename V>
 NonNegativeInteger<T,V> NonNegativeInteger<T,V>::subtract(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
 {
@@ -211,7 +173,7 @@ NonNegativeInteger<T,V> NonNegativeInteger<T,V>::subtract(const NonNegativeInteg
   if (u.limbvec->size() < v.limbvec->size()) return zero;  // wrong usage
   NonNegativeInteger<T,V> r(u.limbvec->size(), true);
   T* rbegin = r.limb_begin();
-  T* rend = subtracter(v.limb_begin(), v.limb_end(), u.limb_begin(), u.limb_end(), rbegin);
+  T* rend = lowlevel::subtract(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
   r.limbvec->set_size(rend - rbegin);
   return r;
 }
@@ -221,9 +183,9 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator-=(const NonNegativeIn
 {
   if (!v.isZero() && limbvec->size() >= v.limbvec->size()) {
     if (limbvec.unique()) {
-      T* rbegin = limb_begin();
-      T* rend = subtracter(v.limb_begin(), v.limb_end(), rbegin, limb_end(), rbegin);
-      limbvec->set_size(rend - rbegin);
+      T* begin = limb_begin();
+      T* end = subtracter(begin, limb_end(), v.limb_begin(), v.limb_end(), begin);
+      limbvec->set_size(end - begin);
     } else
       *this = subtract(*this, v);
   }
@@ -235,45 +197,13 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator-=(const NonNegativeIn
  */
 
 template <typename T, typename V>
-inline T NonNegativeInteger<T,V>::multaddadd(const T u, const T v, T& w, const T k)
-{
-  T u1 = u >> halfbits, u0 = u & lowmask;
-  T v1 = v >> halfbits, v0 = v & lowmask;
-  T r = u0*v0 + (w & lowmask) + (k & lowmask);
-  T s = u1*v0 + (w >> halfbits) + (r >> halfbits);
-  T t = u0*v1 + (s & lowmask) + (k >> halfbits);
-  w = (t << halfbits) | (r & lowmask);
-  return u1*v1 + (s >> halfbits) + (t >> halfbits);
-}
-
-template <typename T, typename V>
-T* NonNegativeInteger<T,V>::multiplier(const T* ufirst, const T *ulast, const T* vfirst, const T *vlast, T* wfirst)
-{
-  const T *ui;
-  T *wij;
-  std::fill(wfirst, wfirst + (ulast - ufirst), 0);
-  while (vfirst != vlast) {
-    T k = 0;
-    ui = ufirst;
-    wij = wfirst;
-    while (ui != ulast)
-      k = multaddadd(*ui++, *vfirst, *wij++, k);
-    *wij = k;
-    ++vfirst;
-    ++wfirst;
-  }
-  wij = wfirst + (ulast - ufirst);
-  if (!*(wij-1)) --wij;
-  return wij;
-}
-
-template <typename T, typename V>
 NonNegativeInteger<T,V> NonNegativeInteger<T,V>::multiply(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
 {
   if (u.isZero() || v.isZero()) return zero;
   NonNegativeInteger<T,V> r(u.limbvec->size() + v.limbvec->size(), true);
   T* rbegin = r.limb_begin();
-  T* rend = multiplier(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
+  T* rend = lowlevel::multiply_sequences(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
+  //T* rend = multiplier(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
   r.limbvec->set_size(rend - rbegin);
   return r;
 }
@@ -292,48 +222,24 @@ template <typename T, typename V>
 std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >
 NonNegativeInteger<T,V>::simple_divide(const NonNegativeInteger<T,V>& u, T v)
 {
-  unsigned int shift = 0;
-
-  while (!(v & (((T) 1) << (halfbits - 1)))) { v <<= 1; ++shift; }
-
-  NonNegativeInteger<T,V> w = u.shift_left(shift);
-  limbvec_size_type limbs = w.limbvec->size();
+  limbvec_size_type limbs = u.limbvec->size();
   NonNegativeInteger<T,V> q(limbs, true);
-  const T *wfirst = w.limb_begin(), *wlast = w.limb_end() - 1;
+  const T *ufirst = u.limb_begin(), *ulast = u.limb_end();
   T* qlast = q.limb_begin() + limbs - 1;
-  T r, t, s, z;
 
-  s = *wlast;
-  t = s >> halfbits;
-  z = (t%v << halfbits) | (s & lowmask);
-  t = (t/v << halfbits) | (z/v);
-  if (t)
-    *qlast = t;
+  std::pair<T, T> quotrem = lowlevel::double_div((T) 0, *--ulast, v);
+
+  if (quotrem.first)
+    *qlast = quotrem.first;
   else
     --limbs;
-  r = z%v;
-  while (wlast != wfirst) {
-    s = *--wlast;
-    t = (r << halfbits) | (s >> halfbits);
-    z = (t%v << halfbits) | (s & lowmask);
-    *--qlast = (t/v << halfbits) | (z/v);
-    r = z%v;
+  while (ulast != ufirst) {
+    quotrem = lowlevel::double_div(quotrem.second, *--ulast, v);
+    *--qlast = quotrem.first;
   }
   q.limbvec->set_size(limbs);
 
-  return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(q, r >> shift);
-}
-
-template <typename T>
-void sethalf(T* p, std::ptrdiff_t i, T v)
-{
-  const int halfbits = boost::integer_traits<T>::digits/2;
-  const T lowmask = (((T) 1) << halfbits) - 1;
-  const T highmask = lowmask << halfbits;
-  if (i%2)
-    p[i/2] = (p[i/2] & lowmask) | (v << halfbits);
-  else
-    p[i/2] = (p[i/2] & highmask) | (v & lowmask);
+  return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(q, quotrem.second);
 }
 
 template <typename T, typename V>
@@ -511,7 +417,7 @@ NonNegativeInteger<T,V>::divide(const NonNegativeInteger<T,V>& u, const NonNegat
 {
   if (v.isZero() || compare(u, v) < 0)
     return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(zero, u);
-  if (v.limbvec->size() == 1 && !(*v.limb_begin() & highmask))
+  if (v.limbvec->size() == 1)
     return simple_divide(u, *v.limb_begin());
   return long_divide(u, v);
 }
