@@ -65,6 +65,18 @@ void check3()
   std::cout << "u%v: " << div.second << std::endl;
 }
 
+void check4()
+{
+  NNI u = NNI(1).binary_shift_this(32) + NNI(2).binary_shift_this(16) + NNI(3);
+  NNI v = NNI(128).binary_shift_this(24);
+
+  std::cout << "u  : " << u << std::endl;
+  std::cout << "v  : " << v << std::endl;
+  std::pair<NNI,NNI> div = u.divide(u, v);
+  std::cout << "u/v: " << div.first << std::endl;
+  std::cout << "u%v: " << div.second << std::endl;
+}
+
 inline unsigned asmadd(unsigned a, unsigned b)
 {
   unsigned sum;
@@ -103,9 +115,16 @@ int main()
 
   check3();*/
 
-  /*unsigned sum = asmadd(1, 3);
-  std::cout << sum << std::endl;*/
-  std::pair<unsigned, unsigned> qr = asmdiv(((unsigned) 1 << 31)-1, 2, (unsigned) 1 << 31);
+  /*std::pair<unsigned, unsigned> qr = asmdiv(((unsigned) 1 << 31)-1, 2, (unsigned) 1 << 31);
   std::cout << qr.first << std::endl;
-  std::cout << qr.second << std::endl;
+  std::cout << qr.second << std::endl;*/
+
+  check3();
+
+  /*limb_t w = 32000;
+
+  limb_t k = com::sputsoft::multiprecision::lowlevel::mult_sub_sub(w, (limb_t) 20000, (limb_t) 15000, (limb_t) 18000);
+
+  std::cout << w << std::endl;
+  std::cout << k << std::endl;*/
 }

@@ -243,121 +243,12 @@ NonNegativeInteger<T,V>::simple_divide(const NonNegativeInteger<T,V>& u, T v)
 }
 
 template <typename T, typename V>
-bool NonNegativeInteger<T,V>::long_divide_multsub_even(const T* vbegin, const T* vend, T* ubegin, const T q)
-{
-  T k = 0, t, u, v;
-  while (vbegin != vend) {
-    u = *ubegin;
-    v = *vbegin++;
-    t = (u & lowmask) - q*(v & lowmask) + k;
-    u = (u & highmask) | (t & lowmask);
-    k = t >> halfbits;
-    if (k) k |= highmask;
-    t = (u >> halfbits) - q*(v >> halfbits) + k;
-    u = (u & lowmask) | (t << halfbits);
-    k = t >> halfbits;
-    if (k) k |= highmask;
-    *ubegin++ = u;
-  }
-  u = *ubegin;
-  t = (u & lowmask) + k;
-  *ubegin = (u & highmask) | (t & lowmask);
-  k = t >> halfbits;
-  return k;
-}
-
-template <typename T, typename V>
-bool NonNegativeInteger<T,V>::long_divide_multsub_odd(const T* vbegin, const T* vend, T* ubegin, const T q)
-{
-  T k = 0, t, u, v;
-  u = *ubegin;
-  for (; vbegin != vend; ++vbegin) {
-    v = *vbegin;
-    t = (u >> halfbits) - q*(v & lowmask) + k;
-    u = (u & lowmask) | (t << halfbits);
-    k = t >> halfbits;
-    if (k) k |= highmask;
-    *ubegin = u;
-    ++ubegin;
-    u = *ubegin;
-    t = (u & lowmask) - q*(v >> halfbits) + k;
-    u = (u & highmask) | (t & lowmask);
-    k = t >> halfbits;
-    if (k) k |= highmask;
-  }
-  t = (u >> halfbits) + k;
-  *ubegin = (u & lowmask) | (t << halfbits);
-  k = t >> halfbits;
-  return k;
-}
-
-template <typename T, typename V>
-void NonNegativeInteger<T,V>::long_divide_addback_even(const T* vbegin, const T* vend, T* ubegin)
-{
-  T u, v, t;
-  bool carry = false;
-  std::cout << "long_divide_addback_even" << std::endl;
-  for (; vbegin != vend; ++vbegin, ++ubegin) {
-    u = *ubegin;
-    v = *vbegin;
-    if (carry) {
-      t = u + v + 1;
-      carry = t <= u;
-    } else {
-      t = u + v;
-      carry = t < u;
-    }
-    *ubegin = t;
-  }
-  assert(carry);
-  u = *ubegin;
-  t = (u & lowmask) + 1;
-  assert(t & highmask);
-  *ubegin = (u & highmask) | (t & lowmask);
-}
-
-template <typename T, typename V>
-void NonNegativeInteger<T,V>::long_divide_addback_odd(const T* vbegin, const T* vend, T* ubegin)
-{
-  T u, v, v1, v2, t;
-  std::cout << "long_divide_addback_odd" << std::endl;
-  u = *ubegin;
-  v1 = *vbegin;
-  v = v1 << halfbits;
-  t = u + v;
-  *ubegin = t;
-  bool carry = t < u;
-  for (++vbegin, ++ubegin; vbegin != vend; ++vbegin, ++ubegin) {
-    u = *ubegin;
-    v2 = v1;
-    v1 = *vbegin;
-    v = (v2 >> halfbits) | (v1 << halfbits);
-    if (carry) {
-      t = u + v + 1;
-      carry = t <= u;
-    } else {
-      t = u + v;
-      carry = t < u;
-    }
-    *ubegin = t;
-  }
-  assert(carry);
-  u = *ubegin;
-  v = v1 >> halfbits;
-  t = u + v + 1;
-  assert(t <= u);
-  *ubegin = t;
-}
-
-template <typename T, typename V>
 std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >
 NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
 {
   unsigned int shift = 0;
-  T s = *(v.limb_end() - 1);
-  while (!(s & (((T) 1) << (limbbits - 1)))) { s <<= 1; ++shift; }
-  T vn1 = s >> halfbits;
-  T vn2 = s & lowmask;
+  T vn1 = *(v.limb_end() - 1);
+  while (!(vn1 & (((T) 1) << (limbbits - 1)))) { vn1 <<= 1; ++shift; }
 
   std::ptrdiff_t n = v.limbvec->size();
   std::ptrdiff_t m = u.limbvec->size() - n;
@@ -373,35 +264,38 @@ NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const Non
   const T* wlast = w.limb_end();
   T* rp = r.limb_begin();
   T* qp = q.limb_begin();
+  T vn2 = *(wlast-2);
 
-  T qh1, qh2, rh, t;
+  T ujn, qh, rh, t;
+  std::pair<T, T> quotrem, highlow;
   for (int j=m; j >= 0; --j) {
-    s = rp[j+n];
-    t = rp[j+n-1] >> halfbits;
-    qh1 = s / vn1;
-    rh  = s % vn1;
-    while ((qh1 & highmask) || (qh1*vn2 > ((rh << halfbits) | t))) {
-      --qh1;
-      rh += vn1;
+    ujn = rp[j+n];
+    if (ujn != vn1) {
+      quotrem = lowlevel::double_div(ujn, rp[j+n-1], vn1);
+      qh = quotrem.first;
+      rh = quotrem.second;
+      t = rp[j+n-2];
+      highlow = lowlevel::double_mult(qh, vn2);
+      if (highlow.first > rh || (highlow.first == rh && highlow.second > t)) {
+        --qh;
+        rh += vn1;
+        if (rh < vn1) break;  // overflow
+        highlow = lowlevel::double_mult(qh, vn2);  // TODO: update existing variables
+      }
+    } else
+      qh = (T) -1;
+
+    t = lowlevel::sequence_mult_limb_sub(rp+j, rp+j+n-1, wfirst, qh);
+
+    rp[j+n] = ujn - t;
+
+    if (t > ujn) {  // add back
+      std::cout << "Add back" << std::endl;
+      lowlevel::add_sequences_with_overflow(rp+j, rp+j+n-1, wfirst, wlast, rp+j);
+      --qh;
     }
-    if (long_divide_multsub_odd(wfirst, wlast, rp + j, qh1)) {
-      long_divide_addback_odd(wfirst, wlast, rp + j);
-      --qh1;
-    }
-    t = rp[j+n-1];
-    s = (rp[j+n] << halfbits) | (t >> halfbits);
-    t &= lowmask;
-    qh2 = s / vn1;
-    rh  = s % vn1;
-    while ((qh2 & highmask) || (qh2*vn2 > ((rh << halfbits) | t))) {
-      --qh2;
-      rh += vn1;
-    }
-    if (long_divide_multsub_even(wfirst, wlast, rp + j, qh2)) {
-      long_divide_addback_even(wfirst, wlast, rp + j);
-      --qh2;
-    }
-    qp[j] = (qh1 << halfbits) | qh2;
+
+    qp[j] = qh;
   }
   q.limbvec->set_size(qp[m] ? m+1 : m);
   r.shift_right_this(shift);

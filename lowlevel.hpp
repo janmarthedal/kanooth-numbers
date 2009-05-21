@@ -119,7 +119,21 @@ T* subtract(const T* first1, const T* last1, const T* first2, const T* last2, T*
  */
 
 template <typename T>
-inline T mult_add_add(const T u, const T v, T& w, const T k)
+inline std::pair<T, T> double_mult(const T u, const T v)
+{
+  const unsigned int halfbits = boost::integer_traits<T>::digits / 2;
+  const T lowmask = (((T) 1) << halfbits) - 1;
+  T u1 = u >> halfbits, u0 = u & lowmask;
+  T v1 = v >> halfbits, v0 = v & lowmask;
+  T r = u0*v0;
+  T s = u1*v0 + (r >> halfbits);
+  T t = u0*v1 + (s & lowmask);
+  return std::make_pair(u1*v1 + (s >> halfbits) + (t >> halfbits),
+                        (t << halfbits) | (r & lowmask));
+}
+
+template <typename T>
+inline T mult_add_add(T& w, const T u, const T v, const T k)
 {
   const unsigned int halfbits = boost::integer_traits<T>::digits / 2;
   const T lowmask = (((T) 1) << halfbits) - 1;
@@ -137,7 +151,7 @@ inline T multiply_sequence_with_limb(const T* first, const T* last, T* dst, T v)
 {
   T k = 0;
   while (first != last)
-    k = mult_add_add(*first++, v, *dst++, k);
+    k = mult_add_add(*dst++, *first++, v, k);
   return k;
 }
 
@@ -150,6 +164,24 @@ T* multiply_sequences(const T* ufirst, const T* ulast, const T* vfirst, const T*
     *wlast++ = multiply_sequence_with_limb(ufirst, ulast, wfirst++, *vfirst++);
   if (!*(wlast-1)) --wlast;
   return wlast;
+}
+
+template <typename T>
+inline T mult_sub_sub(T& w, const T u, const T v, T k)
+{
+  T wt = -w;
+  k = mult_add_add(wt, u, v, k);
+  w = -wt;
+  return k;
+}
+
+template <typename T>
+T sequence_mult_limb_sub(T* ufirst, T* ulast, const T* vfirst, T q)
+{
+  T k = 0;
+  while (ufirst != ulast)
+    k = mult_sub_sub(*ufirst++, *vfirst++, q, k);
+  return k;
 }
 
 
