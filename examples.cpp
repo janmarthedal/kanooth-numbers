@@ -49,12 +49,12 @@ NUMBER construct(const std::string& digits, unsigned short base=10)
   return r;
 }
 
-void check3()
+/*void check3()
 {
   NNI u = NNI(128).binary_shift_this(32) + NNI(128).binary_shift_this(24)
           + NNI(128).binary_shift_this(16) + NNI(127).binary_shift_this(8);
-  /*NNI u = NNI(128).binary_shift_this(40) + NNI(128).binary_shift_this(32)
-          + NNI(128).binary_shift_this(24) + NNI(127).binary_shift_this(16);*/
+  //NNI u = NNI(128).binary_shift_this(40) + NNI(128).binary_shift_this(32)
+  //        + NNI(128).binary_shift_this(24) + NNI(127).binary_shift_this(16);
   NNI v = NNI(128).binary_shift_this(24) + NNI(128).binary_shift_this(16)
           + NNI(128).binary_shift_this(8) + NNI(128);
 
@@ -95,36 +95,21 @@ inline std::pair<unsigned, unsigned> asmdiv(unsigned uhigh, unsigned ulow, unsig
            : "d" (uhigh), "a" (ulow), "b" (v)
            : );
   return std::make_pair(q, r);
-}
+}*/
 
 int main()
 {
-  /*std::pair<limb_t,limb_t> qr = com::sputsoft::multiprecision::lowlevel::double_div<limb_t>(128*256, 0, 128*256);
-
-  std::cout << qr.first << std::endl;
-  std::cout << qr.second << std::endl;
-
   NNI u = construct<NNI>("12345678");
-  NNI v = construct<NNI>("87654321");
 
-  std::cout << "u  : " << u << std::endl;
-  std::cout << "v  : " << v << std::endl;
-  std::cout << "u+v: " << u+v << std::endl;
-  std::cout << "v-u: " << v-u << std::endl;
-  std::cout << "u*v: " << u*v << std::endl;
+  std::cout << "u: " << u << std::endl;
 
-  check3();*/
+  u.binary_shift_this(10);
 
-  /*std::pair<unsigned, unsigned> qr = asmdiv(((unsigned) 1 << 31)-1, 2, (unsigned) 1 << 31);
-  std::cout << qr.first << std::endl;
-  std::cout << qr.second << std::endl;*/
+  std::cout << "u: " << u << std::endl;
 
-  check3();
+  u.binary_shift_this(-100);
 
-  /*limb_t w = 32000;
+  std::cout << "u: " << u << std::endl;
 
-  limb_t k = com::sputsoft::multiprecision::lowlevel::mult_sub_sub(w, (limb_t) 20000, (limb_t) 15000, (limb_t) 18000);
-
-  std::cout << w << std::endl;
-  std::cout << k << std::endl;*/
+  //check3();
 }

@@ -17,6 +17,8 @@
 
 #include <boost/integer_traits.hpp>
 
+//#if defined( __GNUC__ ) && ( defined( __i386__ ) || defined( __x86_64__ ) )
+
 namespace com {
 namespace sputsoft {
 namespace multiprecision {
@@ -229,6 +231,63 @@ std::pair<T,T> double_div(const T uhigh, const T ulow, const T v)
 
   return std::pair<T,T>((q1 << halfbits) | q0, r);
 }
+
+
+template <typename T>
+T* shift_left(const T* first, const T* last, T* dst, std::ptrdiff_t n)
+{
+  if (last != first) {
+    const unsigned int limbbits = boost::integer_traits<T>::digits;
+    unsigned int shift = n % limbbits;
+    n /= limbbits;
+    dst += (last - first) + n;
+    T* d = dst;
+    if (shift != 0) {
+      const unsigned int revshift = limbbits - shift;
+      T t, k = 0;
+      ++d;
+      while (last != first) {
+        t = *--last;
+        *--d = (t >> revshift) | k;
+        k = t << shift;
+      }
+      *--d = k;
+      if (*dst) ++dst;
+    } else {
+      while (last != first)
+        *--d = *--last;
+    }
+    while (n--) *--d = 0;
+  }
+  return dst;
+}
+
+template <typename T>
+T* shift_right(const T* first, const T* last, T* dst, std::ptrdiff_t n)
+{
+  if (last != first) {
+    const unsigned int limbbits = boost::integer_traits<T>::digits;
+    const unsigned int shift = n % limbbits;
+    n /= limbbits;
+    if (n >= last - first) return dst;
+    first += n;
+    if (shift != 0) {
+      const unsigned int revshift = limbbits - shift;
+      T t, k = *first++ >> shift;
+      while (first != last) {
+        t = *first++;
+        *dst++ = (t << revshift) | k;
+        k = t >> shift;
+      }
+      if (k) *dst++ = k;
+    } else {
+      while (first != last)
+        *dst++ = *first++;
+    }
+  }
+  return dst;
+}
+
 
 } // lowlevel
 } // multiprecision
