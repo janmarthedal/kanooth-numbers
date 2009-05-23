@@ -78,7 +78,7 @@ void test_low_level_addition()
   T c[10];
   T r[3] = { 5, 3, 1 };
 
-  std::pair<bool, T*> ret = com::sputsoft::multiprecision::lowlevel::add_sequences_with_overflow(a, a+3, b, b+2, c);
+  std::pair<bool, T*> ret = /*com::sputsoft::multiprecision::*/lowlevel::add_sequences_with_overflow(a, a+3, b, b+2, c);
   assertTrue<T>(!ret.first, ASSERT_ARGS);
   assertTrue<T>(ret.second == c + 3, ASSERT_ARGS);
   assertArraysEqual(r, r+3, c, ASSERT_ARGS);

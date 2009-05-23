@@ -29,9 +29,11 @@
 #include <boost/static_assert.hpp>
 #include "lowlevel.hpp"
 
+/*
 namespace com {
 namespace sputsoft {
 namespace multiprecision {
+*/
 
 template <typename T> int compare_values(const T& a, const T& b) {
   return (a < b) ? -1 : (a > b) ? 1 : 0;
@@ -220,20 +222,21 @@ NonNegativeInteger<T,V>::simple_divide(const NonNegativeInteger<T,V>& u, T v)
   NonNegativeInteger<T,V> q(limbs, true);
   const T *ufirst = u.limb_begin(), *ulast = u.limb_end();
   T* qlast = q.limb_begin() + limbs - 1;
+  T qh, rh;
 
-  std::pair<T, T> quotrem = lowlevel::double_div((T) 0, *--ulast, v);
+  lowlevel::double_div((T) 0, *--ulast, v, qh, rh);
 
-  if (quotrem.first)
-    *qlast = quotrem.first;
+  if (qh)
+    *qlast = qh;
   else
     --limbs;
   while (ulast != ufirst) {
-    quotrem = lowlevel::double_div(quotrem.second, *--ulast, v);
-    *--qlast = quotrem.first;
+    lowlevel::double_div(rh, *--ulast, v, qh, rh);
+    *--qlast = qh;
   }
   q.limbvec->set_size(limbs);
 
-  return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(q, quotrem.second);
+  return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(q, rh);
 }
 
 template <typename T, typename V>
@@ -250,6 +253,7 @@ NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const Non
   const NonNegativeInteger<T,V> w = v.shift_left(shift);
   NonNegativeInteger<T,V> r(m+n+1, true);
   *(r.limb_begin() + m+n) = 0;
+  //r.limbvec->set_size(m+n+1);
   lowlevel::shift_left(u.limb_begin(), u.limb_end(), r.limb_begin(), shift);
 
   NonNegativeInteger<T,V> q(m+1, true);
@@ -260,32 +264,29 @@ NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const Non
   T* qp = q.limb_begin();
   T vn2 = *(wlast-2);
 
-  T ujn, qh, rh, t;
-  std::pair<T, T> quotrem, highlow;
+  T ujn, qh, rh, t, high, low;
   for (int j=m; j >= 0; --j) {
     ujn = rp[j+n];
     if (ujn != vn1) {
-      quotrem = lowlevel::double_div(ujn, rp[j+n-1], vn1);
-      qh = quotrem.first;
-      rh = quotrem.second;
+      lowlevel::double_div(ujn, rp[j+n-1], vn1, qh, rh);
       t = rp[j+n-2];
-      highlow = lowlevel::double_mult(qh, vn2);
-      if (highlow.first > rh || (highlow.first == rh && highlow.second > t)) {
+      lowlevel::double_mult(qh, vn2, high, low);
+      while (high > rh || (high == rh && low > t)) {
         --qh;
         rh += vn1;
         if (rh < vn1) break;  // overflow
-        highlow = lowlevel::double_mult(qh, vn2);  // TODO: update existing variables
+        lowlevel::double_mult(qh, vn2, high, low);  // TODO: update existing variables
       }
     } else
       qh = (T) -1;
 
-    t = lowlevel::sequence_mult_limb_sub(rp+j, rp+j+n-1, wfirst, qh);
+    t = lowlevel::sequence_mult_limb_sub(rp+j, rp+j+n, wfirst, qh);
 
     rp[j+n] = ujn - t;
 
     if (t > ujn) {  // add back
       std::cout << "Add back" << std::endl;
-      lowlevel::add_sequences_with_overflow(rp+j, rp+j+n-1, wfirst, wlast, rp+j);
+      lowlevel::add_sequences_with_overflow(rp+j, rp+j+n+1, wfirst, wlast, rp+j);
       --qh;
     }
 
@@ -293,7 +294,7 @@ NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const Non
   }
 
   q.limbvec->set_size(qp[m] ? m+1 : m);
-  r.shift_right_this(shift);
+  lowlevel::shift_right(rp, rp+n, rp, shift);
   while (n != 0 && !rp[n-1]) n--;
   r.limbvec->set_size(n);
 
@@ -516,8 +517,10 @@ std::ostream& operator<<(std::ostream& os, const NonNegativeInteger<T,V>& n)
   return os;
 }
 
+/*
 } // multiprecision
 } // sputsoft
 } // com
+*/
 
 #endif	/* _NONNEGATIVEINTEGER_HPP */
