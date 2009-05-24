@@ -19,8 +19,8 @@
 
 //using com::sputsoft::multiprecision::NonNegativeInteger;
 
-typedef unsigned char limb_t;
-//typedef unsigned short limb_t;
+//typedef unsigned char limb_t;
+typedef unsigned short limb_t;
 //typedef unsigned int limb_t;
 //typedef unsigned long limb_t;
 //typedef unsigned long long limb_t;
@@ -66,7 +66,19 @@ void check3()
   std::cout << "Verification: " << (z == u ? "OK" : "FAIL") << std::endl;
 }
 
+void check4()
+{
+  NNI u = construct<NNI>("999");
+  NNI v = construct<NNI>("99999999");
+  NNI r = construct<NNI>("99899999001");
+
+  std::cout << "u  : " << u << std::endl;
+  std::cout << "v  : " << v << std::endl;
+  std::cout << "u*v: " << u*v << std::endl;
+  std::cout << "r  : " << r << std::endl;
+}
+
 int main()
 {
-  check3();
+  check4();
 }

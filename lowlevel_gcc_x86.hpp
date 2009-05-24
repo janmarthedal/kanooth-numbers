@@ -49,7 +49,7 @@ typedef boost::uint32_t U32;
       "  sahf\n"
       "  jnc   3f\n"
       "  movl  (%%ebx),%%eax\n"
-      "  incl  %%eax\n"              // Carry not affected!
+      "  incl  %%eax\n"              // Carry not affected?!
       "  movl  %%eax,(%%esi)\n"
       "  lahf\n"
       "  addl  $0x4,%%ebx\n"
@@ -69,7 +69,7 @@ typedef boost::uint32_t U32;
 }*/
 
 template <>
-inline void double_mult<U32>(const U32 u, const U32 v, U32& high, U32& low)
+inline void double_mult<U32>(const U32 u, const U32 v, U32& low, U32& high)
 {
   __asm__ (
       "mull  %%ebx"
@@ -78,7 +78,7 @@ inline void double_mult<U32>(const U32 u, const U32 v, U32& high, U32& low)
 }
 
 template <>
-inline U32 mult_add_add<U32>(U32& w, const U32 u, const U32 v, U32 k)
+inline void double_mult_add_add<U32>(const U32 u, const U32 v, const U32 a1, const U32 a2, U32& low, U32& high)
 {
   __asm__ (
       "mull  %%ebx\n"
@@ -86,9 +86,8 @@ inline U32 mult_add_add<U32>(U32& w, const U32 u, const U32 v, U32 k)
       "adcl  $0,%%edx\n"
       "addl  %%esi,%%eax\n"
       "adcl  $0,%%edx\n"
-      : "=d" (k), "=a" (w)
-      : "a" (u), "b" (v), "c" (w), "S" (k));
-  return k;
+      : "=d" (high), "=a" (low)
+      : "a" (u), "b" (v), "c" (a1), "S" (a2));
 }
 
 template <>

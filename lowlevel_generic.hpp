@@ -26,21 +26,17 @@ namespace multiprecision {*/
 namespace lowlevel {
 
 
-template <typename T>
-T* reset_sequence(T* first, T* last)
-{
-  while (first != last)
-    *first++ = 0;
-  return first;
-}
-
 /*
  * ADDITION
  */
 
-// Assumes ulast-ufirst > vlast-vfirst
+/*
+ * Assumes ulast-ufirst > vlast-vfirst
+ *
+ * Used by: add_sequences, NonNegativeInteger::long_divide
+ */
 template <typename T>
-inline std::pair<bool, T*> add_sequences_with_overflow(const T* ufirst, const T* ulast, const T* vfirst, const T* vlast, T* dst)
+T* add_sequences_with_overflow(const T* ufirst, const T* ulast, const T* vfirst, const T* vlast, T* dst, bool& overflow)
 {
   T lx, ly, lz;
   bool carry = false;
@@ -63,17 +59,21 @@ inline std::pair<bool, T*> add_sequences_with_overflow(const T* ufirst, const T*
   }
   if (ufirst != ulast)
     dst = std::copy(ufirst, ulast, dst);
-  return std::make_pair(carry, dst);
+  overflow = carry;
+  return dst;
 }
 
+/*
+ * Used by: NonNegativeInteger::add, NonNegativeInteger::operator+=
+ */
 template <typename T>
 T* add_sequences(const T* ufirst, const T* ulast, const T* vfirst, const T* vlast, T* dst)
 {
-  std::pair<bool, T*> ret = (ulast - ufirst > vlast - vfirst) ?
-          add_sequences_with_overflow(ufirst, ulast, vfirst, vlast, dst)
-        : add_sequences_with_overflow(vfirst, vlast, ufirst, ulast, dst);
-  dst = ret.second;
-  if (ret.first) *dst++ = 1;
+  bool overflow;
+  dst = (ulast - ufirst > vlast - vfirst) ?
+          add_sequences_with_overflow(ufirst, ulast, vfirst, vlast, dst, overflow)
+        : add_sequences_with_overflow(vfirst, vlast, ufirst, ulast, dst, overflow);
+  if (overflow) *dst++ = 1;
   return dst;
 }
 
@@ -82,7 +82,9 @@ T* add_sequences(const T* ufirst, const T* ulast, const T* vfirst, const T* vlas
  * SUBTRACTION
  */
 
-// Requires last1-first1 >= last2-first2
+/*
+ * Requires last1-first1 >= last2-first2
+ */
 template <typename T>
 T* subtract(const T* first1, const T* last1, const T* first2, const T* last2, T* dst)
 {
@@ -123,39 +125,56 @@ T* subtract(const T* first1, const T* last1, const T* first2, const T* last2, T*
  */
 
 template <typename T>
-inline void double_mult(const T u, const T v, T& high, T& low)
+inline void double_mult_add_add(const T u, const T v, const T a1, const T a2, T& low, T& high)
 {
   const unsigned int halfbits = boost::integer_traits<T>::digits / 2;
   const T lowmask = (((T) 1) << halfbits) - 1;
   T u1 = u >> halfbits, u0 = u & lowmask;
   T v1 = v >> halfbits, v0 = v & lowmask;
-  T r = u0*v0;
-  T s = u1*v0 + (r >> halfbits);
-  T t = u0*v1 + (s & lowmask);
+  T r  = u0*v0 + (a1 & lowmask) + (a2 & lowmask);
+  T s  = u1*v0 + (a1 >> halfbits) + (r >> halfbits);
+  T t  = u0*v1 + (s & lowmask) + (a2 >> halfbits);
   high = u1*v1 + (s >> halfbits) + (t >> halfbits);
   low  = (t << halfbits) | (r & lowmask);
 }
 
 template <typename T>
-inline T mult_add_add(T& w, const T u, const T v, const T k)
+inline void double_mult_add(const T u, const T v, const T a, T& low, T& high)
 {
-  const unsigned int halfbits = boost::integer_traits<T>::digits / 2;
-  const T lowmask = (((T) 1) << halfbits) - 1;
-  T u1 = u >> halfbits, u0 = u & lowmask;
-  T v1 = v >> halfbits, v0 = v & lowmask;
-  T r = u0*v0 + (w & lowmask) + (k & lowmask);
-  T s = u1*v0 + (w >> halfbits) + (r >> halfbits);
-  T t = u0*v1 + (s & lowmask) + (k >> halfbits);
-  w = (t << halfbits) | (r & lowmask);
-  return u1*v1 + (s >> halfbits) + (t >> halfbits);
+  double_mult_add_add(u, v, a, (T) 0, low, high);
 }
 
+template <typename T>
+inline void double_mult(const T u, const T v, T& low, T& high)
+{
+  double_mult_add_add(u, v, (T) 0, (T) 0, low, high);
+}
+
+/*
+ * Used by multiply_sequences
+ */
+template <typename T>
+inline T multiply_add_sequence_with_limb(const T* first, const T* last, T* dst, T v)
+{
+  T k = 0;
+  while (first != last) {
+    double_mult_add_add(*first++, v, *dst, k, *dst, k);
+    dst++;
+  }
+  return k;
+}
+
+/*
+ * Used by NonNegativeInteger::operator*=
+ */
 template <typename T>
 inline T multiply_sequence_with_limb(const T* first, const T* last, T* dst, T v)
 {
   T k = 0;
-  while (first != last)
-    k = mult_add_add(*dst++, *first++, v, k);
+  while (first != last) {
+    double_mult_add(*first++, v, k, *dst, k);
+    dst++;
+  }
   return k;
 }
 
@@ -163,9 +182,10 @@ inline T multiply_sequence_with_limb(const T* first, const T* last, T* dst, T v)
 template <typename T>
 T* multiply_sequences(const T* ufirst, const T* ulast, const T* vfirst, const T* vlast, T* wfirst)
 {
-  T *wlast=reset_sequence(wfirst, wfirst + (ulast - ufirst));
+  T *wlast = wfirst + (ulast - ufirst);
+  *wlast++ = multiply_sequence_with_limb(ufirst, ulast, wfirst++, *vfirst++);
   while (vfirst != vlast)
-    *wlast++ = multiply_sequence_with_limb(ufirst, ulast, wfirst++, *vfirst++);
+    *wlast++ = multiply_add_sequence_with_limb(ufirst, ulast, wfirst++, *vfirst++);
   if (!*(wlast-1)) --wlast;
   return wlast;
 }
@@ -173,8 +193,8 @@ T* multiply_sequences(const T* ufirst, const T* ulast, const T* vfirst, const T*
 template <typename T>
 inline T mult_sub_sub(T& w, const T u, const T v, T k)
 {
-  T wt = 0;
-  k = mult_add_add(wt, u, v, k);
+  T wt;
+  double_mult_add(u, v, k, wt, k);
   if (wt > w) ++k;
   w -= wt;
   return k;

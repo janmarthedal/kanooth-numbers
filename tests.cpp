@@ -13,15 +13,18 @@
  */
 
 #include <iostream>
+#include <boost/cstdint.hpp>
 #include "lowlevel.hpp"
 
 #define ASSERT_ARGS __LINE__
 
 template <typename T> const char* get_type_name() { return "Unknown"; }
-template <> const char* get_type_name<unsigned char>() { return "unsigned char"; }
-template <> const char* get_type_name<unsigned short>() { return "unsigned short"; }
-template <> const char* get_type_name<unsigned int>() { return "unsigned int"; }
-template <> const char* get_type_name<unsigned long>() { return "unsigned long"; }
+template <> const char* get_type_name<boost::uint8_t>() { return "8 bits, unsigned"; }
+template <> const char* get_type_name<boost::uint16_t>() { return "16 bits, unsigned"; }
+template <> const char* get_type_name<boost::uint32_t>() { return "32 bits, unsigned"; }
+#ifndef BOOST_NO_INT64_T
+template <> const char* get_type_name<boost::uint64_t>() { return "64 bits, unsigned"; }
+#endif
 
 template <typename T>
 void show_array(const T* first, const T* last)
@@ -71,34 +74,75 @@ void assertArraysEqual(const T* first1, const T* last1, const T* first2, int lin
 
 
 template <typename T>
-void test_low_level_addition()
+void test_low_level_add_sequences_with_overflow()
 {
+  std::cout << "    testing add_sequences_with_overflow" << std::endl;
+
   T a[3] = { 3, 2, 1 };
   T b[2] = { 2, 1 };
   T c[10];
   T r[3] = { 5, 3, 1 };
+  bool overflow;
 
-  std::pair<bool, T*> ret = /*com::sputsoft::multiprecision::*/lowlevel::add_sequences_with_overflow(a, a+3, b, b+2, c);
-  assertTrue<T>(!ret.first, ASSERT_ARGS);
-  assertTrue<T>(ret.second == c + 3, ASSERT_ARGS);
+  T* end = lowlevel::add_sequences_with_overflow(a, a+3, b, b+2, c, overflow);
+  assertTrue<T>(!overflow, ASSERT_ARGS);
+  assertTrue<T>(end == c + 3, ASSERT_ARGS);
   assertArraysEqual(r, r+3, c, ASSERT_ARGS);
 }
 
 template <typename T>
+void test_low_level_double_mult_add_add()
+{
+  std::cout << "    testing double_mult_add_add" << std::endl;
+
+  T high, low;
+  T max = (T) -1;
+
+  lowlevel::double_mult_add_add(max, max, max, max, high, low);
+  assertTrue<T>(high == max, ASSERT_ARGS);
+  assertTrue<T>(low == max, ASSERT_ARGS);
+  lowlevel::double_mult_add_add(max, max, (T) 0, max, high, low);
+  assertTrue<T>(high == max, ASSERT_ARGS);
+  assertTrue<T>(low == 0, ASSERT_ARGS);
+  lowlevel::double_mult_add_add(max, max, max, (T) 0, high, low);
+  assertTrue<T>(high == max, ASSERT_ARGS);
+  assertTrue<T>(low == 0, ASSERT_ARGS);
+  lowlevel::double_mult_add_add(max, max, (T) 0, (T) 0, high, low);
+  assertTrue<T>(high == max-1, ASSERT_ARGS);
+  assertTrue<T>(low == 1, ASSERT_ARGS);
+}
+
+
+template <typename T>
+void test_low_level()
+{
+  std::cout << "  testing low level" << std::endl;
+  test_low_level_add_sequences_with_overflow<T>();
+  test_low_level_double_mult_add_add<T>();
+}
+
+
+template <typename T>
 void all_tests_for_type()
 {
-  test_low_level_addition<T>();
+  std::cout << "all tests for type " << get_type_name<T>() << std::endl;
+
+  test_low_level<T>();
+
+  std::cout << std::endl;
 }
 
 int main()
 {
-  all_tests_for_type<unsigned char>();
-  all_tests_for_type<unsigned short>();
-  all_tests_for_type<unsigned int>();
-  all_tests_for_type<unsigned long>();
+  all_tests_for_type<boost::uint8_t>();
+  all_tests_for_type<boost::uint16_t>();
+  all_tests_for_type<boost::uint32_t>();
+# ifndef BOOST_NO_INT64_T
+  all_tests_for_type<boost::uint64_t>();
+# endif
 
   std::cerr.flush();
-  std::cout << "Testing done" << std::endl;
+  std::cout << "testing done" << std::endl;
 
   return 0;
 }

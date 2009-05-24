@@ -14,13 +14,13 @@
 
 /*
  * TODO:
- * - Self shifts
- * - Inner loops without conditionals
  * - Binary operations
  */
 
 #ifndef _NONNEGATIVEINTEGER_HPP
 #define _NONNEGATIVEINTEGER_HPP
+
+#define BOOST_DISABLE_ASSERTS
 
 #include <iostream>
 #include <cassert>
@@ -44,20 +44,20 @@ class SimpleLimbVector {
 public:
   typedef T value_type;
   typedef size_t size_type;
-  SimpleLimbVector() : _capacity(2), _size(0), _elems(new T[2]) {}
+  SimpleLimbVector() : _capacity(2), _first(new T[_capacity]), _last(_first) {}
   explicit SimpleLimbVector(size_type __size)
-    : _capacity(std::max(__size, (size_type) 2)), _size(0), _elems(new T[_capacity]) {}
-  size_type size() const { return _size; }
-  size_type capacity() const { return _capacity; }
-  void set_size(size_type __size) { _size = __size; }
-  T* begin() { return _elems; }
-  T* end() { return _elems + _size; }
-  const T* begin() const { return _elems; }
-  const T* end() const { return _elems + _size; }
+    : _capacity(std::max(__size, (size_type) 2)), _first(new T[_capacity]), _last(_first) {}
+  size_type size() const { return _last - _first; }
+  bool request_size(size_type req_size) const { return _capacity >= req_size; }
+  void set_end(T* end) { _last = end; }
+  T* begin() { return _first; }
+  T* end() { return _last; }
+  const T* begin() const { return _first; }
+  const T* end() const { return _last; }
 private:
   size_type _capacity;
-  size_type _size;
-  T* _elems;
+  T *_first;
+  T *_last;
 };
 
 template <typename T, typename V=SimpleLimbVector<T> >
@@ -70,9 +70,6 @@ private:
   boost::shared_ptr<V> limbvec;
   typedef typename V::size_type limbvec_size_type;
   static const unsigned int limbbits = boost::integer_traits<T>::digits;
-  static const unsigned int halfbits = limbbits / 2;
-  static const T lowmask = (((T) 1) << halfbits) - 1;
-  static const T highmask = lowmask << halfbits;
   NonNegativeInteger(limbvec_size_type size, bool) : limbvec(new V(size)) {}
   T* limb_begin() { return limbvec->begin(); }
   T* limb_end() { return limbvec->end(); }
@@ -116,8 +113,9 @@ template <typename T, typename V>
 NonNegativeInteger<T,V>::NonNegativeInteger(T value) : limbvec(new V(1))
 {
   if (value) {
-    *limb_begin() = value;
-    limbvec->set_size(1);
+    T* begin = limb_begin();
+    *begin = value;
+    limbvec->set_end(begin + 1);
   }
 }
 
@@ -137,9 +135,8 @@ NonNegativeInteger<T,V> NonNegativeInteger<T,V>::add(const NonNegativeInteger<T,
   if (u.isZero()) return v;
   if (v.isZero()) return u;
   NonNegativeInteger<T,V> r(std::max(u.limbvec->size(), v.limbvec->size())+1, true);
-  T* rbegin = r.limb_begin();
-  T* rend = lowlevel::add_sequences(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
-  r.limbvec->set_size(rend - rbegin);
+  T* rend = lowlevel::add_sequences(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), r.limb_begin());
+  r.limbvec->set_end(rend);
   return r;
 }
 
@@ -149,10 +146,9 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator+=(const NonNegativeIn
   if (isZero()) {
     *this = x;
   } else if (!x.isZero()) {
-    if (limbvec.unique() && limbvec->capacity() > std::max(limbvec->size(), x.limbvec->size())) {
-      T* rbegin = limb_begin();
-      T* rend = lowlevel::add_sequences(limb_begin(), limb_end(), x.limb_begin(), x.limb_end(), rbegin);
-      limbvec->set_size(rend - rbegin);
+    if (limbvec.unique() && limbvec->request_size(std::max(limbvec->size(), x.limbvec->size()))) {
+      T* rend = lowlevel::add_sequences(limb_begin(), limb_end(), x.limb_begin(), x.limb_end(), limb_begin());
+      limbvec->set_end(rend);
     } else
       *this = add(*this, x);
   }
@@ -169,9 +165,8 @@ NonNegativeInteger<T,V> NonNegativeInteger<T,V>::subtract(const NonNegativeInteg
   if (v.isZero()) return u;
   if (u.limbvec->size() < v.limbvec->size()) return zero;  // wrong usage
   NonNegativeInteger<T,V> r(u.limbvec->size(), true);
-  T* rbegin = r.limb_begin();
-  T* rend = lowlevel::subtract(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
-  r.limbvec->set_size(rend - rbegin);
+  T* rend = lowlevel::subtract(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), r.limb_begin());
+  r.limbvec->set_end(rend);
   return r;
 }
 
@@ -182,7 +177,7 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator-=(const NonNegativeIn
     if (limbvec.unique()) {
       T* begin = limb_begin();
       T* end = subtracter(begin, limb_end(), v.limb_begin(), v.limb_end(), begin);
-      limbvec->set_size(end - begin);
+      limbvec->set_end(end);
     } else
       *this = subtract(*this, v);
   }
@@ -198,16 +193,29 @@ NonNegativeInteger<T,V> NonNegativeInteger<T,V>::multiply(const NonNegativeInteg
 {
   if (u.isZero() || v.isZero()) return zero;
   NonNegativeInteger<T,V> r(u.limbvec->size() + v.limbvec->size(), true);
-  T* rbegin = r.limb_begin();
-  T* rend = lowlevel::multiply_sequences(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), rbegin);
-  r.limbvec->set_size(rend - rbegin);
+  T* rend = lowlevel::multiply_sequences(u.limb_begin(), u.limb_end(), v.limb_begin(), v.limb_end(), r.limb_begin());
+  r.limbvec->set_end(rend);
   return r;
 }
 
 template <typename T, typename V>
 NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator*=(const NonNegativeInteger<T,V>& v)
 {
-  return *this = multiply(*this, v);
+  if (!isZero()) {
+    if (v.isZero()) {
+      *this = zero;
+    } else if (v.limbvec->size() == 1 && limbvec.unique() && limbvec->request_size(limbvec->size() + 1)) {
+      T* first = limb_begin();
+      T* last = limb_end();
+      T k = lowlevel::multiply_sequence_with_limb(first, last, first, *v.limb_begin());
+      if (k) {
+        *last++ = k;
+        limbvec->set_end(last);
+      }
+    } else
+      *this = multiply(*this, v);
+  }
+  return *this;
 }
 
 /*
@@ -234,7 +242,7 @@ NonNegativeInteger<T,V>::simple_divide(const NonNegativeInteger<T,V>& u, T v)
     lowlevel::double_div(rh, *--ulast, v, qh, rh);
     *--qlast = qh;
   }
-  q.limbvec->set_size(limbs);
+  q.limbvec->set_end(q.limb_begin() + limbs);
 
   return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(q, rh);
 }
@@ -253,7 +261,6 @@ NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const Non
   const NonNegativeInteger<T,V> w = v.shift_left(shift);
   NonNegativeInteger<T,V> r(m+n+1, true);
   *(r.limb_begin() + m+n) = 0;
-  //r.limbvec->set_size(m+n+1);
   lowlevel::shift_left(u.limb_begin(), u.limb_end(), r.limb_begin(), shift);
 
   NonNegativeInteger<T,V> q(m+1, true);
@@ -270,12 +277,12 @@ NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const Non
     if (ujn != vn1) {
       lowlevel::double_div(ujn, rp[j+n-1], vn1, qh, rh);
       t = rp[j+n-2];
-      lowlevel::double_mult(qh, vn2, high, low);
+      lowlevel::double_mult(qh, vn2, low, high);
       while (high > rh || (high == rh && low > t)) {
         --qh;
         rh += vn1;
         if (rh < vn1) break;  // overflow
-        lowlevel::double_mult(qh, vn2, high, low);  // TODO: update existing variables
+        lowlevel::double_mult(qh, vn2, low, high);  // TODO: update existing variables
       }
     } else
       qh = (T) -1;
@@ -286,17 +293,19 @@ NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const Non
 
     if (t > ujn) {  // add back
       std::cout << "Add back" << std::endl;
-      lowlevel::add_sequences_with_overflow(rp+j, rp+j+n+1, wfirst, wlast, rp+j);
+      bool overflow;
+      lowlevel::add_sequences_with_overflow(rp+j, rp+j+n+1, wfirst, wlast, rp+j, overflow);
+      assert(overflow);
       --qh;
     }
 
     qp[j] = qh;
   }
 
-  q.limbvec->set_size(qp[m] ? m+1 : m);
+  q.limbvec->set_end(qp[m] ? &qp[m+1] : &qp[m]);
   lowlevel::shift_right(rp, rp+n, rp, shift);
   while (n != 0 && !rp[n-1]) n--;
-  r.limbvec->set_size(n);
+  r.limbvec->set_end(&rp[n]);
 
   return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(q, r);
 }
@@ -333,9 +342,8 @@ NonNegativeInteger<T,V> NonNegativeInteger<T,V>::shift_left(size_t n) const
 {
   if (!n) return *this;
   NonNegativeInteger<T,V> r(limbvec->size() + n/limbbits + 1, true);
-  T* rfirst = r.limb_begin();
-  T* rlast = lowlevel::shift_left(limb_begin(), limb_end(), rfirst, n);
-  r.limbvec->set_size(rlast - rfirst);
+  T* rlast = lowlevel::shift_left(limb_begin(), limb_end(), r.limb_begin(), n);
+  r.limbvec->set_end(rlast);
   return r;
 }
 
@@ -343,10 +351,10 @@ template <typename T, typename V>
 NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::shift_left_this(size_t n)
 {
   if (n && !isZero()) {
-    if (limbvec.unique() && (limbvec->capacity() >= limbvec->size() + n/limbbits + 1)) {
+    if (limbvec.unique() && limbvec->request_size(limbvec->size() + n/limbbits + 1)) {
       T* first = limb_begin();
       T* last = lowlevel::shift_left(first, limb_end(), first, n);
-      limbvec->set_size(last - first);
+      limbvec->set_end(last);
     } else
       *this = shift_left(n);
   }
@@ -360,9 +368,8 @@ NonNegativeInteger<T,V> NonNegativeInteger<T,V>::shift_right(size_t n) const
   size_t limbshift = n / limbbits;
   if (limbshift >= limbvec->size()) return zero;
   NonNegativeInteger<T,V> r(limbvec->size() - limbshift, true);
-  T* rfirst = r.limb_begin();
-  T* rlast = lowlevel::shift_right(limb_begin(), limb_end(), rfirst, n);
-  r.limbvec->set_size(rlast - rfirst);
+  T* rlast = lowlevel::shift_right(limb_begin(), limb_end(), r.limb_begin(), n);
+  r.limbvec->set_end(rlast);
   return r;
 }
 
@@ -373,7 +380,7 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::shift_right_this(size_t n)
     if (limbvec.unique()) {
       T* first = limb_begin();
       T* last = lowlevel::shift_right(first, limb_end(), first, n);
-      limbvec->set_size(last - first);
+      limbvec->set_end(last);
     } else
       *this = shift_right(n);
   }
