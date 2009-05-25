@@ -247,6 +247,29 @@ NonNegativeInteger<T,V>::simple_divide(const NonNegativeInteger<T,V>& u, T v)
   return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(q, rh);
 }
 
+template <typename T>
+inline T calc_qh(T ujn, T ujn1, T ujn2, T vn1, T vn2)
+{
+  T qh, rh, high, low;
+
+  if (ujn == vn1) {
+    qh = (T) -1;
+    rh = ujn1 + vn1;
+    if (rh < vn1) return qh;
+  } else
+    lowlevel::double_div(ujn, ujn1, vn1, qh, rh);
+
+  lowlevel::double_mult(qh, vn2, low, high);
+  while (high > rh || (high == rh && low > ujn2)) {
+    --qh;
+    rh += vn1;
+    if (rh < vn1) break;  // overflow
+    lowlevel::double_mult(qh, vn2, low, high);
+  }
+
+  return qh;
+}
+
 template <typename T, typename V>
 std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >
 NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
@@ -271,34 +294,19 @@ NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const Non
   T* qp = q.limb_begin();
   T vn2 = *(wlast-2);
 
-  T ujn, qh, rh, t, high, low;
+  T ujn, qh, k;
   for (int j=m; j >= 0; --j) {
     ujn = rp[j+n];
-    if (ujn != vn1) {
-      lowlevel::double_div(ujn, rp[j+n-1], vn1, qh, rh);
-      t = rp[j+n-2];
-      lowlevel::double_mult(qh, vn2, low, high);
-      while (high > rh || (high == rh && low > t)) {
-        --qh;
-        rh += vn1;
-        if (rh < vn1) break;  // overflow
-        lowlevel::double_mult(qh, vn2, low, high);  // TODO: update existing variables
-      }
-    } else
-      qh = (T) -1;
-
-    t = lowlevel::sequence_mult_limb_sub(rp+j, rp+j+n, wfirst, qh);
-
-    rp[j+n] = ujn - t;
-
-    if (t > ujn) {  // add back
+    qh = calc_qh(ujn, rp[j+n-1], rp[j+n-2], vn1, vn2);
+    k = lowlevel::sequence_mult_limb_sub(rp+j, rp+j+n, wfirst, qh);
+    rp[j+n] = ujn - k;
+    if (k > ujn) {  // subtraction borrow?
       std::cout << "Add back" << std::endl;
       bool overflow;
       lowlevel::add_sequences_with_overflow(rp+j, rp+j+n+1, wfirst, wlast, rp+j, overflow);
       assert(overflow);
       --qh;
     }
-
     qp[j] = qh;
   }
 

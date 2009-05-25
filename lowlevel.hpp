@@ -18,10 +18,8 @@
 
 #include "lowlevel_generic.hpp"
 
-#if 1
 #if defined( __GNUC__ ) && ( defined( __i386__ ) || defined( __x86_64__ ) )
 #include "lowlevel_gcc_x86.hpp"
-#endif
 #endif
 
 

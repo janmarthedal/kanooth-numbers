@@ -15,15 +15,17 @@
 #include <iostream>
 #include <boost/cstdint.hpp>
 #include "lowlevel.hpp"
+#include "NonNegativeInteger.hpp"
+
 
 #define ASSERT_ARGS __LINE__
 
 template <typename T> const char* get_type_name() { return "Unknown"; }
-template <> const char* get_type_name<boost::uint8_t>() { return "8 bits, unsigned"; }
-template <> const char* get_type_name<boost::uint16_t>() { return "16 bits, unsigned"; }
-template <> const char* get_type_name<boost::uint32_t>() { return "32 bits, unsigned"; }
+template <> const char* get_type_name<boost::uint8_t>() { return "8 bits"; }
+template <> const char* get_type_name<boost::uint16_t>() { return "16 bits"; }
+template <> const char* get_type_name<boost::uint32_t>() { return "32 bits"; }
 #ifndef BOOST_NO_INT64_T
-template <> const char* get_type_name<boost::uint64_t>() { return "64 bits, unsigned"; }
+template <> const char* get_type_name<boost::uint64_t>() { return "64 bits"; }
 #endif
 
 template <typename T>
@@ -98,20 +100,38 @@ void test_low_level_double_mult_add_add()
   T high, low;
   T max = (T) -1;
 
-  lowlevel::double_mult_add_add(max, max, max, max, high, low);
+  lowlevel::double_mult_add_add(max, max, max, max, low, high);
   assertTrue<T>(high == max, ASSERT_ARGS);
   assertTrue<T>(low == max, ASSERT_ARGS);
-  lowlevel::double_mult_add_add(max, max, (T) 0, max, high, low);
+  lowlevel::double_mult_add_add(max, max, (T) 0, max, low, high);
   assertTrue<T>(high == max, ASSERT_ARGS);
   assertTrue<T>(low == 0, ASSERT_ARGS);
-  lowlevel::double_mult_add_add(max, max, max, (T) 0, high, low);
+  lowlevel::double_mult_add_add(max, max, max, (T) 0, low, high);
   assertTrue<T>(high == max, ASSERT_ARGS);
   assertTrue<T>(low == 0, ASSERT_ARGS);
-  lowlevel::double_mult_add_add(max, max, (T) 0, (T) 0, high, low);
+  lowlevel::double_mult_add_add(max, max, (T) 0, (T) 0, low, high);
   assertTrue<T>(high == max-1, ASSERT_ARGS);
   assertTrue<T>(low == 1, ASSERT_ARGS);
 }
 
+template <typename T>
+void test_division()
+{
+  std::cout << "  testing division" << std::endl;
+
+  const unsigned int limbbits = boost::integer_traits<T>::digits;
+  const T half = (T) 1 << (limbbits - 1);
+  typedef NonNegativeInteger<T> NNI;
+
+  NNI u = NNI(half).binary_shift_this(3*limbbits);
+  NNI v = NNI(half).binary_shift_this(2*limbbits) + NNI(1);
+
+  std::pair<NNI,NNI> div = u.divide(u, v);
+  NNI z = div.first*v + div.second;
+
+  assertTrue<T>(z == u, ASSERT_ARGS);
+
+}
 
 template <typename T>
 void test_low_level()
@@ -128,6 +148,7 @@ void all_tests_for_type()
   std::cout << "all tests for type " << get_type_name<T>() << std::endl;
 
   test_low_level<T>();
+  test_division<T>();
 
   std::cout << std::endl;
 }

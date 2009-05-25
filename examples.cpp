@@ -50,10 +50,11 @@ NONNEGNUM construct(const std::string& digits, unsigned short base=10)
 
 void check3()
 {
-  NNI u = NNI(128).binary_shift_this(80) + NNI(128).binary_shift_this(64)
-          + NNI(128).binary_shift_this(48) + NNI(127).binary_shift_this(32);
-  NNI v = NNI(128).binary_shift_this(48) + NNI(128).binary_shift_this(32)
-          + NNI(128).binary_shift_this(16) + NNI(128);
+  const unsigned int limbbits = boost::integer_traits<limb_t>::digits;
+  const limb_t half = (limb_t) 1 << (limbbits - 1);
+
+  NNI u = NNI(half).binary_shift_this(3*limbbits);
+  NNI v = NNI(half).binary_shift_this(2*limbbits) + NNI(1);
 
   std::cout << "u  : " << u << std::endl;
   std::cout << "v  : " << v << std::endl;
@@ -80,5 +81,5 @@ void check4()
 
 int main()
 {
-  check4();
+  check3();
 }
