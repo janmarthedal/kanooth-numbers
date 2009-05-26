@@ -14,7 +14,7 @@
 
 #include <iostream>
 #include <boost/cstdint.hpp>
-#include "lowlevel.hpp"
+#include "detail/lowlevel.hpp"
 #include "NonNegativeInteger.hpp"
 
 

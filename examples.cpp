@@ -19,13 +19,13 @@
 
 //using com::sputsoft::multiprecision::NonNegativeInteger;
 
-//typedef unsigned char limb_t;
-typedef unsigned short limb_t;
-//typedef unsigned int limb_t;
-//typedef unsigned long limb_t;
-//typedef unsigned long long limb_t;
-//typedef boost::uintmax_t limb_t;
-typedef NonNegativeInteger<limb_t> NNI;
+//typedef unsigned char digit_t;
+//typedef unsigned short digit_t;
+typedef unsigned int digit_t;
+//typedef unsigned long digit_t;
+//typedef unsigned long long digit_t;
+//typedef boost::uintmax_t digit_t;
+typedef NonNegativeInteger<digit_t> NNI;
 
 
 template <typename NONNEGNUM>
@@ -50,11 +50,11 @@ NONNEGNUM construct(const std::string& digits, unsigned short base=10)
 
 void check3()
 {
-  const unsigned int limbbits = boost::integer_traits<limb_t>::digits;
-  const limb_t half = (limb_t) 1 << (limbbits - 1);
+  const unsigned int digitbits = boost::integer_traits<digit_t>::digits;
+  const digit_t half = (digit_t) 1 << (digitbits - 1);
 
-  NNI u = NNI(half).binary_shift_this(3*limbbits);
-  NNI v = NNI(half).binary_shift_this(2*limbbits) + NNI(1);
+  NNI u = NNI(half).binary_shift_this(3*digitbits);
+  NNI v = NNI(half).binary_shift_this(2*digitbits) + NNI(1);
 
   std::cout << "u  : " << u << std::endl;
   std::cout << "v  : " << v << std::endl;
