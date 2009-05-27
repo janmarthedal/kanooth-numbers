@@ -260,6 +260,7 @@ NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const Non
   const NonNegativeInteger<T,V> w = v.shift_left(shift);
   NonNegativeInteger<T,V> r(m+n+1, true);
   *(r.digit_begin() + m+n) = 0;
+  r.digitvec->set_end(r.digit_begin() + m+n+1);  // DEBUG
   lowlevel::shift_left(u.digit_begin(), u.digit_end(), r.digit_begin(), shift);
 
   NonNegativeInteger<T,V> q(m+1, true);
@@ -269,6 +270,7 @@ NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const Non
   T* rp = r.digit_begin();
   T* qp = q.digit_begin();
   T vn2 = *(wlast-2);
+  vn1 = *(wlast-1);
 
   T ujn, qh, k;
   for (int j=m; j >= 0; --j) {
@@ -287,7 +289,7 @@ NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const Non
   }
 
   q.digitvec->set_end(qp[m] ? &qp[m+1] : &qp[m]);
-  lowlevel::shift_right(rp, rp+n, rp, shift);
+  lowlevel::shift_right(rp, rp+n+1, rp, shift);  // is not n digits long until AFTER the shift
   while (n != 0 && !rp[n-1]) n--;
   r.digitvec->set_end(&rp[n]);
 
@@ -402,76 +404,6 @@ int NonNegativeInteger<T,V>::compare(const NonNegativeInteger<T,V>& u, const Non
     if (c) return c;
   }
   return 0;
-}
-
-template <typename T, typename V>
-inline bool operator==(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
-{
-  return NonNegativeInteger<T,V>::compare(u, v) == 0;
-}
-
-template <typename T, typename V>
-inline bool operator!=(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
-{
-  return NonNegativeInteger<T,V>::compare(u, v) != 0;
-}
-
-template <typename T, typename V>
-inline bool operator<(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
-{
-  return NonNegativeInteger<T,V>::compare(u, v) < 0;
-}
-
-template <typename T, typename V>
-inline bool operator<=(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
-{
-  return NonNegativeInteger<T,V>::compare(u, v) <= 0;
-}
-
-template <typename T, typename V>
-inline bool operator>(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
-{
-  return NonNegativeInteger<T,V>::compare(u, v) > 0;
-}
-
-template <typename T, typename V>
-inline bool operator>=(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
-{
-  return NonNegativeInteger<T,V>::compare(u, v) >= 0;
-}
-
-/*
- * Out-of-class operator overloads
- */
-
-template <typename T, typename V>
-inline NonNegativeInteger<T,V> operator+(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
-{
-  return NonNegativeInteger<T,V>::add(u, v);
-}
-
-template <typename T, typename V>
-NonNegativeInteger<T,V> operator-(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
-{
-  return NonNegativeInteger<T,V>::subtract(u, v);
-}
-
-template <typename T, typename V>
-inline NonNegativeInteger<T,V> operator*(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
-{
-  return NonNegativeInteger<T,V>::multiply(u, v);
-}
-
-template <typename T, typename V>
-inline NonNegativeInteger<T,V> operator/(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
-{
-  return NonNegativeInteger<T,V>::divide(u, v).first;
-}
-
-template <typename T, typename V>
-inline NonNegativeInteger<T,V> operator%(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
-{
-  return NonNegativeInteger<T,V>::divide(u, v).second;
 }
 
 /*

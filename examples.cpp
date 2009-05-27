@@ -13,40 +13,20 @@
  */
 
 #include <iostream>
+#include <vector>
 #include <boost/cstdint.hpp>
 #include <boost/integer_traits.hpp>
 #include "NonNegativeInteger.hpp"
+#include "NNIutils.hpp"
 
 //using com::sputsoft::multiprecision::NonNegativeInteger;
 
-//typedef unsigned char digit_t;
-//typedef unsigned short digit_t;
-typedef unsigned int digit_t;
-//typedef unsigned long digit_t;
-//typedef unsigned long long digit_t;
-//typedef boost::uintmax_t digit_t;
+//typedef boost::uint8_t digit_t;
+typedef boost::uint16_t digit_t;
+//typedef boost::uint32_t digit_t;
+//typedef boost::uint64_t digit_t;
 typedef NonNegativeInteger<digit_t> NNI;
 
-
-template <typename NONNEGNUM>
-NONNEGNUM construct(const std::string& digits, unsigned short base=10)
-{
-  NONNEGNUM r = NONNEGNUM::zero;
-  if (base >= 2 && base <= 36) {
-    NONNEGNUM b(base);
-    unsigned short v;
-    for (std::string::const_iterator p=digits.begin(); p != digits.end(); ++p) {
-      char c = *p;
-      if (c >= '0' && c <= '9') v = c - '0';
-      else if (c >= 'a' && c <= 'z') v = c - 'a' + 10;
-      else if (c >= 'A' && c <= 'Z') v = c - 'A' + 10;
-      else break;
-      r *= b;
-      r += NONNEGNUM(v);
-    }
-  }
-  return r;
-}
 
 void check3()
 {
@@ -69,9 +49,9 @@ void check3()
 
 void check4()
 {
-  NNI u = construct<NNI>("999");
-  NNI v = construct<NNI>("99999999");
-  NNI r = construct<NNI>("99899999001");
+  NNI u = string_to_nni<NNI>("999");
+  NNI v = string_to_nni<NNI>("99999999");
+  NNI r = string_to_nni<NNI>("99899999001");
 
   std::cout << "u  : " << u << std::endl;
   std::cout << "v  : " << v << std::endl;
@@ -79,7 +59,50 @@ void check4()
   std::cout << "r  : " << r << std::endl;
 }
 
+void PE3()
+{
+  std::vector<NNI> factors;
+  factorize(string_to_nni<NNI>("600851475143"), std::back_inserter(factors));
+  std::cout << factors.back() << std::endl;
+  // 6857
+}
+
+void PE20()
+{
+  NNI n = factorial<NNI>(100);
+
+  std::cout << n << std::endl;
+
+  NNI res = NNI::zero;
+  std::pair<NNI,NNI> divrem;
+
+  while (n != NNI::zero) {
+    divrem = NNI::divide(n, 10);
+    res += divrem.second;
+    n = divrem.first;
+  }
+
+  std::cout << res << std::endl;
+}
+
+void factorize_test1()
+{
+  std::vector<NNI> factors;
+  factorize(string_to_nni<NNI>("123456789012345678901234567890"), std::back_inserter(factors));
+  for (std::vector<NNI>::const_iterator p=factors.begin(); p != factors.end(); ++p)
+    std::cout << " " << *p << std::endl;
+}
+
 int main()
 {
-  check3();
+  PE3();
+
+  /*std::pair<NNI,NNI> divrem;
+
+  NNI u = string_to_nni<NNI>("8462696833");
+  NNI v = string_to_nni<NNI>("258");
+
+  divrem = NNI::divide(u, v);
+
+  std::cout << divrem.first << ", " << divrem.second << std::endl;*/
 }

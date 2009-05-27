@@ -13,9 +13,11 @@
  */
 
 #include <iostream>
+#include <vector>
 #include <boost/cstdint.hpp>
 #include "detail/lowlevel.hpp"
 #include "NonNegativeInteger.hpp"
+#include "NNIutils.hpp"
 
 
 #define ASSERT_ARGS __LINE__
@@ -78,7 +80,7 @@ void assertArraysEqual(const T* first1, const T* last1, const T* first2, int lin
 template <typename T>
 void test_low_level_add_sequences_with_overflow()
 {
-  std::cout << "    testing add_sequences_with_overflow" << std::endl;
+  std::cout << "  testing add_sequences_with_overflow" << std::endl;
 
   T a[3] = { 3, 2, 1 };
   T b[2] = { 2, 1 };
@@ -93,9 +95,9 @@ void test_low_level_add_sequences_with_overflow()
 }
 
 template <typename T>
-void test_low_level_double_mult_add_add()
+void test_double_mult_add_add()
 {
-  std::cout << "    testing double_mult_add_add" << std::endl;
+  std::cout << "  testing double_mult_add_add" << std::endl;
 
   T high, low;
   T max = (T) -1;
@@ -130,15 +132,19 @@ void test_division()
   NNI z = div.first*v + div.second;
 
   assertTrue<T>(z == u, ASSERT_ARGS);
-
 }
 
+
 template <typename T>
-void test_low_level()
+void test_factorization()
 {
-  std::cout << "  testing low level" << std::endl;
-  test_low_level_add_sequences_with_overflow<T>();
-  test_low_level_double_mult_add_add<T>();
+  std::cout << "  testing factorization" << std::endl;
+
+  typedef NonNegativeInteger<T> NNI;
+  std::vector<NNI> factors;
+  factorize(string_to_nni<NNI>("600851475143"), std::back_inserter(factors));
+  NNI expected = string_to_nni<NNI>("6857");
+  assertTrue<T>(factors.back() == expected, ASSERT_ARGS);
 }
 
 
@@ -147,8 +153,10 @@ void all_tests_for_type()
 {
   std::cout << "all tests for type " << get_type_name<T>() << std::endl;
 
-  test_low_level<T>();
+  test_low_level_add_sequences_with_overflow<T>();
+  test_double_mult_add_add<T>();
   test_division<T>();
+  test_factorization<T>();
 
   std::cout << std::endl;
 }
