@@ -26,6 +26,18 @@ namespace multiprecision {*/
 namespace lowlevel {
 
 
+template <typename T>
+inline unsigned lg_floor(T n)
+{
+  unsigned r = -1;
+  while (n) {
+    n >>= 1;
+    ++r;
+  }
+  return r;
+}
+
+
 /*
  * LEVEL 1 - CONSTANT TIME OPERATIONS
  */

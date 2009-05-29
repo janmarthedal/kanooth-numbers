@@ -22,9 +22,9 @@
 //using com::sputsoft::multiprecision::NonNegativeInteger;
 
 //typedef boost::uint8_t digit_t;
-typedef boost::uint16_t digit_t;
+//typedef boost::uint16_t digit_t;
 //typedef boost::uint32_t digit_t;
-//typedef boost::uint64_t digit_t;
+typedef boost::uint64_t digit_t;
 typedef NonNegativeInteger<digit_t> NNI;
 
 
@@ -95,14 +95,12 @@ void factorize_test1()
 
 int main()
 {
-  PE3();
+  NNI x = string_to_nni<NNI>("123456789012345678901234567890");
+  //NNI x = NNI(1).binary_shift(20) + NNI(1);
+  size_t floor = x.lg_floor();
+  size_t ceil = x.lg_ceil();
 
-  /*std::pair<NNI,NNI> divrem;
-
-  NNI u = string_to_nni<NNI>("8462696833");
-  NNI v = string_to_nni<NNI>("258");
-
-  divrem = NNI::divide(u, v);
-
-  std::cout << divrem.first << ", " << divrem.second << std::endl;*/
+  std::cout << x << std::endl;
+  std::cout << NNI(1).binary_shift(floor) << ", " << floor << std::endl;
+  std::cout << NNI(1).binary_shift(ceil) << ", " << ceil << std::endl;
 }

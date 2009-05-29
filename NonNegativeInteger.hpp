@@ -20,9 +20,12 @@
 #ifndef _NONNEGATIVEINTEGER_HPP
 #define _NONNEGATIVEINTEGER_HPP
 
+#ifdef NDEBUG
 #define BOOST_DISABLE_ASSERTS
+#endif
 
 #include <iostream>
+#include <iomanip>    // setw i/o manipulator
 #include <cassert>
 #include <boost/shared_ptr.hpp>
 #include <boost/integer_traits.hpp>
@@ -40,8 +43,7 @@ template <typename T, typename V=detail::SimpleDigitVector<T> >
 class NonNegativeInteger {
   BOOST_STATIC_ASSERT(boost::integer_traits<T>::is_integer);
   BOOST_STATIC_ASSERT(!boost::integer_traits<T>::is_signed);
-  template <typename S, typename W>
-  friend std::ostream& operator<<(std::ostream& os, const NonNegativeInteger<S,W>& n);
+  //template <typename S, typename W> friend std::ostream& operator<<(std::ostream& os, const NonNegativeInteger<S,W>& n);
 private:
   boost::shared_ptr<V> digitvec;
   typedef typename V::size_type digitvec_size_type;
@@ -55,10 +57,8 @@ private:
   NonNegativeInteger shift_right(size_t n) const;
   NonNegativeInteger& shift_left_this(size_t n);
   NonNegativeInteger& shift_right_this(size_t n);
-  static std::pair<NonNegativeInteger,NonNegativeInteger>
-    long_divide(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
-  static std::pair<NonNegativeInteger,NonNegativeInteger>
-    simple_divide(const NonNegativeInteger<T,V>& u, T v);
+  static std::pair<NonNegativeInteger, NonNegativeInteger>
+    divide_long(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
 public:
   static const NonNegativeInteger zero;
   NonNegativeInteger();
@@ -67,11 +67,14 @@ public:
   static NonNegativeInteger add(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   static NonNegativeInteger subtract(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   static NonNegativeInteger multiply(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
+  static std::pair<NonNegativeInteger, T> divide_simple(const NonNegativeInteger<T,V>& u, T v);
   static std::pair<NonNegativeInteger,NonNegativeInteger>
     divide(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   static int compare(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   NonNegativeInteger binary_shift(std::ptrdiff_t n) const;
   NonNegativeInteger& binary_shift_this(std::ptrdiff_t n);
+  size_t lg_floor() const;
+  size_t lg_ceil() const;
   NonNegativeInteger& operator+=(const NonNegativeInteger<T,V>& v);
   NonNegativeInteger& operator-=(const NonNegativeInteger<T,V>& v);
   NonNegativeInteger& operator*=(const NonNegativeInteger<T,V>& v);
@@ -199,8 +202,8 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator*=(const NonNegativeIn
  */
 
 template <typename T, typename V>
-std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >
-NonNegativeInteger<T,V>::simple_divide(const NonNegativeInteger<T,V>& u, T v)
+std::pair<NonNegativeInteger<T,V>, T>
+NonNegativeInteger<T,V>::divide_simple(const NonNegativeInteger<T,V>& u, T v)
 {
   digitvec_size_type digits = u.digitvec->size();
   NonNegativeInteger<T,V> q(digits, true);
@@ -220,7 +223,7 @@ NonNegativeInteger<T,V>::simple_divide(const NonNegativeInteger<T,V>& u, T v)
   }
   q.digitvec->set_end(q.digit_begin() + digits);
 
-  return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(q, rh);
+  return std::pair<NonNegativeInteger<T,V>, T>(q, rh);
 }
 
 template <typename T>
@@ -248,31 +251,25 @@ inline T calc_qh(T ujn, T ujn1, T ujn2, T vn1, T vn2)
 
 template <typename T, typename V>
 std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >
-NonNegativeInteger<T,V>::long_divide(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+NonNegativeInteger<T,V>::divide_long(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
 {
-  unsigned int shift = 0;
-  T vn1 = *(v.digit_end() - 1);
-  while (!(vn1 & (((T) 1) << (digitbits - 1)))) { vn1 <<= 1; ++shift; }
-
+  unsigned int shift = digitbits-1 - lowlevel::lg_floor(*(v.digit_end() - 1));
+  const NonNegativeInteger<T,V> w = v.shift_left(shift);
   std::ptrdiff_t n = v.digitvec->size();
   std::ptrdiff_t m = u.digitvec->size() - n;
-
-  const NonNegativeInteger<T,V> w = v.shift_left(shift);
   NonNegativeInteger<T,V> r(m+n+1, true);
-  *(r.digit_begin() + m+n) = 0;
-  r.digitvec->set_end(r.digit_begin() + m+n+1);  // DEBUG
-  lowlevel::shift_left(u.digit_begin(), u.digit_end(), r.digit_begin(), shift);
-
   NonNegativeInteger<T,V> q(m+1, true);
-
   const T* wfirst = w.digit_begin();
   const T* wlast = w.digit_end();
   T* rp = r.digit_begin();
   T* qp = q.digit_begin();
+  T vn1 = *(wlast-1);
   T vn2 = *(wlast-2);
-  vn1 = *(wlast-1);
-
   T ujn, qh, k;
+
+  *(r.digit_begin() + m+n) = 0;
+  lowlevel::shift_left(u.digit_begin(), u.digit_end(), r.digit_begin(), shift);
+
   for (int j=m; j >= 0; --j) {
     ujn = rp[j+n];
     qh = calc_qh(ujn, rp[j+n-1], rp[j+n-2], vn1, vn2);
@@ -303,8 +300,8 @@ NonNegativeInteger<T,V>::divide(const NonNegativeInteger<T,V>& u, const NonNegat
   if (v.isZero() || compare(u, v) < 0)
     return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(zero, u);
   if (v.digitvec->size() == 1)
-    return simple_divide(u, *v.digit_begin());
-  return long_divide(u, v);
+    return divide_simple(u, *v.digit_begin());
+  return divide_long(u, v);
 }
 
 template <typename T, typename V>
@@ -320,7 +317,7 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator%=(const NonNegativeIn
 }
 
 /*
- * BINARY SHIFTING
+ * BINARY OPERATIONS
  */
 
 template <typename T, typename V>
@@ -385,6 +382,29 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::binary_shift_this(std::ptrdiff
   return n >= 0 ? shift_left_this(n) : shift_right_this(-n);
 }
 
+template <typename T, typename V>
+size_t NonNegativeInteger<T,V>::lg_floor() const
+{
+  return isZero() ? -1 : (lowlevel::lg_floor(*(digit_end() - 1)) + (digitvec->size() - 1) * digitbits);
+}
+
+template <typename T, typename V>
+size_t NonNegativeInteger<T,V>::lg_ceil() const
+{
+  if (isZero()) return -1;
+  const T* first = digit_begin();
+  const T* last = digit_end();
+  T t = *--last;
+  unsigned s = lowlevel::lg_floor(t);
+  size_t r = s + (digitvec->size() - 1) * digitbits;
+
+  if (t != ((T) 1) << s) return r+1;
+  while (last != first)
+    if (*--last) return r+1;
+  return r;
+}
+
+
 /*
  * COMPARISONS
  */
@@ -410,26 +430,31 @@ int NonNegativeInteger<T,V>::compare(const NonNegativeInteger<T,V>& u, const Non
  * Miscellaneous
  */
 
-template <typename N> void output_number(std::ostream& os, N n) { os << n; }
-template <> void output_number(std::ostream& os, unsigned char n) { os << (unsigned)n; }
+template <typename N> inline void output_number(std::ostream& os, N n) { os << n; }
+template <> inline void output_number(std::ostream& os, unsigned char n) { os << (unsigned)n; }
+
 
 template <typename T, typename V>
 std::ostream& operator<<(std::ostream& os, const NonNegativeInteger<T,V>& n)
 {
   if (!n.isZero()) {
-    const typename NonNegativeInteger<T,V>::digitvec_size_type bits =
-                                                n.digitvec->size() * NonNegativeInteger<T,V>::digitbits;
-    char buffer[(28*bits + 92)/93];  // 28/93 > ln2/ln10
-    int digits=0;
-    NonNegativeInteger<T,V> s = n, ten(10);
+    const unsigned base_log10 = boost::integer_traits<T>::digits10;
+    T buffer[28*(n.lg_floor()+1)/(93*base_log10)+1];  // 28/93 > ln2/ln10
+    T denom = 1;
+    for (unsigned u=0; u < base_log10; u++) denom *= 10;
+    NonNegativeInteger<T,V> s = n;
+    int k=0;
     while (!s.isZero()) {
-      std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> > divrem = NonNegativeInteger<T,V>::divide(s, ten);
+      std::pair<NonNegativeInteger<T,V>, T> divrem = NonNegativeInteger<T,V>::divide_simple(s, denom);
       s = divrem.first;
-      buffer[digits++] = divrem.second.isZero() ? '0' : *divrem.second.digit_begin() + 48;
+      buffer[k++] = divrem.second;
     }
-    while (digits)
-      os << buffer[--digits];
-    if (!*(n.digit_end()-1)) {
+    output_number(os, buffer[--k]);
+    while (k) {
+      os << std::setw(base_log10) << std::setfill('0');
+      output_number(os, buffer[--k]);
+    }
+    /*if (!*(n.digit_end()-1)) {
       os << " | ";
       T const* p = n.digit_end();
       while (p != n.digit_begin()) {
@@ -437,12 +462,84 @@ std::ostream& operator<<(std::ostream& os, const NonNegativeInteger<T,V>& n)
         os << " ";
       }
       os << "(" << n.digitvec.use_count() << ")";
-    }
+    }*/
   } else
     os << '0';
 
   return os;
 }
+
+
+/*
+ * EXTERNAL FUNCTIONS
+ */
+
+template <typename T, typename V>
+inline bool operator==(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  return NonNegativeInteger<T,V>::compare(u, v) == 0;
+}
+
+template <typename T, typename V>
+inline bool operator!=(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  return NonNegativeInteger<T,V>::compare(u, v) != 0;
+}
+
+template <typename T, typename V>
+inline bool operator<(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  return NonNegativeInteger<T,V>::compare(u, v) < 0;
+}
+
+template <typename T, typename V>
+inline bool operator<=(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  return NonNegativeInteger<T,V>::compare(u, v) <= 0;
+}
+
+template <typename T, typename V>
+inline bool operator>(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  return NonNegativeInteger<T,V>::compare(u, v) > 0;
+}
+
+template <typename T, typename V>
+inline bool operator>=(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  return NonNegativeInteger<T,V>::compare(u, v) >= 0;
+}
+
+template <typename T, typename V>
+inline NonNegativeInteger<T,V> operator+(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  return NonNegativeInteger<T,V>::add(u, v);
+}
+
+template <typename T, typename V>
+NonNegativeInteger<T,V> operator-(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  return NonNegativeInteger<T,V>::subtract(u, v);
+}
+
+template <typename T, typename V>
+inline NonNegativeInteger<T,V> operator*(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  return NonNegativeInteger<T,V>::multiply(u, v);
+}
+
+template <typename T, typename V>
+inline NonNegativeInteger<T,V> operator/(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  return NonNegativeInteger<T,V>::divide(u, v).first;
+}
+
+template <typename T, typename V>
+inline NonNegativeInteger<T,V> operator%(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  return NonNegativeInteger<T,V>::divide(u, v).second;
+}
+
 
 /*
 } // multiprecision
