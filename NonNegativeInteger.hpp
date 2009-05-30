@@ -39,6 +39,8 @@ namespace sputsoft {
 namespace multiprecision {
 */
 
+class DivideByZero {};
+
 template <typename T, typename V=detail::SimpleDigitVector<T> >
 class NonNegativeInteger {
   BOOST_STATIC_ASSERT(boost::integer_traits<T>::is_integer);
@@ -73,6 +75,9 @@ public:
   static int compare(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   NonNegativeInteger binary_shift(std::ptrdiff_t n) const;
   NonNegativeInteger& binary_shift_this(std::ptrdiff_t n);
+  static NonNegativeInteger binary_and(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
+  static NonNegativeInteger binary_or(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
+  static NonNegativeInteger binary_xor(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   size_t lg_floor() const;
   size_t lg_ceil() const;
   NonNegativeInteger& operator+=(const NonNegativeInteger<T,V>& v);
@@ -80,6 +85,9 @@ public:
   NonNegativeInteger& operator*=(const NonNegativeInteger<T,V>& v);
   NonNegativeInteger& operator/=(const NonNegativeInteger<T,V>& v);
   NonNegativeInteger& operator%=(const NonNegativeInteger<T,V>& v);
+  NonNegativeInteger& operator&=(const NonNegativeInteger<T,V>& v);
+  NonNegativeInteger& operator|=(const NonNegativeInteger<T,V>& v);
+  NonNegativeInteger& operator^=(const NonNegativeInteger<T,V>& v);
 };
 
 template <typename T, typename V> const NonNegativeInteger<T,V> NonNegativeInteger<T,V>::zero;
@@ -205,23 +213,30 @@ template <typename T, typename V>
 std::pair<NonNegativeInteger<T,V>, T>
 NonNegativeInteger<T,V>::divide_simple(const NonNegativeInteger<T,V>& u, T v)
 {
+  if (!v)
+    throw DivideByZero();
+  if (u.isZero())
+    return std::pair<NonNegativeInteger<T,V>, T>(zero, (T) 0);
+  if (u.digitvec->size() == 1 && *u.digit_begin() < v)
+    return std::pair<NonNegativeInteger<T,V>, T>(zero, *u.digit_begin());
+
+  const T *ufirst = u.digit_begin(), *ulast = u.digit_end();
   digitvec_size_type digits = u.digitvec->size();
   NonNegativeInteger<T,V> q(digits, true);
-  const T *ufirst = u.digit_begin(), *ulast = u.digit_end();
-  T* qlast = q.digit_begin() + digits - 1;
+  T *qlast = q.digit_begin() + digits, *qiter = qlast-1;
   T qh, rh;
 
   lowlevel::double_div((T) 0, *--ulast, v, qh, rh);
 
   if (qh)
-    *qlast = qh;
+    *qiter = qh;
   else
-    --digits;
+    --qlast;
   while (ulast != ufirst) {
     lowlevel::double_div(rh, *--ulast, v, qh, rh);
-    *--qlast = qh;
+    *--qiter = qh;
   }
-  q.digitvec->set_end(q.digit_begin() + digits);
+  q.digitvec->set_end(qlast);
 
   return std::pair<NonNegativeInteger<T,V>, T>(q, rh);
 }
@@ -253,6 +268,11 @@ template <typename T, typename V>
 std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >
 NonNegativeInteger<T,V>::divide_long(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
 {
+  if (v.isZero())
+    throw DivideByZero();
+  if (compare(u, v) < 0)
+    return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(zero, u);
+
   unsigned int shift = digitbits-1 - lowlevel::lg_floor(*(v.digit_end() - 1));
   const NonNegativeInteger<T,V> w = v.shift_left(shift);
   std::ptrdiff_t n = v.digitvec->size();
@@ -297,8 +317,6 @@ template <typename T, typename V>
 std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >
 NonNegativeInteger<T,V>::divide(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
 {
-  if (v.isZero() || compare(u, v) < 0)
-    return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(zero, u);
   if (v.digitvec->size() == 1)
     return divide_simple(u, *v.digit_begin());
   return divide_long(u, v);
@@ -381,6 +399,83 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::binary_shift_this(std::ptrdiff
 {
   return n >= 0 ? shift_left_this(n) : shift_right_this(-n);
 }
+
+template <typename T, typename V>
+NonNegativeInteger<T,V> NonNegativeInteger<T,V>::binary_and(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  if (u.isZero() || v.isZero()) return zero;
+  NonNegativeInteger<T,V> r(std::min(u.digitvec->size(), v.digitvec->size()), true);
+  T* rend = lowlevel::and_sequences(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
+  r.digitvec->set_end(rend);
+  return r;
+}
+
+template <typename T, typename V>
+NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator&=(const NonNegativeInteger<T,V>& v)
+{
+  if (!isZero()) {
+    if (!v.isZero()) {
+      if (digitvec.unique()) {
+        T* end = lowlevel::and_sequences(digit_begin(), digit_end(), v.digit_begin(), v.digit_end(), digit_begin());
+        digitvec->set_end(end);
+      } else
+        *this = binary_and(*this, v);
+    } else
+      *this = zero;
+  }
+  return *this;
+}
+
+
+template <typename T, typename V>
+NonNegativeInteger<T,V> NonNegativeInteger<T,V>::binary_or(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  if (u.isZero()) return v;
+  if (v.isZero()) return u;
+  NonNegativeInteger<T,V> r(std::max(u.digitvec->size(), v.digitvec->size()), true);
+  T* rend = lowlevel::or_sequences(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
+  r.digitvec->set_end(rend);
+  return r;
+}
+
+template <typename T, typename V>
+NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator|=(const NonNegativeInteger<T,V>& v)
+{
+  if (!v.isZero()) {
+    if (digitvec.unique() && digitvec->request_size(std::max(digitvec->size(), v.digitvec->size()))) {
+      T* end = lowlevel::or_sequences(digit_begin(), digit_end(), v.digit_begin(), v.digit_end(), digit_begin());
+      digitvec->set_end(end);
+    } else
+      *this = binary_or(*this, v);
+  }
+  return *this;
+}
+
+
+template <typename T, typename V>
+NonNegativeInteger<T,V> NonNegativeInteger<T,V>::binary_xor(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  if (u.isZero()) return v;
+  if (v.isZero()) return u;
+  NonNegativeInteger<T,V> r(std::max(u.digitvec->size(), v.digitvec->size()), true);
+  T* rend = lowlevel::xor_sequences(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
+  r.digitvec->set_end(rend);
+  return r;
+}
+
+template <typename T, typename V>
+NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator^=(const NonNegativeInteger<T,V>& v)
+{
+  if (!v.isZero()) {
+    if (digitvec.unique() && digitvec->request_size(std::max(digitvec->size(), v.digitvec->size()))) {
+      T* end = lowlevel::xor_sequences(digit_begin(), digit_end(), v.digit_begin(), v.digit_end(), digit_begin());
+      digitvec->set_end(end);
+    } else
+      *this = binary_xor(*this, v);
+  }
+  return *this;
+}
+
 
 template <typename T, typename V>
 size_t NonNegativeInteger<T,V>::lg_floor() const

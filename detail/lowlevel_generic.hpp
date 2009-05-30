@@ -327,6 +327,70 @@ T* subtract(const T* first1, const T* last1, const T* first2, const T* last2, T*
 
 
 /*
+ * Used by: ?
+ */
+template <typename T>
+T* and_sequences(const T* ufirst, const T* ulast, const T* vfirst, const T* vlast, T* dst)
+{
+  T* dfirst = dst;
+  if (ulast - ufirst > vlast - vfirst) {
+    while (vfirst != vlast)
+      *dst++ = *ufirst++ & *vfirst++;
+  } else {
+    while (ufirst != ulast)
+      *dst++ = *ufirst++ & *vfirst++;
+  }
+  while (dst != dfirst && !*(dst-1))
+    --dst;
+  return dst;
+}
+
+
+/*
+ * Used by: ?
+ */
+template <typename T>
+T* or_sequences(const T* ufirst, const T* ulast, const T* vfirst, const T* vlast, T* dst)
+{
+  if (ulast - ufirst > vlast - vfirst) {
+    while (vfirst != vlast)
+      *dst++ = *ufirst++ | *vfirst++;
+    dst = std::copy(ufirst, ulast, dst);
+  } else {
+    while (ufirst != ulast)
+      *dst++ = *ufirst++ | *vfirst++;
+    dst = std::copy(vfirst, vlast, dst);
+  }
+  return dst;
+}
+
+
+/*
+ * Used by: ?
+ */
+template <typename T>
+T* xor_sequences(const T* ufirst, const T* ulast, const T* vfirst, const T* vlast, T* dst)
+{
+  if (ulast - ufirst > vlast - vfirst) {
+    while (vfirst != vlast)
+      *dst++ = *ufirst++ ^ *vfirst++;
+    dst = std::copy(ufirst, ulast, dst);
+  } else if (ulast - ufirst < vlast - vfirst) {
+    while (ufirst != ulast)
+      *dst++ = *ufirst++ ^ *vfirst++;
+    dst = std::copy(vfirst, vlast, dst);
+  } else {
+    T* dfirst = dst;
+    while (ufirst != ulast)
+      *dst++ = *ufirst++ ^ *vfirst++;
+    while (dst != dfirst && !*(dst-1))
+      --dst;
+  }
+  return dst;
+}
+
+
+/*
  * LEVEL 3 - QUADRATIC TIME
  */
 

@@ -57,7 +57,7 @@ template <typename T>
 void assertTrue(bool condition, int linenum)
 {
   if (!condition)
-    std::cerr << "Fail on line " << linenum << std::endl;
+    std::cout << "************** Fail on line " << linenum << " **************" << std::endl;
 }
 
 template <typename T>
@@ -117,21 +117,114 @@ void test_double_mult_add_add()
 }
 
 template <typename T>
-void test_division()
+void test_divide_simple()
 {
-  std::cout << "  testing division" << std::endl;
+  std::cout << "  testing divide_simple" << std::endl;
 
+  typedef NonNegativeInteger<T> NNI;
+  std::pair<NNI, T> divrem;
+  bool divbyzero = false;
+
+  try {
+    NNI::divide_simple(NNI(1), (T) 0);
+  } catch (DivideByZero ex) {
+    divbyzero = true;
+  }
+  assertTrue<T>(divbyzero, ASSERT_ARGS);
+
+  divbyzero = false;
+  try {
+    NNI::divide_simple(NNI::zero, (T) 0);
+  } catch (DivideByZero ex) {
+    divbyzero = true;
+  }
+  assertTrue<T>(divbyzero, ASSERT_ARGS);
+
+  NNI u = string_to_nni<NNI>("417661693688739506639586565361");
+  divrem = NNI::divide_simple(u, (T) 1);
+  assertTrue<T>(divrem.first == u, ASSERT_ARGS);
+  assertTrue<T>(!divrem.second, ASSERT_ARGS);
+
+  divrem = NNI::divide_simple(u, (T) 251);
+  assertTrue<T>(divrem.first == string_to_nni<NNI>("1663990811508922337209508228"), ASSERT_ARGS);
+  assertTrue<T>(divrem.second == 133, ASSERT_ARGS);
+}
+
+template <typename T>
+void test_divide_long()
+{
+  std::cout << "  testing divide_long" << std::endl;
+
+  typedef NonNegativeInteger<T> NNI;
   const unsigned int limbbits = boost::integer_traits<T>::digits;
   const T half = (T) 1 << (limbbits - 1);
-  typedef NonNegativeInteger<T> NNI;
 
+  // Force add back
   NNI u = NNI(half).binary_shift_this(3*limbbits);
   NNI v = NNI(half).binary_shift_this(2*limbbits) + NNI(1);
-
-  std::pair<NNI,NNI> div = u.divide(u, v);
-  NNI z = div.first*v + div.second;
-
+  std::pair<NNI,NNI> divrem = NNI::divide(u, v);
+  NNI z = divrem.first*v + divrem.second;
   assertTrue<T>(z == u, ASSERT_ARGS);
+}
+
+
+template <typename T>
+void test_binary_and()
+{
+  std::cout << "  testing binary_and" << std::endl;
+
+  typedef NonNegativeInteger<T> NNI;
+
+  NNI u = string_to_nni<NNI>("1110100010101010110101001001001001001010100101010001", 2);
+  NNI v = string_to_nni<NNI>(           "11101000101010101101010010010010010010101", 2);
+  NNI z = string_to_nni<NNI>(            "1000000101000001001000000010000000010001", 2);
+
+  assertTrue<T>(NNI::binary_and(u, NNI::zero) == NNI::zero, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_and(NNI::zero, u) == NNI::zero, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_and(u, v) == z, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_and(v, u) == z, ASSERT_ARGS);
+}
+
+
+template <typename T>
+void test_binary_or()
+{
+  std::cout << "  testing binary_or" << std::endl;
+
+  typedef NonNegativeInteger<T> NNI;
+
+  NNI u = string_to_nni<NNI>("1110100010101010110101001001001001001010100101010001", 2);
+  NNI v = string_to_nni<NNI>(           "11101000101010101101010010010010010010101", 2);
+  NNI z = string_to_nni<NNI>("1110100010111111110101011101101011011010110111010101", 2);
+
+  assertTrue<T>(NNI::binary_or(u, NNI::zero) == u, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_or(NNI::zero, u) == u, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_or(u, v) == z, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_or(v, u) == z, ASSERT_ARGS);
+}
+
+
+template <typename T>
+void test_binary_xor()
+{
+  std::cout << "  testing binary_xor" << std::endl;
+
+  typedef NonNegativeInteger<T> NNI;
+
+  NNI u = string_to_nni<NNI>("1110100010101010110101001001001001001010100101010001", 2);
+  NNI v = string_to_nni<NNI>(           "11101000101010101101010010010010010010101", 2);
+  NNI z = string_to_nni<NNI>("1110100010110111110000011100100011011000110111000100", 2);
+
+  assertTrue<T>(NNI::binary_xor(u, NNI::zero) == u, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_xor(NNI::zero, u) == u, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_xor(u, u) == NNI::zero, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_xor(v, v) == NNI::zero, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_xor(u, v) == z, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_xor(v, u) == z, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_xor(u, z) == v, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_xor(z, u) == v, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_xor(z, v) == u, ASSERT_ARGS);
+  assertTrue<T>(NNI::binary_xor(v, z) == u, ASSERT_ARGS);
 }
 
 
@@ -155,7 +248,13 @@ void all_tests_for_type()
 
   test_low_level_add_sequences_with_overflow<T>();
   test_double_mult_add_add<T>();
-  test_division<T>();
+
+  test_divide_simple<T>();
+  test_divide_long<T>();
+  test_binary_and<T>();
+  test_binary_or<T>();
+  test_binary_xor<T>();
+
   test_factorization<T>();
 
   std::cout << std::endl;
