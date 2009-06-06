@@ -22,9 +22,9 @@
 //using com::sputsoft::multiprecision::NonNegativeInteger;
 
 //typedef boost::uint8_t digit_t;
-//typedef boost::uint16_t digit_t;
+typedef boost::uint16_t digit_t;
 //typedef boost::uint32_t digit_t;
-typedef boost::uint64_t digit_t;
+//typedef boost::uint64_t digit_t;
 typedef NonNegativeInteger<digit_t> NNI;
 
 
@@ -93,7 +93,7 @@ void factorize_test1()
     std::cout << " " << *p << std::endl;
 }
 
-int main()
+void lgs()
 {
   NNI x = string_to_nni<NNI>("123456789012345678901234567890");
   //NNI x = NNI(1).binary_shift(20) + NNI(1);
@@ -103,4 +103,32 @@ int main()
   std::cout << x << std::endl;
   std::cout << NNI(1).binary_shift(floor) << ", " << floor << std::endl;
   std::cout << NNI(1).binary_shift(ceil) << ", " << ceil << std::endl;
+}
+
+
+
+int main()
+{
+  // This is a typedef for a random number generator.
+  // Try boost::mt19937 or boost::ecuyer1988 instead of boost::minstd_rand
+  boost::minstd_rand generator(42u);
+
+  std::cout << NNI(1).binary_shift(200) << std::endl;
+  std::cout << NNI::makeRandom(generator, 200) << std::endl;
+  std::cout << NNI::makeRandom(generator, 200) << std::endl;
+  std::cout << NNI::makeRandom(generator, 200) << std::endl;
+  std::cout << NNI::makeRandom(generator, 200) << std::endl;
+  std::cout << NNI::makeRandom(generator, 200) << std::endl;
+  std::cout << NNI::makeRandom(generator, 200) << std::endl;
+  std::cout << NNI::makeRandom(generator, 200) << std::endl;
+  std::cout << NNI::makeRandom(generator, 200) << std::endl;
+
+  /*boost::uniform_int<boost::uint64_t> uni_dist(0, boost::integer_traits<uint64_t>::const_max);
+  boost::uniform_int<boost::uint64_t> uni_dist(0, 10);
+  boost::variate_generator<base_generator_type&, boost::uniform_int<boost::uint64_t> > uni(generator, uni_dist);
+
+  std::cout << boost::integer_traits<uint64_t>::const_max << " (max)" << std::endl;
+
+  for(int i = 0; i < 10; i++)
+    std::cout << uni() << std::endl;*/
 }

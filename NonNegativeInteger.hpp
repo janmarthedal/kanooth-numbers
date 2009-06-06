@@ -30,6 +30,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/integer_traits.hpp>
 #include <boost/static_assert.hpp>
+#include <boost/random.hpp>
 #include "detail/SimpleDigitVector.hpp"
 #include "detail/lowlevel.hpp"
 
@@ -78,6 +79,8 @@ public:
   static NonNegativeInteger binary_and(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   static NonNegativeInteger binary_or(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   static NonNegativeInteger binary_xor(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
+  template <typename Generator>
+  static NonNegativeInteger makeRandom(Generator& generator, std::size_t bits);
   size_t lg_floor() const;
   size_t lg_ceil() const;
   NonNegativeInteger& operator+=(const NonNegativeInteger<T,V>& v);
@@ -524,6 +527,38 @@ int NonNegativeInteger<T,V>::compare(const NonNegativeInteger<T,V>& u, const Non
 /*
  * Miscellaneous
  */
+
+
+template <typename T, typename V>
+template <typename Generator>
+NonNegativeInteger<T,V> NonNegativeInteger<T,V>::makeRandom(Generator& generator, std::size_t bits)
+{
+  if (!bits) return zero;
+
+  NonNegativeInteger<T,V> r((bits+digitbits-1) / digitbits, true);
+  T *rbegin = r.digit_begin(), *riter = rbegin;
+
+  boost::uniform_int<T> digit_dist(0, boost::integer_traits<T>::const_max);
+  boost::variate_generator<Generator&, boost::uniform_int<T> > digit_uni(generator, digit_dist);
+
+  while (bits >= digitbits) {
+    *riter++ = digit_uni();
+    bits -= digitbits;
+  }
+
+  if (bits) {
+    boost::uniform_int<T> rem_dist(0, (T(1) << bits) - 1);
+    boost::variate_generator<Generator&, boost::uniform_int<T> > rem_uni(generator, rem_dist);
+    *riter++ = rem_uni();
+  }
+
+  while (riter != rbegin && !*(riter-1))
+    --riter;
+  r.digitvec->set_end(riter);
+
+  return r;
+}
+
 
 template <typename N> inline void output_number(std::ostream& os, N n) { os << n; }
 template <> inline void output_number(std::ostream& os, unsigned char n) { os << (unsigned)n; }
