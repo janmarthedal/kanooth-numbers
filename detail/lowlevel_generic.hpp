@@ -111,6 +111,7 @@ void double_div(T uhigh, T ulow, T v, T& quot, T& rem)
     while ((q1 & highmask) || q1*v0 > ((r << halfbits) | u1)) {
       --q1;
       r += v1;
+      if (r & highmask) break;
     }
     r = ((r << halfbits) | u1) - q1*v0;
     q0 = r / v1;
@@ -118,6 +119,7 @@ void double_div(T uhigh, T ulow, T v, T& quot, T& rem)
     while ((q0 & highmask) || q0*v0 > ((r << halfbits) | u0)) {
       --q0;
       r += v1;
+      if (r & highmask) break;
     }
     r = ((r << halfbits) | u0) - q0*v0;
   }

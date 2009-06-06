@@ -22,9 +22,9 @@
 //using com::sputsoft::multiprecision::NonNegativeInteger;
 
 //typedef boost::uint8_t digit_t;
-typedef boost::uint16_t digit_t;
+//typedef boost::uint16_t digit_t;
 //typedef boost::uint32_t digit_t;
-//typedef boost::uint64_t digit_t;
+typedef boost::uint64_t digit_t;
 typedef NonNegativeInteger<digit_t> NNI;
 
 
@@ -105,30 +105,25 @@ void lgs()
   std::cout << NNI(1).binary_shift(ceil) << ", " << ceil << std::endl;
 }
 
+void debug()
+{
+  NNI u = string_to_nni<NNI>("36009210388420562488862885753");
+  NNI v = string_to_nni<NNI>("15097386575707753956");
+  std::pair<NNI,NNI> divrem = NNI::divide(u, v);
+  NNI z = divrem.first*v + divrem.second;
+
+  std::cout << "u : ";  show_internal(std::cout, u);              std::cout << std::endl;
+  std::cout << "v : ";  show_internal(std::cout, v);              std::cout << std::endl;
+  std::cout << "q': ";  show_internal(std::cout, divrem.first);   std::cout << std::endl;
+  std::cout << "r': ";  show_internal(std::cout, divrem.second);  std::cout << std::endl;
+  std::cout << "q : ";  show_internal(std::cout, string_to_nni<NNI>("2385128724"));   std::cout << std::endl;
+  std::cout << "r : ";  show_internal(std::cout, string_to_nni<NNI>("9367997898882653609"));  std::cout << std::endl;
+
+  std::cout << (z == u ? "OK" : "Check error") << std::endl;
+}
 
 
 int main()
 {
-  // This is a typedef for a random number generator.
-  // Try boost::mt19937 or boost::ecuyer1988 instead of boost::minstd_rand
-  boost::minstd_rand generator(42u);
-
-  std::cout << NNI(1).binary_shift(200) << std::endl;
-  std::cout << NNI::makeRandom(generator, 200) << std::endl;
-  std::cout << NNI::makeRandom(generator, 200) << std::endl;
-  std::cout << NNI::makeRandom(generator, 200) << std::endl;
-  std::cout << NNI::makeRandom(generator, 200) << std::endl;
-  std::cout << NNI::makeRandom(generator, 200) << std::endl;
-  std::cout << NNI::makeRandom(generator, 200) << std::endl;
-  std::cout << NNI::makeRandom(generator, 200) << std::endl;
-  std::cout << NNI::makeRandom(generator, 200) << std::endl;
-
-  /*boost::uniform_int<boost::uint64_t> uni_dist(0, boost::integer_traits<uint64_t>::const_max);
-  boost::uniform_int<boost::uint64_t> uni_dist(0, 10);
-  boost::variate_generator<base_generator_type&, boost::uniform_int<boost::uint64_t> > uni(generator, uni_dist);
-
-  std::cout << boost::integer_traits<uint64_t>::const_max << " (max)" << std::endl;
-
-  for(int i = 0; i < 10; i++)
-    std::cout << uni() << std::endl;*/
+  debug();
 }

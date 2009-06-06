@@ -117,6 +117,21 @@ void test_double_mult_add_add()
 }
 
 template <typename T>
+void test_double_div()
+{
+  std::cout << "  testing double_div" << std::endl;
+
+  const unsigned int halfbits = boost::integer_traits<T>::digits / 2;
+  const T lowmask = (((T) 1) << halfbits) - 1;
+  T q, r;
+
+  lowlevel::double_div(T(lowmask << halfbits), T(0), T(-1), q, r);
+  assertTrue<T>(q == 240, ASSERT_ARGS);
+  assertTrue<T>(r == 240, ASSERT_ARGS);
+}
+
+
+template <typename T>
 void test_divide_simple()
 {
   std::cout << "  testing divide_simple" << std::endl;
@@ -151,9 +166,9 @@ void test_divide_simple()
 }
 
 template <typename T>
-void test_divide_long()
+void test_divide_long_1()
 {
-  std::cout << "  testing divide_long" << std::endl;
+  std::cout << "  testing divide_long_1" << std::endl;
 
   typedef NonNegativeInteger<T> NNI;
   const unsigned int limbbits = boost::integer_traits<T>::digits;
@@ -167,6 +182,31 @@ void test_divide_long()
   assertTrue<T>(z == u, ASSERT_ARGS);
 }
 
+boost::minstd_rand generator(2u);
+
+template <typename T>
+void test_divide_long_2()
+{
+  std::cout << "  testing divide_long_2" << std::endl;
+
+  typedef NonNegativeInteger<T> NNI;
+  for (std::size_t u_bits=4; u_bits <= 9; ++u_bits) {
+    for (std::size_t v_bits=8; v_bits <= 15; ++v_bits) {
+      NNI u = NNI::make_random(generator, u_bits+v_bits);
+      NNI v = NNI::make_random(generator, v_bits);
+      std::pair<NNI,NNI> divrem = NNI::divide(u, v);
+      NNI z = divrem.first*v + divrem.second;
+      assertTrue<T>(z == u, ASSERT_ARGS);
+      if (z != u) {
+        std::cout << u_bits << " " << v_bits << std::endl;
+        std::cout << u << std::endl;
+        std::cout << v << std::endl;
+        std::cout << divrem.first << std::endl;
+        std::cout << divrem.second << std::endl;
+      }
+    }
+  }
+}
 
 template <typename T>
 void test_binary_and()
@@ -248,9 +288,11 @@ void all_tests_for_type()
 
   test_low_level_add_sequences_with_overflow<T>();
   test_double_mult_add_add<T>();
+  test_double_div<T>();
 
   test_divide_simple<T>();
-  test_divide_long<T>();
+  test_divide_long_1<T>();
+  test_divide_long_2<T>();
   test_binary_and<T>();
   test_binary_or<T>();
   test_binary_xor<T>();
@@ -265,9 +307,9 @@ int main()
   all_tests_for_type<boost::uint8_t>();
   all_tests_for_type<boost::uint16_t>();
   all_tests_for_type<boost::uint32_t>();
-# ifndef BOOST_NO_INT64_T
+#ifndef BOOST_NO_INT64_T
   all_tests_for_type<boost::uint64_t>();
-# endif
+#endif
 
   std::cerr.flush();
   std::cout << "testing done" << std::endl;

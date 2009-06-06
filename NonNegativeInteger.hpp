@@ -12,11 +12,6 @@
  * $Id$
  */
 
-/*
- * TODO:
- * - Binary operations
- */
-
 #ifndef _NONNEGATIVEINTEGER_HPP
 #define _NONNEGATIVEINTEGER_HPP
 
@@ -47,6 +42,8 @@ class NonNegativeInteger {
   BOOST_STATIC_ASSERT(boost::integer_traits<T>::is_integer);
   BOOST_STATIC_ASSERT(!boost::integer_traits<T>::is_signed);
   //template <typename S, typename W> friend std::ostream& operator<<(std::ostream& os, const NonNegativeInteger<S,W>& n);
+  template <typename S, typename W>
+  friend void show_internal(std::ostream& os, const NonNegativeInteger<S,W>& n);
 private:
   boost::shared_ptr<V> digitvec;
   typedef typename V::size_type digitvec_size_type;
@@ -80,7 +77,7 @@ public:
   static NonNegativeInteger binary_or(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   static NonNegativeInteger binary_xor(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   template <typename Generator>
-  static NonNegativeInteger makeRandom(Generator& generator, std::size_t bits);
+  static NonNegativeInteger make_random(Generator& generator, std::size_t bits);
   size_t lg_floor() const;
   size_t lg_ceil() const;
   NonNegativeInteger& operator+=(const NonNegativeInteger<T,V>& v);
@@ -299,7 +296,9 @@ NonNegativeInteger<T,V>::divide_long(const NonNegativeInteger<T,V>& u, const Non
     k = lowlevel::sequence_mult_digit_sub(rp+j, rp+j+n, wfirst, qh);
     rp[j+n] = ujn - k;
     if (k > ujn) {  // subtraction borrow?
+/*#ifndef NDEBUG
       std::cout << "Add back" << std::endl;
+#endif*/
       bool overflow;
       lowlevel::add_sequences_with_overflow(rp+j, rp+j+n+1, wfirst, wlast, rp+j, overflow);
       assert(overflow);
@@ -531,7 +530,7 @@ int NonNegativeInteger<T,V>::compare(const NonNegativeInteger<T,V>& u, const Non
 
 template <typename T, typename V>
 template <typename Generator>
-NonNegativeInteger<T,V> NonNegativeInteger<T,V>::makeRandom(Generator& generator, std::size_t bits)
+NonNegativeInteger<T,V> NonNegativeInteger<T,V>::make_random(Generator& generator, std::size_t bits)
 {
   if (!bits) return zero;
 
@@ -597,6 +596,19 @@ std::ostream& operator<<(std::ostream& os, const NonNegativeInteger<T,V>& n)
     os << '0';
 
   return os;
+}
+
+template <typename T, typename V>
+void show_internal(std::ostream& os, const NonNegativeInteger<T,V>& n)
+{
+  os << n;
+  os << " | ";
+  const T* p = n.digit_end();
+  while (p != n.digit_begin()) {
+    output_number(os, *--p);
+    os << " ";
+  }
+  os << "(" << n.digitvec.use_count() << ")";
 }
 
 

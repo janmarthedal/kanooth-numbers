@@ -33,14 +33,85 @@ boost::minstd_rand generator(42u);
 
 
 template <typename T>
-void benchmarks()
+void long_multiplication_random(int u_bits, int v_bits, int runs)
 {
   typedef NonNegativeInteger<T> NNI;
 
+  std::cout << "  Long multiplication ";  std::cout.flush();
+
+  NNI u = NNI::make_random(generator, u_bits);
+  NNI v = NNI::make_random(generator, v_bits);
+  NNI w;
+
+  boost::timer loop_time;
+  for (int k=runs; k != 0; --k)
+    w = NNI::multiply(u, v);
+  double t = loop_time.elapsed();
+
+  std::cout << 1.0e-6*runs*u_bits*v_bits/t << " Mbits/s" << std::endl;
+}
+
+template <typename T>
+void long_division_random(long u_bits, long v_bits, int runs)
+{
+  typedef NonNegativeInteger<T> NNI;
+
+  std::cout << "  Long division ";  std::cout.flush();
+
+  NNI u = NNI::make_random(generator, u_bits+v_bits);
+  NNI v = NNI::make_random(generator, v_bits);
+  std::pair<NNI, NNI> divrem;
+
+  boost::timer loop_time;
+  for (int k=runs; k != 0; --k)
+    divrem = NNI::divide(u, v);
+  double t = loop_time.elapsed();
+
+  std::cout << 1.0e-6*runs*u_bits*v_bits/t << " Mbits/s" << std::endl;
+}
+
+template <typename T>
+void long_division_check_random(long u_bits, long v_bits, int runs)
+{
+  typedef NonNegativeInteger<T> NNI;
+
+  std::cout << "  Long division check ";  std::cout.flush();
+
+  NNI u = NNI::make_random(generator, u_bits+v_bits);
+  NNI v = NNI::make_random(generator, v_bits);
+  std::pair<NNI, NNI> divrem;
+  int passed = 0;
+
+  boost::timer loop_time;
+  for (int k=runs; k != 0; --k) {
+    divrem = NNI::divide(u, v);
+    if (u == divrem.first * v + divrem.second)
+      ++passed;
+  }
+  double t = loop_time.elapsed();
+
+  std::cout << 1.0e-6*runs*u_bits*v_bits/t << " Mbits/s" << std::endl;
+
+  if (passed != runs)
+    std::cout << "  ** Check failed **" << std::endl;
+}
+
+template <typename T>
+void benchmarks()
+{
   std::cout << "Running benchmarks for " << get_type_name<T>() << std::endl;
+
+  long_multiplication_random<T>(80000, 40000, 10);
+  long_division_random<T>(80000, 40000, 10);
+  long_division_check_random<T>(80000, 40000, 10);
 }
 
 int main()
 {
   benchmarks<boost::uint8_t>();
+  benchmarks<boost::uint16_t>();
+  benchmarks<boost::uint32_t>();
+#ifndef BOOST_NO_INT64_T
+  benchmarks<boost::uint64_t>();
+#endif
 }
