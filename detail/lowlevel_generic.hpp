@@ -20,8 +20,7 @@
 #include <boost/integer_traits.hpp>
 
 
-/*namespace com {
-namespace sputsoft {
+/*namespace sputsoft {
 namespace multiprecision {*/
 namespace lowlevel {
 
@@ -120,6 +119,7 @@ void double_div(T uhigh, T ulow, T v, T& quot, T& rem)
       --q0;
       r += v1;
       if (r & highmask) break;
+      //if (r & highmask) { quot = 0; rem = (T) -1; return; }
     }
     r = ((r << halfbits) | u0) - q0*v0;
   }
@@ -415,7 +415,6 @@ T* multiply_sequences(const T* ufirst, const T* ulast, const T* vfirst, const T*
 
 } // lowlevel
 /*} // multiprecision
-} // sputsoft
-} // com*/
+} // sputsoft*/
 
 #endif	/* _LOWLEVEL_GENERIC_HPP */

@@ -19,7 +19,7 @@
 #include "NonNegativeInteger.hpp"
 #include "NNIutils.hpp"
 
-//using com::sputsoft::multiprecision::NonNegativeInteger;
+//using sputsoft::multiprecision::NonNegativeInteger;
 
 //typedef boost::uint8_t digit_t;
 //typedef boost::uint16_t digit_t;

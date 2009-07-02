@@ -121,13 +121,17 @@ void test_double_div()
 {
   std::cout << "  testing double_div" << std::endl;
 
-  const unsigned int halfbits = boost::integer_traits<T>::digits / 2;
-  const T lowmask = (((T) 1) << halfbits) - 1;
+  const unsigned int bits = boost::integer_traits<T>::digits;
   T q, r;
 
-  lowlevel::double_div(T(lowmask << halfbits), T(0), T(-1), q, r);
-  assertTrue<T>(q == 240, ASSERT_ARGS);
-  assertTrue<T>(r == 240, ASSERT_ARGS);
+  lowlevel::double_div( (T(1) << (bits/2-2)) + 1, T(0),
+      (T(1) << (bits-1)) + (T(1) << (bits/2)) - 1, q, r);
+  assertTrue<T>(q == (T(1) << (bits/2-1)), ASSERT_ARGS);
+  assertTrue<T>(r == (((T(1) << (bits-1)) + (T(1) << (bits/2-1)))), ASSERT_ARGS);
+
+  lowlevel::double_div(T(-2), T(-2), T(-1), q, r);
+  assertTrue<T>(q == T(-1), ASSERT_ARGS);
+  assertTrue<T>(r == T(-3), ASSERT_ARGS);
 }
 
 
@@ -197,13 +201,13 @@ void test_divide_long_2()
       std::pair<NNI,NNI> divrem = NNI::divide(u, v);
       NNI z = divrem.first*v + divrem.second;
       assertTrue<T>(z == u, ASSERT_ARGS);
-      if (z != u) {
+      /*if (z != u) {
         std::cout << u_bits << " " << v_bits << std::endl;
         std::cout << u << std::endl;
         std::cout << v << std::endl;
         std::cout << divrem.first << std::endl;
         std::cout << divrem.second << std::endl;
-      }
+      }*/
     }
   }
 }
