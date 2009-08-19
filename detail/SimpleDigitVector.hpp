@@ -31,6 +31,7 @@ public:
   SimpleDigitVector() : _capacity(2), _first(new T[_capacity]), _last(_first) {}
   explicit SimpleDigitVector(size_type __size)
     : _capacity(std::max(__size, (size_type) 2)), _first(new T[_capacity]), _last(_first) {}
+  ~SimpleDigitVector() { delete[] _first; }
   size_type size() const { return _last - _first; }
   bool request_size(size_type req_size) const { return _capacity >= req_size; }
   void set_end(T* end) { _last = end; }

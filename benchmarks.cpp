@@ -33,6 +33,25 @@ boost::minstd_rand generator(42u);
 
 
 template <typename T>
+void add_random(int u_bits, int v_bits, int runs)
+{
+  typedef NonNegativeInteger<T> NNI;
+
+  std::cout << "  Addition ";  std::cout.flush();
+
+  NNI u = NNI::make_random(generator, u_bits);
+  NNI v = NNI::make_random(generator, v_bits);
+  NNI w;
+
+  boost::timer loop_time;
+  for (int k=runs; k != 0; --k)
+    w = NNI::add(u, v);
+  double t = loop_time.elapsed();
+
+  std::cout << 1.0e-6*runs*std::max(u_bits, v_bits)/t << " Mbits/s" << std::endl;
+}
+
+template <typename T>
 void long_multiplication_random(int u_bits, int v_bits, int runs)
 {
   typedef NonNegativeInteger<T> NNI;
@@ -48,7 +67,7 @@ void long_multiplication_random(int u_bits, int v_bits, int runs)
     w = NNI::multiply(u, v);
   double t = loop_time.elapsed();
 
-  std::cout << 1.0e-6*runs*u_bits*v_bits/t << " Mbits/s" << std::endl;
+  std::cout << 1.0e-6*runs*(u_bits+v_bits)/t << " Mbits/s" << std::endl;
 }
 
 template <typename T>
@@ -67,7 +86,7 @@ void long_division_random(long u_bits, long v_bits, int runs)
     divrem = NNI::divide(u, v);
   double t = loop_time.elapsed();
 
-  std::cout << 1.0e-6*runs*u_bits*v_bits/t << " Mbits/s" << std::endl;
+  std::cout << 1.0e-6*runs*(u_bits+v_bits)/t << " Mbits/s" << std::endl;
 }
 
 template <typename T>
@@ -90,7 +109,7 @@ void long_division_check_random(long u_bits, long v_bits, int runs)
   }
   double t = loop_time.elapsed();
 
-  std::cout << 1.0e-6*runs*u_bits*v_bits/t << " Mbits/s" << std::endl;
+  std::cout << 1.0e-6*runs*(u_bits+v_bits)/t << " Mbits/s" << std::endl;
 
   if (passed != runs)
     std::cout << "  ** Check failed **" << std::endl;
@@ -101,9 +120,11 @@ void benchmarks()
 {
   std::cout << "Running benchmarks for " << get_type_name<T>() << std::endl;
 
-  long_multiplication_random<T>(80000, 40000, 10);
-  long_division_random<T>(80000, 40000, 10);
-  long_division_check_random<T>(80000, 40000, 10);
+  add_random<T>(800000, 400000, 10000);
+  add_random<T>(600000, 600000, 1000);
+  //long_multiplication_random<T>(80000, 40000, 10);
+  //long_division_random<T>(80000, 40000, 10);
+  //long_division_check_random<T>(80000, 40000, 10);
 }
 
 int main()

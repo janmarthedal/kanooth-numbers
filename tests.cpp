@@ -82,16 +82,25 @@ void test_low_level_add_sequences_with_overflow()
 {
   std::cout << "  testing add_sequences_with_overflow" << std::endl;
 
+  bool overflow;
   T a[3] = { 3, 2, 1 };
   T b[2] = { 2, 1 };
   T c[10];
   T r[3] = { 5, 3, 1 };
-  bool overflow;
 
   T* end = lowlevel::add_sequences_with_overflow(a, a+3, b, b+2, c, overflow);
   assertTrue<T>(!overflow, ASSERT_ARGS);
-  assertTrue<T>(end == c + 3, ASSERT_ARGS);
+  assertTrue<T>(end == c+3, ASSERT_ARGS);
   assertArraysEqual(r, r+3, c, ASSERT_ARGS);
+
+  T a2[3] = { (T) -3, (T) -2, (T) -1 };
+  T b2[2] = { (T) -5, (T) -4 };
+  T r2[3] = { (T) -8, (T) -5, (T)  0 };
+
+  end = lowlevel::add_sequences_with_overflow(a2, a2+3, b2, b2+2, c, overflow);
+  assertTrue<T>(overflow, ASSERT_ARGS);
+  assertTrue<T>(end == c+3, ASSERT_ARGS);
+  assertArraysEqual(r2, r2+3, c, ASSERT_ARGS);
 }
 
 template <typename T>
@@ -124,8 +133,8 @@ void test_double_div()
   const unsigned int bits = boost::integer_traits<T>::digits;
   T q, r;
 
-  lowlevel::double_div( (T(1) << (bits/2-2)) + 1, T(0),
-      (T(1) << (bits-1)) + (T(1) << (bits/2)) - 1, q, r);
+  lowlevel::double_div( T((T(1) << (bits/2-2)) + 1), T(0),
+      T((T(1) << (bits-1)) + (T(1) << (bits/2)) - 1), q, r);
   assertTrue<T>(q == (T(1) << (bits/2-1)), ASSERT_ARGS);
   assertTrue<T>(r == (((T(1) << (bits-1)) + (T(1) << (bits/2-1)))), ASSERT_ARGS);
 

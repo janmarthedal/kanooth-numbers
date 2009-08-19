@@ -80,7 +80,9 @@ inline T mult_sub_sub(T& w, const T u, const T v, T k)
   return k;
 }
 
-/*
+/**
+ * Assumes uhigh*b+ulow < b*v (does not handle overflow) and v != 0
+ *
  * Used by: NonNegativeInteger::simple_divide, NonNegativeInteger::long_divide
  */
 template <typename T>
@@ -119,7 +121,6 @@ void double_div(T uhigh, T ulow, T v, T& quot, T& rem)
       --q0;
       r += v1;
       if (r & highmask) break;
-      //if (r & highmask) { quot = 0; rem = (T) -1; return; }
     }
     r = ((r << halfbits) | u0) - q0*v0;
   }
@@ -244,6 +245,34 @@ T* shift_right(const T* first, const T* last, T* dst, std::ptrdiff_t n)
  *
  * Used by: add_sequences, NonNegativeInteger::long_divide
  */
+/*template <typename T>
+T* add_sequences_with_overflow(const T* ufirst, const T* ulast, const T* vfirst, const T* vlast, T* dst, bool& overflow)
+{
+  const unsigned int halfbits = boost::integer_traits<T>::digits / 2;
+  const T lowmask = (((T) 1) << halfbits) - 1;
+  T lx, ly, lzl, lzh;
+  T k = 0;
+  for (; vfirst != vlast; ++vfirst, ++ufirst, ++dst) {
+    lx = *vfirst;
+    ly = *ufirst;
+    lzl = (lx & lowmask) + (ly & lowmask) + k;
+    lzh = (lx >> halfbits) + (ly >> halfbits) + (lzl >> halfbits);
+    k = lzh >> halfbits;
+    *dst = (lzh << halfbits) | (lzl & lowmask);
+  }
+  bool carry = k != 0;
+  for (; ufirst != ulast && carry; ++ufirst, ++dst) {
+    lzl = *ufirst;
+    ++lzl;
+    carry = !lzl;
+    *dst = lzl;
+  }
+  if (ufirst != ulast)
+    dst = std::copy(ufirst, ulast, dst);
+  overflow = carry;
+  return dst;
+}*/
+
 template <typename T>
 T* add_sequences_with_overflow(const T* ufirst, const T* ulast, const T* vfirst, const T* vlast, T* dst, bool& overflow)
 {
@@ -262,9 +291,10 @@ T* add_sequences_with_overflow(const T* ufirst, const T* ulast, const T* vfirst,
     *dst = lz;
   }
   for (; ufirst != ulast && carry; ++ufirst, ++dst) {
-    lz = *ufirst + 1;
-    *dst = lz;
+    lz = *ufirst;
+    ++lz;
     carry = !lz;
+    *dst = lz;
   }
   if (ufirst != ulast)
     dst = std::copy(ufirst, ulast, dst);
