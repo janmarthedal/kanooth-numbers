@@ -1,5 +1,5 @@
 /*
- * File:   NNIutils.hpp
+ * File:   nni_utils.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-05-27 11:43Z

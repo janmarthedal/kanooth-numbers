@@ -1,5 +1,5 @@
 /*
- * File:   Integer.hpp
+ * File:   integer.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created on 5. maj 2009, 15:52
@@ -16,10 +16,11 @@
 #define	_INTEGER_HPP
 
 #include <iostream>
-//#include "NonNegativeInteger.hpp"
+
 
 namespace sputsoft {
 namespace multiprecision {
+
 
 template <typename N>
 class Integer {
@@ -81,8 +82,10 @@ std::ostream& operator<<(std::ostream& os, const Integer<N>& n)
   return os;
 }
 
+
 } // multiprecision
 } // sputsoft
+
 
 #endif	/* _INTEGER_HPP */
 

@@ -15,9 +15,10 @@
 #include <iostream>
 #include <vector>
 #include <boost/cstdint.hpp>
-#include "detail/lowlevel.hpp"
-#include "NonNegativeInteger.hpp"
-#include "NNIutils.hpp"
+
+#include <detail/lowlevel.hpp>
+#include <nonnegative_integer.hpp>
+#include <nni_utils.hpp>
 
 using sputsoft::multiprecision::lowlevel::add_sequences_with_overflow;
 using sputsoft::multiprecision::lowlevel::double_mult_add_add;

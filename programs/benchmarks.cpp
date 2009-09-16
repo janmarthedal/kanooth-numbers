@@ -16,7 +16,8 @@
 #include <boost/cstdint.hpp>
 #include <boost/timer.hpp>
 #include <boost/random.hpp>
-#include "NonNegativeInteger.hpp"
+
+#include <nonnegative_integer.hpp>
 
 using sputsoft::multiprecision::NonNegativeInteger;
 

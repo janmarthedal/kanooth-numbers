@@ -1,5 +1,5 @@
 /*
- * File:   NonNegativeInteger.hpp
+ * File:   nonnegative_integer.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-05-05 12:43Z
@@ -26,8 +26,9 @@
 #include <boost/integer_traits.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/random.hpp>
-#include "detail/SimpleDigitVector.hpp"
-#include "detail/lowlevel.hpp"
+
+#include <detail/simple_digit_vector.hpp>
+#include <detail/lowlevel.hpp>
 
 
 namespace sputsoft {

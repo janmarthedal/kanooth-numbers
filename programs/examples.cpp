@@ -16,9 +16,10 @@
 #include <vector>
 #include <boost/cstdint.hpp>
 #include <boost/integer_traits.hpp>
-#include "NonNegativeInteger.hpp"
-#include "NNIutils.hpp"
-#include "Integer.hpp"
+
+#include <nonnegative_integer.hpp>
+#include <nni_utils.hpp>
+#include <integer.hpp>
 
 using sputsoft::multiprecision::NonNegativeInteger;
 using sputsoft::multiprecision::Integer;
