@@ -18,7 +18,7 @@
 #include <boost/random.hpp>
 #include "NonNegativeInteger.hpp"
 
-//using com::sputsoft::multiprecision::NonNegativeInteger;
+using sputsoft::multiprecision::NonNegativeInteger;
 
 template <typename T> const char* get_type_name() { return "Unknown"; }
 template <> const char* get_type_name<boost::uint8_t>() { return "8 bits"; }

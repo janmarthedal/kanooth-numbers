@@ -15,12 +15,8 @@
 #ifndef _NNIUTILS_HPP
 #define _NNIUTILS_HPP
 
-/*
-namespace com {
 namespace sputsoft {
 namespace multiprecision {
-*/
-
 
 template <typename NONNEGNUM>
 NONNEGNUM string_to_nni(const std::string& digits, unsigned short base=10)
@@ -68,10 +64,7 @@ NUM factorial(unsigned n)
   return r;
 }
 
-/*
 } // multiprecision
 } // sputsoft
-} // com
-*/
 
 #endif	/* _NNIUTILS_HPP */

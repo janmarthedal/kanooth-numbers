@@ -18,13 +18,18 @@
 #include <boost/integer_traits.hpp>
 #include "NonNegativeInteger.hpp"
 #include "NNIutils.hpp"
+#include "Integer.hpp"
 
-//using sputsoft::multiprecision::NonNegativeInteger;
+using sputsoft::multiprecision::NonNegativeInteger;
+using sputsoft::multiprecision::Integer;
+using sputsoft::multiprecision::string_to_nni;
+using sputsoft::multiprecision::factorial;
 
 //typedef boost::uint8_t digit_t;
 //typedef boost::uint16_t digit_t;
 //typedef boost::uint32_t digit_t;
-typedef boost::uint64_t digit_t;
+//typedef boost::uint64_t digit_t;
+typedef unsigned int digit_t;
 typedef NonNegativeInteger<digit_t> NNI;
 
 
@@ -122,8 +127,12 @@ void debug()
   std::cout << (z == u ? "OK" : "Check error") << std::endl;
 }
 
+typedef Integer<NonNegativeInteger<unsigned> > integer;
 
 int main()
 {
-  debug();
+  integer a(123, false);
+  integer b(456, true);
+
+  std::cout << a*b << std::endl;
 }

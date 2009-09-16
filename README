@@ -1,0 +1,45 @@
+/*
+ * (C) Copyright SputSoft 2009
+ *
+ * Use, modification and distribution are subject to the
+ * Boost Software License, Version 1.0. (See accompanying file
+ * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ *
+ * $Id$
+ */
+
+= About =
+
+SputArithmetic is a library for doing multiple-precision arithmetic. Currently,
+only non-negative integers are supported.
+
+= Files =
+
+README
+	This file.
+LICENSE_1_0.txt
+	The boost license file.
+NonNegativeInteger.hpp
+	The main include file for the type NonNegativeInteger, representing
+	non-negative integers.
+NNIutils.hpp
+	Helper functions that operate on non-negative integers.
+tests.cpp
+	A batch of tests that verify the correctness of the library.
+benchmarks.cpp
+	Small programs that time central algorithms of the library.
+examples.cpp
+	Illustrative examples on using the library.
+detail/lowlevel.hpp
+	Main include file for low-level functions.
+detail/lowlevel_generic.hpp
+	Generic and portable low-level functions.
+detail/lowlevel_gcc_x86.hpp
+	Low-level functions optimized for the GCC compiler on x86 architectures.
+detail/SimpleDigitVector.hpp
+	Digit container, used by NonNegativeInteger.
+	
+= Further information =
+
+Bug reports, suggestions for improvements, patches, and other comments are very
+welcome. See the project homepage http://sputsoft.com/projects/sputarithmetic.

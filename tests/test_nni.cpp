@@ -19,6 +19,13 @@
 #include "NonNegativeInteger.hpp"
 #include "NNIutils.hpp"
 
+using sputsoft::multiprecision::lowlevel::add_sequences_with_overflow;
+using sputsoft::multiprecision::lowlevel::double_mult_add_add;
+using sputsoft::multiprecision::lowlevel::double_div;
+using sputsoft::multiprecision::DivideByZero;
+using sputsoft::multiprecision::string_to_nni;
+using sputsoft::multiprecision::NonNegativeInteger;
+
 
 #define ASSERT_ARGS __LINE__
 
@@ -76,7 +83,6 @@ void assertArraysEqual(const T* first1, const T* last1, const T* first2, int lin
   }
 }
 
-
 template <typename T>
 void test_low_level_add_sequences_with_overflow()
 {
@@ -88,7 +94,7 @@ void test_low_level_add_sequences_with_overflow()
   T c[10];
   T r[3] = { 5, 3, 1 };
 
-  T* end = lowlevel::add_sequences_with_overflow(a, a+3, b, b+2, c, overflow);
+  T* end = add_sequences_with_overflow(a, a+3, b, b+2, c, overflow);
   assertTrue<T>(!overflow, ASSERT_ARGS);
   assertTrue<T>(end == c+3, ASSERT_ARGS);
   assertArraysEqual(r, r+3, c, ASSERT_ARGS);
@@ -97,7 +103,7 @@ void test_low_level_add_sequences_with_overflow()
   T b2[2] = { (T) -5, (T) -4 };
   T r2[3] = { (T) -8, (T) -5, (T)  0 };
 
-  end = lowlevel::add_sequences_with_overflow(a2, a2+3, b2, b2+2, c, overflow);
+  end = add_sequences_with_overflow(a2, a2+3, b2, b2+2, c, overflow);
   assertTrue<T>(overflow, ASSERT_ARGS);
   assertTrue<T>(end == c+3, ASSERT_ARGS);
   assertArraysEqual(r2, r2+3, c, ASSERT_ARGS);
@@ -111,16 +117,16 @@ void test_double_mult_add_add()
   T high, low;
   T max = (T) -1;
 
-  lowlevel::double_mult_add_add(max, max, max, max, low, high);
+  double_mult_add_add(max, max, max, max, low, high);
   assertTrue<T>(high == max, ASSERT_ARGS);
   assertTrue<T>(low == max, ASSERT_ARGS);
-  lowlevel::double_mult_add_add(max, max, (T) 0, max, low, high);
+  double_mult_add_add(max, max, (T) 0, max, low, high);
   assertTrue<T>(high == max, ASSERT_ARGS);
   assertTrue<T>(low == 0, ASSERT_ARGS);
-  lowlevel::double_mult_add_add(max, max, max, (T) 0, low, high);
+  double_mult_add_add(max, max, max, (T) 0, low, high);
   assertTrue<T>(high == max, ASSERT_ARGS);
   assertTrue<T>(low == 0, ASSERT_ARGS);
-  lowlevel::double_mult_add_add(max, max, (T) 0, (T) 0, low, high);
+  double_mult_add_add(max, max, (T) 0, (T) 0, low, high);
   assertTrue<T>(high == max-1, ASSERT_ARGS);
   assertTrue<T>(low == 1, ASSERT_ARGS);
 }
@@ -133,16 +139,15 @@ void test_double_div()
   const unsigned int bits = boost::integer_traits<T>::digits;
   T q, r;
 
-  lowlevel::double_div( T((T(1) << (bits/2-2)) + 1), T(0),
+  double_div( T((T(1) << (bits/2-2)) + 1), T(0),
       T((T(1) << (bits-1)) + (T(1) << (bits/2)) - 1), q, r);
   assertTrue<T>(q == (T(1) << (bits/2-1)), ASSERT_ARGS);
   assertTrue<T>(r == (((T(1) << (bits-1)) + (T(1) << (bits/2-1)))), ASSERT_ARGS);
 
-  lowlevel::double_div(T(-2), T(-2), T(-1), q, r);
+  double_div(T(-2), T(-2), T(-1), q, r);
   assertTrue<T>(q == T(-1), ASSERT_ARGS);
   assertTrue<T>(r == T(-3), ASSERT_ARGS);
 }
-
 
 template <typename T>
 void test_divide_simple()
@@ -237,7 +242,6 @@ void test_binary_and()
   assertTrue<T>(NNI::binary_and(u, v) == z, ASSERT_ARGS);
   assertTrue<T>(NNI::binary_and(v, u) == z, ASSERT_ARGS);
 }
-
 
 template <typename T>
 void test_binary_or()

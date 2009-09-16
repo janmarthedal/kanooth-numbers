@@ -29,11 +29,10 @@
 #include "detail/SimpleDigitVector.hpp"
 #include "detail/lowlevel.hpp"
 
-/*
-namespace com {
+
 namespace sputsoft {
 namespace multiprecision {
-*/
+
 
 class DivideByZero {};
 
@@ -64,6 +63,7 @@ public:
   NonNegativeInteger();
   NonNegativeInteger(T value);
   bool isZero() const;
+  bool isEven() const { return !digitvec->size() || !(*digitvec->begin() & T(1)); }
   static NonNegativeInteger add(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   static NonNegativeInteger subtract(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   static NonNegativeInteger multiply(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
@@ -683,10 +683,7 @@ inline NonNegativeInteger<T,V> operator%(const NonNegativeInteger<T,V>& u, const
 }
 
 
-/*
 } // multiprecision
 } // sputsoft
-} // com
-*/
 
 #endif	/* _NONNEGATIVEINTEGER_HPP */
