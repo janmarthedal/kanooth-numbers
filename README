@@ -1,12 +1,10 @@
-/*
- * (C) Copyright SputSoft 2009
- *
- * Use, modification and distribution are subject to the
- * Boost Software License, Version 1.0. (See accompanying file
- * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
- *
- * $Id$
- */
+$Id$
+
+(C) Copyright SputSoft 2009
+
+Use, modification and distribution are subject to the
+Boost Software License, Version 1.0. (See accompanying file
+LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 = About =
 
@@ -19,27 +17,27 @@ README
 	This file.
 LICENSE_1_0.txt
 	The boost license file.
-NonNegativeInteger.hpp
+src/nonnegative_integer.hpp
 	The main include file for the type NonNegativeInteger, representing
 	non-negative integers.
-NNIutils.hpp
+src/nni_utils.hpp
 	Helper functions that operate on non-negative integers.
-tests.cpp
-	A batch of tests that verify the correctness of the library.
-benchmarks.cpp
-	Small programs that time central algorithms of the library.
-examples.cpp
-	Illustrative examples on using the library.
-detail/lowlevel.hpp
-	Main include file for low-level functions.
-detail/lowlevel_generic.hpp
+src/detail/lowlevel.hpp
+	Wrapper file for low-level include files.
+src/detail/lowlevel_generic.hpp
 	Generic and portable low-level functions.
-detail/lowlevel_gcc_x86.hpp
+src/detail/lowlevel_gcc_x86.hpp
 	Low-level functions optimized for the GCC compiler on x86 architectures.
-detail/SimpleDigitVector.hpp
+src/detail/simple_digit_vector.hpp
 	Digit container, used by NonNegativeInteger.
+programs/tests.cpp
+	A batch of tests that verify the correctness of the library.
+programs/benchmarks.cpp
+	Small programs that time central algorithms of the library.
+programs/examples.cpp
+	Illustrative examples on using the library.
 	
 = Further information =
 
 Bug reports, suggestions for improvements, patches, and other comments are very
-welcome. See the project homepage http://sputsoft.com/projects/sputarithmetic.
+welcome. See the project homepage http://sputsoft.com/projects/sputarithmetic/.

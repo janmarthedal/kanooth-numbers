@@ -123,9 +123,9 @@ void benchmarks()
 
   add_random<T>(800000, 400000, 10000);
   add_random<T>(600000, 600000, 1000);
-  //long_multiplication_random<T>(80000, 40000, 10);
-  //long_division_random<T>(80000, 40000, 10);
-  //long_division_check_random<T>(80000, 40000, 10);
+  long_multiplication_random<T>(80000, 40000, 10);
+  long_division_random<T>(80000, 40000, 10);
+  long_division_check_random<T>(80000, 40000, 10);
 }
 
 int main()

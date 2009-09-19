@@ -12,21 +12,20 @@
  * $Id$
  */
 
-#ifndef _NONNEGATIVEINTEGER_HPP
-#define _NONNEGATIVEINTEGER_HPP
+#ifndef _NONNEGATIVE_INTEGER_HPP
+#define _NONNEGATIVE_INTEGER_HPP
 
 #ifdef NDEBUG
 #define BOOST_DISABLE_ASSERTS
 #endif
 
 #include <iostream>
-#include <iomanip>    // setw i/o manipulator
+#include <iomanip>
 #include <cassert>
 #include <boost/shared_ptr.hpp>
 #include <boost/integer_traits.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/random.hpp>
-
 #include <detail/simple_digit_vector.hpp>
 #include <detail/lowlevel.hpp>
 
@@ -41,7 +40,6 @@ template <typename T, typename V=detail::SimpleDigitVector<T> >
 class NonNegativeInteger {
   BOOST_STATIC_ASSERT(boost::integer_traits<T>::is_integer);
   BOOST_STATIC_ASSERT(!boost::integer_traits<T>::is_signed);
-  //template <typename S, typename W> friend std::ostream& operator<<(std::ostream& os, const NonNegativeInteger<S,W>& n);
   template <typename S, typename W>
   friend void show_internal(std::ostream& os, const NonNegativeInteger<S,W>& n);
 private:
@@ -60,11 +58,11 @@ private:
   static std::pair<NonNegativeInteger, NonNegativeInteger>
     divide_long(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
 public:
+  typedef T digit_type;
   static const NonNegativeInteger zero;
   NonNegativeInteger();
   NonNegativeInteger(T value);
   bool isZero() const;
-  bool isEven() const { return !digitvec->size() || !(*digitvec->begin() & T(1)); }
   static NonNegativeInteger add(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   static NonNegativeInteger subtract(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   static NonNegativeInteger multiply(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
@@ -74,6 +72,7 @@ public:
   static int compare(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   NonNegativeInteger binary_shift(std::ptrdiff_t n) const;
   NonNegativeInteger& binary_shift_this(std::ptrdiff_t n);
+  static T binary_and(const NonNegativeInteger<T,V>& u, const T v);
   static NonNegativeInteger binary_and(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   static NonNegativeInteger binary_or(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
   static NonNegativeInteger binary_xor(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
@@ -91,7 +90,8 @@ public:
   NonNegativeInteger& operator^=(const NonNegativeInteger<T,V>& v);
 };
 
-template <typename T, typename V> const NonNegativeInteger<T,V> NonNegativeInteger<T,V>::zero;
+template <typename T, typename V>
+const NonNegativeInteger<T,V> NonNegativeInteger<T,V>::zero;
 
 template <typename T, typename V>
 NonNegativeInteger<T,V>::NonNegativeInteger() : digitvec(new V())
@@ -297,9 +297,6 @@ NonNegativeInteger<T,V>::divide_long(const NonNegativeInteger<T,V>& u, const Non
     k = lowlevel::sequence_mult_digit_sub(rp+j, rp+j+n, wfirst, qh);
     rp[j+n] = ujn - k;
     if (k > ujn) {  // subtraction borrow?
-/*#ifndef NDEBUG
-      std::cout << "Add back" << std::endl;
-#endif*/
       bool overflow;
       lowlevel::add_sequences_with_overflow(rp+j, rp+j+n+1, wfirst, wlast, rp+j, overflow);
       assert(overflow);
@@ -404,6 +401,12 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::binary_shift_this(std::ptrdiff
 }
 
 template <typename T, typename V>
+T NonNegativeInteger<T,V>::binary_and(const NonNegativeInteger<T,V>& u, const T v)
+{
+  return u.isZero() ? T(0) : *u.digit_begin() & v;
+}
+
+template <typename T, typename V>
 NonNegativeInteger<T,V> NonNegativeInteger<T,V>::binary_and(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
 {
   if (u.isZero() || v.isZero()) return zero;
@@ -429,7 +432,6 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator&=(const NonNegativeIn
   return *this;
 }
 
-
 template <typename T, typename V>
 NonNegativeInteger<T,V> NonNegativeInteger<T,V>::binary_or(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
 {
@@ -453,7 +455,6 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator|=(const NonNegativeIn
   }
   return *this;
 }
-
 
 template <typename T, typename V>
 NonNegativeInteger<T,V> NonNegativeInteger<T,V>::binary_xor(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
@@ -479,7 +480,6 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator^=(const NonNegativeIn
   return *this;
 }
 
-
 template <typename T, typename V>
 size_t NonNegativeInteger<T,V>::lg_floor() const
 {
@@ -501,7 +501,6 @@ size_t NonNegativeInteger<T,V>::lg_ceil() const
     if (*--last) return r+1;
   return r;
 }
-
 
 /*
  * COMPARISONS
@@ -527,7 +526,6 @@ int NonNegativeInteger<T,V>::compare(const NonNegativeInteger<T,V>& u, const Non
 /*
  * Miscellaneous
  */
-
 
 template <typename T, typename V>
 template <typename Generator>
@@ -557,46 +555,6 @@ NonNegativeInteger<T,V> NonNegativeInteger<T,V>::make_random(Generator& generato
   r.digitvec->set_end(riter);
 
   return r;
-}
-
-
-template <typename N> inline void output_number(std::ostream& os, N n) { os << n; }
-template <> inline void output_number(std::ostream& os, unsigned char n) { os << (unsigned)n; }
-
-
-template <typename T, typename V>
-std::ostream& operator<<(std::ostream& os, const NonNegativeInteger<T,V>& n)
-{
-  if (!n.isZero()) {
-    const unsigned base_log10 = boost::integer_traits<T>::digits10;
-    T buffer[28*(n.lg_floor()+1)/(93*base_log10)+1];  // 28/93 > ln2/ln10
-    T denom = 1;
-    for (unsigned u=0; u < base_log10; u++) denom *= 10;
-    NonNegativeInteger<T,V> s = n;
-    int k=0;
-    while (!s.isZero()) {
-      std::pair<NonNegativeInteger<T,V>, T> divrem = NonNegativeInteger<T,V>::divide_simple(s, denom);
-      s = divrem.first;
-      buffer[k++] = divrem.second;
-    }
-    output_number(os, buffer[--k]);
-    while (k) {
-      os << std::setw(base_log10) << std::setfill('0');
-      output_number(os, buffer[--k]);
-    }
-    /*if (!*(n.digit_end()-1)) {
-      os << " | ";
-      T const* p = n.digit_end();
-      while (p != n.digit_begin()) {
-        output_number(os, *--p);
-        os << " ";
-      }
-      os << "(" << n.digitvec.use_count() << ")";
-    }*/
-  } else
-    os << '0';
-
-  return os;
 }
 
 template <typename T, typename V>
@@ -683,8 +641,62 @@ inline NonNegativeInteger<T,V> operator%(const NonNegativeInteger<T,V>& u, const
   return NonNegativeInteger<T,V>::divide(u, v).second;
 }
 
+template <typename T, typename V>
+inline NonNegativeInteger<T,V> operator&(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  return NonNegativeInteger<T,V>::binary_and(u, v);
+}
+
+template <typename T, typename V>
+inline T operator&(const NonNegativeInteger<T,V>& u, const T v)
+{
+  return NonNegativeInteger<T,V>::binary_and(u, v);
+}
+
+template <typename T, typename V>
+inline NonNegativeInteger<T,V> operator|(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  return NonNegativeInteger<T,V>::binary_or(u, v);
+}
+
+template <typename T, typename V>
+inline NonNegativeInteger<T,V> operator^(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+{
+  return NonNegativeInteger<T,V>::binary_xor(u, v);
+}
+
+template <typename N> inline void output_number(std::ostream& os, N n) { os << n; }
+template <> inline void output_number(std::ostream& os, unsigned char n) { os << (unsigned)n; }
+
+template <typename T, typename V>
+std::ostream& operator<<(std::ostream& os, const NonNegativeInteger<T,V>& n)
+{
+  if (!n.isZero()) {
+    const unsigned base_log10 = boost::integer_traits<T>::digits10;
+    T buffer[28*(n.lg_floor()+1)/(93*base_log10)+1];  // 28/93 > ln2/ln10
+    T denom = 1;
+    for (unsigned u=0; u < base_log10; u++) denom *= 10;
+    NonNegativeInteger<T,V> s = n;
+    int k=0;
+    while (!s.isZero()) {
+      std::pair<NonNegativeInteger<T,V>, T> divrem = NonNegativeInteger<T,V>::divide_simple(s, denom);
+      s = divrem.first;
+      buffer[k++] = divrem.second;
+    }
+    output_number(os, buffer[--k]);
+    while (k) {
+      os << std::setw(base_log10) << std::setfill('0');
+      output_number(os, buffer[--k]);
+    }
+  } else
+    os << '0';
+
+  return os;
+}
+
 
 } // multiprecision
 } // sputsoft
 
-#endif	/* _NONNEGATIVEINTEGER_HPP */
+
+#endif	/* _NONNEGATIVE_INTEGER_HPP */

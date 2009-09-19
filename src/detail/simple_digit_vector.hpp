@@ -1,5 +1,5 @@
 /*
- * File:   SimpleDigitVector.hpp
+ * File:   simple_digit_vector.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-05-26 18:41Z
@@ -12,8 +12,9 @@
  * $Id$
  */
 
-#ifndef _SIMPLEDIGITVECTOR_HPP
-#define _SIMPLEDIGITVECTOR_HPP
+#ifndef _SIMPLE_DIGIT_VECTOR_HPP
+#define _SIMPLE_DIGIT_VECTOR_HPP
+
 
 namespace sputsoft {
 namespace multiprecision {
@@ -43,8 +44,8 @@ private:
 };
 
 
-}
+} // detail
 } // multiprecision
 } // sputsoft
 
-#endif	/* _SIMPLEDIGITVECTOR_HPP */
+#endif	/* _SIMPLE_DIGIT_VECTOR_HPP */

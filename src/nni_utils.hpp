@@ -15,8 +15,10 @@
 #ifndef _NNIUTILS_HPP
 #define _NNIUTILS_HPP
 
+
 namespace sputsoft {
 namespace multiprecision {
+
 
 template <typename NONNEGNUM>
 NONNEGNUM string_to_nni(const std::string& digits, unsigned short base=10)
@@ -38,20 +40,32 @@ NONNEGNUM string_to_nni(const std::string& digits, unsigned short base=10)
   return r;
 }
 
+
+// TODO: Optimize this. Use d = 2, 3, 6k-1, 6k+1 for k=1, 2, ...
+// and change condition to d^2 <= n (or equivalent)
 template <typename NUM, typename Out>
 void factorize(NUM n, Out out)
 {
-  NUM d(2);
-  NUM one(1), two(2), four(4);
+  NUM two=2;
   std::pair<NUM,NUM> divrem;
 
+  while (two <= n) {
+    divrem = NUM::divide(n, two);
+    if (divrem.second.isZero()) {
+      *out++ = two;
+      n = divrem.first;
+    } else
+      break;
+  }
+
+  NUM d = 3;
   while (d <= n) {
     divrem = NUM::divide(n, d);
-    if (divrem.second == NUM::zero) {
+    if (divrem.second.isZero()) {
       *out++ = d;
       n = divrem.first;
     } else
-      d += one;
+      d += two;
   }
 }
 
@@ -64,7 +78,27 @@ NUM factorial(unsigned n)
   return r;
 }
 
+template <typename NUM>
+NUM power(NUM n, unsigned p)
+{
+  NUM y = 1, z = n;
+
+  while (p) {
+    if (p & 1) {
+      y *= z;
+      p--;
+    } else {
+      z *= z;
+      p /= 2;
+    }
+  }
+
+  return y;
+}
+
+
 } // multiprecision
 } // sputsoft
+
 
 #endif	/* _NNIUTILS_HPP */

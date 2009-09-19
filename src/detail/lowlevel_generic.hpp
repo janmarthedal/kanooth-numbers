@@ -447,4 +447,5 @@ T* multiply_sequences(const T* ufirst, const T* ulast, const T* vfirst, const T*
 } // multiprecision
 } // sputsoft
 
+
 #endif	/* _LOWLEVEL_GENERIC_HPP */

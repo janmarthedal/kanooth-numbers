@@ -25,6 +25,7 @@ using sputsoft::multiprecision::NonNegativeInteger;
 using sputsoft::multiprecision::Integer;
 using sputsoft::multiprecision::string_to_nni;
 using sputsoft::multiprecision::factorial;
+using sputsoft::multiprecision::power;
 
 //typedef boost::uint8_t digit_t;
 //typedef boost::uint16_t digit_t;
@@ -34,106 +35,72 @@ typedef unsigned int digit_t;
 typedef NonNegativeInteger<digit_t> NNI;
 
 
-void check3()
+NNI digit_sum(NNI n)
 {
-  const unsigned int digitbits = boost::integer_traits<digit_t>::digits;
-  const digit_t half = (digit_t) 1 << (digitbits - 1);
-
-  NNI u = NNI(half).binary_shift_this(3*digitbits);
-  NNI v = NNI(half).binary_shift_this(2*digitbits) + NNI(1);
-
-  std::cout << "u  : " << u << std::endl;
-  std::cout << "v  : " << v << std::endl;
-  std::pair<NNI,NNI> div = u.divide(u, v);
-  std::cout << "u/v: " << div.first << std::endl;
-  std::cout << "u%v: " << div.second << std::endl;
-
-  NNI z = div.first*v + div.second;
-
-  std::cout << "Verification: " << (z == u ? "OK" : "FAIL") << std::endl;
-}
-
-void check4()
-{
-  NNI u = string_to_nni<NNI>("999");
-  NNI v = string_to_nni<NNI>("99999999");
-  NNI r = string_to_nni<NNI>("99899999001");
-
-  std::cout << "u  : " << u << std::endl;
-  std::cout << "v  : " << v << std::endl;
-  std::cout << "u*v: " << u*v << std::endl;
-  std::cout << "r  : " << r << std::endl;
-}
-
-void PE3()
-{
-  std::vector<NNI> factors;
-  factorize(string_to_nni<NNI>("600851475143"), std::back_inserter(factors));
-  std::cout << factors.back() << std::endl;
-  // 6857
-}
-
-void PE20()
-{
-  NNI n = factorial<NNI>(100);
-
-  std::cout << n << std::endl;
-
   NNI res = NNI::zero;
-  std::pair<NNI,NNI> divrem;
+  std::pair<NNI, NNI> divrem;
 
-  while (n != NNI::zero) {
+  while (!n.isZero()) {
     divrem = NNI::divide(n, 10);
     res += divrem.second;
     n = divrem.first;
   }
 
-  std::cout << res << std::endl;
+  return res;
 }
 
-void factorize_test1()
+
+// Find largest prime factor of 600851475143
+void PE3()
 {
+  NNI n = string_to_nni<NNI>("600851475143");
   std::vector<NNI> factors;
-  factorize(string_to_nni<NNI>("123456789012345678901234567890"), std::back_inserter(factors));
+
+  std::cout << "Number: " << n << std::endl;
+  factorize(n, std::back_inserter(factors));
+  std::cout << "Largest prime factor: " << factors.back() << std::endl << std::endl;
+  // Answer: 6857
+}
+
+
+// Add the (decimal) digits of 2^1000
+void PE16()
+{
+  NNI n = power(NNI(2), 1000);
+  std::cout << "2^1000 = " << n << std::endl;
+  std::cout << "Digit sum: " << digit_sum(n) << std::endl << std::endl;
+  // Answer: 1366
+}
+
+
+// Add the (decimal) digits of 100!
+void PE20()
+{
+  NNI n = factorial<NNI>(100);
+  std::cout << "100! = " << n << std::endl;
+  std::cout << "Digit sum: " << digit_sum(n) << std::endl << std::endl;
+  // Answer: 648
+}
+
+void factorize_ex1()
+{
+  NNI n = string_to_nni<NNI>("123456789012345678901234567890");
+  std::vector<NNI> factors;
+
+  std::cout << "Number: " << n << std::endl;
+  factorize(n, std::back_inserter(factors));
+
+  std::cout << "Factors:";
   for (std::vector<NNI>::const_iterator p=factors.begin(); p != factors.end(); ++p)
-    std::cout << " " << *p << std::endl;
+    std::cout << " " << *p;
+  std::cout << std::endl;
 }
 
-void lgs()
-{
-  NNI x = string_to_nni<NNI>("123456789012345678901234567890");
-  //NNI x = NNI(1).binary_shift(20) + NNI(1);
-  size_t floor = x.lg_floor();
-  size_t ceil = x.lg_ceil();
-
-  std::cout << x << std::endl;
-  std::cout << NNI(1).binary_shift(floor) << ", " << floor << std::endl;
-  std::cout << NNI(1).binary_shift(ceil) << ", " << ceil << std::endl;
-}
-
-void debug()
-{
-  NNI u = string_to_nni<NNI>("36009210388420562488862885753");
-  NNI v = string_to_nni<NNI>("15097386575707753956");
-  std::pair<NNI,NNI> divrem = NNI::divide(u, v);
-  NNI z = divrem.first*v + divrem.second;
-
-  std::cout << "u : ";  show_internal(std::cout, u);              std::cout << std::endl;
-  std::cout << "v : ";  show_internal(std::cout, v);              std::cout << std::endl;
-  std::cout << "q': ";  show_internal(std::cout, divrem.first);   std::cout << std::endl;
-  std::cout << "r': ";  show_internal(std::cout, divrem.second);  std::cout << std::endl;
-  std::cout << "q : ";  show_internal(std::cout, string_to_nni<NNI>("2385128724"));   std::cout << std::endl;
-  std::cout << "r : ";  show_internal(std::cout, string_to_nni<NNI>("9367997898882653609"));  std::cout << std::endl;
-
-  std::cout << (z == u ? "OK" : "Check error") << std::endl;
-}
-
-typedef Integer<NonNegativeInteger<unsigned> > integer;
 
 int main()
 {
-  integer a(123, false);
-  integer b(456, true);
-
-  std::cout << a*b << std::endl;
+  PE3();
+  PE16();
+  PE20();
+  factorize_ex1();
 }
