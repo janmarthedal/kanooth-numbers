@@ -1,5 +1,5 @@
 /*
- * File:   nni_utils.hpp
+ * File:   natural_number_algorithms.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-05-27 11:43Z
@@ -12,20 +12,20 @@
  * $Id$
  */
 
-#ifndef _NNIUTILS_HPP
-#define _NNIUTILS_HPP
+#ifndef _NATURAL_NUMBER_ALGORITHMS_HPP
+#define _NATURAL_NUMBER_ALGORITHMS_HPP
 
 
 namespace sputsoft {
 namespace multiprecision {
 
 
-template <typename NONNEGNUM>
-NONNEGNUM string_to_nni(const std::string& digits, unsigned short base=10)
+template <typename NUM>
+NUM string_to_natural_number(const std::string& digits, unsigned short base=10)
 {
-  NONNEGNUM r = NONNEGNUM::zero;
+  NUM r = NUM::zero;
   if (base >= 2 && base <= 36) {
-    NONNEGNUM b(base);
+    NUM b(base);
     unsigned short v;
     for (std::string::const_iterator p=digits.begin(); p != digits.end(); ++p) {
       char c = *p;
@@ -34,7 +34,7 @@ NONNEGNUM string_to_nni(const std::string& digits, unsigned short base=10)
       else if (c >= 'A' && c <= 'Z') v = c - 'A' + 10;
       else break;
       r *= b;
-      r += NONNEGNUM(v);
+      r += NUM(v);
     }
   }
   return r;
@@ -82,7 +82,6 @@ template <typename NUM>
 NUM power(NUM n, unsigned p)
 {
   NUM y = 1, z = n;
-
   while (p) {
     if (p & 1) {
       y *= z;
@@ -92,7 +91,6 @@ NUM power(NUM n, unsigned p)
       p /= 2;
     }
   }
-
   return y;
 }
 
@@ -101,4 +99,4 @@ NUM power(NUM n, unsigned p)
 } // sputsoft
 
 
-#endif	/* _NNIUTILS_HPP */
+#endif	/* _NATURAL_NUMBER_ALGORITHMS_HPP */

@@ -1,5 +1,5 @@
 /*
- * File:   nonnegative_integer.hpp
+ * File:   natural_number.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-05-05 12:43Z
@@ -12,8 +12,8 @@
  * $Id$
  */
 
-#ifndef _NONNEGATIVE_INTEGER_HPP
-#define _NONNEGATIVE_INTEGER_HPP
+#ifndef _NATURAL_NUMBER_HPP
+#define _NATURAL_NUMBER_HPP
 
 #ifdef NDEBUG
 #define BOOST_DISABLE_ASSERTS
@@ -26,7 +26,7 @@
 #include <boost/integer_traits.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/random.hpp>
-#include <detail/simple_digit_vector.hpp>
+#include <detail/digit_vector.hpp>
 #include <detail/lowlevel.hpp>
 
 
@@ -36,70 +36,70 @@ namespace multiprecision {
 
 class DivideByZero {};
 
-template <typename T, typename V=detail::SimpleDigitVector<T> >
-class NonNegativeInteger {
+template <typename T, typename V=detail::digit_vector<T> >
+class natural_number {
   BOOST_STATIC_ASSERT(boost::integer_traits<T>::is_integer);
   BOOST_STATIC_ASSERT(!boost::integer_traits<T>::is_signed);
   template <typename S, typename W>
-  friend void show_internal(std::ostream& os, const NonNegativeInteger<S,W>& n);
+  friend void show_internal(std::ostream& os, const natural_number<S,W>& n);
 private:
   boost::shared_ptr<V> digitvec;
   typedef typename V::size_type digitvec_size_type;
   static const unsigned int digitbits = boost::integer_traits<T>::digits;
-  NonNegativeInteger(digitvec_size_type size, bool) : digitvec(new V(size)) {}
+  natural_number(digitvec_size_type size, bool) : digitvec(new V(size)) {}
   T* digit_begin() { return digitvec->begin(); }
   T* digit_end() { return digitvec->end(); }
   const T* digit_begin() const { return digitvec->begin(); }
   const T* digit_end() const { return digitvec->end(); }
-  NonNegativeInteger shift_left(size_t n) const;
-  NonNegativeInteger shift_right(size_t n) const;
-  NonNegativeInteger& shift_left_this(size_t n);
-  NonNegativeInteger& shift_right_this(size_t n);
-  static std::pair<NonNegativeInteger, NonNegativeInteger>
-    divide_long(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
+  natural_number shift_left(size_t n) const;
+  natural_number shift_right(size_t n) const;
+  natural_number& shift_left_this(size_t n);
+  natural_number& shift_right_this(size_t n);
+  static std::pair<natural_number, natural_number>
+    divide_long(const natural_number<T,V>& u, const natural_number<T,V>& v);
 public:
   typedef T digit_type;
-  static const NonNegativeInteger zero;
-  NonNegativeInteger();
-  NonNegativeInteger(T value);
+  static const natural_number zero;
+  natural_number();
+  natural_number(T value);
   bool isZero() const;
-  static NonNegativeInteger add(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
-  static NonNegativeInteger subtract(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
-  static NonNegativeInteger multiply(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
-  static std::pair<NonNegativeInteger, T> divide_simple(const NonNegativeInteger<T,V>& u, T v);
-  static std::pair<NonNegativeInteger,NonNegativeInteger>
-    divide(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
-  static int compare(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
-  NonNegativeInteger binary_shift(std::ptrdiff_t n) const;
-  NonNegativeInteger& binary_shift_this(std::ptrdiff_t n);
-  static T binary_and(const NonNegativeInteger<T,V>& u, const T v);
-  static NonNegativeInteger binary_and(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
-  static NonNegativeInteger binary_or(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
-  static NonNegativeInteger binary_xor(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v);
+  static natural_number add(const natural_number<T,V>& u, const natural_number<T,V>& v);
+  static natural_number subtract(const natural_number<T,V>& u, const natural_number<T,V>& v);
+  static natural_number multiply(const natural_number<T,V>& u, const natural_number<T,V>& v);
+  static std::pair<natural_number, T> divide_simple(const natural_number<T,V>& u, T v);
+  static std::pair<natural_number,natural_number>
+    divide(const natural_number<T,V>& u, const natural_number<T,V>& v);
+  static int compare(const natural_number<T,V>& u, const natural_number<T,V>& v);
+  natural_number binary_shift(std::ptrdiff_t n) const;
+  natural_number& binary_shift_this(std::ptrdiff_t n);
+  static T binary_and(const natural_number<T,V>& u, const T v);
+  static natural_number binary_and(const natural_number<T,V>& u, const natural_number<T,V>& v);
+  static natural_number binary_or(const natural_number<T,V>& u, const natural_number<T,V>& v);
+  static natural_number binary_xor(const natural_number<T,V>& u, const natural_number<T,V>& v);
   template <typename Generator>
-  static NonNegativeInteger make_random(Generator& generator, std::size_t bits);
+  static natural_number make_random(Generator& generator, std::size_t bits);
   size_t lg_floor() const;
   size_t lg_ceil() const;
-  NonNegativeInteger& operator+=(const NonNegativeInteger<T,V>& v);
-  NonNegativeInteger& operator-=(const NonNegativeInteger<T,V>& v);
-  NonNegativeInteger& operator*=(const NonNegativeInteger<T,V>& v);
-  NonNegativeInteger& operator/=(const NonNegativeInteger<T,V>& v);
-  NonNegativeInteger& operator%=(const NonNegativeInteger<T,V>& v);
-  NonNegativeInteger& operator&=(const NonNegativeInteger<T,V>& v);
-  NonNegativeInteger& operator|=(const NonNegativeInteger<T,V>& v);
-  NonNegativeInteger& operator^=(const NonNegativeInteger<T,V>& v);
-  void swap(NonNegativeInteger& v);
+  natural_number& operator+=(const natural_number<T,V>& v);
+  natural_number& operator-=(const natural_number<T,V>& v);
+  natural_number& operator*=(const natural_number<T,V>& v);
+  natural_number& operator/=(const natural_number<T,V>& v);
+  natural_number& operator%=(const natural_number<T,V>& v);
+  natural_number& operator&=(const natural_number<T,V>& v);
+  natural_number& operator|=(const natural_number<T,V>& v);
+  natural_number& operator^=(const natural_number<T,V>& v);
+  void swap(natural_number& v);
 };
 
 template <typename T, typename V>
-const NonNegativeInteger<T,V> NonNegativeInteger<T,V>::zero;
+const natural_number<T,V> natural_number<T,V>::zero;
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>::NonNegativeInteger() : digitvec(new V())
+natural_number<T,V>::natural_number() : digitvec(new V())
 {}
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>::NonNegativeInteger(T value) : digitvec(new V(1))
+natural_number<T,V>::natural_number(T value) : digitvec(new V(1))
 {
   if (value) {
     T* begin = digit_begin();
@@ -109,7 +109,7 @@ NonNegativeInteger<T,V>::NonNegativeInteger(T value) : digitvec(new V(1))
 }
 
 template <typename T, typename V>
-inline bool NonNegativeInteger<T,V>::isZero() const
+inline bool natural_number<T,V>::isZero() const
 {
   return !digitvec->size();
 }
@@ -119,18 +119,18 @@ inline bool NonNegativeInteger<T,V>::isZero() const
  */
 
 template <typename T, typename V>
-NonNegativeInteger<T,V> NonNegativeInteger<T,V>::add(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+natural_number<T,V> natural_number<T,V>::add(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
   if (u.isZero()) return v;
   if (v.isZero()) return u;
-  NonNegativeInteger<T,V> r(std::max(u.digitvec->size(), v.digitvec->size())+1, true);
+  natural_number<T,V> r(std::max(u.digitvec->size(), v.digitvec->size())+1, true);
   T* rend = lowlevel::add_sequences(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
   r.digitvec->set_end(rend);
   return r;
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator+=(const NonNegativeInteger<T,V>& x)
+natural_number<T,V>& natural_number<T,V>::operator+=(const natural_number<T,V>& x)
 {
   if (isZero()) {
     *this = x;
@@ -149,18 +149,18 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator+=(const NonNegativeIn
  */
 
 template <typename T, typename V>
-NonNegativeInteger<T,V> NonNegativeInteger<T,V>::subtract(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+natural_number<T,V> natural_number<T,V>::subtract(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
   if (v.isZero()) return u;
   if (u.digitvec->size() < v.digitvec->size()) return zero;  // wrong usage
-  NonNegativeInteger<T,V> r(u.digitvec->size(), true);
+  natural_number<T,V> r(u.digitvec->size(), true);
   T* rend = lowlevel::subtract(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
   r.digitvec->set_end(rend);
   return r;
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator-=(const NonNegativeInteger<T,V>& v)
+natural_number<T,V>& natural_number<T,V>::operator-=(const natural_number<T,V>& v)
 {
   if (!v.isZero() && digitvec->size() >= v.digitvec->size()) {
     if (digitvec.unique()) {
@@ -178,17 +178,17 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator-=(const NonNegativeIn
  */
 
 template <typename T, typename V>
-NonNegativeInteger<T,V> NonNegativeInteger<T,V>::multiply(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+natural_number<T,V> natural_number<T,V>::multiply(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
   if (u.isZero() || v.isZero()) return zero;
-  NonNegativeInteger<T,V> r(u.digitvec->size() + v.digitvec->size(), true);
+  natural_number<T,V> r(u.digitvec->size() + v.digitvec->size(), true);
   T* rend = lowlevel::multiply_sequences(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
   r.digitvec->set_end(rend);
   return r;
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator*=(const NonNegativeInteger<T,V>& v)
+natural_number<T,V>& natural_number<T,V>::operator*=(const natural_number<T,V>& v)
 {
   if (!isZero()) {
     if (v.isZero()) {
@@ -212,19 +212,19 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator*=(const NonNegativeIn
  */
 
 template <typename T, typename V>
-std::pair<NonNegativeInteger<T,V>, T>
-NonNegativeInteger<T,V>::divide_simple(const NonNegativeInteger<T,V>& u, T v)
+std::pair<natural_number<T,V>, T>
+natural_number<T,V>::divide_simple(const natural_number<T,V>& u, T v)
 {
   if (!v)
     throw DivideByZero();
   if (u.isZero())
-    return std::pair<NonNegativeInteger<T,V>, T>(zero, (T) 0);
+    return std::pair<natural_number<T,V>, T>(zero, (T) 0);
   if (u.digitvec->size() == 1 && *u.digit_begin() < v)
-    return std::pair<NonNegativeInteger<T,V>, T>(zero, *u.digit_begin());
+    return std::pair<natural_number<T,V>, T>(zero, *u.digit_begin());
 
   const T *ufirst = u.digit_begin(), *ulast = u.digit_end();
   digitvec_size_type digits = u.digitvec->size();
-  NonNegativeInteger<T,V> q(digits, true);
+  natural_number<T,V> q(digits, true);
   T *qlast = q.digit_begin() + digits, *qiter = qlast-1;
   T qh, rh;
 
@@ -240,7 +240,7 @@ NonNegativeInteger<T,V>::divide_simple(const NonNegativeInteger<T,V>& u, T v)
   }
   q.digitvec->set_end(qlast);
 
-  return std::pair<NonNegativeInteger<T,V>, T>(q, rh);
+  return std::pair<natural_number<T,V>, T>(q, rh);
 }
 
 template <typename T>
@@ -267,20 +267,20 @@ inline T calc_qh(T ujn, T ujn1, T ujn2, T vn1, T vn2)
 }
 
 template <typename T, typename V>
-std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >
-NonNegativeInteger<T,V>::divide_long(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+std::pair<natural_number<T,V>, natural_number<T,V> >
+natural_number<T,V>::divide_long(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
   if (v.isZero())
     throw DivideByZero();
   if (compare(u, v) < 0)
-    return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(zero, u);
+    return std::pair<natural_number<T,V>, natural_number<T,V> >(zero, u);
 
   unsigned int shift = digitbits-1 - lowlevel::lg_floor(*(v.digit_end() - 1));
-  const NonNegativeInteger<T,V> w = v.shift_left(shift);
+  const natural_number<T,V> w = v.shift_left(shift);
   std::ptrdiff_t n = v.digitvec->size();
   std::ptrdiff_t m = u.digitvec->size() - n;
-  NonNegativeInteger<T,V> r(m+n+1, true);
-  NonNegativeInteger<T,V> q(m+1, true);
+  natural_number<T,V> r(m+n+1, true);
+  natural_number<T,V> q(m+1, true);
   const T* wfirst = w.digit_begin();
   const T* wlast = w.digit_end();
   T* rp = r.digit_begin();
@@ -311,12 +311,12 @@ NonNegativeInteger<T,V>::divide_long(const NonNegativeInteger<T,V>& u, const Non
   while (n != 0 && !rp[n-1]) n--;
   r.digitvec->set_end(&rp[n]);
 
-  return std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >(q, r);
+  return std::pair<natural_number<T,V>, natural_number<T,V> >(q, r);
 }
 
 template <typename T, typename V>
-std::pair<NonNegativeInteger<T,V>, NonNegativeInteger<T,V> >
-NonNegativeInteger<T,V>::divide(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+std::pair<natural_number<T,V>, natural_number<T,V> >
+natural_number<T,V>::divide(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
   if (v.digitvec->size() == 1)
     return divide_simple(u, *v.digit_begin());
@@ -324,13 +324,13 @@ NonNegativeInteger<T,V>::divide(const NonNegativeInteger<T,V>& u, const NonNegat
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator/=(const NonNegativeInteger<T,V>& v)
+natural_number<T,V>& natural_number<T,V>::operator/=(const natural_number<T,V>& v)
 {
   return *this = divide(*this, v).first;
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator%=(const NonNegativeInteger<T,V>& v)
+natural_number<T,V>& natural_number<T,V>::operator%=(const natural_number<T,V>& v)
 {
   return *this = divide(*this, v).second;
 }
@@ -340,17 +340,17 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator%=(const NonNegativeIn
  */
 
 template <typename T, typename V>
-NonNegativeInteger<T,V> NonNegativeInteger<T,V>::shift_left(size_t n) const
+natural_number<T,V> natural_number<T,V>::shift_left(size_t n) const
 {
   if (!n) return *this;
-  NonNegativeInteger<T,V> r(digitvec->size() + n/digitbits + 1, true);
+  natural_number<T,V> r(digitvec->size() + n/digitbits + 1, true);
   T* rlast = lowlevel::shift_left(digit_begin(), digit_end(), r.digit_begin(), n);
   r.digitvec->set_end(rlast);
   return r;
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::shift_left_this(size_t n)
+natural_number<T,V>& natural_number<T,V>::shift_left_this(size_t n)
 {
   if (n && !isZero()) {
     if (digitvec.unique() && digitvec->request_size(digitvec->size() + n/digitbits + 1)) {
@@ -364,19 +364,19 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::shift_left_this(size_t n)
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V> NonNegativeInteger<T,V>::shift_right(size_t n) const
+natural_number<T,V> natural_number<T,V>::shift_right(size_t n) const
 {
   if (!n) return *this;
   size_t digitshift = n / digitbits;
   if (digitshift >= digitvec->size()) return zero;
-  NonNegativeInteger<T,V> r(digitvec->size() - digitshift, true);
+  natural_number<T,V> r(digitvec->size() - digitshift, true);
   T* rlast = lowlevel::shift_right(digit_begin(), digit_end(), r.digit_begin(), n);
   r.digitvec->set_end(rlast);
   return r;
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::shift_right_this(size_t n)
+natural_number<T,V>& natural_number<T,V>::shift_right_this(size_t n)
 {
   if (n) {
     if (digitvec.unique()) {
@@ -390,35 +390,35 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::shift_right_this(size_t n)
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V> NonNegativeInteger<T,V>::binary_shift(std::ptrdiff_t n) const
+natural_number<T,V> natural_number<T,V>::binary_shift(std::ptrdiff_t n) const
 {
   return n >= 0 ? shift_left(n) : shift_right(-n);
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::binary_shift_this(std::ptrdiff_t n)
+natural_number<T,V>& natural_number<T,V>::binary_shift_this(std::ptrdiff_t n)
 {
   return n >= 0 ? shift_left_this(n) : shift_right_this(-n);
 }
 
 template <typename T, typename V>
-T NonNegativeInteger<T,V>::binary_and(const NonNegativeInteger<T,V>& u, const T v)
+T natural_number<T,V>::binary_and(const natural_number<T,V>& u, const T v)
 {
   return u.isZero() ? T(0) : *u.digit_begin() & v;
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V> NonNegativeInteger<T,V>::binary_and(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+natural_number<T,V> natural_number<T,V>::binary_and(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
   if (u.isZero() || v.isZero()) return zero;
-  NonNegativeInteger<T,V> r(std::min(u.digitvec->size(), v.digitvec->size()), true);
+  natural_number<T,V> r(std::min(u.digitvec->size(), v.digitvec->size()), true);
   T* rend = lowlevel::and_sequences(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
   r.digitvec->set_end(rend);
   return r;
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator&=(const NonNegativeInteger<T,V>& v)
+natural_number<T,V>& natural_number<T,V>::operator&=(const natural_number<T,V>& v)
 {
   if (!isZero()) {
     if (!v.isZero()) {
@@ -434,18 +434,18 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator&=(const NonNegativeIn
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V> NonNegativeInteger<T,V>::binary_or(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+natural_number<T,V> natural_number<T,V>::binary_or(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
   if (u.isZero()) return v;
   if (v.isZero()) return u;
-  NonNegativeInteger<T,V> r(std::max(u.digitvec->size(), v.digitvec->size()), true);
+  natural_number<T,V> r(std::max(u.digitvec->size(), v.digitvec->size()), true);
   T* rend = lowlevel::or_sequences(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
   r.digitvec->set_end(rend);
   return r;
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator|=(const NonNegativeInteger<T,V>& v)
+natural_number<T,V>& natural_number<T,V>::operator|=(const natural_number<T,V>& v)
 {
   if (!v.isZero()) {
     if (digitvec.unique() && digitvec->request_size(std::max(digitvec->size(), v.digitvec->size()))) {
@@ -458,18 +458,18 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator|=(const NonNegativeIn
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V> NonNegativeInteger<T,V>::binary_xor(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+natural_number<T,V> natural_number<T,V>::binary_xor(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
   if (u.isZero()) return v;
   if (v.isZero()) return u;
-  NonNegativeInteger<T,V> r(std::max(u.digitvec->size(), v.digitvec->size()), true);
+  natural_number<T,V> r(std::max(u.digitvec->size(), v.digitvec->size()), true);
   T* rend = lowlevel::xor_sequences(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
   r.digitvec->set_end(rend);
   return r;
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator^=(const NonNegativeInteger<T,V>& v)
+natural_number<T,V>& natural_number<T,V>::operator^=(const natural_number<T,V>& v)
 {
   if (!v.isZero()) {
     if (digitvec.unique() && digitvec->request_size(std::max(digitvec->size(), v.digitvec->size()))) {
@@ -482,13 +482,13 @@ NonNegativeInteger<T,V>& NonNegativeInteger<T,V>::operator^=(const NonNegativeIn
 }
 
 template <typename T, typename V>
-size_t NonNegativeInteger<T,V>::lg_floor() const
+size_t natural_number<T,V>::lg_floor() const
 {
   return isZero() ? -1 : (lowlevel::lg_floor(*(digit_end() - 1)) + (digitvec->size() - 1) * digitbits);
 }
 
 template <typename T, typename V>
-size_t NonNegativeInteger<T,V>::lg_ceil() const
+size_t natural_number<T,V>::lg_ceil() const
 {
   if (isZero()) return -1;
   const T* first = digit_begin();
@@ -512,7 +512,7 @@ template <typename T> int compare_values(const T& a, const T& b) {
 }
 
 template <typename T, typename V>
-int NonNegativeInteger<T,V>::compare(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+int natural_number<T,V>::compare(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
   int c = compare_values(u.digitvec->size(), v.digitvec->size());
   if (c) return c;
@@ -530,11 +530,11 @@ int NonNegativeInteger<T,V>::compare(const NonNegativeInteger<T,V>& u, const Non
 
 template <typename T, typename V>
 template <typename Generator>
-NonNegativeInteger<T,V> NonNegativeInteger<T,V>::make_random(Generator& generator, std::size_t bits)
+natural_number<T,V> natural_number<T,V>::make_random(Generator& generator, std::size_t bits)
 {
   if (!bits) return zero;
 
-  NonNegativeInteger<T,V> r((bits+digitbits-1) / digitbits, true);
+  natural_number<T,V> r((bits+digitbits-1) / digitbits, true);
   T *rbegin = r.digit_begin(), *riter = rbegin;
 
   boost::uniform_int<T> digit_dist(0, boost::integer_traits<T>::const_max);
@@ -559,7 +559,7 @@ NonNegativeInteger<T,V> NonNegativeInteger<T,V>::make_random(Generator& generato
 }
 
 template <typename T, typename V>
-void show_internal(std::ostream& os, const NonNegativeInteger<T,V>& n)
+void show_internal(std::ostream& os, const natural_number<T,V>& n)
 {
   os << n;
   os << " | ";
@@ -577,103 +577,103 @@ void show_internal(std::ostream& os, const NonNegativeInteger<T,V>& n)
  */
 
 template <typename T, typename V>
-inline bool operator==(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+inline bool operator==(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  return NonNegativeInteger<T,V>::compare(u, v) == 0;
+  return natural_number<T,V>::compare(u, v) == 0;
 }
 
 template <typename T, typename V>
-inline bool operator!=(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+inline bool operator!=(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  return NonNegativeInteger<T,V>::compare(u, v) != 0;
+  return natural_number<T,V>::compare(u, v) != 0;
 }
 
 template <typename T, typename V>
-inline bool operator<(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+inline bool operator<(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  return NonNegativeInteger<T,V>::compare(u, v) < 0;
+  return natural_number<T,V>::compare(u, v) < 0;
 }
 
 template <typename T, typename V>
-inline bool operator<=(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+inline bool operator<=(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  return NonNegativeInteger<T,V>::compare(u, v) <= 0;
+  return natural_number<T,V>::compare(u, v) <= 0;
 }
 
 template <typename T, typename V>
-inline bool operator>(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+inline bool operator>(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  return NonNegativeInteger<T,V>::compare(u, v) > 0;
+  return natural_number<T,V>::compare(u, v) > 0;
 }
 
 template <typename T, typename V>
-inline bool operator>=(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+inline bool operator>=(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  return NonNegativeInteger<T,V>::compare(u, v) >= 0;
+  return natural_number<T,V>::compare(u, v) >= 0;
 }
 
 template <typename T, typename V>
-inline NonNegativeInteger<T,V> operator+(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+inline natural_number<T,V> operator+(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  return NonNegativeInteger<T,V>::add(u, v);
+  return natural_number<T,V>::add(u, v);
 }
 
 template <typename T, typename V>
-NonNegativeInteger<T,V> operator-(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+natural_number<T,V> operator-(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  return NonNegativeInteger<T,V>::subtract(u, v);
+  return natural_number<T,V>::subtract(u, v);
 }
 
 template <typename T, typename V>
-inline NonNegativeInteger<T,V> operator*(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+inline natural_number<T,V> operator*(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  return NonNegativeInteger<T,V>::multiply(u, v);
+  return natural_number<T,V>::multiply(u, v);
 }
 
 template <typename T, typename V>
-inline NonNegativeInteger<T,V> operator/(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+inline natural_number<T,V> operator/(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  return NonNegativeInteger<T,V>::divide(u, v).first;
+  return natural_number<T,V>::divide(u, v).first;
 }
 
 template <typename T, typename V>
-inline NonNegativeInteger<T,V> operator%(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+inline natural_number<T,V> operator%(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  return NonNegativeInteger<T,V>::divide(u, v).second;
+  return natural_number<T,V>::divide(u, v).second;
 }
 
 template <typename T, typename V>
-inline NonNegativeInteger<T,V> operator&(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+inline natural_number<T,V> operator&(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  return NonNegativeInteger<T,V>::binary_and(u, v);
+  return natural_number<T,V>::binary_and(u, v);
 }
 
 template <typename T, typename V>
-inline T operator&(const NonNegativeInteger<T,V>& u, const T v)
+inline T operator&(const natural_number<T,V>& u, const T v)
 {
-  return NonNegativeInteger<T,V>::binary_and(u, v);
+  return natural_number<T,V>::binary_and(u, v);
 }
 
 template <typename T, typename V>
-inline NonNegativeInteger<T,V> operator|(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+inline natural_number<T,V> operator|(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  return NonNegativeInteger<T,V>::binary_or(u, v);
+  return natural_number<T,V>::binary_or(u, v);
 }
 
 template <typename T, typename V>
-inline NonNegativeInteger<T,V> operator^(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
+inline natural_number<T,V> operator^(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  return NonNegativeInteger<T,V>::binary_xor(u, v);
+  return natural_number<T,V>::binary_xor(u, v);
 }
 
 template <typename T, typename V>
-void NonNegativeInteger<T,V>::swap(NonNegativeInteger<T,V>& v)
+void natural_number<T,V>::swap(natural_number<T,V>& v)
 {
   digitvec.swap(v.digitvec);
 }
 
 template <typename T, typename V>
-void swap(NonNegativeInteger<T,V>& u, NonNegativeInteger<T,V>& v)
+void swap(natural_number<T,V>& u, natural_number<T,V>& v)
 {
   u.swap(v);
 }
@@ -682,17 +682,17 @@ template <typename N> inline void output_number(std::ostream& os, N n) { os << n
 template <> inline void output_number(std::ostream& os, unsigned char n) { os << (unsigned)n; }
 
 template <typename T, typename V>
-std::ostream& operator<<(std::ostream& os, const NonNegativeInteger<T,V>& n)
+std::ostream& operator<<(std::ostream& os, const natural_number<T,V>& n)
 {
   if (!n.isZero()) {
     const unsigned base_log10 = boost::integer_traits<T>::digits10;
     T buffer[28*(n.lg_floor()+1)/(93*base_log10)+1];  // 28/93 > ln2/ln10
     T denom = 1;
     for (unsigned u=0; u < base_log10; u++) denom *= 10;
-    NonNegativeInteger<T,V> s = n;
+    natural_number<T,V> s = n;
     int k=0;
     while (!s.isZero()) {
-      std::pair<NonNegativeInteger<T,V>, T> divrem = NonNegativeInteger<T,V>::divide_simple(s, denom);
+      std::pair<natural_number<T,V>, T> divrem = natural_number<T,V>::divide_simple(s, denom);
       s = divrem.first;
       buffer[k++] = divrem.second;
     }
@@ -712,4 +712,4 @@ std::ostream& operator<<(std::ostream& os, const NonNegativeInteger<T,V>& n)
 } // sputsoft
 
 
-#endif	/* _NONNEGATIVE_INTEGER_HPP */
+#endif	/* _NATURAL_NUMBER_HPP */

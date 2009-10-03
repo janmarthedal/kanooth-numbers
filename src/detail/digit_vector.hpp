@@ -1,5 +1,5 @@
 /*
- * File:   simple_digit_vector.hpp
+ * File:   digit_vector.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-05-26 18:41Z
@@ -12,8 +12,8 @@
  * $Id$
  */
 
-#ifndef _SIMPLE_DIGIT_VECTOR_HPP
-#define _SIMPLE_DIGIT_VECTOR_HPP
+#ifndef _DIGIT_VECTOR_HPP
+#define _DIGIT_VECTOR_HPP
 
 
 namespace sputsoft {
@@ -22,14 +22,14 @@ namespace detail {
 
 
 template <typename T>
-class SimpleDigitVector {
+class digit_vector {
 public:
   typedef T value_type;
   typedef size_t size_type;
-  SimpleDigitVector() : _capacity(2), _first(new T[_capacity]), _last(_first) {}
-  explicit SimpleDigitVector(size_type __size)
+  digit_vector() : _capacity(2), _first(new T[_capacity]), _last(_first) {}
+  explicit digit_vector(size_type __size)
     : _capacity(std::max(__size, (size_type) 2)), _first(new T[_capacity]), _last(_first) {}
-  ~SimpleDigitVector() { delete[] _first; }
+  ~digit_vector() { delete[] _first; }
   size_type size() const { return _last - _first; }
   bool request_size(size_type req_size) const { return _capacity >= req_size; }
   void set_end(T* end) { _last = end; }
