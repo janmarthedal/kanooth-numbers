@@ -88,6 +88,7 @@ public:
   NonNegativeInteger& operator&=(const NonNegativeInteger<T,V>& v);
   NonNegativeInteger& operator|=(const NonNegativeInteger<T,V>& v);
   NonNegativeInteger& operator^=(const NonNegativeInteger<T,V>& v);
+  void swap(NonNegativeInteger& v);
 };
 
 template <typename T, typename V>
@@ -663,6 +664,18 @@ template <typename T, typename V>
 inline NonNegativeInteger<T,V> operator^(const NonNegativeInteger<T,V>& u, const NonNegativeInteger<T,V>& v)
 {
   return NonNegativeInteger<T,V>::binary_xor(u, v);
+}
+
+template <typename T, typename V>
+void NonNegativeInteger<T,V>::swap(NonNegativeInteger<T,V>& v)
+{
+  digitvec.swap(v.digitvec);
+}
+
+template <typename T, typename V>
+void swap(NonNegativeInteger<T,V>& u, NonNegativeInteger<T,V>& v)
+{
+  u.swap(v);
 }
 
 template <typename N> inline void output_number(std::ostream& os, N n) { os << n; }
