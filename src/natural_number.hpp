@@ -62,7 +62,7 @@ public:
   static const natural_number zero;
   natural_number();
   natural_number(T value);
-  bool isZero() const;
+  bool is_zero() const;
   static natural_number add(const natural_number<T,V>& u, const natural_number<T,V>& v);
   static natural_number subtract(const natural_number<T,V>& u, const natural_number<T,V>& v);
   static natural_number multiply(const natural_number<T,V>& u, const natural_number<T,V>& v);
@@ -109,7 +109,7 @@ natural_number<T,V>::natural_number(T value) : digitvec(new V(1))
 }
 
 template <typename T, typename V>
-inline bool natural_number<T,V>::isZero() const
+inline bool natural_number<T,V>::is_zero() const
 {
   return !digitvec->size();
 }
@@ -121,8 +121,8 @@ inline bool natural_number<T,V>::isZero() const
 template <typename T, typename V>
 natural_number<T,V> natural_number<T,V>::add(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  if (u.isZero()) return v;
-  if (v.isZero()) return u;
+  if (u.is_zero()) return v;
+  if (v.is_zero()) return u;
   natural_number<T,V> r(std::max(u.digitvec->size(), v.digitvec->size())+1, true);
   T* rend = lowlevel::add_sequences(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
   r.digitvec->set_end(rend);
@@ -132,9 +132,9 @@ natural_number<T,V> natural_number<T,V>::add(const natural_number<T,V>& u, const
 template <typename T, typename V>
 natural_number<T,V>& natural_number<T,V>::operator+=(const natural_number<T,V>& x)
 {
-  if (isZero()) {
+  if (is_zero()) {
     *this = x;
-  } else if (!x.isZero()) {
+  } else if (!x.is_zero()) {
     if (digitvec.unique() && digitvec->request_size(std::max(digitvec->size(), x.digitvec->size()))) {
       T* rend = lowlevel::add_sequences(digit_begin(), digit_end(), x.digit_begin(), x.digit_end(), digit_begin());
       digitvec->set_end(rend);
@@ -151,7 +151,7 @@ natural_number<T,V>& natural_number<T,V>::operator+=(const natural_number<T,V>& 
 template <typename T, typename V>
 natural_number<T,V> natural_number<T,V>::subtract(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  if (v.isZero()) return u;
+  if (v.is_zero()) return u;
   if (u.digitvec->size() < v.digitvec->size()) return zero;  // wrong usage
   natural_number<T,V> r(u.digitvec->size(), true);
   T* rend = lowlevel::subtract(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
@@ -162,7 +162,7 @@ natural_number<T,V> natural_number<T,V>::subtract(const natural_number<T,V>& u, 
 template <typename T, typename V>
 natural_number<T,V>& natural_number<T,V>::operator-=(const natural_number<T,V>& v)
 {
-  if (!v.isZero() && digitvec->size() >= v.digitvec->size()) {
+  if (!v.is_zero() && digitvec->size() >= v.digitvec->size()) {
     if (digitvec.unique()) {
       T* begin = digit_begin();
       T* end = lowlevel::subtract(begin, digit_end(), v.digit_begin(), v.digit_end(), begin);
@@ -180,7 +180,7 @@ natural_number<T,V>& natural_number<T,V>::operator-=(const natural_number<T,V>& 
 template <typename T, typename V>
 natural_number<T,V> natural_number<T,V>::multiply(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  if (u.isZero() || v.isZero()) return zero;
+  if (u.is_zero() || v.is_zero()) return zero;
   natural_number<T,V> r(u.digitvec->size() + v.digitvec->size(), true);
   T* rend = lowlevel::multiply_sequences(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
   r.digitvec->set_end(rend);
@@ -190,8 +190,8 @@ natural_number<T,V> natural_number<T,V>::multiply(const natural_number<T,V>& u, 
 template <typename T, typename V>
 natural_number<T,V>& natural_number<T,V>::operator*=(const natural_number<T,V>& v)
 {
-  if (!isZero()) {
-    if (v.isZero()) {
+  if (!is_zero()) {
+    if (v.is_zero()) {
       *this = zero;
     } else if (v.digitvec->size() == 1 && digitvec.unique() && digitvec->request_size(digitvec->size() + 1)) {
       T* first = digit_begin();
@@ -217,7 +217,7 @@ natural_number<T,V>::divide_simple(const natural_number<T,V>& u, T v)
 {
   if (!v)
     throw DivideByZero();
-  if (u.isZero())
+  if (u.is_zero())
     return std::pair<natural_number<T,V>, T>(zero, (T) 0);
   if (u.digitvec->size() == 1 && *u.digit_begin() < v)
     return std::pair<natural_number<T,V>, T>(zero, *u.digit_begin());
@@ -270,7 +270,7 @@ template <typename T, typename V>
 std::pair<natural_number<T,V>, natural_number<T,V> >
 natural_number<T,V>::divide_long(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  if (v.isZero())
+  if (v.is_zero())
     throw DivideByZero();
   if (compare(u, v) < 0)
     return std::pair<natural_number<T,V>, natural_number<T,V> >(zero, u);
@@ -352,7 +352,7 @@ natural_number<T,V> natural_number<T,V>::shift_left(size_t n) const
 template <typename T, typename V>
 natural_number<T,V>& natural_number<T,V>::shift_left_this(size_t n)
 {
-  if (n && !isZero()) {
+  if (n && !is_zero()) {
     if (digitvec.unique() && digitvec->request_size(digitvec->size() + n/digitbits + 1)) {
       T* first = digit_begin();
       T* last = lowlevel::shift_left(first, digit_end(), first, n);
@@ -404,13 +404,13 @@ natural_number<T,V>& natural_number<T,V>::binary_shift_this(std::ptrdiff_t n)
 template <typename T, typename V>
 T natural_number<T,V>::binary_and(const natural_number<T,V>& u, const T v)
 {
-  return u.isZero() ? T(0) : *u.digit_begin() & v;
+  return u.is_zero() ? T(0) : *u.digit_begin() & v;
 }
 
 template <typename T, typename V>
 natural_number<T,V> natural_number<T,V>::binary_and(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  if (u.isZero() || v.isZero()) return zero;
+  if (u.is_zero() || v.is_zero()) return zero;
   natural_number<T,V> r(std::min(u.digitvec->size(), v.digitvec->size()), true);
   T* rend = lowlevel::and_sequences(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
   r.digitvec->set_end(rend);
@@ -420,8 +420,8 @@ natural_number<T,V> natural_number<T,V>::binary_and(const natural_number<T,V>& u
 template <typename T, typename V>
 natural_number<T,V>& natural_number<T,V>::operator&=(const natural_number<T,V>& v)
 {
-  if (!isZero()) {
-    if (!v.isZero()) {
+  if (!is_zero()) {
+    if (!v.is_zero()) {
       if (digitvec.unique()) {
         T* end = lowlevel::and_sequences(digit_begin(), digit_end(), v.digit_begin(), v.digit_end(), digit_begin());
         digitvec->set_end(end);
@@ -436,8 +436,8 @@ natural_number<T,V>& natural_number<T,V>::operator&=(const natural_number<T,V>& 
 template <typename T, typename V>
 natural_number<T,V> natural_number<T,V>::binary_or(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  if (u.isZero()) return v;
-  if (v.isZero()) return u;
+  if (u.is_zero()) return v;
+  if (v.is_zero()) return u;
   natural_number<T,V> r(std::max(u.digitvec->size(), v.digitvec->size()), true);
   T* rend = lowlevel::or_sequences(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
   r.digitvec->set_end(rend);
@@ -447,7 +447,7 @@ natural_number<T,V> natural_number<T,V>::binary_or(const natural_number<T,V>& u,
 template <typename T, typename V>
 natural_number<T,V>& natural_number<T,V>::operator|=(const natural_number<T,V>& v)
 {
-  if (!v.isZero()) {
+  if (!v.is_zero()) {
     if (digitvec.unique() && digitvec->request_size(std::max(digitvec->size(), v.digitvec->size()))) {
       T* end = lowlevel::or_sequences(digit_begin(), digit_end(), v.digit_begin(), v.digit_end(), digit_begin());
       digitvec->set_end(end);
@@ -460,8 +460,8 @@ natural_number<T,V>& natural_number<T,V>::operator|=(const natural_number<T,V>& 
 template <typename T, typename V>
 natural_number<T,V> natural_number<T,V>::binary_xor(const natural_number<T,V>& u, const natural_number<T,V>& v)
 {
-  if (u.isZero()) return v;
-  if (v.isZero()) return u;
+  if (u.is_zero()) return v;
+  if (v.is_zero()) return u;
   natural_number<T,V> r(std::max(u.digitvec->size(), v.digitvec->size()), true);
   T* rend = lowlevel::xor_sequences(u.digit_begin(), u.digit_end(), v.digit_begin(), v.digit_end(), r.digit_begin());
   r.digitvec->set_end(rend);
@@ -471,7 +471,7 @@ natural_number<T,V> natural_number<T,V>::binary_xor(const natural_number<T,V>& u
 template <typename T, typename V>
 natural_number<T,V>& natural_number<T,V>::operator^=(const natural_number<T,V>& v)
 {
-  if (!v.isZero()) {
+  if (!v.is_zero()) {
     if (digitvec.unique() && digitvec->request_size(std::max(digitvec->size(), v.digitvec->size()))) {
       T* end = lowlevel::xor_sequences(digit_begin(), digit_end(), v.digit_begin(), v.digit_end(), digit_begin());
       digitvec->set_end(end);
@@ -484,13 +484,13 @@ natural_number<T,V>& natural_number<T,V>::operator^=(const natural_number<T,V>& 
 template <typename T, typename V>
 size_t natural_number<T,V>::lg_floor() const
 {
-  return isZero() ? -1 : (lowlevel::lg_floor(*(digit_end() - 1)) + (digitvec->size() - 1) * digitbits);
+  return is_zero() ? -1 : (lowlevel::lg_floor(*(digit_end() - 1)) + (digitvec->size() - 1) * digitbits);
 }
 
 template <typename T, typename V>
 size_t natural_number<T,V>::lg_ceil() const
 {
-  if (isZero()) return -1;
+  if (is_zero()) return -1;
   const T* first = digit_begin();
   const T* last = digit_end();
   T t = *--last;
@@ -684,14 +684,14 @@ template <> inline void output_number(std::ostream& os, unsigned char n) { os <<
 template <typename T, typename V>
 std::ostream& operator<<(std::ostream& os, const natural_number<T,V>& n)
 {
-  if (!n.isZero()) {
+  if (!n.is_zero()) {
     const unsigned base_log10 = boost::integer_traits<T>::digits10;
     T buffer[28*(n.lg_floor()+1)/(93*base_log10)+1];  // 28/93 > ln2/ln10
     T denom = 1;
     for (unsigned u=0; u < base_log10; u++) denom *= 10;
     natural_number<T,V> s = n;
     int k=0;
-    while (!s.isZero()) {
+    while (!s.is_zero()) {
       std::pair<natural_number<T,V>, T> divrem = natural_number<T,V>::divide_simple(s, denom);
       s = divrem.first;
       buffer[k++] = divrem.second;

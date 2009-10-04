@@ -17,9 +17,9 @@
 #include <boost/timer.hpp>
 #include <boost/random.hpp>
 
-#include <nonnegative_integer.hpp>
+#include <natural_number.hpp>
 
-using sputsoft::multiprecision::NonNegativeInteger;
+using sputsoft::multiprecision::natural_number;
 
 template <typename T> const char* get_type_name() { return "Unknown"; }
 template <> const char* get_type_name<boost::uint8_t>() { return "8 bits"; }
@@ -36,7 +36,7 @@ boost::minstd_rand generator(42u);
 template <typename T>
 void add_random(int u_bits, int v_bits, int runs)
 {
-  typedef NonNegativeInteger<T> NNI;
+  typedef natural_number<T> NNI;
 
   std::cout << "  Addition ";  std::cout.flush();
 
@@ -55,7 +55,7 @@ void add_random(int u_bits, int v_bits, int runs)
 template <typename T>
 void long_multiplication_random(int u_bits, int v_bits, int runs)
 {
-  typedef NonNegativeInteger<T> NNI;
+  typedef natural_number<T> NNI;
 
   std::cout << "  Long multiplication ";  std::cout.flush();
 
@@ -74,7 +74,7 @@ void long_multiplication_random(int u_bits, int v_bits, int runs)
 template <typename T>
 void long_division_random(long u_bits, long v_bits, int runs)
 {
-  typedef NonNegativeInteger<T> NNI;
+  typedef natural_number<T> NNI;
 
   std::cout << "  Long division ";  std::cout.flush();
 
@@ -93,7 +93,7 @@ void long_division_random(long u_bits, long v_bits, int runs)
 template <typename T>
 void long_division_check_random(long u_bits, long v_bits, int runs)
 {
-  typedef NonNegativeInteger<T> NNI;
+  typedef natural_number<T> NNI;
 
   std::cout << "  Long division check ";  std::cout.flush();
 

@@ -6,16 +6,16 @@ COMMON = $(LIBPATH)/natural_number.hpp $(LIBPATH)/natural_number_algorithms.hpp 
 DEVFLAGS = -g -Wall -fmessage-length=0 -I$(LIBPATH)
 OPTFLAGS = -O2 -DNDEBUG -Wall -fmessage-length=0 -I$(LIBPATH)
 
-examples.exe: examples.cpp $(COMMON)
+examples: examples.cpp $(COMMON)
 	$(CXX) $(DEVFLAGS) -o $@ $<
 
-test_nni.exe: test_nni.cpp $(COMMON)
+tests: tests.cpp $(COMMON)
 	$(CXX) $(DEVFLAGS) -o $@ $<
 
-benchmarks.exe: benchmarks.cpp $(COMMON)
+benchmarks: benchmarks.cpp $(COMMON)
 	$(CXX) $(OPTFLAGS) -o $@ $<
     
-all: examples.exe test_nni.exe benchmarks.exe
+all: examples tests benchmarks
 
 clean:
-	rm -f examples.exe test_nni.exe benchmarks.exe
+	rm -f *.exe

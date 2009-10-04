@@ -19,11 +19,13 @@
 
 #include <natural_number.hpp>
 #include <natural_number_algorithms.hpp>
+#include <integer.hpp>
 
 using sputsoft::multiprecision::natural_number;
 using sputsoft::multiprecision::string_to_natural_number;
 using sputsoft::multiprecision::factorial;
 using sputsoft::multiprecision::power;
+using sputsoft::multiprecision::integer;
 
 //typedef boost::uint8_t digit_t;
 //typedef boost::uint16_t digit_t;
@@ -31,6 +33,7 @@ using sputsoft::multiprecision::power;
 //typedef boost::uint64_t digit_t;
 typedef unsigned int digit_t;
 typedef natural_number<digit_t> NUM;
+typedef integer<NUM> INT;
 
 
 NUM digit_sum(NUM n)
@@ -38,7 +41,7 @@ NUM digit_sum(NUM n)
   NUM res = NUM::zero;
   std::pair<NUM, NUM> divrem;
 
-  while (!n.isZero()) {
+  while (!n.is_zero()) {
     divrem = NUM::divide(n, 10);
     res += divrem.second;
     n = divrem.first;
@@ -54,7 +57,7 @@ void PE3()
   NUM n = string_to_natural_number<NUM>("600851475143");
   std::vector<NUM> factors;
 
-  //std::cout << "Number: " << n << std::endl;
+  std::cout << "Number: " << n << std::endl;
   factorize(n, std::back_inserter(factors));
   std::cout << "Largest prime factor: " << factors.back() << std::endl << std::endl;
   // Answer: 6857
@@ -96,10 +99,56 @@ void factorize_ex1()
 }
 
 
+void int_divide_check(INT n, INT d)
+{
+  std::pair<INT,INT> qr;
+
+  std::cout << "---------" << std::endl;
+  std::cout << "n: " << n << std::endl;
+  std::cout << "d: " << d << std::endl;
+
+  qr = INT::divide_floor(n, d);
+  std::cout << "divide floor" << std::endl;
+  std::cout << "q: " << qr.first << std::endl;
+  std::cout << "r: " << qr.second << std::endl;
+  if (n != qr.first*d + qr.second)
+    std::cout << "Check error!" << std::endl;
+
+  qr = INT::divide_ceil(n, d);
+  std::cout << "divide ceil" << std::endl;
+  std::cout << "q: " << qr.first << std::endl;
+  std::cout << "r: " << qr.second << std::endl;
+  if (n != qr.first*d + qr.second)
+    std::cout << "Check error!" << std::endl;
+
+  qr = INT::divide_truncate(n, d);
+  std::cout << "divide truncate" << std::endl;
+  std::cout << "q: " << qr.first << std::endl;
+  std::cout << "r: " << qr.second << std::endl;
+  if (n != qr.first*d + qr.second)
+    std::cout << "Check error!" << std::endl;
+}
+
+void int_divide()
+{
+  int_divide_check(10, 7);
+  int_divide_check(10, -7);
+  int_divide_check(-10, 7);
+  int_divide_check(-10, -7);
+  int_divide_check(14, 7);
+  int_divide_check(14, -7);
+  int_divide_check(-14, 7);
+  int_divide_check(-14, -7);
+  int_divide_check(0, 7);
+  int_divide_check(0, -7);
+}
+
+
 int main()
 {
-  PE3();
+  /*PE3();
   PE16();
   PE20();
-  factorize_ex1();
+  factorize_ex1();*/
+  int_divide();
 }
