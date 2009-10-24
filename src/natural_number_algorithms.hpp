@@ -23,7 +23,7 @@ namespace multiprecision {
 template <typename NUM, typename Iter>
 NUM digits_to_natural_number(Iter first, const Iter last, unsigned short base=10)
 {
-  NUM r = NUM::zero;
+  NUM r = 0;
   if (base >= 2 && base <= 36) {
     NUM b(base);
     unsigned short v;
@@ -48,7 +48,7 @@ NUM string_to_natural_number(const std::string& digits, unsigned short base=10)
 
 
 // TODO: Optimize this. Use d = 2, 3, 6k-1, 6k+1 for k=1, 2, ...
-// and change condition to d^2 <= n (or equivalent)
+//       and change condition to d^2 <= n (or equivalent)
 template <typename NUM, typename Out>
 void factorize(NUM n, Out out)
 {
@@ -57,7 +57,7 @@ void factorize(NUM n, Out out)
 
   while (two <= n) {
     divrem = NUM::divide(n, two);
-    if (divrem.second.is_zero()) {
+    if (!divrem.second) {
       *out++ = two;
       n = divrem.first;
     } else
@@ -67,7 +67,7 @@ void factorize(NUM n, Out out)
   NUM d = 3;
   while (d <= n) {
     divrem = NUM::divide(n, d);
-    if (divrem.second.is_zero()) {
+    if (!divrem.second) {
       *out++ = d;
       n = divrem.first;
     } else

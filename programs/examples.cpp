@@ -41,7 +41,7 @@ NUM digit_sum(NUM n)
   NUM res = NUM::zero;
   std::pair<NUM, NUM> divrem;
 
-  while (!n.is_zero()) {
+  while (n) {
     divrem = NUM::divide(n, 10);
     res += divrem.second;
     n = divrem.first;

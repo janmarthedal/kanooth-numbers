@@ -196,8 +196,8 @@ void test_divide_long_1()
   const T half = (T) 1 << (limbbits - 1);
 
   // Force add back
-  NUM u = NUM(half).binary_shift_this(3*limbbits);
-  NUM v = NUM(half).binary_shift_this(2*limbbits) + NUM(1);
+  NUM u = NUM(half).binary_shift_left_this(3*limbbits);
+  NUM v = NUM(half).binary_shift_left_this(2*limbbits) + NUM(1);
   std::pair<NUM,NUM> divrem = NUM::divide(u, v);
   NUM z = divrem.first*v + divrem.second;
   assertTrue<T>(z == u, ASSERT_ARGS);

@@ -46,7 +46,7 @@ public:
   integer(const register_type v);
   integer(const N& n, const bool pos=true);
   integer operator-() const { return integer(number, !positive); }
-  bool is_zero() const { return number.is_zero(); }
+  bool is_zero() const { return !number; }
   bool is_positive() const { return !is_zero() && positive; }
   bool is_negative() const { return !is_zero() && !positive; }
   static N abs(const integer<N>& u);
@@ -152,7 +152,7 @@ template <typename N>
 std::pair<integer<N>, integer<N> > integer<N>::divide_floor(const integer<N>& u, const integer<N>& v)
 {
   std::pair<N,N> qr = N::divide(u.number, v.number);
-  return qr.second.is_zero() ?
+  return !qr.second ?
       std::make_pair(integer<N>(qr.first, u.positive == v.positive), integer<N>()) :
     u.positive == v.positive ?
       std::make_pair(integer<N>(qr.first), integer<N>(qr.second, v.positive)) :
@@ -163,7 +163,7 @@ template <typename N>
 std::pair<integer<N>, integer<N> > integer<N>::divide_ceil(const integer<N>& u, const integer<N>& v)
 {
   std::pair<N,N> qr = N::divide(u.number, v.number);
-  return qr.second.is_zero() ?
+  return !qr.second ?
       std::make_pair(integer<N>(qr.first, u.positive == v.positive), integer<N>()) :
     u.is_positive() != v.is_positive() ?
       std::make_pair(integer<N>(qr.first, false), integer<N>(qr.second, u.positive)) :
@@ -175,7 +175,7 @@ std::pair<integer<N>, integer<N> > integer<N>::divide_truncate(const integer<N>&
 {
   std::pair<N,N> qr = N::divide(u.number, v.number);
   return std::make_pair(integer<N>(qr.first, u.positive == v.positive),
-                        qr.second.is_zero() ? integer<N>() : integer<N>(qr.second, u.positive));
+                        !qr.second ? integer<N>() : integer<N>(qr.second, u.positive));
 }
 
 
