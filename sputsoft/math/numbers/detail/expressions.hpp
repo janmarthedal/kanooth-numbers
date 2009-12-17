@@ -31,206 +31,109 @@ namespace ops {
     class remainder {};
   }
   namespace unary {
-    class identity {};
     class negate {};
-    class not_zero {};
+    class nonzero {};
   }
 }
 
-namespace expr {
+namespace wrap {
+
+  template <typename R, typename E> class expr;
+  template <class T>
+  struct resolve_ref {
+    typedef T ref_type;
+  };
+  template <class R, class E>
+  struct resolve_ref<expr<R, E> > {
+    typedef const expr<R, E>& ref_type;
+  };
 
   template <typename Op, typename X, typename Y>
   class binary {
   private:
     binary() {}
   public:
-    const X& x;
-    const Y& y;
+    typename resolve_ref<X>::ref_type x;
+    typename resolve_ref<Y>::ref_type y;
     binary(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    binary(const binary& e) : x(e.x), y(e.y) {}
   };
 
   template <typename Op, typename X>
   class unary {
   private:
-    const X& x;
     unary() {}
-    unary(const unary&) {}
   public:
+    typename resolve_ref<X>::ref_type x;
     unary(const X& _x) : x(_x) {}
-    const X& get() const { return x; }
   };  
 
-  template <typename X>
-  class unary<ops::unary::identity, X> {
-  private:
-    X x;
-  public:
-    unary() : x() {}
-    template <typename T> unary(const T& v) : x(v) {}
-    template <typename E> unary& operator=(const E& expr)
-      { X::assign(x, expr); return *this; }
-    const X& get() const { return x; }
-  };
-
 }
+
+template <typename R, typename E>
+class expr {
+private:
+  E e;
+public:
+  expr(const E& _e) : e(_e) {}
+  const E& get_expr() const { return e; }
+  R eval() const { return R(e); }
+};
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const expr::unary<ops::unary::identity, T>& n)
+class expr<T, T> {
+private:
+  T n;
+public:
+  expr() : n() {}
+  template <typename E>
+  expr(const E& e) : n(e) {}
+  template <typename E>
+  expr& operator=(const E& e) { n = e; return *this; }
+  const T& get_expr() const { return n; }
+  const T& eval() const { return n; }
+  template <typename E>
+  expr& operator+=(const E& e) { n += e; return *this; }
+};
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const expr<T, T>& n)
 {
-  return os << n.get();
+  return os << n.get_expr().to_string(10);
 }
 
+template <typename Op, typename X, typename Y> struct resolve_binary;
 
-/*template <typename Xop, typename X1, typename X2, typename Yop, typename Y1, typename Y2>
-expr::binary<ops::binary::add, expr::binary<Xop, X1, X2>, expr::binary<Yop, Y1, Y2> >
-operator+(const expr::binary<Xop, X1, X2>& x, const expr::binary<Yop, Y1, Y2>& y) \
-{ return expr::binary<ops::binary::add, expr::binary<Xop, X1, X2>, expr::binary<Yop, Y1, Y2> >(x, y); }
+#define SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(op_overload, op_type) \
+\
+template <typename R1, typename E1, typename R2, typename E2> \
+expr<typename resolve_binary<op_type, R1, R2>::return_type, \
+  wrap::binary<op_type, expr<R1, E1>, expr<R2, E2> > > \
+op_overload(const expr<R1, E1>& x, const expr<R2, E2>& y) { \
+  return expr<typename resolve_binary<op_type, R1, R2>::return_type, \
+              wrap::binary<op_type, expr<R1, E1>, expr<R2, E2> > > \
+    (wrap::binary<op_type, expr<R1, E1>, expr<R2, E2> >(x, y)); } \
+\
+template <typename R, typename E, typename T> \
+expr<typename resolve_binary<op_type, R, T>::return_type, \
+  wrap::binary<op_type, expr<R, E>, expr<T, T> > > \
+op_overload(const expr<R, E>& x, const T& y) { \
+  return expr<typename resolve_binary<op_type, R, T>::return_type, \
+              wrap::binary<op_type, expr<R, E>, expr<T, T> > > \
+    (wrap::binary<op_type, expr<R, E>, expr<T, T> >(x, expr<T, T>(y))); } \
+\
+template <typename R, typename E, typename T> \
+expr<typename resolve_binary<op_type, T, R>::return_type, \
+  wrap::binary<op_type, expr<T, T>, expr<R, E> > > \
+op_overload(const T& x, const expr<R, E>& y) { \
+  return expr<typename resolve_binary<op_type, T, R>::return_type, \
+              wrap::binary<op_type, expr<T, T>, expr<R, E> > > \
+    (wrap::binary<op_type, expr<T, T>, expr<R, E> >(expr<T, T>(x), y)); }
 
-template <typename X, typename Yop, typename Y1, typename Y2>
-expr::binary<ops::binary::add, X, expr::binary<Yop, Y1, Y2> >
-operator+(const expr::unary<ops::unary::identity, X>& x, const expr::binary<Yop, Y1, Y2>& y)
-{ return expr::binary<ops::binary::add, X, expr::binary<Yop, Y1, Y2> >(x.get(), y); }
-
-template <typename Xop, typename X1, typename X2, typename Y>
-expr::binary<ops::binary::add, expr::binary<Xop, X1, X2>, Y>
-operator+(const expr::binary<Xop, X1, X2>& x, const expr::unary<ops::unary::identity, Y>& y)
-{ return expr::binary<ops::binary::add, expr::binary<Xop, X1, X2>, Y>(x, y.get()); }
-
-template <typename X, typename Yop, typename Y1, typename Y2>
-expr::binary<ops::binary::add, X, expr::binary<Yop, Y1, Y2> >
-operator+(const X& x, const expr::binary<Yop, Y1, Y2>& y)
-{ return expr::binary<ops::binary::add, X, expr::binary<Yop, Y1, Y2> >(x, y); }
-
-template <typename Xop, typename X1, typename X2, typename Y>
-expr::binary<ops::binary::add, expr::binary<Xop, X1, X2>, Y>
-operator+(const expr::binary<Xop, X1, X2>& x, const Y& y)
-{ return expr::binary<ops::binary::add, expr::binary<Xop, X1, X2>, Y>(x, y); }
-
-template <typename X, typename Y>
-expr::binary<ops::binary::add, X, Y>
-operator+(const expr::unary<ops::unary::identity, X>& x, const expr::unary<ops::unary::identity, Y>& y)
-{ return expr::binary<ops::binary::add, X, Y>(x.get(), y.get()); }
-
-template <typename X, typename Y>
-expr::binary<ops::binary::add, X, Y>
-operator+(const expr::unary<ops::unary::identity, X>& x, const Y& y)
-{ return expr::binary<ops::binary::add, X, Y>(x.get(), y); }
-
-template <typename X, typename Y>
-expr::binary<ops::binary::add, X, Y>
-operator+(const X& x, const expr::unary<ops::unary::identity, Y>& y)
-{ return expr::binary<ops::binary::add, X, Y>(x, y.get()); }
-*/
-
-#define SPUTSOFT_MATH_NUMBER_BINARY_PARSE_BIN_BIN(op_overload, op_type) \
-template <typename Xop, typename X1, typename X2, typename Yop, typename Y1, typename Y2> \
-expr::binary<op_type, expr::binary<Xop, X1, X2>, expr::binary<Yop, Y1, Y2> > \
-op_overload(const expr::binary<Xop, X1, X2>& x, const expr::binary<Yop, Y1, Y2>& y) \
-{ return expr::binary<op_type, expr::binary<Xop, X1, X2>, expr::binary<Yop, Y1, Y2> >(x, y); }
-
-#define SPUTSOFT_MATH_NUMBER_BINARY_PARSE_ID_BIN(op_overload, op_type) \
-template <typename X, typename Yop, typename Y1, typename Y2> \
-expr::binary<op_type, X, expr::binary<Yop, Y1, Y2> > \
-op_overload(const expr::unary<ops::unary::identity, X>& x, const expr::binary<Yop, Y1, Y2>& y) \
-{ return expr::binary<op_type, X, expr::binary<Yop, Y1, Y2> >(x.get(), y); }
-
-#define SPUTSOFT_MATH_NUMBER_BINARY_PARSE_BIN_ID(op_overload, op_type) \
-template <typename Xop, typename X1, typename X2, typename Y> \
-expr::binary<op_type, expr::binary<Xop, X1, X2>, Y> \
-op_overload(const expr::binary<Xop, X1, X2>& x, const expr::unary<ops::unary::identity, Y>& y) \
-{ return expr::binary<op_type, expr::binary<Xop, X1, X2>, Y>(x, y.get()); }
-
-#define SPUTSOFT_MATH_NUMBER_BINARY_PARSE_X_BIN(op_overload, op_type) \
-template <typename X, typename Yop, typename Y1, typename Y2> \
-expr::binary<op_type, X, expr::binary<Yop, Y1, Y2> > \
-op_overload(const X& x, const expr::binary<Yop, Y1, Y2>& y) \
-{ return expr::binary<op_type, X, expr::binary<Yop, Y1, Y2> >(x, y); }
-
-#define SPUTSOFT_MATH_NUMBER_BINARY_PARSE_BIN_X(op_overload, op_type) \
-template <typename Xop, typename X1, typename X2, typename Y> \
-expr::binary<op_type, expr::binary<Xop, X1, X2>, Y> \
-op_overload(const expr::binary<Xop, X1, X2>& x, const Y& y) \
-{ return expr::binary<op_type, expr::binary<Xop, X1, X2>, Y>(x, y); }
-
-#define SPUTSOFT_MATH_NUMBER_BINARY_PARSE_ID_ID(op_overload, op_type) \
-template <typename X, typename Y> \
-expr::binary<op_type, X, Y> \
-op_overload(const expr::unary<ops::unary::identity, X>& x, const expr::unary<ops::unary::identity, Y>& y) \
-{ return expr::binary<op_type, X, Y>(x.get(), y.get()); }
-
-#define SPUTSOFT_MATH_NUMBER_BINARY_PARSE_ID_X(op_overload, op_type) \
-template <typename X, typename Y> \
-expr::binary<op_type, X, Y> \
-op_overload(const expr::unary<ops::unary::identity, X>& x, const Y& y) \
-{ return expr::binary<op_type, X, Y>(x.get(), y); }
-
-#define SPUTSOFT_MATH_NUMBER_BINARY_PARSE_X_ID(op_overload, op_type) \
-template <typename X, typename Y> \
-expr::binary<op_type, X, Y> \
-op_overload(const X& x, const expr::unary<ops::unary::identity, Y>& y) \
-{ return expr::binary<op_type, X, Y>(x, y.get()); }
-
-#define SPUTSOFT_MATH_NUMBER_BINARY_PARSE(op_overload, op_type) \
-  SPUTSOFT_MATH_NUMBER_BINARY_PARSE_BIN_BIN(op_overload, op_type) \
-  SPUTSOFT_MATH_NUMBER_BINARY_PARSE_ID_BIN(op_overload, op_type) \
-  SPUTSOFT_MATH_NUMBER_BINARY_PARSE_BIN_ID(op_overload, op_type) \
-  SPUTSOFT_MATH_NUMBER_BINARY_PARSE_X_BIN(op_overload, op_type) \
-  SPUTSOFT_MATH_NUMBER_BINARY_PARSE_BIN_X(op_overload, op_type) \
-  SPUTSOFT_MATH_NUMBER_BINARY_PARSE_ID_ID(op_overload, op_type) \
-  SPUTSOFT_MATH_NUMBER_BINARY_PARSE_ID_X(op_overload, op_type) \
-  SPUTSOFT_MATH_NUMBER_BINARY_PARSE_X_ID(op_overload, op_type)
-
-SPUTSOFT_MATH_NUMBER_BINARY_PARSE(operator+, ops::binary::add)
-SPUTSOFT_MATH_NUMBER_BINARY_PARSE(operator-, ops::binary::subtract)
-SPUTSOFT_MATH_NUMBER_BINARY_PARSE(operator*, ops::binary::multiply)
-SPUTSOFT_MATH_NUMBER_BINARY_PARSE(operator/, ops::binary::divide)
-SPUTSOFT_MATH_NUMBER_BINARY_PARSE(operator%, ops::binary::remainder)
-
-#define SPUTSOFT_MATH_NUMBER_UNARY_PARSE_BIN(op_overload, op_type) \
-template <typename Xop, typename X1, typename X2> \
-expr::unary<op_type, expr::binary<Xop, X1, X2> > \
-op_overload(const expr::binary<Xop, X1, X2>& x) \
-{ return expr::unary<op_type, expr::binary<Xop, X1, X2> >(x); }
-
-#define SPUTSOFT_MATH_NUMBER_UNARY_PARSE_UN(op_overload, op_type) \
-template <typename Xop, typename X> \
-expr::unary<op_type, expr::unary<Xop, X> > \
-op_overload(const expr::unary<Xop, X>& x) \
-{ return expr::unary<op_type, expr::unary<Xop, X> >(x); }
-
-#define SPUTSOFT_MATH_NUMBER_UNARY_PARSE(op_overload, op_type) \
-  SPUTSOFT_MATH_NUMBER_UNARY_PARSE_BIN(op_overload, op_type) \
-  SPUTSOFT_MATH_NUMBER_UNARY_PARSE_UN(op_overload, op_type)
-
-SPUTSOFT_MATH_NUMBER_UNARY_PARSE(operator!, ops::unary::not_zero)
-
-// unary +
-
-template <typename Xop, typename X1, typename X2>
-expr::binary<Xop, X1, X2>
-operator+(const expr::binary<Xop, X1, X2>& e)
-{ return e; }
-
-template <typename Xop, typename X>
-expr::unary<Xop, X>
-operator+(const expr::unary<Xop, X>& x)
-{ return x; }
-
-// unary -
-
-SPUTSOFT_MATH_NUMBER_UNARY_PARSE(operator-, ops::unary::negate)
-
-template <typename X>
-expr::unary<ops::unary::identity, X>
-operator-(const expr::unary<ops::unary::negate, X>& e)
-{ return expr::unary<ops::unary::identity, X>(e.get()); }
-
-template <typename X>
-expr::unary<ops::unary::negate, X>
-operator-(const expr::unary<ops::unary::identity, X>& e)
-{ return expr::unary<ops::unary::negate, X>(e.get()); }
-
+SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator+, ops::binary::add)
+SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator-, ops::binary::subtract)
+SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator*, ops::binary::multiply)
+SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator/, ops::binary::divide)
+SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator%, ops::binary::remainder)
 
 } // namespace detail
 /*} // namespace numbers

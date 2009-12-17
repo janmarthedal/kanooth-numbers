@@ -16,29 +16,19 @@
 #define _SPUTSOFT_MATH_NUMBERS_NATURAL_NUMBER_HPP_
 
 #include <sputsoft/math/numbers/generic/natural_number.hpp>
-#include <sputsoft/math/numbers/detail/digit_array.hpp>
-#include <sputsoft/math/numbers/generic/lowlevel.hpp>
-#include <sputsoft/math/numbers/gmp/lowlevel.hpp>
+#ifdef SPUTSOFT_USE_GMP
+#include <sputsoft/math/numbers/gmp/natural_number.hpp>
+#endif
 
 /*namespace sputsoft {
 namespace math {
 namespace numbers {*/
 
-namespace generic {
-
-typedef unary<identity, natnum< midlevel< ::detail::digit_array<unsigned long>, lowlevel<unsigned long> > > > natural_number;
-
-} // namespace generic
-
-namespace gmp {
-
-typedef ::detail::expr::unary< ::detail::ops::unary::identity,
-  ::generic::natnum< ::generic::midlevel< ::detail::digit_array<unsigned long>,
-  lowlevel > > > natural_number;
-
-} // namespace generic
-
+#ifdef SPUTSOFT_USE_GMP
+typedef ::gmp::natural_number natural_number;
+#else
 typedef ::generic::natural_number natural_number;
+#endif
 
 /*} // namespace numbers
 } // namespace math

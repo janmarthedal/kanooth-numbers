@@ -26,26 +26,37 @@ namespace gmp {
 class lowlevel {
 public:
 
+  typedef mp_limb_t digit_type;
+
   // n >= 0
   // rp == xp  or  {rp,n} and {xp,n} do not overlap
-  static inline void copy(mp_limb_t* rp, const mp_limb_t* xp,
+  static inline void copy(digit_type* rp, const digit_type* xp,
                           const std::size_t n)
   {
     if (!n || rp == xp) return;
-    std::memcpy(rp, xp, n*sizeof(mp_limb_t));
+    std::memcpy(rp, xp, n*sizeof(digit_type));
   }
 
   // n >= 0
-  static inline mp_limb_t add_1(mp_limb_t* rp,
-                                const mp_limb_t* xp, std::size_t n,
-                                const mp_limb_t y)
+  static inline digit_type add_1(digit_type* rp,
+                                 const digit_type* xp, std::size_t n,
+                                 const digit_type y)
   { return mpn_add_1(rp, xp, n, y); }
 
   // xn >= yn >= 0
-  static inline mp_limb_t add(mp_limb_t* rp,
-                              const mp_limb_t* xp, const std::size_t xn,
-                              const mp_limb_t* yp, const std::size_t yn)
+  static inline digit_type add(digit_type* rp,
+                               const digit_type* xp, const std::size_t xn,
+                               const digit_type* yp, const std::size_t yn)
   { return mpn_add(rp, xp, xn, yp, yn); }
+
+  static inline digit_type rem_1(const digit_type* xp, const std::size_t xn,
+                                 digit_type y)
+  { return mpn_mod_1(xp, xn, y); }
+
+  static inline std::size_t to_chars(unsigned char* st, unsigned base,
+      digit_type* xp, const std::size_t xn) {
+    return mpn_get_str(st, base, xp, xn);
+  }
 
 };
 

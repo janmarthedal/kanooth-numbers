@@ -15,6 +15,8 @@
 #ifndef _SPUTSOFT_MATH_NUMBERS_DETAIL_DIGIT_ARRAY_HPP_
 #define _SPUTSOFT_MATH_NUMBERS_DETAIL_DIGIT_ARRAY_HPP_
 
+#include <cstring>
+
 namespace sputsoft {
 
 template <typename T>
@@ -34,14 +36,23 @@ class digit_array {
   template <typename Os, typename S>
   friend Os& operator<<(Os& os, const digit_array<S>& d);
 private:
+  std::size_t to_allocate(std::size_t min_size) {
+    return min_size ? ((min_size+5)/4)*4 : 0;
+  }
   std::size_t used;
   std::size_t allocated;
   T* digits;
 public:
   typedef T digit_type;
   digit_array() : used(0), allocated(0), digits(0) {}
-  digit_array(std::size_t min_size) : used(0), allocated(min_size),
-    digits(min_size ? new T[min_size] : 0) {}
+  digit_array(std::size_t min_size)
+    : used(0), allocated(to_allocate(min_size)),
+      digits(allocated ? new T[allocated] : 0) {}
+  digit_array(const digit_array& other)
+    : used(other.used), allocated(to_allocate(used)),
+      digits(allocated ? new T[allocated] : 0) {
+    if (used) std::memcpy(digits, other.digits, used*sizeof(T));
+  }
   ~digit_array() {
     if (digits) delete[] digits;
   }
