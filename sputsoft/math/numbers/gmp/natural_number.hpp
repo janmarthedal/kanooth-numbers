@@ -29,12 +29,7 @@ typedef ::detail::expr<
             ::detail::natural_number<
                 ::detail::midlevel<
                     ::detail::digit_array<unsigned long>,
-                    lowlevel > >,
-            ::detail::natural_number<
-                ::detail::midlevel<
-                    ::detail::digit_array<unsigned long>,
-                    lowlevel > >
-        > natural_number;
+                    lowlevel > > > natural_number;
 
 } // namespace gmp
 /*} // namespace numbers

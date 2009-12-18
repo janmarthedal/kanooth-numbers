@@ -36,17 +36,18 @@ namespace ops {
   }
 }
 
+//template <typename R, typename E> class expr;
+
 namespace wrap {
 
-  template <typename R, typename E> class expr;
   template <class T>
   struct resolve_ref {
     typedef T ref_type;
   };
-  template <class R, class E>
+  /*template <class R, class E>
   struct resolve_ref<expr<R, E> > {
     typedef const expr<R, E>& ref_type;
-  };
+  };*/
 
   template <typename Op, typename X, typename Y>
   class binary {
@@ -69,7 +70,7 @@ namespace wrap {
 
 }
 
-template <typename R, typename E>
+template <typename R, typename E=R>
 class expr {
 private:
   E e;
@@ -82,24 +83,12 @@ public:
 template <typename T>
 class expr<T, T> {
 private:
-  T n;
+  T e;
 public:
-  expr() : n() {}
-  template <typename E>
-  expr(const E& e) : n(e) {}
-  template <typename E>
-  expr& operator=(const E& e) { n = e; return *this; }
-  const T& get_expr() const { return n; }
-  const T& eval() const { return n; }
-  template <typename E>
-  expr& operator+=(const E& e) { n += e; return *this; }
+  expr(const T& _e) : e(_e) {}
+  const T& get_expr() const { return e; }
+  const T& eval() const { return e; }
 };
-
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const expr<T, T>& n)
-{
-  return os << n.get_expr().to_string(10);
-}
 
 template <typename Op, typename X, typename Y> struct resolve_binary;
 
@@ -115,19 +104,19 @@ op_overload(const expr<R1, E1>& x, const expr<R2, E2>& y) { \
 \
 template <typename R, typename E, typename T> \
 expr<typename resolve_binary<op_type, R, T>::return_type, \
-  wrap::binary<op_type, expr<R, E>, expr<T, T> > > \
+  wrap::binary<op_type, expr<R, E>, expr<T> > > \
 op_overload(const expr<R, E>& x, const T& y) { \
   return expr<typename resolve_binary<op_type, R, T>::return_type, \
-              wrap::binary<op_type, expr<R, E>, expr<T, T> > > \
-    (wrap::binary<op_type, expr<R, E>, expr<T, T> >(x, expr<T, T>(y))); } \
+              wrap::binary<op_type, expr<R, E>, expr<T> > > \
+    (wrap::binary<op_type, expr<R, E>, expr<T> >(x, expr<T>(y))); } \
 \
 template <typename R, typename E, typename T> \
 expr<typename resolve_binary<op_type, T, R>::return_type, \
-  wrap::binary<op_type, expr<T, T>, expr<R, E> > > \
+  wrap::binary<op_type, expr<T>, expr<R, E> > > \
 op_overload(const T& x, const expr<R, E>& y) { \
   return expr<typename resolve_binary<op_type, T, R>::return_type, \
-              wrap::binary<op_type, expr<T, T>, expr<R, E> > > \
-    (wrap::binary<op_type, expr<T, T>, expr<R, E> >(expr<T, T>(x), y)); }
+              wrap::binary<op_type, expr<T>, expr<R, E> > > \
+    (wrap::binary<op_type, expr<T>, expr<R, E> >(expr<T>(x), y)); }
 
 SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator+, ops::binary::add)
 SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator-, ops::binary::subtract)

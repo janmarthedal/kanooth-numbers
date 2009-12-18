@@ -125,6 +125,31 @@ public:
 
 };
 
+
+template <typename MidLevel>
+class expr<natural_number<MidLevel>, natural_number<MidLevel> > {
+private:
+  natural_number<MidLevel> n;
+public:
+  expr() : n() {}
+  template <typename E>
+  expr(const E& e) : n(e) {}
+  template <typename E>
+  inline expr& operator=(const E& e) { n = e; return *this; }
+  inline const natural_number<MidLevel>& get_expr() const { return n; }
+  inline const natural_number<MidLevel>& eval() const { return n; }
+  template <typename E>
+  inline expr& operator+=(const E& e) { n += e; return *this; }
+};
+
+template <typename MidLevel>
+std::ostream& operator<<(std::ostream& os,
+        const expr<natural_number<MidLevel> >& n)
+{
+  return os << n.get_expr().to_string(10);
+}
+
+
 /* Return type resolving */
 
 template <typename Op, typename ML>
