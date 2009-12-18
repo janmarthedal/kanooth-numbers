@@ -30,45 +30,51 @@ private:
   typename MidLevel::container_type digits;
 
   template <typename E1, typename E2>
-  static void assign_expr(natural_number& r, const wrap::binary<ops::binary::add,
+  void assign_expr(const wrap::binary<ops::binary::add,
       expr<natural_number, E1>, expr<natural_number, E2> >& e) {
-    MidLevel::add(r.digits, e.x.eval().digits, e.y.eval().digits);
+    MidLevel::add(digits, e.x.eval().digits, e.y.eval().digits);
   }
 
   template <typename E1, typename E2>
-  static void assign_expr(natural_number& r, const wrap::binary<ops::binary::add,
+  void assign_expr(const wrap::binary<ops::binary::add,
       expr<natural_number, E1>, expr<unsigned, E2> >& e) {
-    MidLevel::add(r.digits, e.x.eval().digits, e.y.eval());
+    MidLevel::add(digits, e.x.eval().digits, e.y.eval());
   }
 
   template <typename E1, typename E2>
-  static void assign_expr(natural_number& r, const wrap::binary<ops::binary::add,
+  void assign_expr(const wrap::binary<ops::binary::add,
       expr<unsigned, E1>, expr<natural_number, E2> >& e) {
-    MidLevel::add(r.digits, e.y.eval().digits, e.x.eval());
+    MidLevel::add(digits, e.y.eval().digits, e.x.eval());
   }
 
-  static void assign(natural_number& r, unsigned u) {
-    MidLevel::set(r.digits, u);
+  template <typename E1, typename E2>
+  void assign_expr(const wrap::binary<ops::binary::divide,
+      expr<natural_number, E1>, expr<unsigned, E2> >& e) {
+    MidLevel::divide(digits, e.x.eval().digits, e.y.eval());
+  }
+
+  void assign(unsigned u) {
+    MidLevel::set(digits, u);
   }
 
 public:
   natural_number() : digits() {}
   template <typename E>
   natural_number(const expr<natural_number, E>& e) : digits() {
-    assign_expr(*this, e.get_expr());
+    assign_expr(e.get_expr());
   }
   template <typename T>
   natural_number(const T& e) : digits() {
-    assign(*this, e);
+    assign(e);
   }
   template <typename E>
   natural_number& operator=(const expr<natural_number, E>& e) {
-    assign_expr(*this, e.get_expr());
+    assign_expr(e.get_expr());
     return *this;
   }
   template <typename T>
   natural_number& operator=(const T& e) {
-    assign(*this, e);
+    assign(e);
     return *this;
   }
   template <typename E>
@@ -114,6 +120,11 @@ struct resolve_binary<Op, natural_number<ML>, unsigned> {
 
 template <typename ML>
 struct resolve_binary<ops::binary::remainder, natural_number<ML>, unsigned> {
+  typedef unsigned return_type;
+};
+
+template <typename ML>
+struct resolve_binary<ops::binary::divide, unsigned, natural_number<ML> > {
   typedef unsigned return_type;
 };
 

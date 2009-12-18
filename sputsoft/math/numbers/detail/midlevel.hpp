@@ -33,6 +33,11 @@ namespace math {
 namespace numbers {*/
 namespace detail {
 
+int division_by_zero() {
+  int y = 0;  // hide warning
+  return 1/y;
+}
+
 template <typename Con, typename LowLevel>
 class midlevel {
 
@@ -57,7 +62,7 @@ class midlevel {
       add3(r, x, y);
   }
 
-  static void add3(Con& r, const Con& x, unsigned long y) {
+  static void add3(Con& r, const Con& x, digit_type y) {
     std::size_t xs = x.size();
     digit_type carry = LowLevel::add_1(r.get(), x.get(), xs, y);
     if (carry) r[xs++] = carry;
@@ -65,7 +70,7 @@ class midlevel {
   }
 
   // x.size() >= 1, y != 0
-  static void add2(Con& r, const Con& x, unsigned long y) {
+  static void add2(Con& r, const Con& x, digit_type y) {
     std::size_t xs = x.size();
     if (!r.will_fit(xs + 1)) {
       Con t(xs + 1);
@@ -75,8 +80,15 @@ class midlevel {
       add3(r, x, y);    
   }
 
+  // r.size() >= x.size(), !x.is_empty(), y != 0
+  static void divide2(Con& r, const Con& x, digit_type y) {
+    std::size_t n = x.size();
+    LowLevel::divrem_1(r.get(), x.get(), n, y);
+    r.set_size(r[n-1] ? n : n-1);
+  }
+
 public:
-  
+
   typedef Con container_type;
 
   static void set(Con& r, digit_type x) {
@@ -104,6 +116,20 @@ public:
     if (x.is_empty()) set(r, y);
     else if (!y)      set(r, x);
     else              add2(r, x, y);
+  }
+
+  static void divide(Con& r, const Con& u, digit_type v) {
+    if (!v) division_by_zero();
+    else if (u.is_empty()) r.set_size(0);
+    else {
+      std::size_t n = u.size();
+      if (r.will_fit(n)) {
+        Con t(n);
+        divide2(t, u, v);
+        r.swap(t);
+      } else 
+        divide2(r, u, v);
+    }
   }
 
   static inline digit_type remainder(const Con& u, digit_type v) {

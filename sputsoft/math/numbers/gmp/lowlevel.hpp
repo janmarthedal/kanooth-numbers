@@ -40,18 +40,31 @@ public:
   // n >= 0
   static inline digit_type add_1(digit_type* rp,
                                  const digit_type* xp, std::size_t n,
-                                 const digit_type y)
-  { return mpn_add_1(rp, xp, n, y); }
+                                 const digit_type y) {
+    return mpn_add_1(rp, xp, n, y);
+  }
 
   // xn >= yn >= 0
   static inline digit_type add(digit_type* rp,
                                const digit_type* xp, const std::size_t xn,
-                               const digit_type* yp, const std::size_t yn)
-  { return mpn_add(rp, xp, xn, yp, yn); }
+                               const digit_type* yp, const std::size_t yn) {
+    return mpn_add(rp, xp, xn, yp, yn);
+  }
 
+  // n >= 0
+  // rp == xp  or  {rp,n} and {xp,n} do not overlap
+  static inline digit_type divrem_1(digit_type* rp,
+                                 const digit_type* xp, std::size_t n,
+                                 const digit_type y) {
+    rp[0] = 123; return 1;
+    //return mpn_divrem_1(rp, 0, xp, n, y);
+  }
+
+  // xn >= 0
   static inline digit_type rem_1(const digit_type* xp, const std::size_t xn,
-                                 digit_type y)
-  { return mpn_mod_1(xp, xn, y); }
+                                 digit_type y) {
+    return mpn_mod_1(xp, xn, y);
+  }
 
   static inline std::size_t to_chars(unsigned char* st, unsigned base,
       digit_type* xp, const std::size_t xn) {
