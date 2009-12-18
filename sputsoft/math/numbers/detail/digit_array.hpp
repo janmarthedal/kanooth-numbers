@@ -63,7 +63,7 @@ public:
   }
   std::size_t size() const { return used; }
   void set_size(std::size_t n) { used = n; }
-  bool will_fit(std::size_t n) const { return n <= allocated; }
+  bool request_size(std::size_t n) const { return n <= allocated; }
   bool is_empty() const { return used == 0; }
   const T* get() const { return digits; }
   T* get() { return digits; }

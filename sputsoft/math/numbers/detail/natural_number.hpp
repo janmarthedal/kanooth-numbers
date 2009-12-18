@@ -16,7 +16,7 @@
 #define _SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_HPP_
 
 #include <iostream>
-//#include <boost/cstdint.hpp>
+#include <sputsoft/math/number_theory/common.hpp>
 #include <sputsoft/math/numbers/detail/expressions.hpp>
 
 /*namespace sputsoft {
@@ -51,6 +51,12 @@ private:
   void assign_expr(const wrap::binary<ops::binary::divide,
       expr<natural_number, E1>, expr<unsigned, E2> >& e) {
     MidLevel::divide(digits, e.x.eval().digits, e.y.eval());
+  }
+
+  template <typename E1, typename E2>
+  void assign_expr(const wrap::binary<ops::binary::remainder,
+      expr<unsigned, E1>, expr<natural_number, E2> >& e) {
+    MidLevel::remainder(digits, e.x.eval(), e.y.eval().digits);
   }
 
   void assign(unsigned u) {
@@ -95,8 +101,26 @@ public:
     return MidLevel::to_string(digits, base);
   }
 
-  static unsigned remainder(const natural_number& x, unsigned y) {
+  static inline unsigned remainder(const natural_number& x, unsigned y) {
     return MidLevel::remainder(x.digits, y);
+  }
+
+  static inline unsigned divide(unsigned x, const natural_number& y) {
+    return MidLevel::divide(x, y.digits);
+  }
+
+  static inline std::pair<natural_number, unsigned>
+        quotrem(const natural_number& x, unsigned y) {
+    natural_number q;
+    unsigned r = MidLevel::quotrem(q.digits, x.digits, y);
+    return std::make_pair(q, r);
+  }
+
+  static inline std::pair<unsigned, natural_number>
+        quotrem(unsigned x, const natural_number& y) {
+    natural_number r;
+    unsigned q = MidLevel::quotrem(r.digits, x, y.digits);
+    return std::make_pair(q, r);
   }
 
 };
@@ -144,11 +168,51 @@ public:
   operator unsigned() const { return eval(); }
 };
 
+template <typename ML, typename E1, typename E2>
+class expr<unsigned, wrap::binary<ops::binary::divide, expr<unsigned, E1>, expr<natural_number<ML>, E2> > > {
+private:
+  typedef wrap::binary<ops::binary::divide, expr<unsigned, E1>, expr<natural_number<ML>, E2> > E;
+  E e;
+public:
+  expr(const E& _e) : e(_e) {}
+  const E& get_expr() const { return e; }
+  unsigned eval() const {
+    return natural_number<ML>::divide(e.x.eval(), e.y.eval());
+  }
+  operator unsigned() const { return eval(); }
+};
+
 
 } // namespace detail
 /*} // namespace numbers
 } // namespace math
 } // namespace sputsoft*/
+
+namespace sputsoft {
+namespace math {
+namespace number_theory {
+
+/* Specializations */
+
+template <typename ML>
+struct quotrem_evaluator<detail::natural_number<ML>, unsigned> {
+  static inline std::pair<detail::natural_number<ML>, unsigned>
+        quotrem(const detail::natural_number<ML>& u, unsigned v) {
+    return detail::natural_number<ML>::quotrem(u, v);
+  }
+};
+
+template <typename ML>
+struct quotrem_evaluator<unsigned, detail::natural_number<ML> > {
+  static inline std::pair<unsigned, detail::natural_number<ML> >
+        quotrem(unsigned u, const detail::natural_number<ML>& v) {
+    return detail::natural_number<ML>::quotrem(u, v);
+  }
+};
+
+} // namespace number_theory
+} // namespace math
+} // namespace sputsoft
 
 #endif // _SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_HPP_
 

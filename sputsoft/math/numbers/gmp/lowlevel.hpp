@@ -54,10 +54,9 @@ public:
   // n >= 0
   // rp == xp  or  {rp,n} and {xp,n} do not overlap
   static inline digit_type divrem_1(digit_type* rp,
-                                 const digit_type* xp, std::size_t n,
-                                 const digit_type y) {
-    rp[0] = 123; return 1;
-    //return mpn_divrem_1(rp, 0, xp, n, y);
+                                    const digit_type* xp, std::size_t n,
+                                    const digit_type y) {
+    return mpn_divrem_1(rp, 0, xp, n, y);
   }
 
   // xn >= 0

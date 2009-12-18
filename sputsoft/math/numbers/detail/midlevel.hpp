@@ -54,7 +54,7 @@ class midlevel {
   // x.size() >= y.size() >= 1
   static void add2(Con& r, const Con& x, const Con& y) {
     std::size_t xs = x.size();
-    if (!r.will_fit(xs + 1)) {
+    if (!r.request_size(xs + 1)) {
       Con t(xs + 1);
       add3(t, x, y);
       r.swap(t);
@@ -72,7 +72,7 @@ class midlevel {
   // x.size() >= 1, y != 0
   static void add2(Con& r, const Con& x, digit_type y) {
     std::size_t xs = x.size();
-    if (!r.will_fit(xs + 1)) {
+    if (!r.request_size(xs + 1)) {
       Con t(xs + 1);
       add3(t, x, y);
       r.swap(t);
@@ -93,7 +93,8 @@ public:
 
   static void set(Con& r, digit_type x) {
     if (x) {
-      if (!r.will_fit(1)) Con(1).swap(r);
+      if (!r.request_size(1))
+        Con(1).swap(r);
       r[0] = x;
       r.set_size(1);
     } else
@@ -101,8 +102,14 @@ public:
   }
 
   static void set(Con& r, const Con& x) {
-    LowLevel::copy(r.get(), x.get(), x.size());
-    r.set_size(x.size());
+    std::size_t n = x.size();
+    if (!r.request_size(n)) {
+      Con t(n);
+      LowLevel::copy(t.get(), x.get(), n);
+      r.swap(t);
+    } else
+      LowLevel::copy(r.get(), x.get(), x.size());
+    r.set_size(n);
   }
 
   static void add(Con& r, const Con& x, const Con& y) {
@@ -119,11 +126,13 @@ public:
   }
 
   static void divide(Con& r, const Con& u, digit_type v) {
-    if (!v) division_by_zero();
-    else if (u.is_empty()) r.set_size(0);
+    if (!v)
+      division_by_zero();
+    else if (u.is_empty())
+      r.set_size(0);
     else {
       std::size_t n = u.size();
-      if (r.will_fit(n)) {
+      if (!r.request_size(n)) {
         Con t(n);
         divide2(t, u, v);
         r.swap(t);
@@ -132,8 +141,54 @@ public:
     }
   }
 
+  static inline digit_type divide(digit_type u, const Con& v) {
+    if (v.is_empty())
+      division_by_zero();
+    else if (v.size() > 1)
+      return 0;
+    else
+      return u / v[0];
+  }
+
   static inline digit_type remainder(const Con& u, digit_type v) {
     return LowLevel::rem_1(u.get(), u.size(), v);
+  }
+
+  static inline void remainder(Con& r, digit_type u, const Con& v) {
+    if (v.is_empty())
+      division_by_zero();
+    else if (v.size() > 1 || v[0] > u)
+      set(r, v);
+    else
+      set(r, u % v[0]);
+  }
+
+  static inline digit_type quotrem(Con& r, const Con& u, digit_type v) {
+    if (!v)
+      division_by_zero();
+    else if (u.is_empty()) {
+      r.set_size(0);
+      return v;
+    } else {
+      Con t(u.size());
+      digit_type rem = divide2(t, u, v);
+      r.swap(t);
+      return rem;
+    }
+  }
+
+  static inline digit_type quotrem(Con& r, digit_type u, const Con& v) {
+    if (v.is_empty())
+      division_by_zero();
+    else if (v.size() > 1 || v[0] > u) {
+      set(r, v);
+      return 0;
+    } else {
+      std::pair<digit_type, digit_type> qr =
+              sputsoft::math::number_theory::quotrem(u, v[0]);
+      set(r, qr.second);
+      return qr.first;
+    }
   }
 
   static inline std::string to_string(const Con& x, unsigned base) {

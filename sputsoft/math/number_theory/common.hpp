@@ -1,5 +1,5 @@
 /*
- * File:   math/numbers/common.hpp
+ * File:   math/number_theory/common.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-16 13:46Z
@@ -44,7 +44,7 @@ inline V remainder(const U& u, const V& v) {
 template <typename U, typename V>
 struct quotrem_evaluator {
   static std::pair<U, V> quotrem(const U& u, const V& v)
-  { return std::make_pair(quotient(u, v), remainder(u, v)); }
+  { return std::make_pair(u / v, u % v); }
 };
 
 template <typename U, typename V>
