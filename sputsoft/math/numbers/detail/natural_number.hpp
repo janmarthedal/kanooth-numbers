@@ -35,6 +35,11 @@ private:
     MidLevel::add(r.digits, u.digits, v.digits);
   }
 
+  static inline void sub(natural_number& r,
+      const natural_number& u, const natural_number& v) {
+    MidLevel::subtract(r.digits, u.digits, v.digits);
+  }
+
   static inline void multiply(natural_number& r,
       const natural_number& u, const natural_number& v) {
     MidLevel::multiply(r.digits, u.digits, v.digits);
@@ -50,54 +55,66 @@ private:
     MidLevel::remainder(r.digits, u.digits, v.digits);
   }
 
+#define SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PRIVATE_BUILTIN(type, convtype) \
+  static inline void add(natural_number& r, \
+      const natural_number& u, type v) { \
+    MidLevel::add(r.digits, u.digits, (convtype) v); \
+  } \
+  static inline void add(natural_number& r, \
+      type u, const natural_number& v) { \
+    MidLevel::add(r.digits, v.digits, (convtype) u); \
+  } \
+  static inline void subtract(natural_number& r, \
+      const natural_number& u, type v) { \
+    MidLevel::subtract(r.digits, u.digits, (convtype) v); \
+  } \
+  static inline void subtract(natural_number& r, \
+      type u, const natural_number& v) { \
+    assign(MidLevel::subtract((convtype) u, v.digits)); \
+  } \
+  static inline void multiply(natural_number& r, \
+      const natural_number& u, type v) { \
+    MidLevel::multiply(r.digits, u.digits, (convtype) v); \
+  } \
+  static inline void multiply(natural_number& r, \
+      type u, const natural_number& v) { \
+    MidLevel::multiply(r.digits, v.digits, (convtype) u); \
+  } \
+  static inline void divide(natural_number& r, \
+      const natural_number& u, type v) { \
+    MidLevel::divide(r.digits, u.digits, (convtype) v); \
+  } \
+  static inline void divide(natural_number& r, \
+      type u, const natural_number& v) { \
+    assign(divide((convtype) u, v.digits)); \
+  } \
+  static inline void remainder(natural_number& r, \
+      const natural_number& u, type v) { \
+    assign(remainder(u.digits, (convtype) v)); \
+  } \
+  static inline void remainder(natural_number& r, \
+      type u, const natural_number& v) { \
+    MidLevel::remainder(r.digits, (convtype) u, v.digits); \
+  }
+
+  SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PRIVATE_BUILTIN(int, unsigned)
+  SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PRIVATE_BUILTIN(uint8_t, uint8_t)
+  SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PRIVATE_BUILTIN(uint16_t, uint16_t)
+  SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PRIVATE_BUILTIN(uint32_t, uint32_t)
 #ifdef SPUTSOFT_HAS_64_BIT_TYPES
-
-  static inline void add(natural_number& r,
-      const natural_number& u, uint64_t v) {
-    MidLevel::add(r.digits, u.digits, v);
-  }
-
-  static inline void add(natural_number& r,
-      uint64_t u, const natural_number& v) {
-    MidLevel::add(r.digits, v.digits, u);
-  }
-
-  static inline void multiply(natural_number& r,
-      const natural_number& u, uint64_t v) {
-    MidLevel::multiply(r.digits, u.digits, v);
-  }
-
-  static inline void multiply(natural_number& r,
-      uint64_t u, const natural_number& v) {
-    MidLevel::multiply(r.digits, v.digits, u);
-  }
-
-  static inline void divide(natural_number& r,
-      const natural_number& u, uint64_t v) {
-    MidLevel::divide(r.digits, u.digits, v);
-  }
-
-  static inline void divide(natural_number& r,
-      uint64_t u, const natural_number& v) {
-    assign(divide(u, v.digits));
-  }
-
-  static inline void remainder(natural_number& r,
-      const natural_number& u, uint64_t v) {
-    assign(remainder(u.digits, v));
-  }
-
-  static inline void remainder(natural_number& r,
-      uint64_t u, const natural_number& v) {
-    MidLevel::remainder(r.digits, u, v.digits);
-  }
-
+  SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PRIVATE_BUILTIN(uint64_t, uint64_t)
 #endif // SPUTSOFT_HAS_64_BIT_TYPES
 
   template <typename R1, typename E1, typename R2, typename E2>
   inline void assign_expr(const wrap::binary<ops::binary::add,
       expr<R1, E1>, expr<R2, E2> >& e) {
     add(*this, e.x.eval(), e.y.eval());
+  }
+
+  template <typename R1, typename E1, typename R2, typename E2>
+  inline void assign_expr(const wrap::binary<ops::binary::subtract,
+      expr<R1, E1>, expr<R2, E2> >& e) {
+    subtract(*this, e.x.eval(), e.y.eval());
   }
 
   template <typename R1, typename E1, typename R2, typename E2>
@@ -128,6 +145,16 @@ public:
 
   template <typename T>
   inline void add_this(const T& v) {
+    add(*this, *this, v);
+  }
+
+  template <typename R, typename E>
+  inline void subtract_this(const expr<R, E>& e) {
+    add(*this, *this, e.eval());
+  }
+
+  template <typename T>
+  inline void subtract_this(const T& v) {
     add(*this, *this, v);
   }
 
@@ -171,34 +198,38 @@ public:
     return std::make_pair(q, r);
   }
 
+#define SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PUBLIC_BUILTIN(type, convtype) \
+  inline void assign(type u) { \
+    MidLevel::set(digits, (convtype) u); \
+  } \
+  static inline type subtract(type x, const natural_number& y) { \
+    return MidLevel::subtract((convtype) x, y.digits); \
+  } \
+  static inline type remainder(const natural_number& x, type y) { \
+    return MidLevel::remainder(x.digits, (convtype) y); \
+  } \
+  static inline type divide(type x, const natural_number& y) { \
+    return MidLevel::divide((convtype) x, y.digits); \
+  } \
+  static inline std::pair<natural_number, type> \
+        quotrem(const natural_number& x, type y) { \
+    natural_number q; \
+    type r = MidLevel::quotrem(q.digits, x.digits, (convtype) y); \
+    return std::make_pair(q, r); \
+  } \
+  static inline std::pair<type, natural_number> \
+        quotrem(type x, const natural_number& y) { \
+    natural_number r; \
+    type q = MidLevel::quotrem(r.digits, (convtype) x, y.digits); \
+    return std::make_pair(q, r); \
+  }
+
+  SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PUBLIC_BUILTIN(int, unsigned)
+  SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PUBLIC_BUILTIN(uint8_t, uint8_t)
+  SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PUBLIC_BUILTIN(uint16_t, uint16_t)
+  SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PUBLIC_BUILTIN(uint32_t, uint32_t)
 #ifdef SPUTSOFT_HAS_64_BIT_TYPES
-
-  inline void assign(uint64_t u) {
-    MidLevel::set(digits, u);
-  }
-
-  static inline uint64_t remainder(const natural_number& x, uint64_t y) {
-    return MidLevel::remainder(x.digits, y);
-  }
-
-  static inline uint64_t divide(uint64_t x, const natural_number& y) {
-    return MidLevel::divide(x, y.digits);
-  }
-
-  static inline std::pair<natural_number, uint64_t>
-        quotrem(const natural_number& x, uint64_t y) {
-    natural_number q;
-    uint64_t r = MidLevel::quotrem(q.digits, x.digits, y);
-    return std::make_pair(q, r);
-  }
-
-  static inline std::pair<uint64_t, natural_number>
-        quotrem(uint64_t x, const natural_number& y) {
-    natural_number r;
-    uint64_t q = MidLevel::quotrem(r.digits, x, y.digits);
-    return std::make_pair(q, r);
-  }
-
+  SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PUBLIC_BUILTIN(uint64_t, uint64_t)
 #endif // SPUTSOFT_HAS_64_BIT_TYPES
 
 };
@@ -212,10 +243,13 @@ public:
   expr() : n() {}
   template <typename T>
     expr(const T& e) : n() { n.assign(e); }
+  //expr& operator=(int v) { n.assign((unsigned) v); return *this; }
   template <typename T>
     expr& operator=(const T& e) { n.assign(e); return *this; }
   template <typename E>
     inline expr& operator+=(const E& e) { n.add_this(e); return *this; }
+  template <typename E>
+    inline expr& operator-=(const E& e) { n.subtract_this(e); return *this; }
   template <typename E>
     inline expr& operator/=(const E& e) { n.divide_this(e); return *this; }
   template <typename E>
@@ -240,64 +274,91 @@ struct resolve_binary<Op, natural_number<ML>, natural_number<ML> > {
   typedef natural_number<ML> return_type;
 };
 
+#define SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_RESOLVE(type) \
+template <typename Op, typename ML> \
+struct resolve_binary<Op, type, natural_number<ML> > { \
+  typedef natural_number<ML> return_type; \
+}; \
+template <typename Op, typename ML> \
+struct resolve_binary<Op, natural_number<ML>, type> { \
+  typedef natural_number<ML> return_type; \
+}; \
+template <typename ML> \
+struct resolve_binary<ops::binary::subtract, type, natural_number<ML> > { \
+  typedef type return_type; \
+}; \
+template <typename ML> \
+struct resolve_binary<ops::binary::remainder, natural_number<ML>, type> { \
+  typedef type return_type; \
+}; \
+template <typename ML> \
+struct resolve_binary<ops::binary::divide, type, natural_number<ML> > { \
+  typedef type return_type; \
+};
+
+SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_RESOLVE(int)
+SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_RESOLVE(uint8_t)
+SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_RESOLVE(uint16_t)
+SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_RESOLVE(uint32_t)
 #ifdef SPUTSOFT_HAS_64_BIT_TYPES
-
-template <typename Op, typename ML>
-struct resolve_binary<Op, uint64_t, natural_number<ML> > {
-  typedef natural_number<ML> return_type;
-};
-
-template <typename Op, typename ML>
-struct resolve_binary<Op, natural_number<ML>, uint64_t> {
-  typedef natural_number<ML> return_type;
-};
-
-template <typename ML>
-struct resolve_binary<ops::binary::remainder, natural_number<ML>, uint64_t> {
-  typedef uint64_t return_type;
-};
-
-template <typename ML>
-struct resolve_binary<ops::binary::divide, uint64_t, natural_number<ML> > {
-  typedef uint64_t return_type;
-};
-
+SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_RESOLVE(uint64_t)
 #endif // SPUTSOFT_HAS_64_BIT_TYPES
 
 /* Specializations for built-in return types */
 
+#define SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_SPEC_EXPR(type) \
+template <typename ML, typename E1, typename E2> \
+class expr<type, wrap::binary<ops::binary::subtract, expr<type, E1>, \
+                                  expr<natural_number<ML>, E2> > > { \
+private: \
+  typedef wrap::binary<ops::binary::subtract, expr<type, E1>, \
+                       expr<natural_number<ML>, E2> > E; \
+  E e; \
+public: \
+  expr(const E& _e) : e(_e) {} \
+  const E& get_expr() const { return e; } \
+  type eval() const { \
+    return natural_number<ML>::subtract(e.x.eval(), e.y.eval()); \
+  } \
+  operator type() const { return eval(); } \
+}; \
+template <typename ML, typename E1, typename E2> \
+class expr<type, wrap::binary<ops::binary::remainder, \
+           expr<natural_number<ML>, E1>, expr<type, E2> > > { \
+private: \
+  typedef wrap::binary<ops::binary::remainder, expr<natural_number<ML>, E1>, \
+                       expr<type, E2> > E; \
+  E e; \
+public: \
+  expr(const E& _e) : e(_e) {} \
+  const E& get_expr() const { return e; } \
+  type eval() const { \
+    return natural_number<ML>::remainder(e.x.eval(), e.y.eval()); \
+  } \
+  operator type() const { return eval(); } \
+}; \
+template <typename ML, typename E1, typename E2> \
+class expr<type, wrap::binary<ops::binary::divide, expr<type, E1>, \
+                                  expr<natural_number<ML>, E2> > > { \
+private: \
+  typedef wrap::binary<ops::binary::divide, expr<type, E1>, \
+                       expr<natural_number<ML>, E2> > E; \
+  E e; \
+public: \
+  expr(const E& _e) : e(_e) {} \
+  const E& get_expr() const { return e; } \
+  type eval() const { \
+    return natural_number<ML>::divide(e.x.eval(), e.y.eval()); \
+  } \
+  operator type() const { return eval(); } \
+};
+
+SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_SPEC_EXPR(int)
+SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_SPEC_EXPR(uint8_t)
+SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_SPEC_EXPR(uint16_t)
+SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_SPEC_EXPR(uint32_t)
 #ifdef SPUTSOFT_HAS_64_BIT_TYPES
-
-template <typename ML, typename E1, typename E2>
-class expr<uint64_t, wrap::binary<ops::binary::remainder, expr<natural_number<ML>, E1>, expr<uint64_t, E2> > > {
-private:
-  typedef wrap::binary<ops::binary::remainder, expr<natural_number<ML>, E1>, expr<uint64_t, E2> > E;
-  E e;
-public:
-  expr(const E& _e) : e(_e) {}
-  const E& get_expr() const { return e; }
-  uint64_t eval() const {
-    return natural_number<ML>::remainder(e.x.eval(), e.y.eval());
-  }
-  operator uint64_t() const { return eval(); }
-};
-
-template <typename ML, typename E1, typename E2>
-class expr<uint64_t, wrap::binary<ops::binary::divide, expr<uint64_t, E1>,
-                                  expr<natural_number<ML>, E2> > > {
-private:
-  typedef wrap::binary<ops::binary::divide, expr<uint64_t, E1>,
-                       expr<natural_number<ML>, E2> > E;
-  E e;
-public:
-  expr(const E& _e) : e(_e) {}
-  const E& get_expr() const { return e; }
-  uint64_t eval() const {
-    return natural_number<ML>::divide(e.x.eval(), e.y.eval());
-  }
-  operator uint64_t() const { return eval(); }
-};
-
+SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_SPEC_EXPR(uint64_t)
 #endif // SPUTSOFT_HAS_64_BIT_TYPES
 
 } // namespace detail
@@ -319,24 +380,27 @@ struct quotrem_evaluator<detail::natural_number<ML>, detail::natural_number<ML> 
   }
 };
 
+#define SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_SPEC_NUMTH(type) \
+template <typename ML> \
+struct quotrem_evaluator<detail::natural_number<ML>, type> { \
+  static inline std::pair<detail::natural_number<ML>, type> \
+        quotrem(const detail::natural_number<ML>& u, type v) { \
+    return detail::natural_number<ML>::quotrem(u, v); \
+  } \
+}; \
+template <typename ML> \
+struct quotrem_evaluator<type, detail::natural_number<ML> > { \
+  static inline std::pair<type, detail::natural_number<ML> > \
+        quotrem(type u, const detail::natural_number<ML>& v) { \
+    return detail::natural_number<ML>::quotrem(u, v); \
+  } \
+};
+
+SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_SPEC_NUMTH(uint8_t)
+SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_SPEC_NUMTH(uint16_t)
+SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_SPEC_NUMTH(uint32_t)
 #ifdef SPUTSOFT_HAS_64_BIT_TYPES
-
-template <typename ML>
-struct quotrem_evaluator<detail::natural_number<ML>, uint64_t> {
-  static inline std::pair<detail::natural_number<ML>, uint64_t>
-        quotrem(const detail::natural_number<ML>& u, uint64_t v) {
-    return detail::natural_number<ML>::quotrem(u, v);
-  }
-};
-
-template <typename ML>
-struct quotrem_evaluator<uint64_t, detail::natural_number<ML> > {
-  static inline std::pair<uint64_t, detail::natural_number<ML> >
-        quotrem(uint64_t u, const detail::natural_number<ML>& v) {
-    return detail::natural_number<ML>::quotrem(u, v);
-  }
-};
-
+SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_SPEC_NUMTH(uint64_t)
 #endif // SPUTSOFT_HAS_64_BIT_TYPES
 
 } // namespace number_theory

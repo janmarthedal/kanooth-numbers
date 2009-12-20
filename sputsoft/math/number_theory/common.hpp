@@ -21,25 +21,20 @@ namespace sputsoft {
 namespace math {
 namespace number_theory {
 
-/*template <typename U, typename V>
-struct quotient_evaluator {
-  static U quotient(const U& u, const V& v) { return u / v; }
+template <typename T>
+struct floor_log2_evaluator {
+  static std::size_t floor_log2(T n) {
+    std::size_t r = -1;
+    while (n) { ++r; n >>= 1; }
+    return r;
+  }
 };
 
-template <typename U, typename V>
-inline U quotient(const U& u, const V& v) {
-  return quotient_evaluator<U, V>::quotient(u, v);
+template <typename T>
+inline std::size_t floor_log2(T n) {
+  return floor_log2_evaluator<T>::floor_log2(n);
 }
 
-template <typename U, typename V>
-struct remainder_evaluator {
-  static V remainder(const U& u, const V& v) { return u % v; }
-};
-
-template <typename U, typename V>
-inline V remainder(const U& u, const V& v) {
-  return remainder_evaluator<U, V>::remainder(u, v);
-}*/
 
 template <typename U, typename V>
 struct quotrem_evaluator {
@@ -52,8 +47,6 @@ inline std::pair<U, V> quotrem(const U& u, const V& v)
 {
   return quotrem_evaluator<U, V>::quotrem(u, v);
 }
-
-/* Specializations */
 
 template <>
 struct quotrem_evaluator<long, long> {

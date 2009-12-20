@@ -45,7 +45,7 @@ private:
 public:
   typedef T digit_type;
   digit_array() : used(0), allocated(0), digits(0) {}
-  digit_array(std::size_t min_size)
+  explicit digit_array(std::size_t min_size)
     : used(0), allocated(to_allocate(min_size)),
       digits(allocated ? new T[allocated] : 0) {}
   digit_array(const digit_array& other)

@@ -51,6 +51,20 @@ public:
     return mpn_add(rp, xp, xn, yp, yn);
   }
 
+  // n >= 1
+  static inline void sub_1(digit_type* rp,
+                           const digit_type* xp, std::size_t n,
+                           const digit_type y) {
+    mpn_sub_1(rp, xp, n, y);
+  }
+
+  // xn >= yn >= 0
+  static inline void sub(digit_type* rp,
+                         const digit_type* xp, const std::size_t xn,
+                         const digit_type* yp, const std::size_t yn) {
+    mpn_sub(rp, xp, xn, yp, yn);
+  }
+
   // n >= 0
   static inline digit_type mul_1(digit_type* rp,
                                  const digit_type* xp, std::size_t n,
