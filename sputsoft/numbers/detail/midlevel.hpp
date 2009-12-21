@@ -1,5 +1,5 @@
 /*
- * File:   math/numbers/detail/midlevel.hpp
+ * File:   numbers/detail/midlevel.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z
@@ -12,17 +12,16 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_MATH_NUMBERS_DETAIL_MIDLEVEL_HPP_
-#define _SPUTSOFT_MATH_NUMBERS_DETAIL_MIDLEVEL_HPP_
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_MIDLEVEL_HPP_
+#define _SPUTSOFT_NUMBERS_DETAIL_MIDLEVEL_HPP_
 
 #include <sputsoft/types.hpp>
-#include <sputsoft/math/number_theory/common.hpp>
+#include <sputsoft/number_theory/common.hpp>
 #include <boost/integer_traits.hpp>
 
 
-/*namespace sputsoft {
-namespace math {
-namespace numbers {*/
+namespace sputsoft {
+namespace numbers {
 namespace detail {
 
 int division_by_zero() {
@@ -192,7 +191,7 @@ public:
       set(r, v);
       return 0;
     } else {
-      std::pair<D, D> qr = sputsoft::math::number_theory::quotrem(u, v[0]);
+      std::pair<D, D> qr = number_theory::quotrem(u, v[0]);
       set(r, qr.second);
       return qr.first;
     }
@@ -474,17 +473,6 @@ public:
     }
   }
 
-  static inline std::string to_string(const Con& x, unsigned base) {
-    Con tmp(x);
-    unsigned max_digits = tmp.size() * digit_bits
-      / sputsoft::math::number_theory::floor_log2(base) + 1;
-    unsigned char st[max_digits];
-    std::size_t used = LowLevel::to_chars(st, base, tmp.get(), tmp.size());
-    for (unsigned i=0; i < used; ++i) st[i] += '0';
-    st[used] = 0;
-    return std::string((const char*)st, used);
-  }
-
   static inline void set(Con& r, uint8_t u) {
     midlevel_1_8::set(r, u);
   }
@@ -626,9 +614,7 @@ public:
 };
 
 } // namespace detail
-/*} // namespace numbers
-} // namespace math
-} // namespace sputsoft*/
+} // namespace numbers
+} // namespace sputsoft
 
-#endif // _SPUTSOFT_MATH_NUMBERS_DETAIL_MIDLEVEL_HPP_
-
+#endif // _SPUTSOFT_NUMBERS_DETAIL_MIDLEVEL_HPP_

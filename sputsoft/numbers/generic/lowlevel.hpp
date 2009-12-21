@@ -1,5 +1,5 @@
 /*
- * File:   math/numbers/generic/lowlevel.hpp
+ * File:   numbers/generic/lowlevel.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z
@@ -12,14 +12,13 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_MATH_NUMBERS_GENERIC_LOWLEVEL_HPP_
-#define _SPUTSOFT_MATH_NUMBERS_GENERIC_LOWLEVEL_HPP_
+#ifndef _SPUTSOFT_NUMBERS_GENERIC_LOWLEVEL_HPP_
+#define _SPUTSOFT_NUMBERS_GENERIC_LOWLEVEL_HPP_
 
 #include <cstring>
 
-/*namespace sputsoft {
-namespace math {
-namespace numbers {*/
+namespace sputsoft {
+namespace numbers {
 namespace generic {
 
 template <typename T>
@@ -97,9 +96,7 @@ public:
 };
 
 } // namespace generic
-/*} // namespace numbers
-} // namespace math
-} // namespace sputsoft*/
+} // namespace numbers
+} // namespace sputsoft
 
-#endif // _SPUTSOFT_MATH_NUMBERS_GENERIC_LOWLEVEL_HPP_
-
+#endif // _SPUTSOFT_NUMBERS_GENERIC_LOWLEVEL_HPP_

@@ -1,5 +1,5 @@
 /*
- * File:   math/numbers/gmp/lowlevel.hpp
+ * File:   numbers/gmp/lowlevel.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z
@@ -12,15 +12,14 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_MATH_NUMBERS_GMP_LOWLEVEL_HPP_
-#define _SPUTSOFT_MATH_NUMBERS_GMP_LOWLEVEL_HPP_
+#ifndef _SPUTSOFT_NUMBERS_GMP_LOWLEVEL_HPP_
+#define _SPUTSOFT_NUMBERS_GMP_LOWLEVEL_HPP_
 
 #include <cstring>
 #include <gmp.h>
 
-/*namespace sputsoft {
-namespace math {
-namespace numbers {*/
+namespace sputsoft {
+namespace numbers {
 namespace gmp {
 
 class lowlevel {
@@ -102,17 +101,10 @@ public:
     return mpn_mod_1(xp, xn, y);
   }
 
-  static inline std::size_t to_chars(unsigned char* st, unsigned base,
-      digit_type* xp, const std::size_t xn) {
-    return mpn_get_str(st, base, xp, xn);
-  }
-
 };
 
 } // namespace gmp
-/*} // namespace numbers
-} // namespace math
-} // namespace sputsoft*/
+} // namespace numbers
+} // namespace sputsoft
 
-#endif // _SPUTSOFT_MATH_NUMBERS_GENERIC_LOWLEVEL_HPP_
-
+#endif // _SPUTSOFT_NUMBERS_GENERIC_LOWLEVEL_HPP_

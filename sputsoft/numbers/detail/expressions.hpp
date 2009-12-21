@@ -1,5 +1,5 @@
 /*
- * File:   math/numbers/detail/expressions.hpp
+ * File:   numbers/detail/expressions.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z
@@ -12,14 +12,13 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_MATH_NUMBERS_DETAIL_EXPRESSIONS_HPP_
-#define _SPUTSOFT_MATH_NUMBERS_DETAIL_EXPRESSIONS_HPP_
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_EXPRESSIONS_HPP_
+#define _SPUTSOFT_NUMBERS_DETAIL_EXPRESSIONS_HPP_
 
 #include <iostream>
 
-/*namespace sputsoft {
-namespace math {
-namespace numbers {*/
+namespace sputsoft {
+namespace numbers {
 namespace detail {
 
 namespace ops {
@@ -125,9 +124,7 @@ SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator/, ops::binary::divide)
 SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator%, ops::binary::remainder)
 
 } // namespace detail
-/*} // namespace numbers
-} // namespace math
-} // namespace sputsoft*/
+} // namespace numbers
+} // namespace sputsoft
 
-#endif // _SPUTSOFT_MATH_NUMBERS_DETAIL_EXPRESSIONS_HPP_
-
+#endif // _SPUTSOFT_NUMBERS_DETAIL_EXPRESSIONS_HPP_

@@ -1,5 +1,5 @@
 /*
- * File:   math/numbers/detail/natural_number.hpp
+ * File:   numbers/detail/natural_number.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z
@@ -12,21 +12,22 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_HPP_
-#define _SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_HPP_
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_HPP_
+#define _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_HPP_
 
 #include <iostream>
 #include <sputsoft/types.hpp>
-#include <sputsoft/math/number_theory/common.hpp>
-#include <sputsoft/math/numbers/detail/expressions.hpp>
+#include <sputsoft/number_theory/common.hpp>
+#include <sputsoft/numbers/detail/expressions.hpp>
 
-/*namespace sputsoft {
-namespace math {
-namespace numbers {*/
+namespace sputsoft {
+namespace numbers {
 namespace detail {
 
 template <typename MidLevel>
 class natural_number {
+/*public:
+  typedef typename MidLevel::container_type container_type;*/
 private:
   typename MidLevel::container_type digits;
 
@@ -198,6 +199,10 @@ public:
     return std::make_pair(q, r);
   }
 
+  const typename MidLevel::container_type& get_container() const {
+    return digits;
+  }
+
 #define SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PUBLIC_BUILTIN(type, convtype) \
   inline void assign(type u) { \
     MidLevel::set(digits, (convtype) u); \
@@ -240,6 +245,7 @@ class expr<natural_number<MidLevel>, natural_number<MidLevel> > {
 private:
   natural_number<MidLevel> n;
 public:
+  typedef typename MidLevel::container_type container_type;
   expr() : n() {}
   template <typename T>
     expr(const T& e) : n() { n.assign(e); }
@@ -257,13 +263,22 @@ public:
   inline operator bool() const { return !n.is_zero(); }
   inline const natural_number<MidLevel>& get_expr() const { return n; }
   inline const natural_number<MidLevel>& eval() const { return n; }
+  const container_type& get_container() const {
+    return n.get_container();
+  }
 };
 
 template <typename MidLevel>
 std::ostream& operator<<(std::ostream& os,
         const expr<natural_number<MidLevel> >& n)
 {
-  return os << n.get_expr().to_string(10);
+  typedef typename expr<natural_number<MidLevel> >::container_type container_type;
+  const container_type& con = n.get_container();
+  if (con.is_empty())
+    os << "0";
+  else
+    os << con[0];
+  return os;
 }
 
 
@@ -362,37 +377,38 @@ SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_SPEC_EXPR(uint64_t)
 #endif // SPUTSOFT_HAS_64_BIT_TYPES
 
 } // namespace detail
-/*} // namespace numbers
-} // namespace math
-} // namespace sputsoft*/
+} // namespace numbers
+} // namespace sputsoft
 
 namespace sputsoft {
-namespace math {
 namespace number_theory {
 
 /* Specializations */
 
 template <typename ML>
-struct quotrem_evaluator<detail::natural_number<ML>, detail::natural_number<ML> > {
-  static inline std::pair<detail::natural_number<ML>, detail::natural_number<ML> >
-        quotrem(const detail::natural_number<ML>& u, const detail::natural_number<ML>& v) {
-    return detail::natural_number<ML>::quotrem(u, v);
+struct quotrem_evaluator<numbers::detail::natural_number<ML>,
+                         numbers::detail::natural_number<ML> > {
+  static inline std::pair<numbers::detail::natural_number<ML>,
+                          numbers::detail::natural_number<ML> >
+        quotrem(const numbers::detail::natural_number<ML>& u,
+                const numbers::detail::natural_number<ML>& v) {
+    return numbers::detail::natural_number<ML>::quotrem(u, v);
   }
 };
 
 #define SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_SPEC_NUMTH(type) \
 template <typename ML> \
-struct quotrem_evaluator<detail::natural_number<ML>, type> { \
-  static inline std::pair<detail::natural_number<ML>, type> \
-        quotrem(const detail::natural_number<ML>& u, type v) { \
-    return detail::natural_number<ML>::quotrem(u, v); \
+struct quotrem_evaluator<numbers::detail::natural_number<ML>, type> { \
+  static inline std::pair<numbers::detail::natural_number<ML>, type> \
+        quotrem(const numbers::detail::natural_number<ML>& u, type v) { \
+    return numbers::detail::natural_number<ML>::quotrem(u, v); \
   } \
 }; \
 template <typename ML> \
-struct quotrem_evaluator<type, detail::natural_number<ML> > { \
-  static inline std::pair<type, detail::natural_number<ML> > \
-        quotrem(type u, const detail::natural_number<ML>& v) { \
-    return detail::natural_number<ML>::quotrem(u, v); \
+struct quotrem_evaluator<type, numbers::detail::natural_number<ML> > { \
+  static inline std::pair<type, numbers::detail::natural_number<ML> > \
+        quotrem(type u, const numbers::detail::natural_number<ML>& v) { \
+    return numbers::detail::natural_number<ML>::quotrem(u, v); \
   } \
 };
 
@@ -404,8 +420,6 @@ SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_SPEC_NUMTH(uint64_t)
 #endif // SPUTSOFT_HAS_64_BIT_TYPES
 
 } // namespace number_theory
-} // namespace math
 } // namespace sputsoft
 
-#endif // _SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_HPP_
-
+#endif // _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_HPP_

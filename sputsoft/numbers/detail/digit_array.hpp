@@ -1,5 +1,5 @@
 /*
- * File:   math/numbers/detail/digit_array.hpp
+ * File:   numbers/detail/digit_array.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z
@@ -12,8 +12,8 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_MATH_NUMBERS_DETAIL_DIGIT_ARRAY_HPP_
-#define _SPUTSOFT_MATH_NUMBERS_DETAIL_DIGIT_ARRAY_HPP_
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_DIGIT_ARRAY_HPP_
+#define _SPUTSOFT_NUMBERS_DETAIL_DIGIT_ARRAY_HPP_
 
 #include <cstring>
 
@@ -26,9 +26,8 @@ void swap(T& a, T& b) {
 
 }
 
-/*namespace sputsoft {
-namespace math {
-namespace numbers {*/
+namespace sputsoft {
+namespace numbers {
 namespace detail {
 
 template <typename T>
@@ -83,9 +82,7 @@ Os& operator<<(Os& os, const digit_array<T>& d)
 }
 
 } // namespace detail
-/*} // namespace numbers
-} // namespace math
-} // namespace sputsoft*/
+} // namespace numbers
+} // namespace sputsoft
 
-#endif // _SPUTSOFT_MATH_NUMBERS_DETAIL_DIGIT_ARRAY_HPP_
-
+#endif // _SPUTSOFT_NUMBERS_DETAIL_DIGIT_ARRAY_HPP_

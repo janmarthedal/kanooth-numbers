@@ -1,5 +1,5 @@
 /*
- * File:   math/number_theory/common.hpp
+ * File:   number_theory/common.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-16 13:46Z
@@ -12,13 +12,12 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_MATH_NUMBER_THEORY_COMMON_HPP_
-#define _SPUTSOFT_MATH_NUMBER_THEORY_COMMON_HPP_
+#ifndef _SPUTSOFT_NUMBER_THEORY_COMMON_HPP_
+#define _SPUTSOFT_NUMBER_THEORY_COMMON_HPP_
 
 #include <cstdlib>
 
 namespace sputsoft {
-namespace math {
 namespace number_theory {
 
 template <typename T>
@@ -65,8 +64,6 @@ struct quotrem_evaluator<int, int> {
 };
 
 } // namespace number_theory
-} // namespace math
 } // namespace sputsoft
 
-#endif // _SPUTSOFT_MATH_NUMBER_THEORY_COMMON_HPP_
-
+#endif // _SPUTSOFT_NUMBER_THEORY_COMMON_HPP_
