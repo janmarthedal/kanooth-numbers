@@ -42,22 +42,55 @@ private:
       }
       *rp++ = lz;
     }
-    return carry ? 1u : 0u;
+    return carry ? 1 : 0;
+  }
+
+  // n >= 0
+  static inline T sub_n(T* rp, const T* xp, const T* yp, std::size_t n)
+  {
+    T lx, ly, lz;
+    bool borrow = false;
+    while (n--) {
+      lx = *xp++;
+      ly = *yp++;
+      if (borrow) {
+        lz = lx - ly - 1;
+        borrow = lx <= ly;
+      } else {
+        lz = lx - ly;
+        borrow = lx < ly;
+      }
+      *rp++ = lz;
+    }
+    return borrow ? 1 : 0;
   }
 
   // n >= 0
   static inline T inc(T* rp, const T* xp, std::size_t n)
   {
     while (n && *xp == T(-1)) {
-      *rp++ = 0u;
-      ++xp;
-      --n;
+      *rp = 0;
+      ++rp; ++xp; --n;
     }
-    if (n) {
-      copy(rp, xp, n);
-      return 0u;
-    } else
-      return 1u;
+    if (!n) return 1;
+    *rp = *xp + 1;
+    ++rp; ++xp; --n;
+    copy(rp, xp, n);
+    return 0;
+  }
+
+  // n >= 0
+  static inline T dec(T* rp, const T* xp, std::size_t n)
+  {
+    while (n && !*xp) {
+      *rp = T(-1);
+      ++rp; ++xp; --n;
+    }
+    if (!n) return 1;
+    *rp = *xp - 1;
+    ++rp; ++xp; --n;
+    copy(rp, xp, n);
+    return 0u;
   }
 
 public:
@@ -75,14 +108,14 @@ public:
   {
     if (!n) return y;
     if (y) {
-      T r = *xp++ + y;
-      *rp++ = r;
-      --n;
-      if (r < y)
+      T z = *xp + y;
+      *rp = z;
+      ++rp; ++xp; --n;
+      if (z < y)
         return inc(rp, xp, n);
     }
     copy(rp, xp, n);
-    return 0u;
+    return 0;
   }
 
   // xn >= yn >= 0
@@ -91,6 +124,29 @@ public:
   {
     T carry = add_n(rp, xp, yp, yn);
     return add_1(rp + yn, xp + yn, xn - yn, carry);    
+  }
+
+  // n >= 0
+  static inline T sub_1(T* rp, const T* xp, std::size_t n, const T y)
+  {
+    if (!n) return y;
+    if (y) {
+      T x = *xp;
+      *rp = x - y;
+      ++rp; ++xp; --n;
+      if (x < y)
+        return dec(rp, xp, n);
+    }
+    copy(rp, xp, n);
+    return 0;
+  }
+
+  // xn >= yn >= 0
+  static T sub(T* rp, const T* xp, const std::size_t xn,
+               const T* yp, const std::size_t yn)
+  {
+    T borrow = sub_n(rp, xp, yp, yn);
+    return sub_1(rp + yn, xp + yn, xn - yn, borrow);
   }
 
 };
