@@ -208,18 +208,20 @@ private:
 public:
   conwrap() : con(2) {}
   conwrap(uint64_t v) : con(2) {
-    con[0] = v & 0xFFFFFFFF;
+    con[0] = v & 0xFFFFFFFFu;
     con[1] = v >> 32;
     con.set_size(con[1] ? 2 : con[0] ? 1 : 0);
   }
   const Con& get() const { return con; }
   Con& get() { return con; }
   uint64_t value() const {
+    uint64_t r = 0;
     switch (con.size()) {
-      case 0: return 0;
-      case 1: return con[0];
-      case 2: return (((uint64_t) con[1]) << 32) | ((uint64_t) con[0]);
+      case 2: r |= ((uint64_t) con[1]) << 32;
+      case 1: r |= con[0];
+      case 0: break;
     }
+    return r;
   }
 };
 
@@ -321,9 +323,9 @@ class midlevel {
 
   // x.size() >= y.size() >= 1
   static void add2(Con& r, const Con& x, const Con& y) {
-    std::size_t xs = x.size();
-    if (!r.request_size(xs + 1)) {
-      Con t(xs + 1);
+    std::size_t n = x.size();
+    if (!r.request_size(n + 1)) {
+      Con t(n + 1);
       add3(t, x, y);
       r.swap(t);
     } else 
@@ -358,7 +360,7 @@ class midlevel {
 
   // x.size() >= y.size() >= 1
   static void mul2(Con& r, const Con& x, const Con& y) {
-    std::size_t n = x.size() * y.size();
+    std::size_t n = x.size() + y.size();
     if (!r.request_size(n) || r.get() == x.get() || r.get() == y.get()) {
       Con t(n);
       mul3(t, x, y);
@@ -393,10 +395,10 @@ public:
   }
 
   static void add(Con& r, const Con& x, const Con& y) {
-    if (y.is_empty())             set(r, x);
-    else if (x.is_empty())        set(r, y);
-    else if (x.size() > y.size()) add2(r, x, y);
-    else                          add2(r, y, x);
+    if (y.is_empty())              set(r, x);
+    else if (x.is_empty())         set(r, y);
+    else if (x.size() >= y.size()) add2(r, x, y);
+    else                           add2(r, y, x);
   }
 
   static void subtract(Con& r, const Con& x, const Con& y) {
@@ -406,10 +408,9 @@ public:
   }
 
   static void multiply(Con& r, const Con& x, const Con& y) {
-    if (y.is_empty())             set(r, digit_type(0));
-    else if (x.is_empty())        set(r, digit_type(0));
-    else if (x.size() > y.size()) mul2(r, x, y);
-    else                          mul2(r, y, x);
+    if (y.is_empty() || x.is_empty()) set(r, digit_type(0));
+    else if (x.size() >= y.size())    mul2(r, x, y);
+    else                              mul2(r, y, x);
   }
 
   static void divide(Con& q, const Con& u, const Con& v) {

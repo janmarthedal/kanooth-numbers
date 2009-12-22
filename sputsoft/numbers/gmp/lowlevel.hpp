@@ -23,6 +23,7 @@ namespace numbers {
 namespace gmp {
 
 class lowlevel {
+private:
 public:
 
   typedef mp_limb_t digit_type;
@@ -90,7 +91,7 @@ public:
   // un >= vn >= 1, vp[vn-1] != 0
   // {qp, un-vn+1}, {rp, vn}, {up, un}, {vp, vn} do not overlap
   static inline void quotrem(digit_type* qp, digit_type* rp,
-                             const digit_type *up, std::size_t un,
+                             const digit_type* up, std::size_t un,
                              const digit_type* vp, std::size_t vn) {
     mpn_tdiv_qr(qp, rp, 0, up, un, vp, vn);
   }

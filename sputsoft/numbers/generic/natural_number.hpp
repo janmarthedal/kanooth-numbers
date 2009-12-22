@@ -24,13 +24,11 @@ namespace sputsoft {
 namespace numbers {
 namespace generic {
 
-typedef unsigned long digit_type;
-
 typedef detail::expr<
             detail::natural_number<
                 detail::midlevel<
-                    detail::digit_array<digit_type>,
-                    lowlevel<digit_type> > > > natural_number;
+                    detail::digit_array<unsigned long>,
+                    lowlevel > > > natural_number;
 
 } // namespace generic
 } // namespace numbers
