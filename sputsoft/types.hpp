@@ -19,7 +19,34 @@
 
 namespace sputsoft {
 
-  using ::boost::int8_t;
+  template <typename T> struct type_convert;
+
+  template <>
+  struct type_convert<unsigned short int> {
+    typedef unsigned short int unsigned_type;
+  };
+  template <>
+  struct type_convert<signed short int> {
+    typedef unsigned short int unsigned_type;
+  };
+  template <>
+  struct type_convert<unsigned int> {
+    typedef unsigned int unsigned_type;
+  };
+  template <>
+  struct type_convert<signed int> {
+    typedef unsigned int unsigned_type;
+  };
+  template <>
+  struct type_convert<unsigned long int> {
+    typedef unsigned long int unsigned_type;
+  };
+  template <>
+  struct type_convert<signed long int> {
+    typedef unsigned long int unsigned_type;
+  };
+
+/*  using ::boost::int8_t;
   using ::boost::uint8_t;
   using ::boost::int16_t;
   using ::boost::uint16_t;
@@ -32,7 +59,7 @@ namespace sputsoft {
   using ::boost::int64_t;
   using ::boost::uint64_t;
 
-#endif
+#endif*/
 
 } // namespace sputsoft
 

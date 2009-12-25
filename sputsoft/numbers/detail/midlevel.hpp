@@ -228,58 +228,6 @@ public:
   }
 };
 
-/*template <typename Con>
-class conwrap<Con, uint32_t, uint64_t> {
-private:
-  Con con;
-public:
-  conwrap() : con(2) {}
-  conwrap(uint64_t v) : con(2) {
-    con[0] = v & 0xFFFFFFFFu;
-    con[1] = v >> 32;
-    con.set_size(con[1] ? 2 : con[0] ? 1 : 0);
-  }
-  const Con& get() const { return con; }
-  Con& get() { return con; }
-  uint64_t value() const {
-    uint64_t r = 0;
-    switch (con.size()) {
-      case 2: r |= ((uint64_t) con[1]) << 32;
-      case 1: r |= con[0];
-      case 0: break;
-    }
-    return r;
-  }
-};
-
-template <typename Con>
-class conwrap<Con, uint8_t, uint32_t> {
-private:
-  Con con;
-public:
-  conwrap() : con(4) {}
-  conwrap(uint32_t v) : con(4) {
-    con[0] = v & 0xFFu;
-    con[1] = (v >> 8) & 0xFFu;
-    con[2] = (v >> 16) & 0xFFu;
-    con[3] = (v >> 24) & 0xFFu;
-    con.set_size(con[3] ? 4 : con[2] ? 3 : con[1] ? 2 : con[0] ? 1 : 0);
-  }
-  const Con& get() const { return con; }
-  Con& get() { return con; }
-  uint32_t value() const {
-    uint32_t r = 0;
-    switch (con.size()) {
-      case 4: r |= ((uint32_t) con[3]) << 24;
-      case 3: r |= ((uint32_t) con[2]) << 16;
-      case 2: r |= ((uint32_t) con[1]) << 8;
-      case 1: r |= con[0];
-      case 0: break;
-    }
-    return r;
-  }
-};*/
-
 template <typename Con, typename LowLevel, typename D, typename B, bool Cnv>
 class midlevel_1;
 
@@ -334,7 +282,8 @@ public:
 
   static inline B remainder(const Con& u, const B v) {
     con_type cr();
-    midlevel_::remainder(cr.get(), u, con_type(v).get());
+    con_type cv(v);
+    midlevel_::remainder(cr.get(), u, cv.get());
     return cr.value();
   }
 
@@ -362,12 +311,12 @@ class midlevel {
 
   typedef typename Con::digit_type digit_type;
   static const unsigned digit_bits = boost::integer_traits<digit_type>::digits;
-  typedef midlevel_1<Con, LowLevel, digit_type, uint8_t,  digit_bits < 8>  midlevel_1_8;
-  typedef midlevel_1<Con, LowLevel, digit_type, uint16_t, digit_bits < 16> midlevel_1_16;
-  typedef midlevel_1<Con, LowLevel, digit_type, uint32_t, digit_bits < 32> midlevel_1_32;
-#ifdef SPUTSOFT_HAS_64_BIT_TYPES
-  typedef midlevel_1<Con, LowLevel, digit_type, uint64_t, digit_bits < 64> midlevel_1_64;
-#endif // SPUTSOFT_HAS_64_BIT_TYPES
+  static const unsigned short_bits = boost::integer_traits<unsigned short>::digits;
+  static const unsigned int_bits = boost::integer_traits<unsigned>::digits;
+  static const unsigned long_bits = boost::integer_traits<unsigned long>::digits;
+  typedef midlevel_1<Con, LowLevel, digit_type, unsigned short, digit_bits < short_bits> midlevel_1_short;
+  typedef midlevel_1<Con, LowLevel, digit_type, unsigned,       digit_bits < int_bits>   midlevel_1_int;
+  typedef midlevel_1<Con, LowLevel, digit_type, unsigned long,  digit_bits < long_bits>  midlevel_1_long;
 
   static void add3(Con& r, const Con& x, const Con& y) {
     std::size_t xs = x.size();
@@ -497,8 +446,7 @@ public:
     else if (un < vn)
       set(r, un);
     else if (u.get() == v.get())
-      set(r, uint32_t(0));
-      //set(r, digit_type(0));
+      set(r, digit_type(0));
     else {
       Con q(un-vn+1);
       if (r.get() == u.get() || r.get() == v.get() || !r.request_size(vn)) {
@@ -530,143 +478,107 @@ public:
     }
   }
 
-  static inline void set(Con& r, uint8_t u) {
-    midlevel_1_8::set(r, u);
+  static inline void set(Con& r, unsigned short u) {
+    midlevel_1_short::set(r, u);
   }
-  static inline void add(Con& r, const Con& u, uint8_t v) {
-    midlevel_1_8::add(r, u, v);
+  static inline void add(Con& r, const Con& u, unsigned short v) {
+    midlevel_1_short::add(r, u, v);
   }
-  static inline void subtract(Con& r, const Con& u, uint8_t v) {
-    midlevel_1_8::subtract(r, u, v);
+  static inline void subtract(Con& r, const Con& u, unsigned short v) {
+    midlevel_1_short::subtract(r, u, v);
   }
-  static inline uint8_t subtract(uint8_t u, const Con& v) {
-    return midlevel_1_8::subtract(u, v);
+  static inline unsigned short subtract(unsigned short u, const Con& v) {
+    return midlevel_1_short::subtract(u, v);
   }
-  static inline void multiply(Con& r, const Con& u, uint8_t v) {
-    midlevel_1_8::multiply(r, u, v);
+  static inline void multiply(Con& r, const Con& u, unsigned short v) {
+    midlevel_1_short::multiply(r, u, v);
   }
-  static inline void divide(Con& r, const Con& u, uint8_t v) {
-    midlevel_1_8::divide(r, u, v);
+  static inline void divide(Con& r, const Con& u, unsigned short v) {
+    midlevel_1_short::divide(r, u, v);
   }
-  static inline uint8_t divide(uint8_t u, const Con& v) {
-    midlevel_1_8::divide(u, v);
+  static inline unsigned short divide(unsigned short u, const Con& v) {
+    midlevel_1_short::divide(u, v);
   }
-  static inline uint8_t remainder(const Con& u, uint8_t v) {
-    midlevel_1_8::remainder(u, v);
+  static inline unsigned short remainder(const Con& u, unsigned short v) {
+    midlevel_1_short::remainder(u, v);
   }
-  static inline void remainder(Con& r, uint8_t u, const Con& v) {
-    midlevel_1_8::remainder(r, u, v);
+  static inline void remainder(Con& r, unsigned short u, const Con& v) {
+    midlevel_1_short::remainder(r, u, v);
   }
-  static inline digit_type quotrem(Con& r, const Con& u, uint8_t v) {
-    midlevel_1_8::quotrem(r, u, v);
+  static inline digit_type quotrem(Con& r, const Con& u, unsigned short v) {
+    midlevel_1_short::quotrem(r, u, v);
   }
-  static inline digit_type quotrem(Con& r, uint8_t u, const Con& v) {
-    midlevel_1_8::quotrem(r, u, v);
-  }
-
-  static inline void set(Con& r, uint16_t u) {
-    midlevel_1_16::set(r, u);
-  }
-  static inline void add(Con& r, const Con& u, uint16_t v) {
-    midlevel_1_16::add(r, u, v);
-  }
-  static inline void subtract(Con& r, const Con& u, uint16_t v) {
-    midlevel_1_16::subtract(r, u, v);
-  }
-  static inline uint16_t subtract(uint16_t u, const Con& v) {
-    return midlevel_1_16::subtract(u, v);
-  }
-  static inline void multiply(Con& r, const Con& u, uint16_t v) {
-    midlevel_1_16::multiply(r, u, v);
-  }
-  static inline void divide(Con& r, const Con& u, uint16_t v) {
-    midlevel_1_16::divide(r, u, v);
-  }
-  static inline uint16_t divide(uint16_t u, const Con& v) {
-    midlevel_1_16::divide(u, v);
-  }
-  static inline uint16_t remainder(const Con& u, uint16_t v) {
-    midlevel_1_16::remainder(u, v);
-  }
-  static inline void remainder(Con& r, uint16_t u, const Con& v) {
-    midlevel_1_16::remainder(r, u, v);
-  }
-  static inline digit_type quotrem(Con& r, const Con& u, uint16_t v) {
-    midlevel_1_16::quotrem(r, u, v);
-  }
-  static inline digit_type quotrem(Con& r, uint16_t u, const Con& v) {
-    midlevel_1_16::quotrem(r, u, v);
+  static inline digit_type quotrem(Con& r, unsigned short u, const Con& v) {
+    midlevel_1_short::quotrem(r, u, v);
   }
 
-  static inline void set(Con& r, uint32_t u) {
-    midlevel_1_32::set(r, u);
+  static inline void set(Con& r, unsigned u) {
+    midlevel_1_int::set(r, u);
   }
-  static inline void add(Con& r, const Con& u, uint32_t v) {
-    midlevel_1_32::add(r, u, v);
+  static inline void add(Con& r, const Con& u, unsigned v) {
+    midlevel_1_int::add(r, u, v);
   }
-  static inline void subtract(Con& r, const Con& u, uint32_t v) {
-    midlevel_1_32::subtract(r, u, v);
+  static inline void subtract(Con& r, const Con& u, unsigned v) {
+    midlevel_1_int::subtract(r, u, v);
   }
-  static inline uint32_t subtract(uint32_t u, const Con& v) {
-    return midlevel_1_32::subtract(u, v);
+  static inline unsigned subtract(unsigned u, const Con& v) {
+    return midlevel_1_int::subtract(u, v);
   }
-  static inline void multiply(Con& r, const Con& u, uint32_t v) {
-    midlevel_1_32::multiply(r, u, v);
+  static inline void multiply(Con& r, const Con& u, unsigned v) {
+    midlevel_1_int::multiply(r, u, v);
   }
-  static inline void divide(Con& r, const Con& u, uint32_t v) {
-    midlevel_1_32::divide(r, u, v);
+  static inline void divide(Con& r, const Con& u, unsigned v) {
+    midlevel_1_int::divide(r, u, v);
   }
-  static inline uint32_t divide(uint32_t u, const Con& v) {
-    midlevel_1_32::divide(u, v);
+  static inline unsigned divide(unsigned u, const Con& v) {
+    midlevel_1_int::divide(u, v);
   }
-  static inline uint32_t remainder(const Con& u, uint32_t v) {
-    midlevel_1_32::remainder(u, v);
+  static inline unsigned remainder(const Con& u, unsigned v) {
+    midlevel_1_int::remainder(u, v);
   }
-  static inline void remainder(Con& r, uint32_t u, const Con& v) {
-    midlevel_1_32::remainder(r, u, v);
+  static inline void remainder(Con& r, unsigned u, const Con& v) {
+    midlevel_1_int::remainder(r, u, v);
   }
-  static inline digit_type quotrem(Con& r, const Con& u, uint32_t v) {
-    midlevel_1_32::quotrem(r, u, v);
+  static inline digit_type quotrem(Con& r, const Con& u, unsigned v) {
+    midlevel_1_int::quotrem(r, u, v);
   }
-  static inline digit_type quotrem(Con& r, uint32_t u, const Con& v) {
-    midlevel_1_32::quotrem(r, u, v);
+  static inline digit_type quotrem(Con& r, unsigned u, const Con& v) {
+    midlevel_1_int::quotrem(r, u, v);
   }
 
-#ifdef SPUTSOFT_HAS_64_BIT_TYPES
-  static inline void set(Con& r, uint64_t u) {
-    midlevel_1_64::set(r, u);
+  static inline void set(Con& r, unsigned long u) {
+    midlevel_1_long::set(r, u);
   }
-  static inline void add(Con& r, const Con& u, uint64_t v) {
-    midlevel_1_64::add(r, u, v);
+  static inline void add(Con& r, const Con& u, unsigned long v) {
+    midlevel_1_long::add(r, u, v);
   }
-  static inline void subtract(Con& r, const Con& u, uint64_t v) {
-    midlevel_1_64::sub(r, u, v);
+  static inline void subtract(Con& r, const Con& u, unsigned long v) {
+    midlevel_1_long::subtract(r, u, v);
   }
-  static inline uint64_t subtract(uint64_t u, const Con& v) {
-    return midlevel_1_64::sub(u, v);
+  static inline unsigned long subtract(unsigned long u, const Con& v) {
+    return midlevel_1_long::subtract(u, v);
   }
-  static inline void multiply(Con& r, const Con& u, uint64_t v) {
-    midlevel_1_64::multiply(r, u, v);
+  static inline void multiply(Con& r, const Con& u, unsigned long v) {
+    midlevel_1_long::multiply(r, u, v);
   }
-  static inline void divide(Con& r, const Con& u, uint64_t v) {
-    midlevel_1_64::divide(r, u, v);
+  static inline void divide(Con& r, const Con& u, unsigned long v) {
+    midlevel_1_long::divide(r, u, v);
   }
-  static inline uint64_t divide(uint64_t u, const Con& v) {
-    midlevel_1_64::divide(u, v);
+  static inline unsigned long divide(unsigned long u, const Con& v) {
+    midlevel_1_long::divide(u, v);
   }
-  static inline uint64_t remainder(const Con& u, uint64_t v) {
-    midlevel_1_64::remainder(u, v);
+  static inline unsigned long remainder(const Con& u, unsigned long v) {
+    midlevel_1_long::remainder(u, v);
   }
-  static inline void remainder(Con& r, uint64_t u, const Con& v) {
-    midlevel_1_64::remainder(r, u, v);
+  static inline void remainder(Con& r, unsigned long u, const Con& v) {
+    midlevel_1_long::remainder(r, u, v);
   }
-  static inline digit_type quotrem(Con& r, const Con& u, uint64_t v) {
-    midlevel_1_64::quotrem(r, u, v);
+  static inline digit_type quotrem(Con& r, const Con& u, unsigned long v) {
+    midlevel_1_long::quotrem(r, u, v);
   }
-  static inline digit_type quotrem(Con& r, uint64_t u, const Con& v) {
-    midlevel_1_64::quotrem(r, u, v);
+  static inline digit_type quotrem(Con& r, unsigned long u, const Con& v) {
+    midlevel_1_long::quotrem(r, u, v);
   }
-#endif // SPUTSOFT_HAS_64_BIT_TYPES
 
 };
 

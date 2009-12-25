@@ -148,7 +148,7 @@ private:
   }
 
   template <typename T>
-  void double_div(T uhigh, T ulow, T v, T& quot, T& rem)
+  static void double_div(T uhigh, T ulow, T v, T& quot, T& rem)
   {
     const unsigned int digitbits = boost::integer_traits<T>::digits;
     const unsigned int halfbits = digitbits / 2;
@@ -274,7 +274,7 @@ public:
     while (x2 != xp) {
       T qh = r;
       T ql = *--x2;
-      double_div(qh, ql, y, &q, &r);
+      double_div(qh, ql, y, q, r);
       *--r2 = q;
     }
     return r;
