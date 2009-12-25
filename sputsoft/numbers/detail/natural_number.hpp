@@ -244,12 +244,12 @@ template <typename MidLevel>
 class expr<natural_number<MidLevel>, natural_number<MidLevel> > {
 private:
   natural_number<MidLevel> n;
+  explicit expr(const natural_number<MidLevel>& _n) : n(_n) {}
 public:
   typedef typename MidLevel::container_type container_type;
   expr() : n() {}
   template <typename T>
     expr(const T& e) : n() { n.assign(e); }
-  //expr& operator=(int v) { n.assign((unsigned) v); return *this; }
   template <typename T>
     expr& operator=(const T& e) { n.assign(e); return *this; }
   template <typename E>
@@ -265,6 +265,11 @@ public:
   inline const natural_number<MidLevel>& eval() const { return n; }
   const container_type& get_container() const {
     return n.get_container();
+  }
+  static std::pair<expr, expr> quotrem(const expr& u, const expr& v) {
+    std::pair<natural_number<MidLevel>, natural_number<MidLevel> > qr =
+            natural_number<MidLevel>::quotrem(u.n, v.n);
+    return std::make_pair(expr(qr.first), expr(qr.second));
   }
 };
 
@@ -386,13 +391,14 @@ namespace number_theory {
 /* Specializations */
 
 template <typename ML>
-struct quotrem_evaluator<numbers::detail::natural_number<ML>,
-                         numbers::detail::natural_number<ML> > {
-  static inline std::pair<numbers::detail::natural_number<ML>,
-                          numbers::detail::natural_number<ML> >
-        quotrem(const numbers::detail::natural_number<ML>& u,
-                const numbers::detail::natural_number<ML>& v) {
-    return numbers::detail::natural_number<ML>::quotrem(u, v);
+struct quotrem_evaluator<numbers::detail::expr<numbers::detail::natural_number<ML> >,
+                         numbers::detail::expr<numbers::detail::natural_number<ML> > > {
+  static inline std::pair<numbers::detail::expr<numbers::detail::natural_number<ML> >,
+                          numbers::detail::expr<numbers::detail::natural_number<ML> > >
+        quotrem(const numbers::detail::expr<numbers::detail::natural_number<ML> >& u,
+                const numbers::detail::expr<numbers::detail::natural_number<ML> >& v)
+  {
+    return numbers::detail::expr<numbers::detail::natural_number<ML> >::quotrem(u, v);
   }
 };
 

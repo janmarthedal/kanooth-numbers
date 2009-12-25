@@ -266,6 +266,27 @@ public:
     multiply_sequences(xp, xp+xn, yp, yp+yn, rp);
   }
 
+  template <typename T>
+  static inline T quotrem_1(T* rp, const T* xp, std::size_t n, const T y) {
+    const T* x2 = xp+n;
+    T* r2 = rp+n;
+    T q, r = 0;
+    while (x2 != xp) {
+      T qh = r;
+      T ql = *--x2;
+      double_div(qh, ql, y, &q, &r);
+      *--r2 = q;
+    }
+    return r;
+  }
+
+  // un >= vn >= 1, vp[vn-1] != 0
+  // {qp, un-vn+1}, {rp, vn}, {up, un}, {vp, vn} do not overlap
+  template <typename T>
+  static void quotrem(T* qp, T* rp, const T* up, std::size_t un,
+                      const T* vp, std::size_t vn) {
+  }
+
 };
 
 } // namespace generic

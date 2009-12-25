@@ -199,9 +199,36 @@ public:
 
 };
 
-template <typename Con, typename D, typename B> class conwrap;
+template <typename Con, typename D, typename B>
+class conwrap {
+private:
+  static const unsigned d_bits = boost::integer_traits<D>::digits;
+  static const unsigned b_bits = boost::integer_traits<B>::digits;
+  static const unsigned con_size = b_bits / d_bits;
+  static const B mask = (B(1) << d_bits) - 1;
+  Con con;
+public:
+  conwrap() : con(con_size) {}
+  conwrap(B v) : con(con_size) {
+    unsigned n = 0;
+    while (v) {
+      con[n++] = v & mask;
+      v >>= d_bits;
+    }
+    con.set_size(n);
+  }
+  const Con& get() const { return con; }
+  Con& get() { return con; }
+  B value() const {
+    B r = 0;
+    unsigned n=con.size();
+    while (n)
+      r = (r << d_bits) | con[--n];
+    return r;
+  }
+};
 
-template <typename Con>
+/*template <typename Con>
 class conwrap<Con, uint32_t, uint64_t> {
 private:
   Con con;
@@ -224,6 +251,34 @@ public:
     return r;
   }
 };
+
+template <typename Con>
+class conwrap<Con, uint8_t, uint32_t> {
+private:
+  Con con;
+public:
+  conwrap() : con(4) {}
+  conwrap(uint32_t v) : con(4) {
+    con[0] = v & 0xFFu;
+    con[1] = (v >> 8) & 0xFFu;
+    con[2] = (v >> 16) & 0xFFu;
+    con[3] = (v >> 24) & 0xFFu;
+    con.set_size(con[3] ? 4 : con[2] ? 3 : con[1] ? 2 : con[0] ? 1 : 0);
+  }
+  const Con& get() const { return con; }
+  Con& get() { return con; }
+  uint32_t value() const {
+    uint32_t r = 0;
+    switch (con.size()) {
+      case 4: r |= ((uint32_t) con[3]) << 24;
+      case 3: r |= ((uint32_t) con[2]) << 16;
+      case 2: r |= ((uint32_t) con[1]) << 8;
+      case 1: r |= con[0];
+      case 0: break;
+    }
+    return r;
+  }
+};*/
 
 template <typename Con, typename LowLevel, typename D, typename B, bool Cnv>
 class midlevel_1;
@@ -353,7 +408,7 @@ class midlevel {
   static void mul3(Con& r, const Con& x, const Con& y) {
     std::size_t xn = x.size();
     std::size_t yn = y.size();
-    std::size_t n  = xn*yn;
+    std::size_t n  = xn + yn;
     LowLevel::mul(r.get(), x.get(), xn, y.get(), yn);
     r.set_size(r[n-1] ? n : n-1);
   }
@@ -442,7 +497,8 @@ public:
     else if (un < vn)
       set(r, un);
     else if (u.get() == v.get())
-      set(r, digit_type(0));
+      set(r, uint32_t(0));
+      //set(r, digit_type(0));
     else {
       Con q(un-vn+1);
       if (r.get() == u.get() || r.get() == v.get() || !r.request_size(vn)) {

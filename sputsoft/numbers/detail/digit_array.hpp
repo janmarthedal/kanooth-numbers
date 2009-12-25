@@ -15,50 +15,41 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_DIGIT_ARRAY_HPP_
 #define _SPUTSOFT_NUMBERS_DETAIL_DIGIT_ARRAY_HPP_
 
-#include <cstring>
-
-namespace sputsoft {
-
-template <typename T>
-void swap(T& a, T& b) {
-  T t = a;  a = b;  b = t;
-}
-
-}
+#include <memory>
+#include <sputsoft/numbers/detail/array_allocator.hpp>
 
 namespace sputsoft {
 namespace numbers {
 namespace detail {
 
-template <typename T>
+template <typename T=unsigned long, typename A=array_allocator<T> >
 class digit_array {
-  template <typename Os, typename S>
-  friend Os& operator<<(Os& os, const digit_array<S>& d);
 private:
-  std::size_t to_allocate(std::size_t min_size) {
-    return min_size ? ((min_size+5)/4)*4 : 0;
-  }
+  A alloc;
   std::size_t used;
   std::size_t allocated;
   T* digits;
 public:
   typedef T digit_type;
   digit_array() : used(0), allocated(0), digits(0) {}
-  explicit digit_array(std::size_t min_size)
-    : used(0), allocated(to_allocate(min_size)),
-      digits(allocated ? new T[allocated] : 0) {}
-  digit_array(const digit_array& other)
-    : used(other.used), allocated(to_allocate(used)),
-      digits(allocated ? new T[allocated] : 0) {
-    if (used) std::memcpy(digits, other.digits, used*sizeof(T));
+  explicit digit_array(std::size_t min_size) : used(0) {
+    std::pair<T*, std::ptrdiff_t> m = alloc.allocate(min_size);
+    allocated = m.second;
+    digits = m.first;
+  }
+  digit_array(const digit_array& other) : used(other.used) {
+    std::pair<T*, std::ptrdiff_t> m = alloc.allocate(used);
+    allocated = m.second;
+    digits = m.first;
+    std::copy(other.digits, other.digits + used, digits);
   }
   ~digit_array() {
-    if (digits) delete[] digits;
+    if (digits) alloc.deallocate(digits, allocated);
   }
   void swap(digit_array& other) {
-    ::sputsoft::swap(used, other.used);
-    ::sputsoft::swap(allocated, other.allocated);
-    ::sputsoft::swap(digits, other.digits);
+    std::swap(used, other.used);
+    std::swap(allocated, other.allocated);
+    std::swap(digits, other.digits);
   }
   std::size_t size() const { return used; }
   void set_size(std::size_t n) { used = n; }
@@ -69,17 +60,6 @@ public:
   const T& operator[](std::size_t n) const { return digits[n]; }
   T& operator[](std::size_t n) { return digits[n]; }
 };
-
-template <typename Os, typename T>
-Os& operator<<(Os& os, const digit_array<T>& d)
-{
-  os << "[";
-  for (std::size_t n=0; n < d.size(); n++) {
-    if (n > 0) os << " ";
-    os << d[n];
-  }
-  return os << "]";
-}
 
 } // namespace detail
 } // namespace numbers

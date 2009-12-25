@@ -27,7 +27,7 @@ namespace generic {
 typedef detail::expr<
             detail::natural_number<
                 detail::midlevel<
-                    detail::digit_array<unsigned long>,
+                    detail::digit_array<unsigned short>,
                     lowlevel > > > natural_number;
 
 } // namespace generic
