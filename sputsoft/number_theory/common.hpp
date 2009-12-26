@@ -36,10 +36,10 @@ inline std::size_t floor_log2(T n) {
 
 
 template <typename U, typename V>
-struct quotrem_evaluator {
+struct quotrem_evaluator /*{
   static std::pair<U, V> quotrem(const U& u, const V& v)
   { return std::make_pair(u / v, u % v); }
-};
+}*/;
 
 template <typename U, typename V>
 inline std::pair<U, V> quotrem(const U& u, const V& v)

@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <sputsoft/types.hpp>
+#include <boost/integer_traits.hpp>
 #include <sputsoft/number_theory/common.hpp>
 #include <sputsoft/numbers/detail/expressions.hpp>
 
@@ -30,6 +31,10 @@ class natural_number {
   typedef typename MidLevel::container_type container_type;*/
 private:
   typename MidLevel::container_type digits;
+
+  static inline void set(natural_number& r, const natural_number& u) {
+    MidLevel::set(r.digits, u.digits);
+  }
 
   static inline void add(natural_number& r,
       const natural_number& u, const natural_number& v) {
@@ -105,6 +110,11 @@ private:
   SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PRIVATE_BUILTIN(signed)
   SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PRIVATE_BUILTIN(signed long)
 
+  static inline void left_shift(natural_number& r,
+      const natural_number& u, std::size_t count) {
+    MidLevel::left_shift(r.digits, u.digits, count);
+  }
+
   template <typename R1, typename E1, typename R2, typename E2>
   inline void assign_expr(const wrap::binary<ops::binary::add,
       expr<R1, E1>, expr<R2, E2> >& e) {
@@ -133,6 +143,16 @@ private:
   inline void assign_expr(const wrap::binary<ops::binary::remainder,
       expr<R1, E1>, expr<R2, E2> >& e) {
     remainder(*this, e.x.eval(), e.y.eval());
+  }
+
+  template <typename R1, typename E1, typename R2, typename E2>
+  inline void assign_expr(const wrap::binary<ops::binary::lshift,
+      expr<R1, E1>, expr<R2, E2> >& e) {
+    left_shift(*this, e.x.eval(), e.y.eval());
+  }
+
+  inline void assign_expr(const natural_number& u) {
+    set(*this, u);
   }
 
 public:
@@ -248,6 +268,7 @@ public:
   expr() : n() {}
   template <typename T>
     expr(const T& e) : n() { n.assign(e); }
+  expr& operator=(const expr& e) { n.assign(e); return *this; }
   template <typename T>
     expr& operator=(const T& e) { n.assign(e); return *this; }
   template <typename E>
@@ -291,12 +312,24 @@ template <typename MidLevel>
 std::ostream& operator<<(std::ostream& os,
         const expr<natural_number<MidLevel> >& n)
 {
-  typedef typename expr<natural_number<MidLevel> >::container_type container_type;
-  const container_type& con = n.get_container();
-  if (con.is_empty())
+  if (n) {
+    typedef expr<natural_number<MidLevel> > num;
+    typedef typename num::container_type container_type;
+    typedef typename container_type::digit_type digit_type;
+    const container_type& con = n.get_container();
+    unsigned max_digits = con.size() * boost::integer_traits<digit_type>::digits / 3 + 1;
+    char st[max_digits];
+    char* p = st + max_digits;
+    *--p = 0;
+    num t = n;
+    while (t) {
+      std::pair<num, short unsigned> qr = number_theory::quotrem(t, (short unsigned) 10);
+      t = qr.first;
+      *--p = (char) qr.second + '0';
+    }
+    os << p;
+  } else
     os << "0";
-  else
-    os << con[0];
   return os;
 }
 

@@ -102,6 +102,20 @@ public:
     return mpn_mod_1(xp, xn, y);
   }
 
+  // zp >= xp, 1 <= count < digit_bits
+  static inline digit_type lshift(digit_type* zp,
+                                  const digit_type* xp, std::size_t n,
+                                  unsigned count) {
+    return mpn_lshift(zp, xp, n, count);
+  }
+
+  // zp <= xp, 1 <= count < digit_bits
+  static inline digit_type rshift(digit_type* zp,
+                                  const digit_type* xp, std::size_t n,
+                                  unsigned count) {
+    return mpn_rshift(zp, xp, n, count);
+  }
+
 };
 
 } // namespace gmp

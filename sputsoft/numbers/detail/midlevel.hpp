@@ -261,7 +261,7 @@ public:
   }
 
   static inline B subtract(const B u, const Con& v) {
-    con_type cr();
+    con_type cr;
     midlevel_::subtract(cr.get(), con_type(u).get(), v);
     return cr.value();
   }
@@ -275,13 +275,13 @@ public:
   }
 
   static inline B divide(const B u, const Con& v) {
-    con_type cq();
+    con_type cq;
     midlevel_::divide(cq.get(), con_type(u).get(), v);
     return cq.value();
   }
 
   static inline B remainder(const Con& u, const B v) {
-    con_type cr();
+    con_type cr;
     con_type cv(v);
     midlevel_::remainder(cr.get(), u, cv.get());
     return cr.value();
@@ -292,13 +292,13 @@ public:
   }
 
   static inline B quotrem(Con& q, const Con& u, const B v) {
-    con_type cr();
+    con_type cr;
     midlevel_::quotrem(q, cr.get(), u, con_type(v).get());
     return cr.value();
   }
 
   static inline B quotrem(Con& r, const B u, const Con& v) {
-    con_type cq();
+    con_type cq;
     midlevel_::quotrem(cq.get(), r, con_type(u).get(), v);
     return cq.value();
   }
@@ -381,6 +381,19 @@ class midlevel {
     q.set_size(q[n-1] ? n : n-1);
     while (vn && !r[vn-1]) --vn;
     r.set_size(vn);
+  }
+
+  static void lshift2(Con& z, const Con& u, std::size_t count) {
+    unsigned whole = count / digit_bits;
+    count %= digit_bits;
+    std::size_t zn = u.size() + whole;
+    if (count) {
+      digit_type s = LowLevel::lshift(z.get() + whole, u.get(), u.size(), count);
+      if (s) z[zn++] = s;
+    } else
+      std::copy_backward(u.get(), u.get() + u.size(), z.get() + zn);
+    std::fill_n(z.get(), whole, 0);
+    z.set_size(zn);
   }
 
 public:
@@ -475,6 +488,23 @@ public:
       quotrem2(qt, rt, u, v);
       r.swap(rt);
       q.swap(qt);
+    }
+  }
+
+  static void left_shift(Con& z, const Con& u, std::size_t count) {
+    if (u.is_empty())
+      set(z, digit_type(0));
+    else if (!count)
+      set(z, u);
+    else {
+      std::size_t n = u.size() + count/digit_bits;
+      if (count % digit_bits) ++n;
+      if (!z.request_size(n)) {
+        Con t(n);
+        lshift2(t, u, count);
+        z.swap(t);
+      } else
+        lshift2(z, u, count);
     }
   }
 

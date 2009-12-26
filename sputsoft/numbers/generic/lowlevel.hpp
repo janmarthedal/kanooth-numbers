@@ -287,6 +287,23 @@ public:
                       const T* vp, std::size_t vn) {
   }
 
+  // n > 0, zp <= xp, 1 <= count < digit_bits
+  template <typename T>
+  static inline T lshift(T* z1, const T* x1, std::size_t n, unsigned count) {
+    const unsigned int rcount = boost::integer_traits<T>::digits - count;
+    T* z2 = z1 + n;
+    const T* x2 = x1 + n;
+    T xl = *--x2, xh;
+    T r = xl >> rcount;
+    while (x2 != x1) {
+      xh = xl;
+      xl = *--x2;
+      *--z2 = (xh << count) | (xl >> rcount);
+    }
+    *--z2 = xl << count;
+    return r;
+  }
+
 };
 
 } // namespace generic

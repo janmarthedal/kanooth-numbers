@@ -15,7 +15,7 @@
 #ifndef _SPUTSOFT_TYPES_HPP_
 #define _SPUTSOFT_TYPES_HPP_
 
-#include <boost/cstdint.hpp>
+//#include <boost/cstdint.hpp>
 
 namespace sputsoft {
 

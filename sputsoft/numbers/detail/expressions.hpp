@@ -28,10 +28,11 @@ namespace ops {
     class multiply {};
     class divide {};
     class remainder {};
+    class lshift {};
+    class rshift {};
   }
   namespace unary {
     class negate {};
-    class nonzero {};
   }
 }
 
@@ -122,6 +123,8 @@ SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator-, ops::binary::subtract)
 SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator*, ops::binary::multiply)
 SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator/, ops::binary::divide)
 SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator%, ops::binary::remainder)
+SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator<<, ops::binary::lshift)
+SPUTSOFT_MATH_NUMBERS_DETAIL_BINARY_OPS(operator>>, ops::binary::rshift)
 
 } // namespace detail
 } // namespace numbers
