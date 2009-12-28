@@ -28,7 +28,7 @@ typedef detail::expr<
             detail::natural_number<
                 detail::midlevel<
                     detail::digit_array<unsigned short>,
-                    lowlevel > > > natural_number;
+                    lowlevel<detail::array_allocator<void> > > > > natural_number;
 
 } // namespace generic
 } // namespace numbers

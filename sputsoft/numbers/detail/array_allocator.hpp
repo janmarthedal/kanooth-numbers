@@ -38,6 +38,15 @@ public:
   }
 };
 
+template <>
+class array_allocator<void> {
+public:
+  template<typename T>
+  struct rebind {
+    typedef array_allocator<T> other;
+  };
+};
+
 } // namespace detail
 } // namespace numbers
 } // namespace sputsoft

@@ -15,10 +15,13 @@
 #ifndef _SPUTSOFT_NUMBERS_GENERIC_LOWLEVEL_HPP_
 #define _SPUTSOFT_NUMBERS_GENERIC_LOWLEVEL_HPP_
 
+#include <sputsoft/numbers/detail/array_allocator.hpp>
+
 namespace sputsoft {
 namespace numbers {
 namespace generic {
 
+template <typename A = detail::array_allocator<void> >
 class lowlevel {
 private:
 
@@ -191,6 +194,54 @@ private:
     rem = r;
   }
 
+  template <typename T>
+  static inline T mult_sub_sub(T& w, const T u, const T v, T k)
+  {
+    T wt;
+    double_mult_add(u, v, k, wt, k);
+    if (wt > w) ++k;
+    w -= wt;
+    return k;
+  }
+
+  template <typename T>
+  static T sequence_mult_digit_sub(T* ufirst, T* ulast, const T* vfirst, T q)
+  {
+    T k = 0;
+    while (ufirst != ulast)
+      k = mult_sub_sub(*ufirst++, *vfirst++, q, k);
+    return k;
+  }
+
+  template <typename T>
+  static inline void double_mult(const T u, const T v, T& low, T& high)
+  {
+    double_mult_add_add(u, v, T(0), T(0), low, high);
+  }
+
+  template <typename T>
+  static inline T calc_qh(T ujn, T ujn1, T ujn2, T vn1, T vn2)
+  {
+    T qh, rh, high, low;
+
+    if (ujn == vn1) {
+      qh = T(-1);
+      rh = ujn1 + vn1;
+      if (rh < vn1) return qh;
+    } else
+      double_div(ujn, ujn1, vn1, qh, rh);
+
+    double_mult(qh, vn2, low, high);
+    while (high > rh || (high == rh && low > ujn2)) {
+      --qh;
+      rh += vn1;
+      if (rh < vn1) break;  // overflow
+      double_mult(qh, vn2, low, high);
+    }
+
+    return qh;
+  }
+
 public:
 
   // n >= 0
@@ -267,27 +318,67 @@ public:
   }
 
   template <typename T>
-  static inline T quotrem_1(T* rp, const T* xp, std::size_t n, const T y) {
-    const T* x2 = xp+n;
-    T* r2 = rp+n;
-    T q, r = 0;
-    while (x2 != xp) {
-      T qh = r;
-      T ql = *--x2;
-      double_div(qh, ql, y, q, r);
-      *--r2 = q;
-    }
+  static inline T quotrem_1(T* z1, const T* x1, std::size_t n, const T y) {
+    const T* x2 = x1 + n;
+    T* z2 = z1 + n;
+    T r = 0;
+    while (x2 != x1)
+      double_div(r, *--x2, y, *--z2, r);
     return r;
   }
 
   // un >= vn >= 1, vp[vn-1] != 0
   // {qp, un-vn+1}, {rp, vn}, {up, un}, {vp, vn} do not overlap
   template <typename T>
-  static void quotrem(T* qp, T* rp, const T* up, std::size_t un,
-                      const T* vp, std::size_t vn) {
+  static void quotrem(T* q1, T* r1, const T* u1, std::size_t un,
+                      const T* v1, std::size_t vn) {
+    if (vn == 1)
+      r1[0] = quotrem_1(q1, u1, un, v1[0]);
+    else {  // vn >= 2
+      typename A::template rebind<T>::other alloc;
+      std::pair<T*, std::ptrdiff_t> talloc = alloc.allocate(un+1);
+      std::pair<T*, std::ptrdiff_t> walloc;
+      T* t1 = talloc.first;
+      const T* w1;
+      unsigned shift = boost::integer_traits<T>::digits
+                         - number_theory::floor_log2(v1[vn-1]) - 1;
+      // normalize
+      if (shift) {
+        walloc = alloc.allocate(vn);
+        t1[un] = lshift(t1, u1, un, shift);
+        lshift(walloc.first, v1, vn, shift);
+        w1 = walloc.first;
+      } else {
+        std::copy(u1, u1+un, t1);
+        t1[un] = 0;
+        w1 = v1;
+      }
+      T wn1 = w1[vn-1], wn2 = w1[vn-2];
+      T tjn, qh, k;
+
+      for (int j=un-vn; j >= 0; --j) {
+        tjn = t1[j+vn];
+        qh = calc_qh(tjn, t1[j+vn-1], t1[j+vn-2], wn1, wn2);
+        k = sequence_mult_digit_sub(t1+j, t1+j+vn, w1, qh);
+        t1[j+vn] = tjn - k;
+        if (k > tjn) {   // qh too big?
+          t1[j+vn] += add_n(t1+j, t1+j, w1, vn);
+          --qh;
+        }
+        q1[j] = qh;
+      }
+
+      // denormalize
+      if (shift) {
+        alloc.deallocate(walloc.first, walloc.second);
+        rshift(r1, t1, vn, shift);
+      } else
+        std::copy(t1, t1+vn, r1);
+      alloc.deallocate(talloc.first, talloc.second);
+    }
   }
 
-  // n > 0, zp <= xp, 1 <= count < digit_bits
+  // n > 0, z1 >= x1, 1 <= count < digit_bits
   template <typename T>
   static inline T lshift(T* z1, const T* x1, std::size_t n, unsigned count) {
     const unsigned int rcount = boost::integer_traits<T>::digits - count;
@@ -301,6 +392,22 @@ public:
       *--z2 = (xh << count) | (xl >> rcount);
     }
     *--z2 = xl << count;
+    return r;
+  }
+
+  // n > 0, z1 <= x1, 1 <= count < digit_bits
+  template <typename T>
+  static inline T rshift(T* z1, const T* x1, std::size_t n, unsigned count) {
+    const unsigned int rcount = boost::integer_traits<T>::digits - count;
+    const T* x2 = x1 + n;
+    T xl, xh = *x1++;
+    T r = xh << rcount;
+    while (x1 != x2) {
+      xl = xh;
+      xh = *x1++;
+      *z1++ = (xh << rcount) | (xl >> count);
+    }
+    *z1++ = xh >> count;
     return r;
   }
 

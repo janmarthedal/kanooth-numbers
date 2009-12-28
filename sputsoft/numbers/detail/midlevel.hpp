@@ -396,6 +396,18 @@ class midlevel {
     z.set_size(zn);
   }
 
+  static void rshift2(Con& z, const Con& u, std::size_t count) {
+    unsigned whole = count / digit_bits;
+    count %= digit_bits;
+    std::size_t zn = u.size() - whole;
+    if (count) {
+      LowLevel::rshift(z.get(), u.get() + whole, zn, count);
+      if (!z[zn-1]) --zn;
+    } else
+      std::copy(u.get() + whole, u.get() + u.size(), z.get());
+    z.set_size(zn);
+  }
+
 public:
 
   typedef Con container_type;
@@ -497,14 +509,29 @@ public:
     else if (!count)
       set(z, u);
     else {
-      std::size_t n = u.size() + count/digit_bits;
-      if (count % digit_bits) ++n;
+      std::size_t n = u.size() + (count+digit_bits-1)/digit_bits;
       if (!z.request_size(n)) {
         Con t(n);
         lshift2(t, u, count);
         z.swap(t);
       } else
         lshift2(z, u, count);
+    }
+  }
+
+  static void right_shift(Con& z, const Con& u, std::size_t count) {
+    if (u.is_empty() || count >= u.size()*digit_bits)
+      set(z, digit_type(0));
+    else if (!count)
+      set(z, u);
+    else {
+      std::size_t n = u.size() - count/digit_bits;
+      if (!z.request_size(n)) {
+        Con t(n);
+        rshift2(t, u, count);
+        z.swap(t);
+      } else
+        rshift2(z, u, count);
     }
   }
 

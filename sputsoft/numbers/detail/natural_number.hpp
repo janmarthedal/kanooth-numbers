@@ -115,6 +115,13 @@ private:
     MidLevel::left_shift(r.digits, u.digits, count);
   }
 
+  static inline void right_shift(natural_number& r,
+      const natural_number& u, std::size_t count) {
+    MidLevel::right_shift(r.digits, u.digits, count);
+  }
+
+public:
+
   template <typename R1, typename E1, typename R2, typename E2>
   inline void assign_expr(const wrap::binary<ops::binary::add,
       expr<R1, E1>, expr<R2, E2> >& e) {
@@ -151,12 +158,22 @@ private:
     left_shift(*this, e.x.eval(), e.y.eval());
   }
 
+  template <typename R1, typename E1, typename R2, typename E2>
+  inline void assign_expr(const wrap::binary<ops::binary::rshift,
+      expr<R1, E1>, expr<R2, E2> >& e) {
+    right_shift(*this, e.x.eval(), e.y.eval());
+  }
+
   inline void assign_expr(const natural_number& u) {
     set(*this, u);
   }
 
-public:
   natural_number() : digits() {}
+
+  template <typename E>
+  natural_number(const E& e) : digits() {
+    assign_expr(e);
+  }
 
   template <typename R, typename E>
   inline void add_this(const expr<R, E>& e) {
@@ -198,11 +215,6 @@ public:
     remainder(*this, *this, v);
   }
 
-  template <typename E>
-  inline void assign(const expr<natural_number, E>& e) {
-    assign_expr(e.get_expr());
-  }
-
   inline std::string to_string(unsigned base) const {
     return MidLevel::to_string(digits, base);
   }
@@ -223,6 +235,9 @@ public:
   }
 
 #define SPUTSOFT_MATH_NUMBERS_DETAIL_NATURAL_NUMBER_PUBLIC_BUILTIN(type) \
+  natural_number(type u) : digits() { \
+    assign(u); \
+  } \
   inline void assign(type u) { \
     MidLevel::set(digits, (type_convert<type>::unsigned_type) u); \
   } \
@@ -265,20 +280,43 @@ private:
   explicit expr(const natural_number<MidLevel>& _n) : n(_n) {}
 public:
   typedef typename MidLevel::container_type container_type;
+
   expr() : n() {}
-  template <typename T>
-    expr(const T& e) : n() { n.assign(e); }
-  expr& operator=(const expr& e) { n.assign(e); return *this; }
-  template <typename T>
-    expr& operator=(const T& e) { n.assign(e); return *this; }
+  expr(unsigned short u) : n(u) {}
+  expr(unsigned u)       : n(u) {}
+  expr(unsigned long u)  : n(u) {}
+  expr(signed short u)   : n(u) {}
+  expr(signed u)         : n(u) {}
+  expr(signed long u)    : n(u) {}
+  expr(const expr& e) : n(e.get_expr()) {}
   template <typename E>
-    inline expr& operator+=(const E& e) { n.add_this(e); return *this; }
+  expr(const expr<natural_number<MidLevel>, E>& e) : n(e.get_expr()) {}
+  
+  expr& operator=(unsigned short u) { n.assign(u); return *this; }
+  expr& operator=(unsigned u)       { n.assign(u); return *this; }
+  expr& operator=(unsigned long u)  { n.assign(u); return *this; }
+  expr& operator=(signed short u)   { n.assign(u); return *this; }
+  expr& operator=(signed u)         { n.assign(u); return *this; }
+  expr& operator=(signed long u)    { n.assign(u); return *this; }
+
+  expr& operator=(const expr& e) {
+    n.assign_expr(e.get_expr());
+    return *this;
+  }
   template <typename E>
-    inline expr& operator-=(const E& e) { n.subtract_this(e); return *this; }
+  expr& operator=(const expr<natural_number<MidLevel>, E>& e) {
+    n.assign_expr(e.get_expr());
+    return *this;
+  }
+
   template <typename E>
-    inline expr& operator/=(const E& e) { n.divide_this(e); return *this; }
+  inline expr& operator+=(const E& e) { n.add_this(e); return *this; }
   template <typename E>
-    inline expr& operator%=(const E& e) { n.remainder_this(e); return *this; }
+  inline expr& operator-=(const E& e) { n.subtract_this(e); return *this; }
+  template <typename E>
+  inline expr& operator/=(const E& e) { n.divide_this(e); return *this; }
+  template <typename E>
+  inline expr& operator%=(const E& e) { n.remainder_this(e); return *this; }
   inline operator bool() const { return !n.is_zero(); }
   inline const natural_number<MidLevel>& get_expr() const { return n; }
   inline const natural_number<MidLevel>& eval() const { return n; }

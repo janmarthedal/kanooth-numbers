@@ -32,18 +32,20 @@ typedef detail::expr<
 
 std::ostream& operator<<(std::ostream& os, const natural_number& n)
 {
-  typedef natural_number::container_type container_type;
-  container_type tmp(n.get_container());
-  unsigned max_digits = tmp.size() * GMP_LIMB_BITS / 3 + 1;
-  char st[max_digits];
-  mp_limb_t t1 = tmp[1];
-  mp_limb_t t0 = tmp[0];
-  std::size_t used = mpn_get_str((unsigned char*)st, 10, tmp.get(), tmp.size());
-  char *p = st;
-  while (!*p) { ++p; --used; }
-  for (unsigned i=0; i < used; ++i) p[i] += '0';
-  p[used] = 0;
-  return os << p;
+  if (n) {
+    typedef natural_number::container_type container_type;
+    container_type tmp(n.get_container());
+    unsigned max_digits = tmp.size() * GMP_LIMB_BITS / 3 + 1;
+    char st[max_digits];
+    std::size_t used = mpn_get_str((unsigned char*)st, 10, tmp.get(), tmp.size());
+    char *p = st;
+    while (!*p) { ++p; --used; }
+    for (unsigned i=0; i < used; ++i) p[i] += '0';
+    p[used] = 0;
+    os << p;
+  } else
+    os << "0";
+  return os;
 }
 
 
