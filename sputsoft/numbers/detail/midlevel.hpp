@@ -29,7 +29,6 @@ int division_by_zero() {
   return 1/y;
 }
 
-
 template <typename Con, typename LowLevel> class midlevel;
 
 template <typename Con, typename LowLevel, typename D>
@@ -151,10 +150,9 @@ public:
   static inline D divide(const D u, const Con& v) {
     if (v.is_empty())
       division_by_zero();
-    else if (v.size() > 1)
-      return 0;
-    else
+    else if (v.size() == 1)
       return u / v[0];
+    return 0;
   }
 
   static inline D remainder(const Con& u, const D v) {
@@ -164,37 +162,35 @@ public:
   static void remainder(Con& r, const D u, const Con& v) {
     if (v.is_empty())
       division_by_zero();
-    else if (v.size() > 1 || v[0] > u)
-      set(r, u);
-    else
+    else if (v.size() == 1 && v[0] <= u)
       set(r, u % v[0]);
+    else
+      set(r, u);
   }
 
   static D quotrem(Con& q, const Con& u, const D v) {
     if (!v)
       division_by_zero();
-    else if (u.is_empty()) {
-      q.set_size(0);
-      return v;
-    } else {
+    else if (!u.is_empty()) {
       Con qt(u.size());
       D r = div2(qt, u, v);
       q.swap(qt);
       return r;
     }
+    q.set_size(0);
+    return v;
   }
 
   static D quotrem(Con& r, const D u, const Con& v) {
     if (v.is_empty())
       division_by_zero();
-    else if (v.size() > 1 || v[0] > u) {
-      set(r, v);
-      return 0;
-    } else {
+    else if (v.size() == 1 && v[0] <= u) {
       std::pair<D, D> qr = number_theory::quotrem(u, v[0]);
       set(r, qr.second);
       return qr.first;
     }
+    set(r, v);
+    return 0;
   }
 
 };
@@ -554,19 +550,19 @@ public:
     midlevel_1_short::divide(r, u, v);
   }
   static inline unsigned short divide(unsigned short u, const Con& v) {
-    midlevel_1_short::divide(u, v);
+    return midlevel_1_short::divide(u, v);
   }
   static inline unsigned short remainder(const Con& u, unsigned short v) {
-    midlevel_1_short::remainder(u, v);
+    return midlevel_1_short::remainder(u, v);
   }
   static inline void remainder(Con& r, unsigned short u, const Con& v) {
     midlevel_1_short::remainder(r, u, v);
   }
-  static inline digit_type quotrem(Con& r, const Con& u, unsigned short v) {
-    midlevel_1_short::quotrem(r, u, v);
+  static inline unsigned short quotrem(Con& q, const Con& u, unsigned short v) {
+    return midlevel_1_short::quotrem(q, u, v);
   }
-  static inline digit_type quotrem(Con& r, unsigned short u, const Con& v) {
-    midlevel_1_short::quotrem(r, u, v);
+  static inline unsigned short quotrem(Con& r, unsigned short u, const Con& v) {
+    return midlevel_1_short::quotrem(r, u, v);
   }
 
   static inline void set(Con& r, unsigned u) {
@@ -588,19 +584,19 @@ public:
     midlevel_1_int::divide(r, u, v);
   }
   static inline unsigned divide(unsigned u, const Con& v) {
-    midlevel_1_int::divide(u, v);
+    return midlevel_1_int::divide(u, v);
   }
   static inline unsigned remainder(const Con& u, unsigned v) {
-    midlevel_1_int::remainder(u, v);
+    return midlevel_1_int::remainder(u, v);
   }
   static inline void remainder(Con& r, unsigned u, const Con& v) {
     midlevel_1_int::remainder(r, u, v);
   }
-  static inline digit_type quotrem(Con& r, const Con& u, unsigned v) {
-    midlevel_1_int::quotrem(r, u, v);
+  static inline unsigned quotrem(Con& q, const Con& u, unsigned v) {
+    return midlevel_1_int::quotrem(q, u, v);
   }
-  static inline digit_type quotrem(Con& r, unsigned u, const Con& v) {
-    midlevel_1_int::quotrem(r, u, v);
+  static inline unsigned quotrem(Con& r, unsigned u, const Con& v) {
+    return midlevel_1_int::quotrem(r, u, v);
   }
 
   static inline void set(Con& r, unsigned long u) {
@@ -622,19 +618,19 @@ public:
     midlevel_1_long::divide(r, u, v);
   }
   static inline unsigned long divide(unsigned long u, const Con& v) {
-    midlevel_1_long::divide(u, v);
+    return midlevel_1_long::divide(u, v);
   }
   static inline unsigned long remainder(const Con& u, unsigned long v) {
-    midlevel_1_long::remainder(u, v);
+    return midlevel_1_long::remainder(u, v);
   }
   static inline void remainder(Con& r, unsigned long u, const Con& v) {
     midlevel_1_long::remainder(r, u, v);
   }
-  static inline digit_type quotrem(Con& r, const Con& u, unsigned long v) {
-    midlevel_1_long::quotrem(r, u, v);
+  static inline unsigned long quotrem(Con& q, const Con& u, unsigned long v) {
+    return midlevel_1_long::quotrem(q, u, v);
   }
-  static inline digit_type quotrem(Con& r, unsigned long u, const Con& v) {
-    midlevel_1_long::quotrem(r, u, v);
+  static inline unsigned long quotrem(Con& r, unsigned long u, const Con& v) {
+    return midlevel_1_long::quotrem(r, u, v);
   }
 
 };

@@ -16,6 +16,7 @@
 #define _SPUTSOFT_NUMBERS_NATURAL_NUMBER_HPP_
 
 #include <sputsoft/numbers/generic/natural_number.hpp>
+#include <sputsoft/numbers/generic/natural_number_shared.hpp>
 #ifdef SPUTSOFT_USE_GMP
 #include <sputsoft/numbers/gmp/natural_number.hpp>
 #endif

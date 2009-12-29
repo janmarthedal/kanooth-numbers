@@ -25,7 +25,7 @@ namespace numbers {
 namespace gmp {
 
 typedef detail::expr<
-            detail::natural_number<
+            detail::natural_number_base<
                 detail::midlevel<
                     detail::digit_array<mp_limb_t>,
                     lowlevel > > > natural_number;
