@@ -16,8 +16,8 @@
 #define _SPUTSOFT_NUMBERS_GENERIC_NATURAL_NUMBER_SHARED_HPP_
 
 #include <sputsoft/numbers/detail/natural_number.hpp>
-#include <sputsoft/numbers/detail/midlevel_shared.hpp>
-#include <sputsoft/numbers/detail/midlevel.hpp>
+#include <sputsoft/numbers/detail/cont_arith_shared.hpp>
+#include <sputsoft/numbers/detail/array_arith.hpp>
 #include <sputsoft/numbers/detail/digit_array.hpp>
 #include <sputsoft/numbers/generic/lowlevel.hpp>
 
@@ -27,8 +27,8 @@ namespace generic {
 
 typedef detail::expr<
             detail::natural_number_base<
-                detail::midlevel_shared<
-                    detail::midlevel<
+                detail::cont_arith_shared<
+                    detail::array_arith<
                         detail::digit_array<unsigned short>,
                         lowlevel<detail::array_allocator<void> > > > > > natural_number_shared;
 

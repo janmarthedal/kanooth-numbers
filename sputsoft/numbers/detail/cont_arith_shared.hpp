@@ -1,5 +1,5 @@
 /*
- * File:   numbers/detail/midlevel_shared.hpp
+ * File:   numbers/detail/cont_arith_shared.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-29 21:33Z
@@ -12,8 +12,8 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_MIDLEVEL_SHARED_HPP_
-#define _SPUTSOFT_NUMBERS_DETAIL_MIDLEVEL_SHARED_HPP_
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_CONT_ARITH_SHARED_HPP_
+#define _SPUTSOFT_NUMBERS_DETAIL_CONT_ARITH_SHARED_HPP_
 
 #include <boost/shared_ptr.hpp>
 
@@ -21,23 +21,29 @@ namespace sputsoft {
 namespace numbers {
 namespace detail {
 
-template <typename MidLevel>
-class midlevel_shared {
+template <typename ContArith>
+class cont_arith_shared {
+public:
+  typedef boost::shared_ptr<ContArith> container_type;
 
-  typedef typename MidLevel::container_type Con2;
+private:
+  container_type con;
 
 public:
 
-  typedef boost::shared_ptr<Con2> container_type;
+  cont_arith_shared() : con(new ContArith) {}
+
+  container_type& get_con() { return con; }
+  const container_type& get_con() const { return con; }
+
+  static inline bool is_zero(const container_type& u) {
+    return ContArith::is_zero(u->get_con());
+  }
 
   static void set(container_type& r, const container_type& x) {
-    if (r.get() && r.unique())
-      MidLevel::set(*r, *x);
-    else {
-      container_type t(new Con2);
-      MidLevel::set(*t, *x);
-      r.swap(t);
-    }
+    const typename ContArith::container_type& xc = x->get_con();
+    if (!r.unique()) r = container_type(new ContArith);
+    ContArith::set(r->get_con(), xc);
   }
 
   static void add(container_type& r, const container_type& x, const container_type& y) {
@@ -59,14 +65,25 @@ public:
   }
 
   static void left_shift(container_type& z, const container_type& u, std::size_t count) {
+    const typename ContArith::container_type& uc = u->get_con();
+    if (!z.unique()) z = container_type(new ContArith);
+    ContArith::left_shift(z->get_con(), uc, count);
   }
 
   static void right_shift(container_type& z, const container_type& u, std::size_t count) {
+    const typename ContArith::container_type& uc = u->get_con();
+    if (!z.unique()) z = container_type(new ContArith);
+    ContArith::right_shift(z->get_con(), uc, count);
   }
 
   static inline void set(container_type& r, unsigned short u) {
+    if (!r.unique()) r = container_type(new ContArith);
+    ContArith::set(r->get_con(), u);
   }
   static inline void add(container_type& r, const container_type& u, unsigned short v) {
+    const typename ContArith::container_type& uc = u->get_con();
+    if (!r.unique()) r = container_type(new ContArith);
+    ContArith::add(r->get_con(), u->get_con(), v);
   }
   static inline void subtract(container_type& r, const container_type& u, unsigned short v) {
   }
@@ -83,13 +100,21 @@ public:
   static inline void remainder(container_type& r, unsigned short u, const container_type& v) {
   }
   static inline unsigned short quotrem(container_type& q, const container_type& u, unsigned short v) {
+    const typename ContArith::container_type& uc = u->get_con();
+    if (!q.unique()) q = container_type(new ContArith);
+    return ContArith::quotrem(q->get_con(), uc, v);
   }
   static inline unsigned short quotrem(container_type& r, unsigned short u, const container_type& v) {
   }
 
   static inline void set(container_type& r, unsigned u) {
+    if (!r.unique()) r = container_type(new ContArith);
+    ContArith::set(r->get_con(), u);
   }
   static inline void add(container_type& r, const container_type& u, unsigned v) {
+    const typename ContArith::container_type& uc = u->get_con();
+    if (!r.unique()) r = container_type(new ContArith);
+    ContArith::add(r->get_con(), u->get_con(), v);
   }
   static inline void subtract(container_type& r, const container_type& u, unsigned v) {
   }
@@ -106,13 +131,21 @@ public:
   static inline void remainder(container_type& r, unsigned u, const container_type& v) {
   }
   static inline unsigned quotrem(container_type& q, const container_type& u, unsigned v) {
+    const typename ContArith::container_type& uc = u->get_con();
+    if (!q.unique()) q = container_type(new ContArith);
+    return ContArith::quotrem(q->get_con(), uc, v);
   }
   static inline unsigned quotrem(container_type& r, unsigned u, const container_type& v) {
   }
 
   static inline void set(container_type& r, unsigned long u) {
+    if (!r.unique()) r = container_type(new ContArith);
+    ContArith::set(r->get_con(), u);
   }
   static inline void add(container_type& r, const container_type& u, unsigned long v) {
+    const typename ContArith::container_type& uc = u->get_con();
+    if (!r.unique()) r = container_type(new ContArith);
+    ContArith::add(r->get_con(), u->get_con(), v);
   }
   static inline void subtract(container_type& r, const container_type& u, unsigned long v) {
   }
@@ -129,6 +162,9 @@ public:
   static inline void remainder(container_type& r, unsigned long u, const container_type& v) {
   }
   static inline unsigned long quotrem(container_type& q, const container_type& u, unsigned long v) {
+    const typename ContArith::container_type& uc = u->get_con();
+    if (!q.unique()) q = container_type(new ContArith);
+    return ContArith::quotrem(q->get_con(), uc, v);
   }
   static inline unsigned long quotrem(container_type& r, unsigned long u, const container_type& v) {
   }
@@ -139,4 +175,4 @@ public:
 } // namespace numbers
 } // namespace sputsoft
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_MIDLEVEL_HPP_
+#endif // _SPUTSOFT_NUMBERS_DETAIL_CONT_ARITH_HPP_

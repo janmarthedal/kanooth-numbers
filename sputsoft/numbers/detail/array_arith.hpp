@@ -1,5 +1,5 @@
 /*
- * File:   numbers/detail/midlevel.hpp
+ * File:   numbers/detail/array_arith.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z
@@ -12,8 +12,8 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_MIDLEVEL_HPP_
-#define _SPUTSOFT_NUMBERS_DETAIL_MIDLEVEL_HPP_
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_ARRAY_ARITH_HPP_
+#define _SPUTSOFT_NUMBERS_DETAIL_ARRAY_ARITH_HPP_
 
 #include <sputsoft/types.hpp>
 #include <sputsoft/number_theory/common.hpp>
@@ -29,10 +29,8 @@ int division_by_zero() {
   return 1/y;
 }
 
-template <typename Con, typename LowLevel> class midlevel;
-
 template <typename Con, typename LowLevel, typename D>
-class midlevel_1_noconv {
+class array_arith_1_noconv {
 private:
 
   static void add3(Con& r, const Con& x, const D y) {
@@ -109,15 +107,15 @@ public:
       r.set_size(0);
   }
 
+  // y != 0
   static void add(Con& r, const Con& x, const D y) {
     if (x.is_empty()) set(r, y);
-    else if (!y)      midlevel<Con, LowLevel>::set(r, x);
     else              add2(r, x, y);
   }
 
+  // y != 0
   static void subtract(Con& r, const Con& x, const D y) {
     if (x.is_empty()) set(r, D(0));                        // misuse if y != 0
-    else if (!y)      midlevel<Con, LowLevel>::set(r, x);
     else              sub2(r, x, y);
   }
 
@@ -125,9 +123,9 @@ public:
     return y.is_empty() ? x : y.size() > 1 ? 0 : x - y[0];
   }
 
+  // y != 1
   static void multiply(Con& r, const Con& x, const D y) {
     if (x.is_empty() || !y) set(r, D(0));
-    else if (y == 1)        midlevel<Con, LowLevel>::set(r, x);
     else                    mul2(r, x, y);
   }
 
@@ -178,7 +176,7 @@ public:
       return r;
     }
     q.set_size(0);
-    return v;
+    return 0;
   }
 
   static D quotrem(Con& r, const D u, const Con& v) {
@@ -189,7 +187,7 @@ public:
       set(r, qr.second);
       return qr.first;
     }
-    set(r, v);
+    set(r, u);
     return 0;
   }
 
@@ -224,78 +222,80 @@ public:
   }
 };
 
+template <typename Con, typename LowLevel> class array_arith;
+
 template <typename Con, typename LowLevel, typename D, typename B, bool Cnv>
-class midlevel_1;
+class array_arith_1;
 
 /* Argument type equal to or smaller than digit type: */
 
 template <typename Con, typename LowLevel, typename D, typename B>
-class midlevel_1<Con, LowLevel, D, B, false>
- : public midlevel_1_noconv<Con, LowLevel, D> {};
+class array_arith_1<Con, LowLevel, D, B, false>
+ : public array_arith_1_noconv<Con, LowLevel, D> {};
 
 /* Argument type larger than digit type: */
 
 template <typename Con, typename LowLevel, typename D, typename B>
-class midlevel_1<Con, LowLevel, D, B, true> {
+class array_arith_1<Con, LowLevel, D, B, true> {
 private:
 
   typedef conwrap<Con, D, B> con_type;
-  typedef midlevel<Con, LowLevel> midlevel_;
+  typedef array_arith<Con, LowLevel> array_arith_;
 
 public:
 
   static inline void set(Con& r, const B u) {
-    midlevel_::set(r, con_type(u).get());
+    array_arith_::set(r, con_type(u).get());
   }
 
   static inline void add(Con& r, const Con& u, const B v) {
-    midlevel_::add(r, u, con_type(v).get());
+    array_arith_::add(r, u, con_type(v).get());
   }
 
   static inline void subtract(Con& r, const Con& u, const B v) {
-    midlevel_::subtract(r, u, con_type(v).get());
+    array_arith_::subtract(r, u, con_type(v).get());
   }
 
   static inline B subtract(const B u, const Con& v) {
     con_type cr;
-    midlevel_::subtract(cr.get(), con_type(u).get(), v);
+    array_arith_::subtract(cr.get(), con_type(u).get(), v);
     return cr.value();
   }
 
   static inline void multiply(Con& r, const Con& u, const B v) {
-    midlevel_::multiply(r, u, con_type(v).get());
+    array_arith_::multiply(r, u, con_type(v).get());
   }
 
   static inline void divide(Con& r, const Con& u, const B v) {
-    midlevel_::multiply(r, u, con_type(v).get());
+    array_arith_::multiply(r, u, con_type(v).get());
   }
 
   static inline B divide(const B u, const Con& v) {
     con_type cq;
-    midlevel_::divide(cq.get(), con_type(u).get(), v);
+    array_arith_::divide(cq.get(), con_type(u).get(), v);
     return cq.value();
   }
 
   static inline B remainder(const Con& u, const B v) {
     con_type cr;
     con_type cv(v);
-    midlevel_::remainder(cr.get(), u, cv.get());
+    array_arith_::remainder(cr.get(), u, cv.get());
     return cr.value();
   }
 
   static inline void remainder(Con& r, const B u, const Con& v) {
-    midlevel_::remainder(r, con_type(u).get(), v);
+    array_arith_::remainder(r, con_type(u).get(), v);
   }
 
   static inline B quotrem(Con& q, const Con& u, const B v) {
     con_type cr;
-    midlevel_::quotrem(q, cr.get(), u, con_type(v).get());
+    array_arith_::quotrem(q, cr.get(), u, con_type(v).get());
     return cr.value();
   }
 
   static inline B quotrem(Con& r, const B u, const Con& v) {
     con_type cq;
-    midlevel_::quotrem(cq.get(), r, con_type(u).get(), v);
+    array_arith_::quotrem(cq.get(), r, con_type(u).get(), v);
     return cq.value();
   }
 
@@ -303,16 +303,18 @@ public:
 
 
 template <typename Con, typename LowLevel>
-class midlevel {
+class array_arith {
+private:
 
   typedef typename Con::digit_type digit_type;
   static const unsigned digit_bits = boost::integer_traits<digit_type>::digits;
   static const unsigned short_bits = boost::integer_traits<unsigned short>::digits;
   static const unsigned int_bits = boost::integer_traits<unsigned>::digits;
   static const unsigned long_bits = boost::integer_traits<unsigned long>::digits;
-  typedef midlevel_1<Con, LowLevel, digit_type, unsigned short, digit_bits < short_bits> midlevel_1_short;
-  typedef midlevel_1<Con, LowLevel, digit_type, unsigned,       digit_bits < int_bits>   midlevel_1_int;
-  typedef midlevel_1<Con, LowLevel, digit_type, unsigned long,  digit_bits < long_bits>  midlevel_1_long;
+  typedef array_arith_1<Con, LowLevel, digit_type, unsigned short, digit_bits < short_bits> array_arith_1_short;
+  typedef array_arith_1<Con, LowLevel, digit_type, unsigned,       digit_bits < int_bits>   array_arith_1_int;
+  typedef array_arith_1<Con, LowLevel, digit_type, unsigned long,  digit_bits < long_bits>  array_arith_1_long;
+  Con con;
 
   static void add3(Con& r, const Con& x, const Con& y) {
     std::size_t xs = x.size();
@@ -407,6 +409,13 @@ class midlevel {
 public:
 
   typedef Con container_type;
+
+  Con& get_con() { return con; }
+  const Con& get_con() const { return con; }
+
+  static inline bool is_zero(const Con& u) {
+    return u.is_empty();
+  }
 
   static void set(Con& r, const Con& x) {
     std::size_t n = x.size();
@@ -532,105 +541,114 @@ public:
   }
 
   static inline void set(Con& r, unsigned short u) {
-    midlevel_1_short::set(r, u);
+    array_arith_1_short::set(r, u);
   }
   static inline void add(Con& r, const Con& u, unsigned short v) {
-    midlevel_1_short::add(r, u, v);
+    if (!v) set(r, u);
+    else array_arith_1_short::add(r, u, v);
   }
   static inline void subtract(Con& r, const Con& u, unsigned short v) {
-    midlevel_1_short::subtract(r, u, v);
+    if (!v) set(r, u);
+    else array_arith_1_short::subtract(r, u, v);
   }
   static inline unsigned short subtract(unsigned short u, const Con& v) {
-    return midlevel_1_short::subtract(u, v);
+    return array_arith_1_short::subtract(u, v);
   }
   static inline void multiply(Con& r, const Con& u, unsigned short v) {
-    midlevel_1_short::multiply(r, u, v);
+    if (v == 1) set(r, u);
+    else array_arith_1_short::multiply(r, u, v);
   }
   static inline void divide(Con& r, const Con& u, unsigned short v) {
-    midlevel_1_short::divide(r, u, v);
+    array_arith_1_short::divide(r, u, v);
   }
   static inline unsigned short divide(unsigned short u, const Con& v) {
-    return midlevel_1_short::divide(u, v);
+    return array_arith_1_short::divide(u, v);
   }
   static inline unsigned short remainder(const Con& u, unsigned short v) {
-    return midlevel_1_short::remainder(u, v);
+    return array_arith_1_short::remainder(u, v);
   }
   static inline void remainder(Con& r, unsigned short u, const Con& v) {
-    midlevel_1_short::remainder(r, u, v);
+    array_arith_1_short::remainder(r, u, v);
   }
   static inline unsigned short quotrem(Con& q, const Con& u, unsigned short v) {
-    return midlevel_1_short::quotrem(q, u, v);
+    return array_arith_1_short::quotrem(q, u, v);
   }
   static inline unsigned short quotrem(Con& r, unsigned short u, const Con& v) {
-    return midlevel_1_short::quotrem(r, u, v);
+    return array_arith_1_short::quotrem(r, u, v);
   }
 
   static inline void set(Con& r, unsigned u) {
-    midlevel_1_int::set(r, u);
+    array_arith_1_int::set(r, u);
   }
   static inline void add(Con& r, const Con& u, unsigned v) {
-    midlevel_1_int::add(r, u, v);
+    if (!v) set(r, u);
+    else array_arith_1_int::add(r, u, v);
   }
   static inline void subtract(Con& r, const Con& u, unsigned v) {
-    midlevel_1_int::subtract(r, u, v);
+    if (!v) set(r, u);
+    else array_arith_1_int::subtract(r, u, v);
   }
   static inline unsigned subtract(unsigned u, const Con& v) {
-    return midlevel_1_int::subtract(u, v);
+    return array_arith_1_int::subtract(u, v);
   }
   static inline void multiply(Con& r, const Con& u, unsigned v) {
-    midlevel_1_int::multiply(r, u, v);
+    if (v == 1) set(r, u);
+    else array_arith_1_int::multiply(r, u, v);
   }
   static inline void divide(Con& r, const Con& u, unsigned v) {
-    midlevel_1_int::divide(r, u, v);
+    array_arith_1_int::divide(r, u, v);
   }
   static inline unsigned divide(unsigned u, const Con& v) {
-    return midlevel_1_int::divide(u, v);
+    return array_arith_1_int::divide(u, v);
   }
   static inline unsigned remainder(const Con& u, unsigned v) {
-    return midlevel_1_int::remainder(u, v);
+    return array_arith_1_int::remainder(u, v);
   }
   static inline void remainder(Con& r, unsigned u, const Con& v) {
-    midlevel_1_int::remainder(r, u, v);
+    array_arith_1_int::remainder(r, u, v);
   }
   static inline unsigned quotrem(Con& q, const Con& u, unsigned v) {
-    return midlevel_1_int::quotrem(q, u, v);
+    return array_arith_1_int::quotrem(q, u, v);
   }
   static inline unsigned quotrem(Con& r, unsigned u, const Con& v) {
-    return midlevel_1_int::quotrem(r, u, v);
+    return array_arith_1_int::quotrem(r, u, v);
   }
 
   static inline void set(Con& r, unsigned long u) {
-    midlevel_1_long::set(r, u);
+    array_arith_1_long::set(r, u);
   }
   static inline void add(Con& r, const Con& u, unsigned long v) {
-    midlevel_1_long::add(r, u, v);
+    if (!v) set(r, u);
+    else array_arith_1_long::add(r, u, v);
   }
   static inline void subtract(Con& r, const Con& u, unsigned long v) {
-    midlevel_1_long::subtract(r, u, v);
+    if (!v) set(r, u);
+    else array_arith_1_long::subtract(r, u, v);
   }
   static inline unsigned long subtract(unsigned long u, const Con& v) {
-    return midlevel_1_long::subtract(u, v);
+    return array_arith_1_long::subtract(u, v);
   }
   static inline void multiply(Con& r, const Con& u, unsigned long v) {
-    midlevel_1_long::multiply(r, u, v);
+    if (v == 1) set(r, u);
+    else array_arith_1_long::multiply(r, u, v);
   }
   static inline void divide(Con& r, const Con& u, unsigned long v) {
-    midlevel_1_long::divide(r, u, v);
+    array_arith_1_long::divide(r, u, v);
   }
   static inline unsigned long divide(unsigned long u, const Con& v) {
-    return midlevel_1_long::divide(u, v);
+    return array_arith_1_long::divide(u, v);
   }
   static inline unsigned long remainder(const Con& u, unsigned long v) {
-    return midlevel_1_long::remainder(u, v);
+    return array_arith_1_long::remainder(u, v);
   }
   static inline void remainder(Con& r, unsigned long u, const Con& v) {
-    midlevel_1_long::remainder(r, u, v);
+    array_arith_1_long::remainder(r, u, v);
   }
   static inline unsigned long quotrem(Con& q, const Con& u, unsigned long v) {
-    return midlevel_1_long::quotrem(q, u, v);
+    return array_arith_1_long::quotrem(q, u, v);
   }
   static inline unsigned long quotrem(Con& r, unsigned long u, const Con& v) {
-    return midlevel_1_long::quotrem(r, u, v);
+    return array_arith_1_long::quotrem(r, u, v);
   }
 
 };
@@ -639,4 +657,4 @@ public:
 } // namespace numbers
 } // namespace sputsoft
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_MIDLEVEL_HPP_
+#endif // _SPUTSOFT_NUMBERS_DETAIL_ARRAY_ARITH_HPP_

@@ -24,80 +24,85 @@ namespace sputsoft {
 namespace numbers {
 namespace detail {
 
-template <typename MidLevel>
+template <typename ContArith>
 class natural_number_base {
 private:
-  typename MidLevel::container_type digits;
+  ContArith cont_arith;
+
+  typedef typename ContArith::container_type container_type;
+
+  container_type& get() { return cont_arith.get_con(); }
+  const container_type& get() const { return cont_arith.get_con(); }
 
   static inline void set(natural_number_base& r, const natural_number_base& u) {
-    MidLevel::set(r.digits, u.digits);
+    ContArith::set(r.get(), u.get());
   }
 
   static inline void add(natural_number_base& r,
       const natural_number_base& u, const natural_number_base& v) {
-    MidLevel::add(r.digits, u.digits, v.digits);
+    ContArith::add(r.get(), u.get(), v.get());
   }
 
   static inline void sub(natural_number_base& r,
       const natural_number_base& u, const natural_number_base& v) {
-    MidLevel::subtract(r.digits, u.digits, v.digits);
+    ContArith::subtract(r.get(), u.get(), v.get());
   }
 
   static inline void multiply(natural_number_base& r,
       const natural_number_base& u, const natural_number_base& v) {
-    MidLevel::multiply(r.digits, u.digits, v.digits);
+    ContArith::multiply(r.get(), u.get(), v.get());
   }
 
   static inline void divide(natural_number_base& r,
       const natural_number_base& u, const natural_number_base& v) {
-    MidLevel::divide(r.digits, u.digits, v.digits);
+    ContArith::divide(r.get(), u.get(), v.get());
   }
 
   static inline void remainder(natural_number_base& r,
       const natural_number_base& u, const natural_number_base& v) {
-    MidLevel::remainder(r.digits, u.digits, v.digits);
+    ContArith::remainder(r.get(), u.get(), v.get());
   }
 
 #define SPUTSOFT_MATH_NUMBERS_DETAIL_natural_number_base_PRIVATE_BUILTIN(type) \
   static inline void add(natural_number_base& r, \
       const natural_number_base& u, type v) { \
-    MidLevel::add(r.digits, u.digits, (type_convert<type>::unsigned_type) v); \
+    ContArith::add(r.get(), u.get(), to_unsigned(v)); \
   } \
   static inline void add(natural_number_base& r, \
       type u, const natural_number_base& v) { \
-    MidLevel::add(r.digits, v.digits, (type_convert<type>::unsigned_type) u); \
+    ContArith::add(r.get(), v.get(), to_unsigned(u)); \
   } \
   static inline void subtract(natural_number_base& r, \
       const natural_number_base& u, type v) { \
-    MidLevel::subtract(r.digits, u.digits, (type_convert<type>::unsigned_type) v); \
+    ContArith::subtract(r.get(), u.get(), to_unsigned(v)); \
   } \
   static inline void subtract(natural_number_base& r, \
       type u, const natural_number_base& v) { \
-    assign(MidLevel::subtract((type_convert<type>::unsigned_type) u, v.digits)); \
+    assign(ContArith::subtract(to_unsigned(u), v.get())); \
   } \
   static inline void multiply(natural_number_base& r, \
       const natural_number_base& u, type v) { \
-    MidLevel::multiply(r.digits, u.digits, (type_convert<type>::unsigned_type) v); \
+    ContArith::multiply(r.get(), u.get(), to_unsigned(v)); \
   } \
   static inline void multiply(natural_number_base& r, \
       type u, const natural_number_base& v) { \
-    MidLevel::multiply(r.digits, v.digits, (type_convert<type>::unsigned_type) u); \
+    ContArith::multiply(r.get(), v.get(), to_unsigned(u)); \
   } \
   static inline void divide(natural_number_base& r, \
       const natural_number_base& u, type v) { \
-    MidLevel::divide(r.digits, u.digits, (type_convert<type>::unsigned_type) v); \
+    ContArith::divide(r.get(), u.get(), to_unsigned(v)); \
   } \
   static inline void divide(natural_number_base& r, \
       type u, const natural_number_base& v) { \
-    assign(divide((type_convert<type>::unsigned_type) u, v.digits)); \
+    assign(divide(to_unsigned(u), v.get())); \
   } \
   static inline void remainder(natural_number_base& r, \
       const natural_number_base& u, type v) { \
-    assign(remainder(u.digits, (type_convert<type>::unsigned_type) v)); \
+    assign(remainder(u.get(), to_unsigned(v))); \
   } \
   static inline void remainder(natural_number_base& r, \
       type u, const natural_number_base& v) { \
-    MidLevel::remainder(r.digits, (type_convert<type>::unsigned_type) u, v.digits); \
+    ContArith::remainder(r.get(), to_unsigned(u), v.get()); \
   }
 
   SPUTSOFT_MATH_NUMBERS_DETAIL_natural_number_base_PRIVATE_BUILTIN(unsigned short)
@@ -109,12 +114,12 @@ private:
 
   static inline void left_shift(natural_number_base& r,
       const natural_number_base& u, std::size_t count) {
-    MidLevel::left_shift(r.digits, u.digits, count);
+    ContArith::left_shift(r.get(), u.get(), count);
   }
 
   static inline void right_shift(natural_number_base& r,
       const natural_number_base& u, std::size_t count) {
-    MidLevel::right_shift(r.digits, u.digits, count);
+    ContArith::right_shift(r.get(), u.get(), count);
   }
 
 public:
@@ -165,10 +170,10 @@ public:
     set(*this, u);
   }
 
-  natural_number_base() : digits() {}
+  natural_number_base() : cont_arith() {}
 
   template <typename E>
-  natural_number_base(const E& e) : digits() {
+  natural_number_base(const E& e) : cont_arith() {
     assign_expr(e);
   }
 
@@ -212,51 +217,59 @@ public:
     remainder(*this, *this, v);
   }
 
+  inline void left_shift_this(std::size_t count) {
+    left_shift(*this, *this, count);
+  }
+
+  inline void right_shift_this(std::size_t count) {
+    right_shift(*this, *this, count);
+  }
+
   inline std::string to_string(unsigned base) const {
-    return MidLevel::to_string(digits, base);
+    return ContArith::to_string(get(), base);
   }
 
   inline bool is_zero() const {
-    return digits.is_empty();
+    return ContArith::is_zero(get());
   }
 
   static inline std::pair<natural_number_base, natural_number_base>
         quotrem(const natural_number_base& x, const natural_number_base& y) {
     natural_number_base q, r;
-    MidLevel::quotrem(q.digits, r.digits, x.digits, y.digits);
+    ContArith::quotrem(q.get(), r.get(), x.get(), y.get());
     return std::make_pair(q, r);
   }
 
-  const typename MidLevel::container_type& get_container() const {
-    return digits;
+  const typename ContArith::container_type& get_container() const {
+    return get();
   }
 
 #define SPUTSOFT_MATH_NUMBERS_DETAIL_natural_number_base_PUBLIC_BUILTIN(type) \
-  natural_number_base(type u) : digits() { \
+  natural_number_base(type u) : cont_arith() { \
     assign(u); \
   } \
   inline void assign(type u) { \
-    MidLevel::set(digits, (type_convert<type>::unsigned_type) u); \
+    ContArith::set(get(), to_unsigned(u)); \
   } \
   static inline type subtract(type x, const natural_number_base& y) { \
-    return MidLevel::subtract((type_convert<type>::unsigned_type) x, y.digits); \
+    return ContArith::subtract(to_unsigned(x), y.get()); \
   } \
   static inline type remainder(const natural_number_base& x, type y) { \
-    return MidLevel::remainder(x.digits, (type_convert<type>::unsigned_type) y); \
+    return ContArith::remainder(x.get(), to_unsigned(y)); \
   } \
   static inline type divide(type x, const natural_number_base& y) { \
-    return MidLevel::divide((type_convert<type>::unsigned_type) x, y.digits); \
+    return ContArith::divide(to_unsigned(x), y.get()); \
   } \
   static inline std::pair<natural_number_base, type> \
         quotrem(const natural_number_base& x, type y) { \
     natural_number_base q; \
-    type r = MidLevel::quotrem(q.digits, x.digits, (type_convert<type>::unsigned_type) y); \
+    type r = ContArith::quotrem(q.get(), x.get(), to_unsigned(y)); \
     return std::make_pair(q, r); \
   } \
   static inline std::pair<type, natural_number_base> \
         quotrem(type x, const natural_number_base& y) { \
     natural_number_base r; \
-    type q = MidLevel::quotrem(r.digits, (type_convert<type>::unsigned_type) x, y.digits); \
+    type q = ContArith::quotrem(r.get(), to_unsigned(x), y.get()); \
     return std::make_pair(q, r); \
   }
 

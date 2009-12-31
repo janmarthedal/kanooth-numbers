@@ -46,6 +46,11 @@ namespace sputsoft {
     typedef unsigned long int unsigned_type;
   };
 
+  template <typename T>
+  typename type_convert<T>::unsigned_type to_unsigned(const T& v) {
+    return (typename type_convert<T>::unsigned_type) v;
+  }
+
 /*  using ::boost::int8_t;
   using ::boost::uint8_t;
   using ::boost::int16_t;

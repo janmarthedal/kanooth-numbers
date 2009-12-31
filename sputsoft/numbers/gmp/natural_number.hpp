@@ -17,7 +17,7 @@
 
 #include <sputsoft/numbers/detail/natural_number.hpp>
 #include <sputsoft/numbers/detail/digit_array.hpp>
-#include <sputsoft/numbers/detail/midlevel.hpp>
+#include <sputsoft/numbers/detail/array_arith.hpp>
 #include <sputsoft/numbers/gmp/lowlevel.hpp>
 
 namespace sputsoft {
@@ -26,7 +26,7 @@ namespace gmp {
 
 typedef detail::expr<
             detail::natural_number_base<
-                detail::midlevel<
+                detail::array_arith<
                     detail::digit_array<mp_limb_t>,
                     lowlevel > > > natural_number;
 

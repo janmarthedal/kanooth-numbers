@@ -66,6 +66,8 @@ public:
   inline expr& operator/=(const E& e) { n.divide_this(e); return *this; }
   template <typename E>
   inline expr& operator%=(const E& e) { n.remainder_this(e); return *this; }
+  inline expr& operator<<=(std::size_t count) { n.left_shift_this(count); return *this; }
+  inline expr& operator>>=(std::size_t count) { n.right_shift_this(count); return *this; }
   inline operator bool() const { return !n.is_zero(); }
   inline const natural_number_base<MidLevel>& get_expr() const { return n; }
   inline const natural_number_base<MidLevel>& eval() const { return n; }
@@ -99,25 +101,18 @@ template <typename MidLevel>
 std::ostream& operator<<(std::ostream& os,
         const expr<natural_number_base<MidLevel> >& n)
 {
-  if (n) {
-    typedef expr<natural_number_base<MidLevel> > num;
-    typedef typename num::container_type container_type;
-    typedef typename container_type::digit_type digit_type;
-    const container_type& con = n.get_container();
-    unsigned max_digits = con.size() * boost::integer_traits<digit_type>::digits / 3 + 1;
-    char st[max_digits];
-    char* p = st + max_digits;
-    *--p = 0;
-    num t = n;
-    while (t) {
-      std::pair<num, short unsigned> qr = number_theory::quotrem(t, (short unsigned) 10);
-      t = qr.first;
-      *--p = (char) qr.second + '0';
-    }
-    os << p;
-  } else
-    os << "0";
-  return os;
+  typedef expr<natural_number_base<MidLevel> > num;
+  unsigned max_digits = n ? number_theory::floor_log2(n) / 3 + 2 : 2;
+  char st[max_digits];
+  char* p = st + max_digits;
+  *--p = 0;
+  num t = n;
+  do {
+    std::pair<num, short unsigned> qr = number_theory::quotrem(t, (short unsigned) 10);
+    t = qr.first;
+    *--p = (char) qr.second + '0';
+  } while (t);
+  return os << p;
 }
 
 
