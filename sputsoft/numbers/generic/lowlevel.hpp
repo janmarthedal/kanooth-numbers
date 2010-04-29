@@ -16,6 +16,8 @@
 #define _SPUTSOFT_NUMBERS_GENERIC_LOWLEVEL_HPP_
 
 #include <sputsoft/numbers/detail/array_allocator.hpp>
+#include <sputsoft/number_theory/common.hpp>
+#include <boost/integer_traits.hpp>
 
 namespace sputsoft {
 namespace numbers {
