@@ -1,5 +1,5 @@
 /*
- * File:   numbers/generic/lowlevel.hpp
+ * File:   numbers/detail/lowlevel_generic.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z
@@ -21,10 +21,10 @@
 
 namespace sputsoft {
 namespace numbers {
-namespace generic {
+namespace detail {
 
-template <typename A = detail::array_allocator<void> >
-class lowlevel {
+template <typename A = array_allocator<void> >
+class lowlevel_generic {
 private:
 
   // n >= 0
@@ -415,8 +415,8 @@ public:
 
 };
 
-} // namespace generic
+} // namespace detail
 } // namespace numbers
 } // namespace sputsoft
 
-#endif // _SPUTSOFT_NUMBERS_GENERIC_LOWLEVEL_HPP_
+#endif // _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_HPP_
