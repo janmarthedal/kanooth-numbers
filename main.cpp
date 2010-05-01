@@ -9,9 +9,20 @@
 #include <boost/integer_traits.hpp>
 #include <sputsoft/numbers/detail/digit_array.hpp>
 #include <sputsoft/numbers/detail/lowlevel_generic.hpp>
+
+/*#include <sputsoft/numbers/detail/shared_nat_num_wrap.hpp>
+typedef sputsoft::numbers::detail::expr<
+          boost::shared_ptr<
+            sputsoft::numbers::detail::nat_num_wrap<
+              sputsoft::numbers::detail::digit_array<unsigned long>,
+              sputsoft::numbers::detail::lowlevel_generic<
+                sputsoft::numbers::detail::array_allocator<void>
+              >
+            >
+          >
+        > natural_number;*/
+
 #include <sputsoft/numbers/detail/nat_num_wrap.hpp>
-
-
 typedef sputsoft::numbers::detail::expr<
           sputsoft::numbers::detail::nat_num_wrap<
             sputsoft::numbers::detail::digit_array<unsigned long>,
@@ -24,12 +35,13 @@ typedef sputsoft::numbers::detail::expr<
 
 int main()
 {
-  natural_number a, b=2u, c;
+  natural_number a, b=20u, c;
 
   sputsoft::numbers::set(c, 10u);
   sputsoft::numbers::set(a, b);
   sputsoft::numbers::add(c, b, 3u);
-  sputsoft::numbers::add(c, 20u, b);
+  sputsoft::numbers::sub(c, b, 5u);
+  sputsoft::numbers::mul(c, c, b);
 
   std::cout << a.get() << std::endl;
   std::cout << c.get() << std::endl;
