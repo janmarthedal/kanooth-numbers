@@ -3,6 +3,8 @@
  * Author: jmr
  *
  * Created on April 30, 2010, 5:04 PM
+ *
+ * $Id$
  */
 
 #ifndef _METHOD_ARITH_HPP

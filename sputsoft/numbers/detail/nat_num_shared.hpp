@@ -3,6 +3,8 @@
  * Author: jmr
  *
  * Created on April 30, 2010, 5:18 PM
+ *
+ * $Id$
  */
 
 #ifndef _SHARED_NAT_NUM_WRAP_HPP
@@ -30,13 +32,25 @@ private:
   template <typename V1, typename V2>
   void add(const V1& v1, const V2& v2) {
     if (!num.unique()) num.reset(new number_type);
-    number_type::add(*num, v1, v2);
+    num->add(v1, v2);
+  }
+
+  template <typename V1, typename V2>
+  void sub(const V1& v1, const V2& v2) {
+    if (!num.unique()) num.reset(new number_type);
+    num->sub(v1, v2);
+  }
+
+  template <typename V1, typename V2>
+  void mul(const V1& v1, const V2& v2) {
+    if (!num.unique()) num.reset(new number_type);
+    num->mul(v1, v2);
   }
 
   template <typename V1, typename V2>
   V2 quotrem(const V1& v1, const V2 v2) {
     if (!num.unique()) num.reset(new number_type);
-    return number_type::quotrem(*num, v1, v2);
+    return num->quotrem(v1, v2);
   }
 
 public:
@@ -54,31 +68,52 @@ public:
   }
 
   expr(unsigned short v) : num(new number_type(v)) {}
-  static inline void set(expr& r, unsigned short v) { r.set(v); }
-  static inline void add(expr& r, const expr& x, unsigned short y) { r.add(*x.num, y); }
-  static inline void add(expr& r, unsigned short x, const expr& y) { r.add(*y.num, x); }
+  inline void set(unsigned short v) { set(v); }
+  inline void add(const expr& x, unsigned short y) { add(*x.num, y); }
+  inline void add(unsigned short x, const expr& y) { add(*y.num, x); }
+  inline void sub(const expr& x, unsigned short y) { sub(*x.num, y); }
+  inline void mul(const expr& x, unsigned short y) { mul(*x.num, y); }
+  inline unsigned short quotrem(const expr& x, unsigned short y)
+    { return quotrem(*x.num, y); }
 
   expr(unsigned v) : num(new number_type(v)) {}
-  static inline void set(expr& r, unsigned v) { r.set(v); }
-  static inline void add(expr& r, const expr& x, unsigned y) { r.add(*x.num, y); }
-  static inline void add(expr& r, unsigned x, const expr& y) { r.add(*y.num, x); }
-  static inline unsigned quotrem(expr& q, const expr& x, unsigned y)
-    { return q.quotrem(*x.num, y); }
+  inline void set(unsigned v) { set(v); }
+  inline void add(const expr& x, unsigned y) { add(*x.num, y); }
+  inline void add(unsigned x, const expr& y) { add(*y.num, x); }
+  inline void sub(const expr& x, unsigned y) { sub(*x.num, y); }
+  inline void mul(const expr& x, unsigned y) { mul(*x.num, y); }
+  inline unsigned quotrem(const expr& x, unsigned y)
+    { return quotrem(*x.num, y); }
 
   expr(unsigned long v) : num(new number_type(v)) {}
-  static inline void set(expr& r, unsigned long v) { r.set(v); }
-  static inline void add(expr& r, const expr& x, unsigned long y) { r.add(*x.num, y); }
-  static inline void add(expr& r, unsigned long x, const expr& y) { r.add(*y.num, x); }
+  inline void set(unsigned long v) { set(v); }
+  inline void add(const expr& x, unsigned long y) { add(*x.num, y); }
+  inline void add(unsigned long x, const expr& y) { add(*y.num, x); }
+  inline void sub(const expr& x, unsigned long y) { sub(*x.num, y); }
+  inline void mul(const expr& x, unsigned long y) { mul(*x.num, y); }
+  inline unsigned long quotrem(const expr& x, unsigned long y)
+    { return quotrem(*x.num, y); }
 
 #ifdef SPUTSOFT_HAS_LONG_LONG
   expr(unsigned long long v) : num(new number_type(v)) {}
-  static inline void set(expr& r, unsigned long long v) { r.set(v); }
-  static inline void add(expr& r, const expr& x, unsigned long long y) { r.add(*x.num, y); }
-  static inline void add(expr& r, unsigned long long x, const expr& y) { r.add(*y.num, x); }
+  inline void set(unsigned long long v) { set(v); }
+  inline void add(const expr& x, unsigned long long y) { add(*x.num, y); }
+  inline void add(unsigned long long x, const expr& y) { add(*y.num, x); }
+  inline void sub(const expr& x, unsigned long long y) { sub(*x.num, y); }
+  inline void mul(const expr& x, unsigned long long y) { mul(*x.num, y); }
+  inline unsigned long long quotrem(const expr& x, unsigned long long y)
+    { return quotrem(*x.num, y); }
 #endif
 
-  static inline void set(expr& r, const expr& x) { r.num = x.num; }
-  static inline void add(expr& r, const expr& x, const expr& y) { r.add(*x.num, *y.num); }
+  inline void set(const expr& x) { num = x.num; }
+  inline void add(const expr& x, const expr& y) { add(*x.num, *y.num); }
+  inline void sub(const expr& x, const expr& y) { sub(*x.num, *y.num); }
+  inline void mul(const expr& x, const expr& y) { mul(*x.num, *y.num); }
+  static inline void quotrem(expr& q, expr& r, const expr& u, const expr& v) {
+    if (!q.num.unique()) q.num.reset(new number_type);
+    if (!r.num.unique()) r.num.reset(new number_type);
+    number_type::quotrem(*q.num, *r.num, *u.num, *v.num);
+  }
 };
 
 } // namespace sputsoft

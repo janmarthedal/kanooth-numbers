@@ -3,6 +3,8 @@
  * Author: jmr
  *
  * Created on April 30, 2010, 5:18 PM
+ *
+ * $Id$
  */
 
 #ifndef _NAT_NUM_WRAP_HPP
@@ -416,57 +418,56 @@ public:
   }
 
   expr(unsigned short v) : con() { set_int(con, v); }
-  static inline void set(expr& r, unsigned short v) { set_int(r.con, v); }
-  static inline void add(expr& r, const expr& x, unsigned short y) { add_int(r.con, x.con, y); }
-  static inline void add(expr& r, unsigned short x, const expr& y) { add_int(r.con, y.con, x); }
-  static inline void sub(expr& r, const expr& x, unsigned short y) { sub_int(r.con, x.con, y); }
-  static inline void mul(expr& r, const expr& x, unsigned short y) { mul_int(r.con, x.con, y); }
-  static inline void div(expr& q, const expr& x, unsigned short y) { quot_int(q.con, x.con, y); }
-  static inline unsigned short rem(const expr& x, unsigned short y) { return rem_int(x.con, y); }
-  static inline unsigned short quotrem(expr& q, const expr& x, unsigned short y)
-    { return quotrem_int(q.con, x.con, y); }
+  inline void set(unsigned short v) { set_int(con, v); }
+  inline void add(const expr& x, unsigned short y) { add_int(con, x.con, y); }
+  inline void add(unsigned short x, const expr& y) { add_int(con, y.con, x); }
+  inline void sub(const expr& x, unsigned short y) { sub_int(con, x.con, y); }
+  inline void mul(const expr& x, unsigned short y) { mul_int(con, x.con, y); }
+  inline void div(const expr& x, unsigned short y) { quot_int(con, x.con, y); }
+  inline unsigned short rem(unsigned short y) const { return rem_int(con, y); }
+  inline unsigned short quotrem(const expr& x, unsigned short y)
+    { return quotrem_int(con, x.con, y); }
 
   expr(unsigned v) : con() { set_int(con, v); }
-  static inline void set(expr& r, unsigned v) { set_int(r.con, v); }
-  static inline void add(expr& r, const expr& x, unsigned y) { add_int(r.con, x.con, y); }
-  static inline void add(expr& r, unsigned x, const expr& y) { add_int(r.con, y.con, x); }
-  static inline void sub(expr& r, const expr& x, unsigned y) { sub_int(r.con, x.con, y); }
-  static inline void mul(expr& r, const expr& x, unsigned y) { mul_int(r.con, x.con, y); }
-  static inline void div(expr& q, const expr& x, unsigned y) { quot_int(q.con, x.con, y); }
-  static inline unsigned rem(const expr& x, unsigned y) { return rem_int(x.con, y); }
-  static inline unsigned quotrem(expr& q, const expr& x, unsigned y)
-    { return quotrem_int(q.con, x.con, y); }
+  inline void set(unsigned v) { set_int(con, v); }
+  inline void add(const expr& x, unsigned y) { add_int(con, x.con, y); }
+  inline void add(unsigned x, const expr& y) { add_int(con, y.con, x); }
+  inline void sub(const expr& x, unsigned y) { sub_int(con, x.con, y); }
+  inline void mul(const expr& x, unsigned y) { mul_int(con, x.con, y); }
+  inline void div(const expr& x, unsigned y) { quot_int(con, x.con, y); }
+  inline unsigned rem(unsigned y) const { return rem_int(con, y); }
+  inline unsigned quotrem(const expr& x, unsigned y) { return quotrem_int(con, x.con, y); }
 
   expr(unsigned long v) : con() { set_int(con, v); }
-  static inline void set(expr& r, unsigned long v) { set_int(r.con, v); }
-  static inline void add(expr& r, const expr& x, unsigned long y) { add_int(r.con, x.con, y); }
-  static inline void add(expr& r, unsigned long x, const expr& y) { add_int(r.con, y.con, x); }
-  static inline void sub(expr& r, const expr& x, unsigned long y) { sub_int(r.con, x.con, y); }
-  static inline void mul(expr& r, const expr& x, unsigned long y) { mul_int(r.con, x.con, y); }
-  static inline void div(expr& q, const expr& x, unsigned long y) { quot_int(q.con, x.con, y); }
-  static inline unsigned long rem(const expr& x, unsigned long y) { return rem_int(x.con, y); }
-  static inline unsigned long quotrem(expr& q, const expr& x, unsigned long y)
-    { return quotrem_int(q.con, x.con, y); }
+  inline void set(unsigned long v) { set_int(con, v); }
+  inline void add(const expr& x, unsigned long y) { add_int(con, x.con, y); }
+  inline void add(unsigned long x, const expr& y) { add_int(con, y.con, x); }
+  inline void sub(const expr& x, unsigned long y) { sub_int(con, x.con, y); }
+  inline void mul(const expr& x, unsigned long y) { mul_int(con, x.con, y); }
+  inline void div(const expr& x, unsigned long y) { quot_int(con, x.con, y); }
+  inline unsigned long rem(unsigned long y) const { return rem_int(con, y); }
+  inline unsigned long quotrem(const expr& x, unsigned long y)
+    { return quotrem_int(con, x.con, y); }
 
 #ifdef SPUTSOFT_HAS_LONG_LONG
   expr(unsigned long long v) : con() { set_int(con, v); }
-  static inline void set(expr& r, unsigned long long v) { set_int(r.con, v); }
-  static inline void add(expr& r, const expr& x, unsigned long long y) { add_int(r.con, x.con, y); }
-  static inline void add(expr& r, unsigned long long x, const expr& y) { add_int(r.con, y.con, x); }
-  static inline void sub(expr& r, const expr& x, unsigned long long y) { sub_int(r.con, x.con, y); }
-  static inline void mul(expr& r, const expr& x, unsigned long long y) { mul_int(r.con, x.con, y); }
-  static inline void div(expr& q, const expr& x, unsigned long long y) { quot_int(q.con, x.con, y); }
-  static inline unsigned long long rem(const expr& x, unsigned long long y) { return rem_int(x.con, y); }
-  static inline unsigned long long quotrem(expr& q, const expr& x, unsigned long long y)
-    { return quotrem_int(q.con, x.con, y); }
+  inline void set(unsigned long long v) { set_int(con, v); }
+  inline void add(const expr& x, unsigned long long y) { add_int(con, x.con, y); }
+  inline void add(unsigned long long x, const expr& y) { add_int(con, y.con, x); }
+  inline void sub(const expr& x, unsigned long long y) { sub_int(con, x.con, y); }
+  inline void mul(const expr& x, unsigned long long y) { mul_int(con, x.con, y); }
+  inline void div(const expr& x, unsigned long long y) { quot_int(con, x.con, y); }
+  inline unsigned long long rem(unsigned long long y) const { return rem_int(con, y); }
+  inline unsigned long long quotrem(const expr& x, unsigned long long y)
+    { return quotrem_int(con, x.con, y); }
 #endif
 
-  static inline void set(expr& r, const expr& x) { set_num(r.con, x.con); }
-  static inline void add(expr& r, const expr& x, const expr& y) { add_num(r.con, x.con, y.con); }
-  static inline void sub(expr& r, const expr& x, const expr& y) { sub_num(r.con, x.con, y.con); }
-  static inline void mul(expr& r, const expr& x, const expr& y) { mul_num(r.con, x.con, y.con); }
-  static inline void div(expr& q, const expr& x, const expr& y) { quot_num(q.con, x.con, y.con); }
-  static inline void rem(expr& r, const expr& x, const expr& y) { rem_num(r.con, x.con, y.con); }
+  inline void set(const expr& x) { set_num(con, x.con); }
+  inline void add(const expr& x, const expr& y) { add_num(con, x.con, y.con); }
+  inline void sub(const expr& x, const expr& y) { sub_num(con, x.con, y.con); }
+  inline void mul(const expr& x, const expr& y) { mul_num(con, x.con, y.con); }
+  inline void div(const expr& x, const expr& y) { quot_num(con, x.con, y.con); }
+  inline void rem(const expr& x, const expr& y) { rem_num(con, x.con, y.con); }
   static inline void quotrem(expr& q, expr& r, const expr& x, const expr& y)
     { quot_num(q.con, r.con, x.con, y.con); }
 

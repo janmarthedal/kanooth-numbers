@@ -3,6 +3,8 @@
  * Author: jmr
  *
  * Created on May 2, 2010, 9:55 AM
+ *
+ * $Id$
  */
 
 #ifndef _ABSTRACT_NATURAL_NUMBER_HPP
