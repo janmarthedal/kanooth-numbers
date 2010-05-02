@@ -8,35 +8,106 @@
 #ifndef _METHOD_ARITH_HPP
 #define	_METHOD_ARITH_HPP
 
+#include <cstring>
+
 namespace sputsoft {
 namespace numbers {
 namespace detail {
 
 template <typename R, typename V>
-class evaluator_ref1_arg1;
+class set_2_eval;
+template <typename R, typename Forw>
+class set_4_eval;
 template <typename R, typename V1, typename V2>
-class evaluator_ref1_arg2;
+class add_3_eval;
+template <typename R, typename V1, typename V2>
+class sub_3_eval;
+template <typename R, typename V1, typename V2>
+class mul_3_eval;
+template <typename R, typename V1, typename V2>
+class div_3_eval;
+template <typename R, typename V1, typename V2>
+class rem_3_eval;
+template <typename V1, typename V2>
+class rem_r2_eval;
+template <typename Q, typename R, typename V1, typename V2>
+class quotrem_4_eval;
+template <typename Q, typename V1, typename V2>
+class quotrem_r3_eval;
+template <typename T>
+struct floor_log2_evaluator {
+  static std::size_t floor_log2(T n) {
+    std::size_t r = -1;
+    while (n) { ++r; n >>= 1; }
+    return r;
+  }
+};
 
 } // namespace sputsoft
 
 template <typename R, typename V>
-void set(R& r, const V& v) {
-  detail::evaluator_ref1_arg1<R, V>::set(r, v);
+inline void set(R& r, const V& v) {
+  detail::set_2_eval<R, V>::set(r, v);
+}
+
+template <typename R, typename Forw>
+inline void set(R& r, Forw first, const Forw last, unsigned base=10) {
+  detail::set_4_eval<R, Forw>::set(r, first, last, base);
+}
+
+template <typename R>
+inline void set(R& r, const std::string& st, unsigned base=10) {
+  set(r, st.begin(), st.end(), base);
+}
+
+template <typename R>
+inline void set(R& r, const char* st, unsigned base=10) {
+  set(r, st, st + std::strlen(st), base);
 }
 
 template <typename R, typename V1, typename V2>
-void add(R& r, const V1& v1, const V2& v2) {
-  detail::evaluator_ref1_arg2<R, V1, V2>::add(r, v1, v2);
+inline void add(R& r, const V1& v1, const V2& v2) {
+  detail::add_3_eval<R, V1, V2>::add(r, v1, v2);
 }
 
 template <typename R, typename V1, typename V2>
-void sub(R& r, const V1& v1, const V2& v2) {
-  detail::evaluator_ref1_arg2<R, V1, V2>::sub(r, v1, v2);
+inline void sub(R& r, const V1& v1, const V2& v2) {
+  detail::sub_3_eval<R, V1, V2>::sub(r, v1, v2);
 }
 
 template <typename R, typename V1, typename V2>
-void mul(R& r, const V1& v1, const V2& v2) {
-  detail::evaluator_ref1_arg2<R, V1, V2>::mul(r, v1, v2);
+inline void mul(R& r, const V1& v1, const V2& v2) {
+  detail::mul_3_eval<R, V1, V2>::mul(r, v1, v2);
+}
+
+template <typename R, typename V1, typename V2>
+inline void div(R& r, const V1& v1, const V2& v2) {
+  detail::div_3_eval<R, V1, V2>::div(r, v1, v2);
+}
+
+template <typename R, typename V1, typename V2>
+inline void rem(R& r, const V1& v1, const V2& v2) {
+  detail::rem_3_eval<R, V1, V2>::rem(r, v1, v2);
+}
+
+template <typename V1, typename V2>
+inline V2 rem(const V1& v1, const V2& v2) {
+  return detail::rem_r2_eval<V1, V2>::rem(v1, v2);
+}
+
+template <typename Q, typename R, typename V1, typename V2>
+inline void quotrem(Q& q, R& r, const V1& v1, const V2& v2) {
+  detail::quotrem_4_eval<Q, R, V1, V2>::quotrem(q, r, v1, v2);
+}
+
+template <typename Q, typename V1, typename V2>
+inline V2 quotrem(Q& q, const V1& v1, const V2& v2) {
+  return detail::quotrem_r3_eval<Q, V1, V2>::quotrem(q, v1, v2);
+}
+
+template <typename T>
+inline std::size_t floor_log2(T n) {
+  return detail::floor_log2_evaluator<T>::floor_log2(n);
 }
 
 } // namespace detail

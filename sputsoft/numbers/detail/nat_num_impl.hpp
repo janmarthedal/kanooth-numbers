@@ -8,7 +8,7 @@
 #ifndef _NAT_NUM_WRAP_HPP
 #define	_NAT_NUM_WRAP_HPP
 
-#include <sputsoft/numbers/detail/expr.hpp>
+#include <sputsoft/numbers/detail/nat_num_abst.hpp>
 
 #define SPUTSOFT_HAS_LONG_LONG
 
@@ -17,18 +17,32 @@ namespace numbers {
 namespace detail {
 
 template <typename Con, typename LowLevel>
-class nat_num_wrap;
+class wrap2;
 
 template <typename Con, typename LowLevel>
-class expr<nat_num_wrap<Con, LowLevel> > {
+class expr<natnum<wrap2<Con, LowLevel> > > {
 private:
   Con con;
   typedef typename Con::digit_type digit_type;
   static const unsigned digit_bits = boost::integer_traits<digit_type>::digits;
 
+  static int division_by_zero() {
+    int y = 0;  // hide warning
+    return 1/y;
+  }
+
   static void ensure_size(Con& c, unsigned size) {
     if (!c.request_size(size))
       Con(size).swap(c);
+  }
+
+  template <typename T>
+  static T to_builtin_int(const Con& c) {
+    T v = 0;
+    unsigned n=c.size();
+    while (n)
+      v = (v << digit_bits) | c[--n];
+    return v;
   }
 
   /* Set to number */
@@ -227,22 +241,163 @@ private:
   }
 
   template <typename T>
-  static void mult_int(Con& r, const Con& x, const T y) {
+  static void mul_int(Con& z, const Con& x, const T y) {
     if (x.is_empty() || !y)
-      r.set_size(0);
+      z.set_size(0);
     else if (y == T(1))
-      set_int(r, T(0));
+      set_int(z, T(0));
     else if (sizeof(T) <= sizeof(digit_type))
-      mul_int1(r, x, y);
+      mul_int1(z, x, y);
     else
-      mul_num(r, x, expr(y).con);
+      mul_num(z, x, expr(y).con);
+  }
+
+  /* Quotient and remainder from two numbers */
+
+  static void quotrem_num0(Con& q, Con& r, const Con& u, const Con& v) {
+    std::size_t un = u.size();
+    std::size_t vn = v.size();
+    std::size_t n = un - vn + 1;
+    LowLevel::quotrem(q.get(), r.get(), u.get(), un, v.get(), vn);
+    q.set_size(q[n-1] ? n : n-1);
+    while (vn && !r[vn-1]) --vn;
+    r.set_size(vn);
+  }
+
+  static void quot_num(Con& q, const Con& u, const Con& v) {
+    std::size_t un = u.size();
+    std::size_t vn = v.size();
+    if (!vn)
+      division_by_zero();
+    else if (un < vn)
+      set_int(q, digit_type(0));
+    else if (u.get() == v.get())
+      set_int(q, digit_type(1));
+    else {
+      Con r(vn);  // work space only
+      std::size_t qn = un-vn+1;
+      if (q.get() == u.get() || q.get() == v.get() || !q.request_size(qn)) {
+        Con qt(qn);
+        quotrem_num0(qt, r, u, v);
+        q.swap(qt);
+      } else
+        quotrem_num0(q, r, u, v);
+    }
+  }
+
+  static void rem_num(Con& r, const Con& u, const Con& v) {
+    std::size_t un = u.size();
+    std::size_t vn = v.size();
+    if (!vn)
+      division_by_zero();
+    else if (un < vn)
+      set_num(r, un);
+    else if (u.get() == v.get())
+      set_int(r, digit_type(0));
+    else {
+      Con q(un-vn+1);  // work space only
+      if (r.get() == u.get() || r.get() == v.get() || !r.request_size(vn)) {
+        Con rt(vn);
+        quotrem_num0(q, rt, u, v);
+        r.swap(rt);
+      } else
+        quotrem_num0(q, r, u, v);
+    }
+  }
+
+  static void quotrem_num(Con& q, Con& r, const Con& u, const Con& v) {
+    std::size_t un = u.size();
+    std::size_t vn = v.size();
+    if (!vn)
+      division_by_zero();
+    else if (un < vn) {
+      set_int(q, digit_type(0));
+      set_num(r, u);
+    } else if (u.get() == v.get()) {
+      set_int(q, digit_type(1));
+      set_int(r, digit_type(0));
+    } else {
+      std::size_t qn = un-vn+1;
+      if (q.get() == u.get() || q.get() == v.get() || !q.request_size(qn)) {
+        Con qt(qn);
+        if (r.get() == u.get() || r.get() == v.get() || !r.request_size(vn)) {
+          Con rt(vn);
+          quotrem_num0(qt, rt, u, v);
+          r.swap(rt);
+        } else
+          quotrem_num0(qt, r, u, v);
+        q.swap(qt);
+      } else if (r.get() == u.get() || r.get() == v.get() || !r.request_size(vn)) {
+        Con rt(vn);
+        quotrem_num0(q, rt, u, v);
+        r.swap(rt);
+      } else
+        quotrem_num0(q, r, u, v);
+    }
+  }
+
+  /* Quotient and remainder from a number and an integer */
+
+  // q.size() >= u.size(), !u.is_empty(), v != 0
+  static digit_type quotrem_int0(Con& q, const Con& u, const digit_type v) {
+    std::size_t n = u.size();
+    digit_type r = LowLevel::quotrem_1(q.get(), u.get(), n, v);
+    q.set_size(q[n-1] ? n : n-1);
+    return r;
+  }
+
+  template <typename T>
+  static void quot_int(Con& q, const Con& u, const T v) {
+    if (!v)
+      division_by_zero();
+    else if (u.is_empty())
+      q.set_size(0);
+    else if (sizeof(T) <= sizeof(digit_type)) {
+      ensure_size(q, u.size());
+      quotrem_int0(q, u, v);
+    } else {
+      Con r(sizeof(T) / sizeof(digit_type));  // work space only
+      quotrem_num(q, r, u, expr(v).con);
+    }
+  }
+
+  template <typename T>
+  static T rem_int(const Con& u, const T v) {
+    if (!v)
+      division_by_zero();
+    else if (u.is_empty())
+      return 0;
+    else {
+      Con q(u.size());  // work space only
+      if (sizeof(T) <= sizeof(digit_type))
+        return quotrem_int0(q, u, v);
+      else {
+        Con r(sizeof(T) / sizeof(digit_type));
+        quotrem_num(q, r, u, expr(v).con);
+        return to_builtin_int<T>(r);
+      }
+    }
+  }
+
+  template <typename T>
+  static T quotrem_int(Con& q, const Con& u, const T v) {
+    if (!v)
+      division_by_zero();
+    else if (u.is_empty()) {
+      q.set_size(0);
+      return 0;
+    } else if (sizeof(T) <= sizeof(digit_type)) {
+      // q.get() == u.get() is ok, because q is then never resized
+      ensure_size(q, u.size());
+      return quotrem_int0(q, u, v);
+    } else {
+      Con r(sizeof(T) / sizeof(digit_type));
+      quotrem_num(q, r, u, expr(v).con);
+      return to_builtin_int<T>(r);
+    }
   }
 
 public:
-  digit_type get() const {
-    return con.is_empty() ? 0 : con[0];
-  }  // DEBUG
-
   expr() : con() {}
   expr(const expr& rhs) : con() {
     set_num(con, rhs.con);
@@ -251,6 +406,14 @@ public:
     set_num(con, rhs.con);
     return *this;
   }
+  operator bool() const {
+    return !con.is_empty();
+  }
+  std::size_t floor_log2() const {
+    std::size_t n = con.size();
+    if (!n) return (std::size_t) -1;
+    return sputsoft::numbers::floor_log2(con[n - 1]) + (n - 1)*digit_bits;
+  }
 
   expr(unsigned short v) : con() { set_int(con, v); }
   static inline void set(expr& r, unsigned short v) { set_int(r.con, v); }
@@ -258,6 +421,10 @@ public:
   static inline void add(expr& r, unsigned short x, const expr& y) { add_int(r.con, y.con, x); }
   static inline void sub(expr& r, const expr& x, unsigned short y) { sub_int(r.con, x.con, y); }
   static inline void mul(expr& r, const expr& x, unsigned short y) { mul_int(r.con, x.con, y); }
+  static inline void div(expr& q, const expr& x, unsigned short y) { quot_int(q.con, x.con, y); }
+  static inline unsigned short rem(const expr& x, unsigned short y) { return rem_int(x.con, y); }
+  static inline unsigned short quotrem(expr& q, const expr& x, unsigned short y)
+    { return quotrem_int(q.con, x.con, y); }
 
   expr(unsigned v) : con() { set_int(con, v); }
   static inline void set(expr& r, unsigned v) { set_int(r.con, v); }
@@ -265,6 +432,10 @@ public:
   static inline void add(expr& r, unsigned x, const expr& y) { add_int(r.con, y.con, x); }
   static inline void sub(expr& r, const expr& x, unsigned y) { sub_int(r.con, x.con, y); }
   static inline void mul(expr& r, const expr& x, unsigned y) { mul_int(r.con, x.con, y); }
+  static inline void div(expr& q, const expr& x, unsigned y) { quot_int(q.con, x.con, y); }
+  static inline unsigned rem(const expr& x, unsigned y) { return rem_int(x.con, y); }
+  static inline unsigned quotrem(expr& q, const expr& x, unsigned y)
+    { return quotrem_int(q.con, x.con, y); }
 
   expr(unsigned long v) : con() { set_int(con, v); }
   static inline void set(expr& r, unsigned long v) { set_int(r.con, v); }
@@ -272,6 +443,10 @@ public:
   static inline void add(expr& r, unsigned long x, const expr& y) { add_int(r.con, y.con, x); }
   static inline void sub(expr& r, const expr& x, unsigned long y) { sub_int(r.con, x.con, y); }
   static inline void mul(expr& r, const expr& x, unsigned long y) { mul_int(r.con, x.con, y); }
+  static inline void div(expr& q, const expr& x, unsigned long y) { quot_int(q.con, x.con, y); }
+  static inline unsigned long rem(const expr& x, unsigned long y) { return rem_int(x.con, y); }
+  static inline unsigned long quotrem(expr& q, const expr& x, unsigned long y)
+    { return quotrem_int(q.con, x.con, y); }
 
 #ifdef SPUTSOFT_HAS_LONG_LONG
   expr(unsigned long long v) : con() { set_int(con, v); }
@@ -280,18 +455,25 @@ public:
   static inline void add(expr& r, unsigned long long x, const expr& y) { add_int(r.con, y.con, x); }
   static inline void sub(expr& r, const expr& x, unsigned long long y) { sub_int(r.con, x.con, y); }
   static inline void mul(expr& r, const expr& x, unsigned long long y) { mul_int(r.con, x.con, y); }
+  static inline void div(expr& q, const expr& x, unsigned long long y) { quot_int(q.con, x.con, y); }
+  static inline unsigned long long rem(const expr& x, unsigned long long y) { return rem_int(x.con, y); }
+  static inline unsigned long long quotrem(expr& q, const expr& x, unsigned long long y)
+    { return quotrem_int(q.con, x.con, y); }
 #endif
 
-  static inline bool is_zero(const expr& u) { return u.con.is_empty(); }
   static inline void set(expr& r, const expr& x) { set_num(r.con, x.con); }
   static inline void add(expr& r, const expr& x, const expr& y) { add_num(r.con, x.con, y.con); }
   static inline void sub(expr& r, const expr& x, const expr& y) { sub_num(r.con, x.con, y.con); }
   static inline void mul(expr& r, const expr& x, const expr& y) { mul_num(r.con, x.con, y.con); }
+  static inline void div(expr& q, const expr& x, const expr& y) { quot_num(q.con, x.con, y.con); }
+  static inline void rem(expr& r, const expr& x, const expr& y) { rem_num(r.con, x.con, y.con); }
+  static inline void quotrem(expr& q, expr& r, const expr& x, const expr& y)
+    { quot_num(q.con, r.con, x.con, y.con); }
 
 };
 
-} // namespace sputsoft
 } // namespace detail
+} // namespace sputsoft
 } // namespace numbers
 
 #endif	/* _NAT_NUM_WRAP_HPP */

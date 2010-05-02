@@ -16,7 +16,6 @@
 #define _SPUTSOFT_NUMBERS_GENERIC_LOWLEVEL_HPP_
 
 #include <sputsoft/numbers/detail/array_allocator.hpp>
-#include <sputsoft/number_theory/common.hpp>
 #include <boost/integer_traits.hpp>
 
 namespace sputsoft {
@@ -329,6 +328,13 @@ public:
     return r;
   }
 
+  template <typename T>
+  static std::size_t floor_log2(T n) {
+    std::size_t r = -1;
+    while (n) { ++r; n >>= 1; }
+    return r;
+  }
+
   // un >= vn >= 1, vp[vn-1] != 0
   // {qp, un-vn+1}, {rp, vn}, {up, un}, {vp, vn} do not overlap
   template <typename T>
@@ -342,8 +348,7 @@ public:
       std::pair<T*, std::ptrdiff_t> walloc;
       T* t1 = talloc.first;
       const T* w1;
-      unsigned shift = boost::integer_traits<T>::digits
-                         - number_theory::floor_log2(v1[vn-1]) - 1;
+      unsigned shift = boost::integer_traits<T>::digits - floor_log2(v1[vn-1]) - 1;
       // normalize
       if (shift) {
         walloc = alloc.allocate(vn);
