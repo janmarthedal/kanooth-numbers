@@ -10,6 +10,7 @@
 #ifndef _NAT_NUM_WRAP_HPP
 #define	_NAT_NUM_WRAP_HPP
 
+#include <boost/integer_traits.hpp>
 #include <sputsoft/numbers/detail/nat_num_abst.hpp>
 
 #define SPUTSOFT_HAS_LONG_LONG

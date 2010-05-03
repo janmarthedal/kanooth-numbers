@@ -12,8 +12,8 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_GENERIC_LOWLEVEL_HPP_
-#define _SPUTSOFT_NUMBERS_GENERIC_LOWLEVEL_HPP_
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_GENERIC_HPP_
+#define _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HPP_
 
 #include <sputsoft/numbers/detail/array_allocator.hpp>
 #include <boost/integer_traits.hpp>

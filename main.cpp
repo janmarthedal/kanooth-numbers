@@ -6,43 +6,14 @@
  */
 
 #include <iostream>
-#include <boost/integer_traits.hpp>
-#include <sputsoft/numbers/detail/digit_array.hpp>
-#include <sputsoft/numbers/detail/lowlevel_generic.hpp>
-
-#include <sputsoft/numbers/detail/nat_num_shared.hpp>
-typedef sputsoft::numbers::detail::expr<
-          sputsoft::numbers::detail::natnum<
-            boost::shared_ptr<
-              sputsoft::numbers::detail::wrap2<
-                sputsoft::numbers::detail::digit_array<unsigned long>,
-                sputsoft::numbers::detail::lowlevel_generic<
-                  sputsoft::numbers::detail::array_allocator<void>
-                >
-              >
-            >
-          >
-        > natural_number;
-
-/*#include <sputsoft/numbers/detail/nat_num_impl.hpp>
-typedef sputsoft::numbers::detail::expr<
-          sputsoft::numbers::detail::natnum<
-            sputsoft::numbers::detail::wrap2<
-              sputsoft::numbers::detail::digit_array<unsigned long>,
-              sputsoft::numbers::detail::lowlevel_generic<
-                sputsoft::numbers::detail::array_allocator<void>
-              >
-            >
-          >
-        > natural_number;*/
-
+#include <sputsoft/numbers/natural_number.hpp>
 
 int main()
 {
-  natural_number a, b=20u, c;
+  sputsoft::numbers::natural_number a, b=20u, c;
   std::string st = "1734675685675464534533456546";
 
-  //sputsoft::numbers::set(b, st);
+  sputsoft::numbers::set(b, st);
 
   std::cout << b << std::endl;
 

@@ -12,17 +12,17 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_GMP_LOWLEVEL_HPP_
-#define _SPUTSOFT_NUMBERS_GMP_LOWLEVEL_HPP_
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_GMP_HPP_
+#define _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_GMP_HPP_
 
 #include <cstring>
 #include <gmp.h>
 
 namespace sputsoft {
 namespace numbers {
-namespace gmp {
+namespace detail {
 
-class lowlevel {
+class lowlevel_gmp {
 private:
 public:
 
@@ -31,8 +31,7 @@ public:
   // n >= 0
   // rp == xp  or  {rp,n} and {xp,n} do not overlap
   static inline void copy(digit_type* rp, const digit_type* xp,
-                          const std::size_t n)
-  {
+                          const std::size_t n) {
     if (!n || rp == xp) return;
     std::memcpy(rp, xp, n*sizeof(digit_type));
   }
@@ -118,8 +117,8 @@ public:
 
 };
 
-} // namespace gmp
+} // namespace detail
 } // namespace numbers
 } // namespace sputsoft
 
-#endif // _SPUTSOFT_NUMBERS_GENERIC_LOWLEVEL_HPP_
+#endif // _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_GMP_HPP_
