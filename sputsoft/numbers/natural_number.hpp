@@ -1,8 +1,13 @@
 /* 
- * File:   natural_number.hpp
+ * File:   sputsoft/numbers/natural_number.hpp
  * Author: jmr
  *
- * Created on May 3, 2010, 10:12 PM
+ * Created 2010-05-03 20:12Z
+ *
+ * (C) Copyright SputSoft 2010
+ * Use, modification and distribution are subject to the
+ * Boost Software License, Version 1.0. (See accompanying file
+ * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  *
  * $Id$
  */

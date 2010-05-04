@@ -22,9 +22,7 @@ namespace sputsoft {
 namespace numbers {
 namespace detail {
 
-class lowlevel_gmp {
-private:
-public:
+struct lowlevel_gmp {
 
   typedef mp_limb_t digit_type;
 
@@ -113,6 +111,10 @@ public:
                                   const digit_type* xp, std::size_t n,
                                   unsigned count) {
     return mpn_rshift(zp, xp, n, count);
+  }
+
+  static inline int comp(const digit_type* xp, const digit_type* yp, std::size_t n) {
+    return mpn_cmp(xp, yp, n);
   }
 
 };

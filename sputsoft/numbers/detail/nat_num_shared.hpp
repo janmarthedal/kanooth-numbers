@@ -1,14 +1,19 @@
 /* 
- * File:   nat_num_wrap.hpp
- * Author: jmr
+ * File:   sputsoft/numbers/detail/nat_num_shared.hpp
+ * Author: Jan Marthedal Rasmussen
  *
- * Created on April 30, 2010, 5:18 PM
+ * Created on 2010-04-30 15:18Z
+ *
+ * (C) Copyright SputSoft 2010
+ * Use, modification and distribution are subject to the
+ * Boost Software License, Version 1.0. (See accompanying file
+ * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  *
  * $Id$
  */
 
-#ifndef _SHARED_NAT_NUM_WRAP_HPP
-#define	_SHARED_NAT_NUM_WRAP_HPP
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_SHARED_HPP
+#define	_SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_SHARED_HPP
 
 #include <sputsoft/numbers/detail/nat_num_impl.hpp>
 #include <boost/shared_ptr.hpp>
@@ -48,6 +53,17 @@ private:
   }
 
   template <typename V2>
+  void _div(const number_type& v1, const V2& v2) {
+    if (!num.unique()) num.reset(new number_type);
+    num->div(v1, v2);
+  }
+
+  template <typename T>
+  T rem_int(const T& v) const {
+    return num->rem(v);
+  }
+
+  template <typename V2>
   V2 _quotrem(const number_type& v1, const V2 v2) {
     if (!num.unique()) num.reset(new number_type);
     return num->quotrem(v1, v2);
@@ -60,12 +76,8 @@ public:
     num = rhs.num;
     return *this;
   }
-  operator bool() const {
-    return *num;
-  }
-  std::size_t floor_log2() const {
-    return num->floor_log2();
-  }
+  operator bool() const { return *num; }
+  std::size_t floor_log2() const { return num->floor_log2(); }
 
   expr(unsigned short v) : num(new number_type(v)) {}
   inline void set(unsigned short v) { _set(v); }
@@ -73,8 +85,10 @@ public:
   inline void add(unsigned short x, const expr& y) { _add(*y.num, x); }
   inline void sub(const expr& x, unsigned short y) { _sub(*x.num, y); }
   inline void mul(const expr& x, unsigned short y) { _mul(*x.num, y); }
-  inline unsigned short quotrem(const expr& x, unsigned short y)
-    { return _quotrem(*x.num, y); }
+  inline void mul(unsigned short x, const expr& y) { _mul(*y.num, x); }
+  inline void div(const expr& x, unsigned short y) { _div(*x.num, y); }
+  inline unsigned short rem(unsigned short y) const { return rem_int(y); }
+  inline unsigned short quotrem(const expr& x, unsigned short y) { return _quotrem(*x.num, y); }
 
   expr(unsigned v) : num(new number_type(v)) {}
   inline void set(unsigned v) { _set(v); }
@@ -82,8 +96,10 @@ public:
   inline void add(unsigned x, const expr& y) { _add(*y.num, x); }
   inline void sub(const expr& x, unsigned y) { _sub(*x.num, y); }
   inline void mul(const expr& x, unsigned y) { _mul(*x.num, y); }
-  inline unsigned quotrem(const expr& x, unsigned y)
-    { return _quotrem(*x.num, y); }
+  inline void mul(unsigned x, const expr& y) { _mul(*y.num, x); }
+  inline void div(const expr& x, unsigned y) { _div(*x.num, y); }
+  inline unsigned rem(unsigned y) const { return rem_int(y); }
+  inline unsigned quotrem(const expr& x, unsigned y) { return _quotrem(*x.num, y); }
 
   expr(unsigned long v) : num(new number_type(v)) {}
   inline void set(unsigned long v) { _set(v); }
@@ -91,8 +107,10 @@ public:
   inline void add(unsigned long x, const expr& y) { _add(*y.num, x); }
   inline void sub(const expr& x, unsigned long y) { _sub(*x.num, y); }
   inline void mul(const expr& x, unsigned long y) { _mul(*x.num, y); }
-  inline unsigned long quotrem(const expr& x, unsigned long y)
-    { return _quotrem(*x.num, y); }
+  inline void mul(unsigned long x, const expr& y) { _mul(*y.num, x); }
+  inline void div(const expr& x, unsigned long y) { _div(*x.num, y); }
+  inline unsigned long rem(unsigned long y) const { return rem_int(y); }
+  inline unsigned long quotrem(const expr& x, unsigned long y) { return _quotrem(*x.num, y); }
 
 #ifdef SPUTSOFT_HAS_LONG_LONG
   expr(unsigned long long v) : num(new number_type(v)) {}
@@ -101,6 +119,9 @@ public:
   inline void add(unsigned long long x, const expr& y) { _add(*y.num, x); }
   inline void sub(const expr& x, unsigned long long y) { _sub(*x.num, y); }
   inline void mul(const expr& x, unsigned long long y) { _mul(*x.num, y); }
+  inline void mul(unsigned long long x, const expr& y) { _mul(*y.num, x); }
+  inline void div(const expr& x, unsigned long long y) { _div(*x.num, y); }
+  inline unsigned long long rem(unsigned long long y) const { return rem_int(y); }
   inline unsigned long long quotrem(const expr& x, unsigned long long y)
     { return _quotrem(*x.num, y); }
 #endif
@@ -109,7 +130,15 @@ public:
   inline void add(const expr& x, const expr& y) { _add(*x.num, *y.num); }
   inline void sub(const expr& x, const expr& y) { _sub(*x.num, *y.num); }
   inline void mul(const expr& x, const expr& y) { _mul(*x.num, *y.num); }
-  static inline void quotrem(expr& q, expr& r, const expr& u, const expr& v) {
+  void div(const expr& x, const expr& y) {
+    if (!num.unique()) num.reset(new number_type);
+    num->div(x, y);
+  }
+  void rem(const expr& x, const expr& y) {
+    if (!num.unique()) num.reset(new number_type);
+    num->rem(x, y);
+  }
+  static void quotrem(expr& q, expr& r, const expr& u, const expr& v) {
     if (!q.num.unique()) q.num.reset(new number_type);
     if (!r.num.unique()) r.num.reset(new number_type);
     number_type::quotrem(*q.num, *r.num, *u.num, *v.num);
@@ -120,5 +149,4 @@ public:
 } // namespace sputsoft
 } // namespace numbers
 
-#endif	/* _NAT_NUM_WRAP_HPP */
-
+#endif	/* _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_SHARED_HPP */

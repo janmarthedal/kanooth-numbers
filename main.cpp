@@ -27,6 +27,7 @@ int main()
   unsigned r = sputsoft::numbers::quotrem(b, c, 7u);
   std::cout << c << std::endl;
   std::cout << b << " " << r << std::endl;
+  std::cout << sputsoft::numbers::rem(b, 100u) << std::endl;
 
   return 0;
 }

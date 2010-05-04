@@ -4,7 +4,7 @@
  *
  * Created 2009-12-15 12:00Z
  *
- * (C) Copyright SputSoft 2009
+ * (C) Copyright SputSoft 2010
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,7 +12,7 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_GENERIC_HPP_
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HPP_
 #define _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HPP_
 
 #include <sputsoft/numbers/detail/array_allocator.hpp>
@@ -416,6 +416,20 @@ public:
     }
     *z1++ = xh >> count;
     return r;
+  }
+
+  template <typename T>
+  static inline int comp(const T* xp, const T* yp, std::size_t n) {
+    if (xp == yp) return 0;
+    xp += n;
+    yp += n;
+    while (n--) {
+      int x = *--xp;
+      int y = *--yp;
+      if (x < y) return -1;
+      if (x > y) return 1;
+    }
+    return 0;
   }
 
 };

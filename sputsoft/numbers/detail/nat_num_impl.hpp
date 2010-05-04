@@ -1,14 +1,19 @@
 /* 
- * File:   nat_num_wrap.hpp
- * Author: jmr
+ * File:   sputsoft/numbers/detail/nat_num_impl.hpp
+ * Author: Jan Marthedal Rasmussen
  *
- * Created on April 30, 2010, 5:18 PM
+ * Created on 2010-04-30 15:18Z
+ *
+ * (C) Copyright SputSoft 2010
+ * Use, modification and distribution are subject to the
+ * Boost Software License, Version 1.0. (See accompanying file
+ * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  *
  * $Id$
  */
 
-#ifndef _NAT_NUM_WRAP_HPP
-#define	_NAT_NUM_WRAP_HPP
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_IMPL_HPP
+#define _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_IMPL_HPP
 
 #include <boost/integer_traits.hpp>
 #include <sputsoft/numbers/detail/nat_num_abst.hpp>
@@ -40,12 +45,18 @@ private:
   }
 
   template <typename T>
-  static T to_builtin_int(const Con& c) {
-    T v = 0;
-    unsigned n=c.size();
-    while (n)
-      v = (v << digit_bits) | c[--n];
-    return v;
+  static T to_int_type(const Con& c) {
+    if (c.is_empty())
+      return (T) 0;
+    else if (sizeof(T) <= sizeof(digit_type))
+      return (T) c[0];
+    else {
+      T v = 0;
+      unsigned n=c.size();
+      while (n)
+        v = (v << digit_bits) | c[--n];
+      return v;
+    }
   }
 
   /* Set to number */
@@ -377,7 +388,7 @@ private:
       else {
         Con r(sizeof(T) / sizeof(digit_type));
         quotrem_num(q, r, u, expr(v).con);
-        return to_builtin_int<T>(r);
+        return to_int_type<T>(r);
       }
     }
   }
@@ -396,8 +407,16 @@ private:
     } else {
       Con r(sizeof(T) / sizeof(digit_type));
       quotrem_num(q, r, u, expr(v).con);
-      return to_builtin_int<T>(r);
+      return to_int_type<T>(r);
     }
+  }
+
+  static int comp_num(const Con& x, const Con& y) {
+    std::size_t xn = x.size();
+    std::size_t yn = y.size();
+    if (xn < yn) return -1;
+    if (xn > yn) return 1;
+    return LowLevel::comp(x.get(), y.get(), xn);
   }
 
 public:
@@ -424,6 +443,7 @@ public:
   inline void add(unsigned short x, const expr& y) { add_int(con, y.con, x); }
   inline void sub(const expr& x, unsigned short y) { sub_int(con, x.con, y); }
   inline void mul(const expr& x, unsigned short y) { mul_int(con, x.con, y); }
+  inline void mul(unsigned short x, const expr& y) { mul_int(con, y.con, x); }
   inline void div(const expr& x, unsigned short y) { quot_int(con, x.con, y); }
   inline unsigned short rem(unsigned short y) const { return rem_int(con, y); }
   inline unsigned short quotrem(const expr& x, unsigned short y)
@@ -435,6 +455,7 @@ public:
   inline void add(unsigned x, const expr& y) { add_int(con, y.con, x); }
   inline void sub(const expr& x, unsigned y) { sub_int(con, x.con, y); }
   inline void mul(const expr& x, unsigned y) { mul_int(con, x.con, y); }
+  inline void mul(unsigned x, const expr& y) { mul_int(con, y.con, x); }
   inline void div(const expr& x, unsigned y) { quot_int(con, x.con, y); }
   inline unsigned rem(unsigned y) const { return rem_int(con, y); }
   inline unsigned quotrem(const expr& x, unsigned y) { return quotrem_int(con, x.con, y); }
@@ -445,6 +466,7 @@ public:
   inline void add(unsigned long x, const expr& y) { add_int(con, y.con, x); }
   inline void sub(const expr& x, unsigned long y) { sub_int(con, x.con, y); }
   inline void mul(const expr& x, unsigned long y) { mul_int(con, x.con, y); }
+  inline void mul(unsigned long x, const expr& y) { mul_int(con, y.con, x); }
   inline void div(const expr& x, unsigned long y) { quot_int(con, x.con, y); }
   inline unsigned long rem(unsigned long y) const { return rem_int(con, y); }
   inline unsigned long quotrem(const expr& x, unsigned long y)
@@ -457,6 +479,7 @@ public:
   inline void add(unsigned long long x, const expr& y) { add_int(con, y.con, x); }
   inline void sub(const expr& x, unsigned long long y) { sub_int(con, x.con, y); }
   inline void mul(const expr& x, unsigned long long y) { mul_int(con, x.con, y); }
+  inline void mul(unsigned long long x, const expr& y) { mul_int(con, y.con, x); }
   inline void div(const expr& x, unsigned long long y) { quot_int(con, x.con, y); }
   inline unsigned long long rem(unsigned long long y) const { return rem_int(con, y); }
   inline unsigned long long quotrem(const expr& x, unsigned long long y)
@@ -478,5 +501,4 @@ public:
 } // namespace sputsoft
 } // namespace numbers
 
-#endif	/* _NAT_NUM_WRAP_HPP */
-
+#endif	/* _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_IMPL_HPP */
