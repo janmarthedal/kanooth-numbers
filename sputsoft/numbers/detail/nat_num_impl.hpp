@@ -411,12 +411,31 @@ private:
     }
   }
 
+  /* Compare two numbers */
+
+  template <typename T>
+  static inline int compare_ints(const T a, const T b) {
+    return a < b ? -1 : a > b ? 1 : 0;
+  }
+
   static int comp_num(const Con& x, const Con& y) {
     std::size_t xn = x.size();
     std::size_t yn = y.size();
-    if (xn < yn) return -1;
-    if (xn > yn) return 1;
-    return LowLevel::comp(x.get(), y.get(), xn);
+    return xn == yn ? LowLevel::comp(x.get(), y.get(), xn) : compare_ints(xn, yn);
+  }
+
+  /* Compare numbers to integer */
+
+  template <typename T>
+  static int comp_int(const Con& x, const T v) {
+    if (!v)
+      return x.is_empty() ? 0 : 1;
+    else if (x.is_empty())
+      return -1;
+    else if (sizeof(T) <= sizeof(digit_type))
+      return x.size() > 1 ? 1 : compare_ints(x[0], (digit_type) v);
+    else
+      return comp_num(x, expr(v).con);
   }
 
 public:
@@ -448,6 +467,7 @@ public:
   inline unsigned short rem(unsigned short y) const { return rem_int(con, y); }
   inline unsigned short quotrem(const expr& x, unsigned short y)
     { return quotrem_int(con, x.con, y); }
+  inline bool cmp(unsigned short v) const { return comp_int(con, v); }
 
   expr(unsigned v) : con() { set_int(con, v); }
   inline void set(unsigned v) { set_int(con, v); }
@@ -459,6 +479,7 @@ public:
   inline void div(const expr& x, unsigned y) { quot_int(con, x.con, y); }
   inline unsigned rem(unsigned y) const { return rem_int(con, y); }
   inline unsigned quotrem(const expr& x, unsigned y) { return quotrem_int(con, x.con, y); }
+  inline bool cmp(unsigned v) const { return comp_int(con, v); }
 
   expr(unsigned long v) : con() { set_int(con, v); }
   inline void set(unsigned long v) { set_int(con, v); }
@@ -471,6 +492,7 @@ public:
   inline unsigned long rem(unsigned long y) const { return rem_int(con, y); }
   inline unsigned long quotrem(const expr& x, unsigned long y)
     { return quotrem_int(con, x.con, y); }
+  inline bool cmp(unsigned long v) const { return comp_int(con, v); }
 
 #ifdef SPUTSOFT_HAS_LONG_LONG
   expr(unsigned long long v) : con() { set_int(con, v); }
@@ -484,6 +506,7 @@ public:
   inline unsigned long long rem(unsigned long long y) const { return rem_int(con, y); }
   inline unsigned long long quotrem(const expr& x, unsigned long long y)
     { return quotrem_int(con, x.con, y); }
+  inline bool cmp(unsigned long long v) const { return comp_int(con, v); }
 #endif
 
   inline void set(const expr& x) { set_num(con, x.con); }
@@ -494,6 +517,7 @@ public:
   inline void rem(const expr& x, const expr& y) { rem_num(con, x.con, y.con); }
   static inline void quotrem(expr& q, expr& r, const expr& x, const expr& y)
     { quot_num(q.con, r.con, x.con, y.con); }
+  inline bool cmp(const expr& v) const { return comp_num(con, v.con); }
 
 };
 

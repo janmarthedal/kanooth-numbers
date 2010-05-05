@@ -17,31 +17,37 @@ namespace numbers {
 namespace detail {
 
 template <typename R, typename V>
-class set_2_eval;
+struct set_2_eval;
 template <typename R, typename Forw>
-class set_4_eval;
+struct set_4_eval;
 template <typename R, typename V1, typename V2>
-class add_3_eval;
+struct add_3_eval;
 template <typename R, typename V1, typename V2>
-class sub_3_eval;
+struct sub_3_eval;
 template <typename R, typename V1, typename V2>
-class mul_3_eval;
+struct mul_3_eval;
 template <typename R, typename V1, typename V2>
-class div_3_eval;
+struct div_3_eval;
 template <typename R, typename V1, typename V2>
-class rem_3_eval;
+struct rem_3_eval;
 template <typename V1, typename V2>
-class rem_r2_eval;
+struct rem_r2_eval;
 template <typename Q, typename R, typename V1, typename V2>
-class quotrem_4_eval;
+struct quotrem_4_eval;
 template <typename Q, typename V1, typename V2>
-class quotrem_r3_eval;
+struct quotrem_r3_eval;
 template <typename T>
 struct floor_log2_evaluator {
   static std::size_t floor_log2(T n) {
     std::size_t r = -1;
     while (n) { ++r; n >>= 1; }
     return r;
+  }
+};
+template <typename V1, typename V2>
+struct cmp_r2_eval {
+  static int cmp(const V1& v1, const V2& v2) {
+    return v1 < v2 ? -1 : v1 > v2 ? 1 : 0;
   }
 };
 
@@ -110,6 +116,11 @@ inline V2 quotrem(Q& q, const V1& v1, const V2& v2) {
 template <typename T>
 inline std::size_t floor_log2(T n) {
   return detail::floor_log2_evaluator<T>::floor_log2(n);
+}
+
+template <typename V1, typename V2>
+inline int compare(const V1& v1, const V2& v2) {
+  return detail::cmp_r2_eval<V1, V2>::cmp(v1, v2);
 }
 
 } // namespace detail
