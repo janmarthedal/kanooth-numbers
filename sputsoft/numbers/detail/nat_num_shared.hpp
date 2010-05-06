@@ -89,6 +89,7 @@ public:
   inline void div(const expr& x, unsigned short y) { _div(*x.num, y); }
   inline unsigned short rem(unsigned short y) const { return rem_int(y); }
   inline unsigned short quotrem(const expr& x, unsigned short y) { return _quotrem(*x.num, y); }
+  inline int cmp(unsigned short v) const { return num->cmp(v); }
 
   expr(unsigned v) : num(new number_type(v)) {}
   inline void set(unsigned v) { _set(v); }
@@ -100,6 +101,7 @@ public:
   inline void div(const expr& x, unsigned y) { _div(*x.num, y); }
   inline unsigned rem(unsigned y) const { return rem_int(y); }
   inline unsigned quotrem(const expr& x, unsigned y) { return _quotrem(*x.num, y); }
+  inline int cmp(unsigned v) const { return num->cmp(v); }
 
   expr(unsigned long v) : num(new number_type(v)) {}
   inline void set(unsigned long v) { _set(v); }
@@ -111,6 +113,7 @@ public:
   inline void div(const expr& x, unsigned long y) { _div(*x.num, y); }
   inline unsigned long rem(unsigned long y) const { return rem_int(y); }
   inline unsigned long quotrem(const expr& x, unsigned long y) { return _quotrem(*x.num, y); }
+  inline int cmp(unsigned long v) const { return num->cmp(v); }
 
 #ifdef SPUTSOFT_HAS_LONG_LONG
   expr(unsigned long long v) : num(new number_type(v)) {}
@@ -124,6 +127,7 @@ public:
   inline unsigned long long rem(unsigned long long y) const { return rem_int(y); }
   inline unsigned long long quotrem(const expr& x, unsigned long long y)
     { return _quotrem(*x.num, y); }
+  inline int cmp(unsigned long long v) const { return num->cmp(v); }
 #endif
 
   inline void set(const expr& x) { num = x.num; }
@@ -143,6 +147,8 @@ public:
     if (!r.num.unique()) r.num.reset(new number_type);
     number_type::quotrem(*q.num, *r.num, *u.num, *v.num);
   }
+  inline int cmp(const expr& v) const { return num->cmp(*v.num); }
+
 };
 
 } // namespace detail

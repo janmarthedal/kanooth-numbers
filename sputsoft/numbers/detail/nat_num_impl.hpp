@@ -467,7 +467,7 @@ public:
   inline unsigned short rem(unsigned short y) const { return rem_int(con, y); }
   inline unsigned short quotrem(const expr& x, unsigned short y)
     { return quotrem_int(con, x.con, y); }
-  inline bool cmp(unsigned short v) const { return comp_int(con, v); }
+  inline int cmp(unsigned short v) const { return comp_int(con, v); }
 
   expr(unsigned v) : con() { set_int(con, v); }
   inline void set(unsigned v) { set_int(con, v); }
@@ -479,7 +479,7 @@ public:
   inline void div(const expr& x, unsigned y) { quot_int(con, x.con, y); }
   inline unsigned rem(unsigned y) const { return rem_int(con, y); }
   inline unsigned quotrem(const expr& x, unsigned y) { return quotrem_int(con, x.con, y); }
-  inline bool cmp(unsigned v) const { return comp_int(con, v); }
+  inline int cmp(unsigned v) const { return comp_int(con, v); }
 
   expr(unsigned long v) : con() { set_int(con, v); }
   inline void set(unsigned long v) { set_int(con, v); }
@@ -492,7 +492,7 @@ public:
   inline unsigned long rem(unsigned long y) const { return rem_int(con, y); }
   inline unsigned long quotrem(const expr& x, unsigned long y)
     { return quotrem_int(con, x.con, y); }
-  inline bool cmp(unsigned long v) const { return comp_int(con, v); }
+  inline int cmp(unsigned long v) const { return comp_int(con, v); }
 
 #ifdef SPUTSOFT_HAS_LONG_LONG
   expr(unsigned long long v) : con() { set_int(con, v); }
@@ -506,7 +506,7 @@ public:
   inline unsigned long long rem(unsigned long long y) const { return rem_int(con, y); }
   inline unsigned long long quotrem(const expr& x, unsigned long long y)
     { return quotrem_int(con, x.con, y); }
-  inline bool cmp(unsigned long long v) const { return comp_int(con, v); }
+  inline int cmp(unsigned long long v) const { return comp_int(con, v); }
 #endif
 
   inline void set(const expr& x) { set_num(con, x.con); }
@@ -517,7 +517,7 @@ public:
   inline void rem(const expr& x, const expr& y) { rem_num(con, x.con, y.con); }
   static inline void quotrem(expr& q, expr& r, const expr& x, const expr& y)
     { quot_num(q.con, r.con, x.con, y.con); }
-  inline bool cmp(const expr& v) const { return comp_num(con, v.con); }
+  inline int cmp(const expr& v) const { return comp_num(con, v.con); }
 
 };
 

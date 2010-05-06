@@ -81,6 +81,13 @@ struct quotrem_r3_eval<expr<Q, Q>, V1, V2> {
   }
 };
 
+template <typename R>
+struct cmp_r2_eval<expr<R, R>, expr<R, R> > {
+  static int cmp(const expr<R, R>& v1, const expr<R, R>& v2) {
+    return v1.cmp(v2);
+  }
+};
+
 template <typename R, typename V>
 struct cmp_r2_eval<expr<R, R>, V> {
   static int cmp(const expr<R, R>& v1, const V& v2) {
