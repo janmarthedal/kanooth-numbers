@@ -42,11 +42,46 @@ private:
 
   template <typename T>
   inline void add_signed_int(const NUM& n1, bool p1, T v2) {
-    typedef typename sputsoft::type_convert<T>::unsigned_type unsigned_type;
-    if (v2 >= 0)
-      _add(n1, p1, (unsigned_type) v2, true);
-    else
-      _add(n1, p1, (unsigned_type) -v2, false);
+    bool p2 = v2 >= 0;
+    _add(n1, p1, sputsoft::to_unsigned(p2 ? v2 : -v2), p2);
+  }
+
+  template <typename T>
+  inline void _mul(const NUM& n1, bool p1, const T& n2, bool p2) {
+    sputsoft::numbers::mul(num, n1, n2);
+    positive = p1 == p2;
+  }
+
+  template <typename T>
+  inline void mul_signed_int(const NUM& n1, bool p1, T v2) {
+    bool p2 = v2 >= 0;
+    _mul(n1, p1, sputsoft::to_unsigned(p2 ? v2 : -v2), p2);
+  }
+
+  static void quotrem_floor(expr& q, expr& r, const NUM& v1, bool p1, const NUM& v2, bool p2) {
+    sputsoft::numbers::quotrem(q.num, r.num, v1, v2);
+    if (p1 != p2) {
+      sputsoft::numbers::add(q.num, q.num, 1u);
+      sputsoft::numbers::sub(r.num, v2, r.num);
+    }
+    q.positive = p1 == p2;
+    r.positive = p2;
+  }
+
+  static void quotrem_ceil(expr& q, expr& r, const NUM& v1, bool p1, const NUM& v2, bool p2) {
+    sputsoft::numbers::quotrem(q.num, r.num, v1, v2);
+    if (p1 == p2) {
+      sputsoft::numbers::add(q.num, q.num, 1u);
+      sputsoft::numbers::sub(r.num, v2, r.num);
+    }
+    q.positive = p1 != p2;
+    r.positive = !p2;
+  }
+
+  static void quotrem_trunc(expr& q, expr& r, const NUM& v1, bool p1, const NUM& v2, bool p2) {
+    sputsoft::numbers::quotrem(q.num, r.num, v1, v2);
+    q.positive = p1 == p2;
+    r.positive = p1;
   }
 
 public:
@@ -62,6 +97,38 @@ public:
     return num;
   }
 
+  expr(unsigned short v) : num(v), positive(true) {}
+  inline void add(const expr& v1, unsigned short v2) { _add(v1.num, v1.positive, v2, true); }
+  inline void add(unsigned short v1, const expr& v2) { _add(v2.num, v2.positive, v1, true); }
+  inline void sub(const expr& v1, unsigned short v2) { _add(v1.num, v1.positive, v2, false); }
+  inline void sub(unsigned short v1, const expr& v2) { _add(v2.num, v2.positive, v1, false); }
+  inline void mul(const expr& v1, unsigned short v2) { _mul(v1.num, v1.positive, v2, true); }
+  inline void mul(unsigned short v1, const expr& v2) { _mul(v2.num, v2.positive, v1, true); }
+
+  expr(short v) : num(sputsoft::to_unsigned(v >= 0 ? v : -v)), positive(v >= 0) {}
+  inline void add(const expr& v1, short v2) { add_signed_int(v1.num, v1.positive, v2); }
+  inline void add(short v1, const expr& v2) { add_signed_int(v2.num, v2.positive, v1); }
+  inline void sub(const expr& v1, short v2) { add_signed_int(v1.num, v1.positive, -v2); }
+  inline void sub(short v1, const expr& v2) { add_signed_int(v2.num, !v2.positive, v1); }
+  inline void mul(const expr& v1, short v2) { mul_signed_int(v1.num, v1.positive, v2); }
+  inline void mul(short v1, const expr& v2) { mul_signed_int(v2.num, v2.positive, v1); }
+
+  expr(unsigned v) : num(v), positive(true) {}
+  inline void add(const expr& v1, unsigned v2) { _add(v1.num, v1.positive, v2, true); }
+  inline void add(unsigned v1, const expr& v2) { _add(v2.num, v2.positive, v1, true); }
+  inline void sub(const expr& v1, unsigned v2) { _add(v1.num, v1.positive, v2, false); }
+  inline void sub(unsigned v1, const expr& v2) { _add(v2.num, v2.positive, v1, false); }
+  inline void mul(const expr& v1, unsigned v2) { _mul(v1.num, v1.positive, v2, true); }
+  inline void mul(unsigned v1, const expr& v2) { _mul(v2.num, v2.positive, v1, true); }
+
+  expr(int v) : num(sputsoft::to_unsigned(v >= 0 ? v : -v)), positive(v >= 0) {}
+  inline void add(const expr& v1, int v2) { add_signed_int(v1.num, v1.positive, v2); }
+  inline void add(int v1, const expr& v2) { add_signed_int(v2.num, v2.positive, v1); }
+  inline void sub(const expr& v1, int v2) { add_signed_int(v1.num, v1.positive, -v2); }
+  inline void sub(int v1, const expr& v2) { add_signed_int(v2.num, !v2.positive, v1); }
+  inline void mul(const expr& v1, int v2) { mul_signed_int(v1.num, v1.positive, v2); }
+  inline void mul(int v1, const expr& v2) { mul_signed_int(v2.num, v2.positive, v1); }
+
   inline void add(const expr& v1, const expr& v2) { _add(v1.num, v1.positive, v2.num, v2.positive); }
   inline void add(const expr& v1, const NUM& v2)  { _add(v1.num, v1.positive, v2, true); }
   inline void add(const NUM& v1,  const expr& v2) { _add(v1, true, v2.num, v2.positive); }
@@ -70,16 +137,13 @@ public:
   inline void sub(const expr& v1, const NUM& v2)  { _add(v1.num, v1.positive, v2, false); }
   inline void sub(const NUM& v1,  const expr& v2) { _add(v1, true, v2.num, !v2.positive); }
   inline void sub(const NUM& v1,  const NUM& v2)  { _add(v1, true, v2, false); }
+  inline void mul(const expr& v1, const expr& v2) { _mul(v1.num, v1.positive, v2.num, v2.positive); }
+  inline void mul(const expr& v1, const NUM& v2)  { _mul(v1.num, v1.positive, v2, true); }
+  inline void mul(const NUM& v1,  const expr& v2) { _mul(v1, true, v2.num, v2.positive); }
+  inline void mul(const NUM& v1,  const NUM& v2)  { _mul(v1, true, v2, true); }
 
-  inline void add(const expr& v1, unsigned short v2) { _add(v1.num, v1.positive, v2, true); }
-  inline void add(unsigned short v1, const expr& v2) { _add(v2.num, v2.positive, v1, true); }
-  inline void sub(const expr& v1, unsigned short v2) { _add(v1.num, v1.positive, v2, false); }
-  inline void sub(unsigned short v1, const expr& v2) { _add(v2.num, v2.positive, v1, false); }
-
-  inline void add(const expr& v1, short v2) { add_signed_int(v1.num, v1.positive, v2); }
-  inline void add(short v1, const expr& v2) { add_signed_int(v2.num, v2.positive, v1); }
-  inline void sub(const expr& v1, short v2) { add_signed_int(v1.num, v1.positive, -v2); }
-  inline void sub(short v1, const expr& v2) { add_signed_int(v2.num, !v2.positive, v1); }
+  static inline void quotrem_floor(expr& q, expr& r, const expr& u, const expr& v)
+  { }
 
 };
 

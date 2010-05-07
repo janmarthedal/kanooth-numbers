@@ -47,14 +47,14 @@ namespace sputsoft {
   };
 
   template <typename T>
-  typename type_convert<T>::unsigned_type to_unsigned(const T& v) {
+  inline typename type_convert<T>::unsigned_type to_unsigned(const T& v) {
     return (typename type_convert<T>::unsigned_type) v;
   }
 
-#ifndef BOOST_HAS_LONG_LONG
+} // namespace sputsoft
+
+#ifdef BOOST_HAS_LONG_LONG
 #define SPUTSOFT_HAS_LONG_LONG
 #endif
-
-} // namespace sputsoft
 
 #endif // _SPUTSOFT_TYPES_HPP_

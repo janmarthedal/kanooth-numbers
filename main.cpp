@@ -36,12 +36,15 @@ void test_natnum()
 
 void test_int()
 {
-  sputsoft::numbers::integer a;
-  std::string st = "-123";
+  sputsoft::numbers::integer a, b=-7654, c;
 
+  std::string st = "-123";
   sputsoft::numbers::set(a, st);
+  sputsoft::numbers::mul(c, a, 12);
 
   std::cout << a << std::endl;
+  std::cout << b << std::endl;
+  std::cout << c << std::endl;
 }
 
 int main()

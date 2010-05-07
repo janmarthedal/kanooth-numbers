@@ -51,6 +51,13 @@ struct cmp_r2_eval {
   }
 };
 
+template <typename V>
+struct abs_r1_eval {
+  static V abs(const V& v) {
+    return v < V() ? -v : v;
+  }
+};
+
 } // namespace sputsoft
 
 template <typename R, typename V>
@@ -121,6 +128,11 @@ inline std::size_t floor_log2(T n) {
 template <typename V1, typename V2>
 inline int compare(const V1& v1, const V2& v2) {
   return detail::cmp_r2_eval<V1, V2>::cmp(v1, v2);
+}
+
+template <typename V>
+inline V abs(const V& v) {
+  return detail::abs_r1_eval<V>::abs(v);
 }
 
 } // namespace detail

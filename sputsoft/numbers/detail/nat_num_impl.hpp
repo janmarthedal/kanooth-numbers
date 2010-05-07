@@ -196,7 +196,7 @@ private:
   }
 
   template <typename T>
-  static void sub_int(Con& r, const Con& x, const T y) {
+  static void sub_num_int(Con& r, const Con& x, const T y) {
     if (x.is_empty())
       r.set_size(0);
     else if (!y)
@@ -205,6 +205,18 @@ private:
       sub_int1(r, x, y);
     else
       sub_num(r, x, expr(y).con);
+  }
+
+  template <typename T>
+  static void sub_int_num(Con& r, const T x, const Con& y) {
+    if (!x)
+      r.set_size(0);
+    else if (y.is_empty())
+      set_int(r, x);
+    else if (sizeof(T) <= sizeof(digit_type))
+      sub_int(r, x - y[0]);
+    else
+      sub_num(r, expr(x).con, y);
   }
 
   /* Multiply two numbers */
@@ -460,7 +472,8 @@ public:
   inline void set(unsigned short v) { set_int(con, v); }
   inline void add(const expr& x, unsigned short y) { add_int(con, x.con, y); }
   inline void add(unsigned short x, const expr& y) { add_int(con, y.con, x); }
-  inline void sub(const expr& x, unsigned short y) { sub_int(con, x.con, y); }
+  inline void sub(const expr& x, unsigned short y) { sub_num_int(con, x.con, y); }
+  inline void sub(unsigned short x, const expr& y) { sub_int_num(con, x, y.con); }
   inline void mul(const expr& x, unsigned short y) { mul_int(con, x.con, y); }
   inline void mul(unsigned short x, const expr& y) { mul_int(con, y.con, x); }
   inline void div(const expr& x, unsigned short y) { quot_int(con, x.con, y); }
@@ -473,7 +486,8 @@ public:
   inline void set(unsigned v) { set_int(con, v); }
   inline void add(const expr& x, unsigned y) { add_int(con, x.con, y); }
   inline void add(unsigned x, const expr& y) { add_int(con, y.con, x); }
-  inline void sub(const expr& x, unsigned y) { sub_int(con, x.con, y); }
+  inline void sub(const expr& x, unsigned y) { sub_num_int(con, x.con, y); }
+  inline void sub(unsigned x, const expr& y) { sub_int_num(con, x, y.con); }
   inline void mul(const expr& x, unsigned y) { mul_int(con, x.con, y); }
   inline void mul(unsigned x, const expr& y) { mul_int(con, y.con, x); }
   inline void div(const expr& x, unsigned y) { quot_int(con, x.con, y); }
@@ -485,7 +499,8 @@ public:
   inline void set(unsigned long v) { set_int(con, v); }
   inline void add(const expr& x, unsigned long y) { add_int(con, x.con, y); }
   inline void add(unsigned long x, const expr& y) { add_int(con, y.con, x); }
-  inline void sub(const expr& x, unsigned long y) { sub_int(con, x.con, y); }
+  inline void sub(const expr& x, unsigned long y) { sub_num_int(con, x.con, y); }
+  inline void sub(unsigned long x, const expr& y) { sub_int_num(con, x, y.con); }
   inline void mul(const expr& x, unsigned long y) { mul_int(con, x.con, y); }
   inline void mul(unsigned long x, const expr& y) { mul_int(con, y.con, x); }
   inline void div(const expr& x, unsigned long y) { quot_int(con, x.con, y); }
@@ -499,7 +514,8 @@ public:
   inline void set(unsigned long long v) { set_int(con, v); }
   inline void add(const expr& x, unsigned long long y) { add_int(con, x.con, y); }
   inline void add(unsigned long long x, const expr& y) { add_int(con, y.con, x); }
-  inline void sub(const expr& x, unsigned long long y) { sub_int(con, x.con, y); }
+  inline void sub(const expr& x, unsigned long long y) { sub_num_int(con, x.con, y); }
+  inline void sub(unsigned long long x, const expr& y) { sub_int_num(con, x, y.con); }
   inline void mul(const expr& x, unsigned long long y) { mul_int(con, x.con, y); }
   inline void mul(unsigned long long x, const expr& y) { mul_int(con, y.con, x); }
   inline void div(const expr& x, unsigned long long y) { quot_int(con, x.con, y); }
