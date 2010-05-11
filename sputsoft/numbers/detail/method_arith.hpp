@@ -16,26 +16,22 @@ namespace sputsoft {
 namespace numbers {
 namespace detail {
 
-template <typename R, typename V>
-struct set_2_eval;
-template <typename R, typename Forw>
-struct set_4_eval;
-template <typename R, typename V1, typename V2>
-struct add_3_eval;
-template <typename R, typename V1, typename V2>
-struct sub_3_eval;
-template <typename R, typename V1, typename V2>
-struct mul_3_eval;
-template <typename R, typename V1, typename V2>
-struct div_3_eval;
-template <typename R, typename V1, typename V2>
-struct rem_3_eval;
-template <typename V1, typename V2>
-struct rem_r2_eval;
-template <typename Q, typename R, typename V1, typename V2>
-struct quotrem_4_eval;
-template <typename Q, typename V1, typename V2>
-struct quotrem_r3_eval;
+template <typename R, typename V>                           struct set_2_eval;
+template <typename R, typename Forw>                        struct set_4_eval;
+template <typename R, typename V1, typename V2>             struct add_3_eval;
+template <typename R, typename V1, typename V2>             struct sub_3_eval;
+template <typename R, typename V1, typename V2>             struct mul_3_eval;
+template <typename R, typename V1, typename V2>             struct div_3_eval;
+template <typename R, typename V1, typename V2>             struct div_ceil_3_eval;
+template <typename R, typename V1, typename V2>             struct div_trunc_3_eval;
+template <typename R, typename V1, typename V2>             struct rem_3_eval;
+template <typename V1, typename V2>                         struct rem_r2_eval;
+template <typename V1, typename V2>                         struct rem_ceil_r2_eval;
+template <typename V1, typename V2>                         struct rem_trunc_r2_eval;
+template <typename Q, typename R, typename V1, typename V2> struct quotrem_4_eval;
+template <typename Q, typename V1, typename V2>             struct quotrem_r3_eval;
+template <typename Q, typename V1, typename V2>             struct quotrem_ceil_r3_eval;
+template <typename Q, typename V1, typename V2>             struct quotrem_trunc_r3_eval;
 template <typename T>
 struct floor_log2_evaluator {
   static std::size_t floor_log2(T n) {
@@ -50,14 +46,6 @@ struct cmp_r2_eval {
     return v1 < v2 ? -1 : v1 > v2 ? 1 : 0;
   }
 };
-
-template <typename V>
-struct abs_r1_eval {
-  static V abs(const V& v) {
-    return v < V() ? -v : v;
-  }
-};
-
 } // namespace sputsoft
 
 template <typename R, typename V>
@@ -101,6 +89,16 @@ inline void div(R& r, const V1& v1, const V2& v2) {
 }
 
 template <typename R, typename V1, typename V2>
+inline void div_ceil(R& r, const V1& v1, const V2& v2) {
+  detail::div_ceil_3_eval<R, V1, V2>::div_ceil(r, v1, v2);
+}
+
+template <typename R, typename V1, typename V2>
+inline void div_trunc(R& r, const V1& v1, const V2& v2) {
+  detail::div_trunc_3_eval<R, V1, V2>::div_trunc(r, v1, v2);
+}
+
+template <typename R, typename V1, typename V2>
 inline void rem(R& r, const V1& v1, const V2& v2) {
   detail::rem_3_eval<R, V1, V2>::rem(r, v1, v2);
 }
@@ -108,6 +106,16 @@ inline void rem(R& r, const V1& v1, const V2& v2) {
 template <typename V1, typename V2>
 inline V2 rem(const V1& v1, const V2& v2) {
   return detail::rem_r2_eval<V1, V2>::rem(v1, v2);
+}
+
+template <typename V1, typename V2>
+inline V2 rem_ceil(const V1& v1, const V2& v2) {
+  return detail::rem_ceil_r2_eval<V1, V2>::rem_ceil(v1, v2);
+}
+
+template <typename V1, typename V2>
+inline V2 rem_trunc(const V1& v1, const V2& v2) {
+  return detail::rem_trunc_r2_eval<V1, V2>::rem_trunc(v1, v2);
 }
 
 template <typename Q, typename R, typename V1, typename V2>
@@ -120,6 +128,16 @@ inline V2 quotrem(Q& q, const V1& v1, const V2& v2) {
   return detail::quotrem_r3_eval<Q, V1, V2>::quotrem(q, v1, v2);
 }
 
+template <typename Q, typename V1, typename V2>
+inline V2 quotrem_ceil(Q& q, const V1& v1, const V2& v2) {
+  return detail::quotrem_ceil_r3_eval<Q, V1, V2>::quotrem_ceil(q, v1, v2);
+}
+
+template <typename Q, typename V1, typename V2>
+inline V2 quotrem_trunc(Q& q, const V1& v1, const V2& v2) {
+  return detail::quotrem_trunc_r3_eval<Q, V1, V2>::quotrem_trunc(q, v1, v2);
+}
+
 template <typename T>
 inline std::size_t floor_log2(T n) {
   return detail::floor_log2_evaluator<T>::floor_log2(n);
@@ -130,9 +148,9 @@ inline int compare(const V1& v1, const V2& v2) {
   return detail::cmp_r2_eval<V1, V2>::cmp(v1, v2);
 }
 
-template <typename V>
-inline V abs(const V& v) {
-  return detail::abs_r1_eval<V>::abs(v);
+template <typename V1, typename V2>
+inline bool equal(const V1& v1, const V2& v2) {
+  return compare(v1, v2) == 0;
 }
 
 } // namespace detail

@@ -59,8 +59,8 @@ private:
   }
 
   template <typename T>
-  T rem_int(const T& v) const {
-    return num->rem(v);
+  static T rem_int(const number_type& v1, const T& v2) {
+    return number_type::rem(v1, v2);
   }
 
   template <typename V2>
@@ -87,7 +87,7 @@ public:
   inline void mul(const expr& x, unsigned short y) { _mul(*x.num, y); }
   inline void mul(unsigned short x, const expr& y) { _mul(*y.num, x); }
   inline void div(const expr& x, unsigned short y) { _div(*x.num, y); }
-  inline unsigned short rem(unsigned short y) const { return rem_int(y); }
+  static inline unsigned short rem(const expr& x, unsigned short y) { return rem_int(*x.num, y); }
   inline unsigned short quotrem(const expr& x, unsigned short y) { return _quotrem(*x.num, y); }
   inline int cmp(unsigned short v) const { return num->cmp(v); }
 
@@ -99,7 +99,7 @@ public:
   inline void mul(const expr& x, unsigned y) { _mul(*x.num, y); }
   inline void mul(unsigned x, const expr& y) { _mul(*y.num, x); }
   inline void div(const expr& x, unsigned y) { _div(*x.num, y); }
-  inline unsigned rem(unsigned y) const { return rem_int(y); }
+  static inline unsigned rem(const expr& x, unsigned y) { return rem_int(*x.num, y); }
   inline unsigned quotrem(const expr& x, unsigned y) { return _quotrem(*x.num, y); }
   inline int cmp(unsigned v) const { return num->cmp(v); }
 
@@ -111,7 +111,7 @@ public:
   inline void mul(const expr& x, unsigned long y) { _mul(*x.num, y); }
   inline void mul(unsigned long x, const expr& y) { _mul(*y.num, x); }
   inline void div(const expr& x, unsigned long y) { _div(*x.num, y); }
-  inline unsigned long rem(unsigned long y) const { return rem_int(y); }
+  static inline unsigned long rem(const expr& x, unsigned long y) { return rem_int(*x.num, y); }
   inline unsigned long quotrem(const expr& x, unsigned long y) { return _quotrem(*x.num, y); }
   inline int cmp(unsigned long v) const { return num->cmp(v); }
 
@@ -124,7 +124,7 @@ public:
   inline void mul(const expr& x, unsigned long long y) { _mul(*x.num, y); }
   inline void mul(unsigned long long x, const expr& y) { _mul(*y.num, x); }
   inline void div(const expr& x, unsigned long long y) { _div(*x.num, y); }
-  inline unsigned long long rem(unsigned long long y) const { return rem_int(y); }
+  static inline unsigned long long rem(const expr& x, unsigned long long y) { return rem_int(*x.num, y); }
   inline unsigned long long quotrem(const expr& x, unsigned long long y)
     { return _quotrem(*x.num, y); }
   inline int cmp(unsigned long long v) const { return num->cmp(v); }

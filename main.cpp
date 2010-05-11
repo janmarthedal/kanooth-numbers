@@ -34,17 +34,51 @@ void test_natnum()
   std::cout << sputsoft::numbers::compare(a, b) << std::endl;
 }
 
+template <typename T, typename S>
+T make_number(const S& s) {
+  T n;
+  sputsoft::numbers::set(n, s);
+  return n;
+}
+
+template <typename N, typename T>
+void div_int_test(const N& u, const T& v)
+{
+  N q1, q2, c;
+  sputsoft::numbers::div(q1, u, v);
+  T r1 = sputsoft::numbers::rem(u, v);
+  sputsoft::numbers::mul(c, q1, v);
+  sputsoft::numbers::add(c, c, r1);
+  std::cout << q1 << " " << r1 << " " << (sputsoft::numbers::equal(u, c) ? "OK" : "FAIL") << std::endl;
+  T r2 = sputsoft::numbers::quotrem(q2, u, v);
+  if (!sputsoft::numbers::equal(q1, q2)) std::cout << "q1 != q2" << std::endl;
+  if (r1 != r2) std::cout << "r1 != r2" << std::endl;
+}
+
+template <typename N, typename T>
+void div_ceil_int_test(const N& u, const T& v)
+{
+  N q1, q2, c;
+  sputsoft::numbers::div_ceil(q1, u, v);
+  T r1 = sputsoft::numbers::rem_ceil(u, v);
+  sputsoft::numbers::mul(c, q1, v);
+  sputsoft::numbers::add(c, c, r1);
+  std::cout << q1 << " " << r1 << " " << (sputsoft::numbers::equal(u, c) ? "OK" : "FAIL") << std::endl;
+  T r2 = sputsoft::numbers::quotrem_ceil(q2, u, v);
+  if (!sputsoft::numbers::equal(q1, q2)) std::cout << "q1 != q2" << std::endl;
+  if (r1 != r2) std::cout << "r1 != r2" << std::endl;
+}
+
 void test_int()
 {
-  sputsoft::numbers::integer a, b=-7654, c;
-
-  std::string st = "-123";
-  sputsoft::numbers::set(a, st);
-  sputsoft::numbers::mul(c, a, 12);
-
-  std::cout << a << std::endl;
-  std::cout << b << std::endl;
-  std::cout << c << std::endl;
+  div_int_test(make_number<sputsoft::numbers::integer>(20), 7);
+  div_int_test(make_number<sputsoft::numbers::integer>(-20), 7);
+  div_int_test(make_number<sputsoft::numbers::integer>(20), -7);
+  div_int_test(make_number<sputsoft::numbers::integer>(-20), -7);
+  div_ceil_int_test(make_number<sputsoft::numbers::integer>(20), 7);
+  div_ceil_int_test(make_number<sputsoft::numbers::integer>(-20), 7);
+  div_ceil_int_test(make_number<sputsoft::numbers::integer>(20), -7);
+  div_ceil_int_test(make_number<sputsoft::numbers::integer>(-20), -7);
 }
 
 int main()

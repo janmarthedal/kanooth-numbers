@@ -17,44 +17,69 @@
 
 #include <boost/integer_traits.hpp>
 
-namespace sputsoft {
-
-  template <typename T> struct type_convert;
-
-  template <>
-  struct type_convert<unsigned short int> {
-    typedef unsigned short int unsigned_type;
-  };
-  template <>
-  struct type_convert<signed short int> {
-    typedef unsigned short int unsigned_type;
-  };
-  template <>
-  struct type_convert<unsigned int> {
-    typedef unsigned int unsigned_type;
-  };
-  template <>
-  struct type_convert<signed int> {
-    typedef unsigned int unsigned_type;
-  };
-  template <>
-  struct type_convert<unsigned long int> {
-    typedef unsigned long int unsigned_type;
-  };
-  template <>
-  struct type_convert<signed long int> {
-    typedef unsigned long int unsigned_type;
-  };
-
-  template <typename T>
-  inline typename type_convert<T>::unsigned_type to_unsigned(const T& v) {
-    return (typename type_convert<T>::unsigned_type) v;
-  }
-
-} // namespace sputsoft
-
 #ifdef BOOST_HAS_LONG_LONG
 #define SPUTSOFT_HAS_LONG_LONG
 #endif
+
+namespace sputsoft {
+
+  template <typename T> struct number_traits;
+
+  template <>
+  struct number_traits<unsigned short> {
+    typedef unsigned short unsigned_type;
+    typedef signed short signed_type;
+  };
+
+  template <>
+  struct number_traits<signed short> {
+    typedef unsigned short unsigned_type;
+    typedef signed short signed_type;
+  };
+
+  template <>
+  struct number_traits<unsigned> {
+    typedef unsigned unsigned_type;
+    typedef signed signed_type;
+  };
+
+  template <>
+  struct number_traits<signed> {
+    typedef unsigned unsigned_type;
+    typedef signed signed_type;
+  };
+
+  template <>
+  struct number_traits<unsigned long> {
+    typedef unsigned long unsigned_type;
+    typedef signed long signed_type;
+  };
+
+  template <>
+  struct number_traits<signed long> {
+    typedef unsigned long unsigned_type;
+    typedef signed long signed_type;
+  };
+
+#ifdef SPUTSOFT_HAS_LONG_LONG
+  template <>
+  struct number_traits<unsigned long long> {
+    typedef unsigned long long unsigned_type;
+    typedef signed long long signed_type;
+  };
+
+  template <>
+  struct number_traits<signed long long> {
+    typedef unsigned long long unsigned_type;
+    typedef signed long long signed_type;
+  };
+#endif
+
+  template <typename T>
+  inline typename number_traits<T>::unsigned_type to_unsigned(const T& v) {
+    return (typename number_traits<T>::unsigned_type) v;
+  }
+
+} // namespace sputsoft
 
 #endif // _SPUTSOFT_TYPES_HPP_

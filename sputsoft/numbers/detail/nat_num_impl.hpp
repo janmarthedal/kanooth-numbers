@@ -12,13 +12,20 @@
  * $Id$
  */
 
+/*
+ * constructor: u, n
+ * set: u->n, n->n
+ * addition: n+n->n, u+n->n, n+u->n
+ * subtraction: n-n->n, u-n->n, n-u->n
+ *
+ */
+
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_IMPL_HPP
 #define _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_IMPL_HPP
 
 #include <boost/integer_traits.hpp>
+#include <sputsoft/detail/types.hpp>
 #include <sputsoft/numbers/detail/nat_num_abst.hpp>
-
-#define SPUTSOFT_HAS_LONG_LONG
 
 namespace sputsoft {
 namespace numbers {
@@ -477,7 +484,7 @@ public:
   inline void mul(const expr& x, unsigned short y) { mul_int(con, x.con, y); }
   inline void mul(unsigned short x, const expr& y) { mul_int(con, y.con, x); }
   inline void div(const expr& x, unsigned short y) { quot_int(con, x.con, y); }
-  inline unsigned short rem(unsigned short y) const { return rem_int(con, y); }
+  static inline unsigned short rem(const expr& x, unsigned short y) { return rem_int(x.con, y); }
   inline unsigned short quotrem(const expr& x, unsigned short y)
     { return quotrem_int(con, x.con, y); }
   inline int cmp(unsigned short v) const { return comp_int(con, v); }
@@ -491,7 +498,7 @@ public:
   inline void mul(const expr& x, unsigned y) { mul_int(con, x.con, y); }
   inline void mul(unsigned x, const expr& y) { mul_int(con, y.con, x); }
   inline void div(const expr& x, unsigned y) { quot_int(con, x.con, y); }
-  inline unsigned rem(unsigned y) const { return rem_int(con, y); }
+  static inline unsigned rem(const expr& x, unsigned y) { return rem_int(x.con, y); }
   inline unsigned quotrem(const expr& x, unsigned y) { return quotrem_int(con, x.con, y); }
   inline int cmp(unsigned v) const { return comp_int(con, v); }
 
@@ -504,7 +511,7 @@ public:
   inline void mul(const expr& x, unsigned long y) { mul_int(con, x.con, y); }
   inline void mul(unsigned long x, const expr& y) { mul_int(con, y.con, x); }
   inline void div(const expr& x, unsigned long y) { quot_int(con, x.con, y); }
-  inline unsigned long rem(unsigned long y) const { return rem_int(con, y); }
+  static inline unsigned long rem(const expr& x, unsigned long y) { return rem_int(x.con, y); }
   inline unsigned long quotrem(const expr& x, unsigned long y)
     { return quotrem_int(con, x.con, y); }
   inline int cmp(unsigned long v) const { return comp_int(con, v); }
@@ -519,7 +526,7 @@ public:
   inline void mul(const expr& x, unsigned long long y) { mul_int(con, x.con, y); }
   inline void mul(unsigned long long x, const expr& y) { mul_int(con, y.con, x); }
   inline void div(const expr& x, unsigned long long y) { quot_int(con, x.con, y); }
-  inline unsigned long long rem(unsigned long long y) const { return rem_int(con, y); }
+  static inline unsigned long long rem(const expr& x, unsigned long long y) { return rem_int(x.con, y); }
   inline unsigned long long quotrem(const expr& x, unsigned long long y)
     { return quotrem_int(con, x.con, y); }
   inline int cmp(unsigned long long v) const { return comp_int(con, v); }
