@@ -69,16 +69,92 @@ void div_ceil_int_test(const N& u, const T& v)
   if (r1 != r2) std::cout << "r1 != r2" << std::endl;
 }
 
+template <typename N, typename T>
+void div_trunc_int_test(const N& u, const T& v)
+{
+  N q1, q2, c;
+  sputsoft::numbers::div_trunc(q1, u, v);
+  T r1 = sputsoft::numbers::rem_trunc(u, v);
+  sputsoft::numbers::mul(c, q1, v);
+  sputsoft::numbers::add(c, c, r1);
+  std::cout << q1 << " " << r1 << " " << (sputsoft::numbers::equal(u, c) ? "OK" : "FAIL") << std::endl;
+  T r2 = sputsoft::numbers::quotrem_trunc(q2, u, v);
+  if (!sputsoft::numbers::equal(q1, q2)) std::cout << "q1 != q2" << std::endl;
+  if (r1 != r2) std::cout << "r1 != r2" << std::endl;
+}
+
+template <typename N>
+void div_num_test(const N& u, const N& v)
+{
+  N q1, r1, q2, r2, c;
+  sputsoft::numbers::div(q1, u, v);
+  sputsoft::numbers::rem(r1, u, v);
+  sputsoft::numbers::mul(c, q1, v);
+  sputsoft::numbers::add(c, c, r1);
+  std::cout << q1 << " " << r1 << " " << (sputsoft::numbers::equal(u, c) ? "OK" : "FAIL") << std::endl;
+  sputsoft::numbers::quotrem(q2, r2, u, v);
+  if (!sputsoft::numbers::equal(q1, q2)) std::cout << "q1 != q2" << std::endl;
+  if (!sputsoft::numbers::equal(r1, r2)) std::cout << "r1 != r2" << std::endl;
+}
+
+template <typename N>
+void div_ceil_num_test(const N& u, const N& v)
+{
+  N q1, r1, q2, r2, c;
+  sputsoft::numbers::div_ceil(q1, u, v);
+  sputsoft::numbers::rem_ceil(r1, u, v);
+  sputsoft::numbers::mul(c, q1, v);
+  sputsoft::numbers::add(c, c, r1);
+  std::cout << q1 << " " << r1 << " " << (sputsoft::numbers::equal(u, c) ? "OK" : "FAIL") << std::endl;
+  sputsoft::numbers::quotrem_ceil(q2, r2, u, v);
+  if (!sputsoft::numbers::equal(q1, q2)) std::cout << "q1 != q2" << std::endl;
+  if (!sputsoft::numbers::equal(r1, r2)) std::cout << "r1 != r2" << std::endl;
+}
+
+template <typename N>
+void div_trunc_num_test(const N& u, const N& v)
+{
+  N q1, r1, q2, r2, c;
+  sputsoft::numbers::div_trunc(q1, u, v);
+  sputsoft::numbers::rem_trunc(r1, u, v);
+  sputsoft::numbers::mul(c, q1, v);
+  sputsoft::numbers::add(c, c, r1);
+  std::cout << q1 << " " << r1 << " " << (sputsoft::numbers::equal(u, c) ? "OK" : "FAIL") << std::endl;
+  sputsoft::numbers::quotrem_trunc(q2, r2, u, v);
+  if (!sputsoft::numbers::equal(q1, q2)) std::cout << "q1 != q2" << std::endl;
+  if (!sputsoft::numbers::equal(r1, r2)) std::cout << "r1 != r2" << std::endl;
+}
+
+sputsoft::numbers::integer make_int(int v) {
+  return make_number<sputsoft::numbers::integer>(v);
+}
+
+template <typename N, typename T>
+void test_div_int(const N& u, const T& v)
+{
+  div_int_test(u, v);
+  div_ceil_int_test(u, v);
+  div_trunc_int_test(u, v);
+}
+
+template <typename N>
+void test_div_num(const N& u, const N& v)
+{
+  div_num_test(u, v);
+  div_ceil_num_test(u, v);
+  div_trunc_num_test(u, v);
+}
+
 void test_int()
 {
-  div_int_test(make_number<sputsoft::numbers::integer>(20), 7);
-  div_int_test(make_number<sputsoft::numbers::integer>(-20), 7);
-  div_int_test(make_number<sputsoft::numbers::integer>(20), -7);
-  div_int_test(make_number<sputsoft::numbers::integer>(-20), -7);
-  div_ceil_int_test(make_number<sputsoft::numbers::integer>(20), 7);
-  div_ceil_int_test(make_number<sputsoft::numbers::integer>(-20), 7);
-  div_ceil_int_test(make_number<sputsoft::numbers::integer>(20), -7);
-  div_ceil_int_test(make_number<sputsoft::numbers::integer>(-20), -7);
+  test_div_int(make_int(20), 7);
+  test_div_int(make_int(-20), 7);
+  test_div_int(make_int(20), -7);
+  test_div_int(make_int(-20), -7);
+  test_div_num(make_int(20), make_int(7));
+  test_div_num(make_int(-20), make_int(7));
+  test_div_num(make_int(20), make_int(-7));
+  test_div_num(make_int(-20), make_int(-7));
 }
 
 int main()

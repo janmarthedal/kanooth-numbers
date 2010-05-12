@@ -74,6 +74,20 @@ struct rem_3_eval<expr<R, R>, V1, V2> {
   }
 };
 
+template <typename R, typename V1, typename V2>
+struct rem_ceil_3_eval<expr<R, R>, V1, V2> {
+  static void rem_ceil(expr<R, R>& r, const V1& v1, const V2& v2) {
+    r.rem_ceil(v1, v2);
+  }
+};
+
+template <typename R, typename V1, typename V2>
+struct rem_trunc_3_eval<expr<R, R>, V1, V2> {
+  static void rem_trunc(expr<R, R>& r, const V1& v1, const V2& v2) {
+    r.rem_trunc(v1, v2);
+  }
+};
+
 template <typename R, typename V2>
 struct rem_r2_eval<expr<R, R>, V2> {
   static V2 rem(const expr<R, R>& v1, const V2& v2) {
@@ -99,6 +113,20 @@ template <typename Q, typename R, typename V1, typename V2>
 struct quotrem_4_eval<expr<Q, Q>, R, V1, V2> {
   static void quotrem(expr<Q, Q>& q, R& r, const V1& v1, const V2& v2) {
     expr<Q, Q>::quotrem(q, r, v1, v2);
+  }
+};
+
+template <typename Q, typename R, typename V1, typename V2>
+struct quotrem_ceil_4_eval<expr<Q, Q>, R, V1, V2> {
+  static void quotrem_ceil(expr<Q, Q>& q, R& r, const V1& v1, const V2& v2) {
+    expr<Q, Q>::quotrem_ceil(q, r, v1, v2);
+  }
+};
+
+template <typename Q, typename R, typename V1, typename V2>
+struct quotrem_trunc_4_eval<expr<Q, Q>, R, V1, V2> {
+  static void quotrem_trunc(expr<Q, Q>& q, R& r, const V1& v1, const V2& v2) {
+    expr<Q, Q>::quotrem_trunc(q, r, v1, v2);
   }
 };
 

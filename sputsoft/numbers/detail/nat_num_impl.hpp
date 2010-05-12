@@ -324,7 +324,7 @@ private:
     if (!vn)
       division_by_zero();
     else if (un < vn)
-      set_num(r, un);
+      set_num(r, u);
     else if (u.get() == v.get())
       set_int(r, digit_type(0));
     else {
@@ -539,7 +539,7 @@ public:
   inline void div(const expr& x, const expr& y) { quot_num(con, x.con, y.con); }
   inline void rem(const expr& x, const expr& y) { rem_num(con, x.con, y.con); }
   static inline void quotrem(expr& q, expr& r, const expr& x, const expr& y)
-    { quot_num(q.con, r.con, x.con, y.con); }
+    { quotrem_num(q.con, r.con, x.con, y.con); }
   inline int cmp(const expr& v) const { return comp_num(con, v.con); }
 
 };

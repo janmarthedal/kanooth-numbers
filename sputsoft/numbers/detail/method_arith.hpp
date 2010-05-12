@@ -25,10 +25,14 @@ template <typename R, typename V1, typename V2>             struct div_3_eval;
 template <typename R, typename V1, typename V2>             struct div_ceil_3_eval;
 template <typename R, typename V1, typename V2>             struct div_trunc_3_eval;
 template <typename R, typename V1, typename V2>             struct rem_3_eval;
+template <typename R, typename V1, typename V2>             struct rem_ceil_3_eval;
+template <typename R, typename V1, typename V2>             struct rem_trunc_3_eval;
 template <typename V1, typename V2>                         struct rem_r2_eval;
 template <typename V1, typename V2>                         struct rem_ceil_r2_eval;
 template <typename V1, typename V2>                         struct rem_trunc_r2_eval;
 template <typename Q, typename R, typename V1, typename V2> struct quotrem_4_eval;
+template <typename Q, typename R, typename V1, typename V2> struct quotrem_ceil_4_eval;
+template <typename Q, typename R, typename V1, typename V2> struct quotrem_trunc_4_eval;
 template <typename Q, typename V1, typename V2>             struct quotrem_r3_eval;
 template <typename Q, typename V1, typename V2>             struct quotrem_ceil_r3_eval;
 template <typename Q, typename V1, typename V2>             struct quotrem_trunc_r3_eval;
@@ -103,6 +107,16 @@ inline void rem(R& r, const V1& v1, const V2& v2) {
   detail::rem_3_eval<R, V1, V2>::rem(r, v1, v2);
 }
 
+template <typename R, typename V1, typename V2>
+inline void rem_ceil(R& r, const V1& v1, const V2& v2) {
+  detail::rem_ceil_3_eval<R, V1, V2>::rem_ceil(r, v1, v2);
+}
+
+template <typename R, typename V1, typename V2>
+inline void rem_trunc(R& r, const V1& v1, const V2& v2) {
+  detail::rem_trunc_3_eval<R, V1, V2>::rem_trunc(r, v1, v2);
+}
+
 template <typename V1, typename V2>
 inline V2 rem(const V1& v1, const V2& v2) {
   return detail::rem_r2_eval<V1, V2>::rem(v1, v2);
@@ -121,6 +135,16 @@ inline V2 rem_trunc(const V1& v1, const V2& v2) {
 template <typename Q, typename R, typename V1, typename V2>
 inline void quotrem(Q& q, R& r, const V1& v1, const V2& v2) {
   detail::quotrem_4_eval<Q, R, V1, V2>::quotrem(q, r, v1, v2);
+}
+
+template <typename Q, typename R, typename V1, typename V2>
+inline void quotrem_ceil(Q& q, R& r, const V1& v1, const V2& v2) {
+  detail::quotrem_ceil_4_eval<Q, R, V1, V2>::quotrem_ceil(q, r, v1, v2);
+}
+
+template <typename Q, typename R, typename V1, typename V2>
+inline void quotrem_trunc(Q& q, R& r, const V1& v1, const V2& v2) {
+  detail::quotrem_trunc_4_eval<Q, R, V1, V2>::quotrem_trunc(q, r, v1, v2);
 }
 
 template <typename Q, typename V1, typename V2>

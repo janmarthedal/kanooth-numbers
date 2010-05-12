@@ -66,7 +66,7 @@ private:
 
   /* quotrem, div, rem floor */
 
-  static void quotrem_floor(expr& q, expr& r, const NUM& v1, bool p1, const NUM& v2, bool p2) {
+  static void quotrem_floor_num(expr& q, expr& r, const NUM& v1, bool p1, const NUM& v2, bool p2) {
     sputsoft::numbers::quotrem(q.num, r.num, v1, v2);
     if (p1 != p2 && r.num) {
       sputsoft::numbers::add(q.num, q.num, 1u);
@@ -74,6 +74,24 @@ private:
     }
     q.positive = p1 == p2;
     r.positive = p2;
+  }
+
+  void div_floor_num(const NUM& v1, bool p1, const NUM& v2, bool p2) {
+    positive = p1 == p2;
+    if (!positive) {
+      NUM rnum;
+      sputsoft::numbers::quotrem(num, rnum, v1, v2);
+      if (rnum)
+        sputsoft::numbers::add(num, num, 1u);
+    } else
+      sputsoft::numbers::div(num, v1, v2);
+  }
+
+  void rem_floor_num(const NUM& v1, bool p1, const NUM& v2, bool p2) {
+    sputsoft::numbers::rem(num, v1, v2);
+    positive = p2;
+    if (p1 != p2 && num)
+      sputsoft::numbers::sub(num, v2, num);
   }
 
   template <typename T>
@@ -94,10 +112,14 @@ private:
   void div_floor_int(const NUM& v1, bool p1, T v2) {
     typedef typename sputsoft::number_traits<T>::unsigned_type unsigned_type;
     bool p2 = v2 >= 0;
-    unsigned_type r = sputsoft::numbers::quotrem(num, v1, (unsigned_type) (p2 ? v2 : -v2));
+    unsigned_type v2u = p2 ? v2 : -v2;
     positive = p1 == p2;
-    if (!positive && r)
-      sputsoft::numbers::add(num, num, 1u);
+    if (!positive) {
+      unsigned_type ru = sputsoft::numbers::quotrem(num, v1, v2u);
+      if (ru)
+        sputsoft::numbers::add(num, num, 1u);
+    } else
+      sputsoft::numbers::div(num, v1, v2u);
   }
 
   template <typename T>
@@ -112,7 +134,7 @@ private:
 
   /* quotrem, div, rem ceil */
 
-  static void quotrem_ceil(expr& q, expr& r, const NUM& v1, bool p1, const NUM& v2, bool p2) {
+  static void quotrem_ceil_num(expr& q, expr& r, const NUM& v1, bool p1, const NUM& v2, bool p2) {
     sputsoft::numbers::quotrem(q.num, r.num, v1, v2);
     if (p1 == p2 && r.num) {
       sputsoft::numbers::add(q.num, q.num, 1u);
@@ -120,6 +142,24 @@ private:
     }
     q.positive = p1 == p2;
     r.positive = !p2;
+  }
+
+  void div_ceil_num(const NUM& v1, bool p1, const NUM& v2, bool p2) {
+    positive = p1 == p2;
+    if (positive) {
+      NUM rnum;
+      sputsoft::numbers::quotrem(num, rnum, v1, v2);
+      if (rnum)
+        sputsoft::numbers::add(num, num, 1u);
+    } else
+      sputsoft::numbers::div(num, v1, v2);
+  }
+
+  void rem_ceil_num(const NUM& v1, bool p1, const NUM& v2, bool p2) {
+    sputsoft::numbers::rem(num, v1, v2);
+    positive = !p2;
+    if (p1 == p2 && num)
+      sputsoft::numbers::sub(num, v2, num);
   }
 
   template <typename T>
@@ -159,16 +199,44 @@ private:
 
   /* quotrem, div, rem trunc */
 
-  static void quotrem_trunc(expr& q, expr& r, const NUM& v1, bool p1, const NUM& v2, bool p2) {
+  static void quotrem_trunc_num(expr& q, expr& r, const NUM& v1, bool p1, const NUM& v2, bool p2) {
     sputsoft::numbers::quotrem(q.num, r.num, v1, v2);
     q.positive = p1 == p2;
     r.positive = p1;
   }
 
+  void div_trunc_num(const NUM& v1, bool p1, const NUM& v2, bool p2) {
+    sputsoft::numbers::div(num, v1, v2);
+    positive = p1 == p2;
+  }
+
+  void rem_trunc_num(const NUM& v1, bool p1, const NUM& v2, bool p2) {
+    sputsoft::numbers::rem(num, v1, v2);
+    positive = p1;
+  }
+
+  template <typename T>
+  T quotrem_trunc_int(const NUM& v1, bool p1, T v2) {
+    typedef typename sputsoft::number_traits<T>::unsigned_type unsigned_type;
+    bool p2 = v2 >= 0;
+    unsigned_type ru = sputsoft::numbers::quotrem(num, v1, (unsigned_type) (p2 ? v2 : -v2));
+    positive = p1 == p2;
+    return (T) (p1 ? ru : -ru);
+  }
+
   template <typename T>
   void div_trunc_int(const NUM& v1, bool p1, T v2) {
-    sputsoft::numbers::div(num, v1, v2);
-    positive = p1 == (v2 >= 0);
+    bool p2 = v2 >= 0;
+    sputsoft::numbers::div(num, v1, sputsoft::to_unsigned(p2 ? v2 : -v2));
+    positive = p1 == p2;
+  }
+
+  template <typename T>
+  static T rem_trunc_int(const NUM& v1, bool p1, T v2) {
+    typedef typename sputsoft::number_traits<T>::unsigned_type unsigned_type;
+    bool p2 = v2 >= 0;
+    unsigned_type ru = sputsoft::numbers::rem(v1, (unsigned_type) (p2 ? v2 : -v2));
+    return (T) (p1 ? ru : -ru);
   }
 
   /* comparisons */
@@ -239,6 +307,9 @@ public:
   inline void div_ceil(const expr& v1, int v2) { div_ceil_int(v1.num, v1.positive, v2); }
   static inline int rem_ceil(const expr& v1, int v2) { return rem_ceil_int(v1.num, v1.positive, v2); }
   inline int quotrem_ceil(const expr& v1, int v2) { return quotrem_ceil_int(v1.num, v1.positive, v2); }
+  inline void div_trunc(const expr& v1, int v2) { div_trunc_int(v1.num, v1.positive, v2); }
+  static inline int rem_trunc(const expr& v1, int v2) { return rem_trunc_int(v1.num, v1.positive, v2); }
+  inline int quotrem_trunc(const expr& v1, int v2) { return quotrem_trunc_int(v1.num, v1.positive, v2); }
 
   inline void add(const expr& v1, const expr& v2) { _add(v1.num, v1.positive, v2.num, v2.positive); }
   inline void add(const expr& v1, const NUM& v2)  { _add(v1.num, v1.positive, v2, true); }
@@ -252,7 +323,25 @@ public:
   inline void mul(const expr& v1, const NUM& v2)  { _mul(v1.num, v1.positive, v2, true); }
   inline void mul(const NUM& v1,  const expr& v2) { _mul(v1, true, v2.num, v2.positive); }
   inline void mul(const NUM& v1,  const NUM& v2)  { _mul(v1, true, v2, true); }
-  //static inline void quotrem_floor(expr& q, expr& r, const expr& u, const expr& v) { }
+  inline void div(const expr& u, const expr& v)
+    { div_floor_num(u.num, u.positive, v.num, v.positive); }
+  inline void rem(const expr& u, const expr& v)
+    { rem_floor_num(u.num, u.positive, v.num, v.positive); }
+  static inline void quotrem(expr& q, expr& r, const expr& u, const expr& v)
+    { quotrem_floor_num(q, r, u.num, u.positive, v.num, v.positive); }
+  inline void div_ceil(const expr& u, const expr& v)
+    { div_ceil_num(u.num, u.positive, v.num, v.positive); }
+  inline void rem_ceil(const expr& u, const expr& v)
+    { rem_ceil_num(u.num, u.positive, v.num, v.positive); }
+  static inline void quotrem_ceil(expr& q, expr& r, const expr& u, const expr& v)
+    { quotrem_ceil_num(q, r, u.num, u.positive, v.num, v.positive); }
+  inline void div_trunc(const expr& u, const expr& v)
+    { div_trunc_num(u.num, u.positive, v.num, v.positive); }
+  inline void rem_trunc(const expr& u, const expr& v)
+    { rem_trunc_num(u.num, u.positive, v.num, v.positive); }
+  static inline void quotrem_trunc(expr& q, expr& r, const expr& u, const expr& v)
+    { quotrem_trunc_num(q, r, u.num, u.positive, v.num, v.positive); }
+
   inline int cmp(const expr& v) const { return _cmp(num, positive, v.num, v.positive); }
 
 };

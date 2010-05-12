@@ -136,11 +136,11 @@ public:
   inline void mul(const expr& x, const expr& y) { _mul(*x.num, *y.num); }
   void div(const expr& x, const expr& y) {
     if (!num.unique()) num.reset(new number_type);
-    num->div(x, y);
+    num->div(*x.num, *y.num);
   }
   void rem(const expr& x, const expr& y) {
     if (!num.unique()) num.reset(new number_type);
-    num->rem(x, y);
+    num->rem(*x.num, *y.num);
   }
   static void quotrem(expr& q, expr& r, const expr& u, const expr& v) {
     if (!q.num.unique()) q.num.reset(new number_type);
