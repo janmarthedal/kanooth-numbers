@@ -45,12 +45,12 @@ template <typename N, typename T>
 void div_int_test(const N& u, const T& v)
 {
   N q1, q2, c;
-  sputsoft::numbers::div(q1, u, v);
-  T r1 = sputsoft::numbers::rem(u, v);
+  sputsoft::numbers::div_floor(q1, u, v);
+  T r1 = sputsoft::numbers::rem_floor(u, v);
   sputsoft::numbers::mul(c, q1, v);
   sputsoft::numbers::add(c, c, r1);
   std::cout << q1 << " " << r1 << " " << (sputsoft::numbers::equal(u, c) ? "OK" : "FAIL") << std::endl;
-  T r2 = sputsoft::numbers::quotrem(q2, u, v);
+  T r2 = sputsoft::numbers::quotrem_floor(q2, u, v);
   if (!sputsoft::numbers::equal(q1, q2)) std::cout << "q1 != q2" << std::endl;
   if (r1 != r2) std::cout << "r1 != r2" << std::endl;
 }
@@ -87,12 +87,12 @@ template <typename N>
 void div_num_test(const N& u, const N& v)
 {
   N q1, r1, q2, r2, c;
-  sputsoft::numbers::div(q1, u, v);
-  sputsoft::numbers::rem(r1, u, v);
+  sputsoft::numbers::div_floor(q1, u, v);
+  sputsoft::numbers::rem_floor(r1, u, v);
   sputsoft::numbers::mul(c, q1, v);
   sputsoft::numbers::add(c, c, r1);
   std::cout << q1 << " " << r1 << " " << (sputsoft::numbers::equal(u, c) ? "OK" : "FAIL") << std::endl;
-  sputsoft::numbers::quotrem(q2, r2, u, v);
+  sputsoft::numbers::quotrem_floor(q2, r2, u, v);
   if (!sputsoft::numbers::equal(q1, q2)) std::cout << "q1 != q2" << std::endl;
   if (!sputsoft::numbers::equal(r1, r2)) std::cout << "r1 != r2" << std::endl;
 }

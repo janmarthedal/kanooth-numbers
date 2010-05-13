@@ -9,14 +9,11 @@
 #define	_INT_IMPL_HPP
 
 #include <sputsoft/detail/types.hpp>
-#include <sputsoft/numbers/detail/expr.hpp>
+#include <sputsoft/numbers/detail/int_abst.hpp>
 
 namespace sputsoft {
 namespace numbers {
 namespace detail {
-
-template <typename T>
-class intnum;
 
 template <typename NUM>
 class expr<intnum<NUM> > {
@@ -273,7 +270,7 @@ public:
   inline void sub(unsigned short v1, const expr& v2) { _add(v2.num, v2.positive, v1, false); }
   inline void mul(const expr& v1, unsigned short v2) { _mul(v1.num, v1.positive, v2, true); }
   inline void mul(unsigned short v1, const expr& v2) { _mul(v2.num, v2.positive, v1, true); }
-  inline void div(const expr& v1, unsigned short v2) { div_floor_int(v1.num, v1.positive, v2); }
+  inline void div_floor(const expr& v1, unsigned short v2) { div_floor_int(v1.num, v1.positive, v2); }
   inline void div_ceil(const expr& v1, unsigned short v2) { div_ceil_int(v1.num, v1.positive, v2); }
   inline void div_trunc(const expr& v1, unsigned short v2) { div_trunc_int(v1.num, v1.positive, v2); }
 
@@ -301,9 +298,9 @@ public:
   inline void sub(int v1, const expr& v2) { add_signed_int(v2.num, !v2.positive, v1); }
   inline void mul(const expr& v1, int v2) { mul_signed_int(v1.num, v1.positive, v2); }
   inline void mul(int v1, const expr& v2) { mul_signed_int(v2.num, v2.positive, v1); }
-  inline void div(const expr& v1, int v2) { div_floor_int(v1.num, v1.positive, v2); }
-  static inline int rem(const expr& v1, int v2) { return rem_floor_int(v1.num, v1.positive, v2); }
-  inline int quotrem(const expr& v1, int v2) { return quotrem_floor_int(v1.num, v1.positive, v2); }
+  inline void div_floor(const expr& v1, int v2) { div_floor_int(v1.num, v1.positive, v2); }
+  static inline int rem_floor(const expr& v1, int v2) { return rem_floor_int(v1.num, v1.positive, v2); }
+  inline int quotrem_floor(const expr& v1, int v2) { return quotrem_floor_int(v1.num, v1.positive, v2); }
   inline void div_ceil(const expr& v1, int v2) { div_ceil_int(v1.num, v1.positive, v2); }
   static inline int rem_ceil(const expr& v1, int v2) { return rem_ceil_int(v1.num, v1.positive, v2); }
   inline int quotrem_ceil(const expr& v1, int v2) { return quotrem_ceil_int(v1.num, v1.positive, v2); }
@@ -323,11 +320,11 @@ public:
   inline void mul(const expr& v1, const NUM& v2)  { _mul(v1.num, v1.positive, v2, true); }
   inline void mul(const NUM& v1,  const expr& v2) { _mul(v1, true, v2.num, v2.positive); }
   inline void mul(const NUM& v1,  const NUM& v2)  { _mul(v1, true, v2, true); }
-  inline void div(const expr& u, const expr& v)
+  inline void div_floor(const expr& u, const expr& v)
     { div_floor_num(u.num, u.positive, v.num, v.positive); }
-  inline void rem(const expr& u, const expr& v)
+  inline void rem_floor(const expr& u, const expr& v)
     { rem_floor_num(u.num, u.positive, v.num, v.positive); }
-  static inline void quotrem(expr& q, expr& r, const expr& u, const expr& v)
+  static inline void quotrem_floor(expr& q, expr& r, const expr& u, const expr& v)
     { quotrem_floor_num(q, r, u.num, u.positive, v.num, v.positive); }
   inline void div_ceil(const expr& u, const expr& v)
     { div_ceil_num(u.num, u.positive, v.num, v.positive); }
@@ -344,28 +341,6 @@ public:
 
   inline int cmp(const expr& v) const { return _cmp(num, positive, v.num, v.positive); }
 
-};
-
-template <typename NUM>
-inline std::ostream& operator<<(std::ostream& os, const expr<intnum<NUM> >& n) {
-  if (n.num && !n.positive) os << "-";
-  return os << n.num;
-}
-
-template <typename NUM, typename Forw>
-struct set_4_eval<expr<intnum<NUM> >, Forw> {
-  static void set(expr<intnum<NUM> >& n, Forw first, const Forw last, unsigned base) {
-    bool pos=true;
-    while (first != last) {
-      char c = *first;
-      if (c == '-') pos = !pos;
-      else if (c != '+') break;
-      ++first;
-    }
-    NUM t;
-    sputsoft::numbers::set(t, first, last, base);
-    n = expr<intnum<NUM> >(t, pos);
-  }
 };
 
 } // namespace detail
