@@ -20,9 +20,9 @@ template <typename T>
 class natnum;
 
 template <typename T>
-struct floor_log2_evaluator<expr<natnum<T> > > {
-  static std::size_t floor_log2(const expr<natnum<T> >& n) {
-    return n.floor_log2();
+struct log2_floor_evaluator<expr<natnum<T> > > {
+  static std::size_t log2_floor(const expr<natnum<T> >& n) {
+    return n.log2_floor();
   }
 };
 
@@ -30,7 +30,7 @@ template <typename T>
 std::ostream& operator<<(std::ostream& os, const expr<natnum<T> >& n)
 {
   typedef expr<natnum<T> > num_type;
-  unsigned max_digits = n ? floor_log2(n) / 3 + 2 : 2;
+  unsigned max_digits = n ? log2_floor(n) / 3 + 2 : 2;
   char st[max_digits];
   char* p = st + max_digits;
   *--p = 0;

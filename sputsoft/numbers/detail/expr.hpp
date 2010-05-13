@@ -1,8 +1,8 @@
 /* 
- * File:   expr.hpp
- * Author: jmr
+ * File:   sputsoft/numbers/detail/expr.hpp
+ * Author: Jan Marthedal Rasmussen
  *
- * Created on April 30, 2010, 5:06 PM
+ * Created 2010-04-30 15:06
  *
  * $Id$
  */
@@ -10,7 +10,7 @@
 #ifndef _EXPR_HPP
 #define	_EXPR_HPP
 
-#include <sputsoft/numbers/detail/method_arith.hpp>
+#include <sputsoft/numbers/detail/named_ops.hpp>
 
 namespace sputsoft {
 namespace numbers {
@@ -204,27 +204,6 @@ template <typename R, typename V>
 struct cmp_r2_eval<V, expr<R> > {
   static int cmp(const V& v1, const expr<R>& v2) {
     return -v2.cmp(v1);
-  }
-};
-
-template <typename R>
-struct equal_r2_eval<expr<R>, expr<R> > {
-  static bool equal(const expr<R>& v1, const expr<R>& v2) {
-    return v1.equal(v2);
-  }
-};
-
-template <typename R, typename V>
-struct equal_r2_eval<expr<R>, V> {
-  static bool equal(const expr<R>& v1, const V& v2) {
-    return v1.equal(v2);
-  }
-};
-
-template <typename R, typename V>
-struct equal_r2_eval<V, expr<R> > {
-  static bool equal(const V& v1, const expr<R>& v2) {
-    return v2.equal(v1);
   }
 };
 

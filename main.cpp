@@ -7,7 +7,6 @@
 
 #include <iostream>
 #include <sputsoft/numbers/natural_number.hpp>
-
 #include "sputsoft/numbers/integer.hpp"
 
 void test_natnum()

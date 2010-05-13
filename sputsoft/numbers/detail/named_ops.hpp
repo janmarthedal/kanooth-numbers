@@ -1,14 +1,14 @@
 /* 
- * File:   method_arith.hpp
+ * File:   sputsoft/numbers/detail/named_ops.hpp
  * Author: jmr
  *
- * Created on April 30, 2010, 5:04 PM
+ * Created 2010-04-30 15:04Z
  *
  * $Id$
  */
 
-#ifndef _METHOD_ARITH_HPP
-#define	_METHOD_ARITH_HPP
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_NAMED_OPS_HPP
+#define	_SPUTSOFT_NUMBERS_DETAIL_NAMED_OPS_HPP
 
 #include <cstring>
 
@@ -32,13 +32,13 @@ struct cmp_r2_eval {
 };
 template <typename V1, typename V2>
 struct equal_r2_eval {
-  static int equal(const V1& v1, const V2& v2) {
-    return v1 == v2;
+  static bool equal(const V1& v1, const V2& v2) {
+    return cmp_r2_eval<V1, V2>::cmp(v1, v2) == 0;
   }
 };
 template <typename T>
 struct log2_floor_evaluator {
-  static std::size_t log_floor(T n) {
+  static std::size_t log2_floor(T n) {
     std::size_t r = -1;
     while (n) { ++r; n >>= 1; }
     return r;
@@ -212,8 +212,8 @@ inline V2 quotrem_trunc(Q& q, const V1& v1, const V2& v2) {
 }
 
 template <typename T>
-inline std::size_t floor_log2(T n) {
-  return detail::floor_log2_evaluator<T>::floor_log2(n);
+inline std::size_t log2_floor(T n) {
+  return detail::log2_floor_evaluator<T>::log2_floor(n);
 }
 
 template <typename V1, typename V2>
@@ -223,11 +223,10 @@ inline int compare(const V1& v1, const V2& v2) {
 
 template <typename V1, typename V2>
 inline bool equal(const V1& v1, const V2& v2) {
-  return detail::equal_r2_eval<V1, V2>(v1, v2);
+  return detail::equal_r2_eval<V1, V2>::equal(v1, v2);
 }
 
 } // namespace numbers
 } // namespace sputsoft
 
-#endif	/* _METHOD_ARITH_HPP */
-
+#endif	/* _SPUTSOFT_NUMBERS_DETAIL_NAMED_OPS_HPP */

@@ -77,7 +77,7 @@ public:
     return *this;
   }
   operator bool() const { return *num; }
-  std::size_t floor_log2() const { return num->floor_log2(); }
+  std::size_t log2_floor() const { return num->log2_floor(); }
 
   expr(unsigned short v) : num(new number_type(v)) {}
   inline void set(unsigned short v) { _set(v); }

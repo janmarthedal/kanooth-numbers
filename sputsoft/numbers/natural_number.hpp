@@ -12,8 +12,8 @@
  * $Id$
  */
 
-#ifndef _NATURAL_NUMBER_HPP
-#define	_NATURAL_NUMBER_HPP
+#ifndef _SPUTSOFT_NUMBERS_NATURAL_NUMBER_HPP
+#define	_SPUTSOFT_NUMBERS_NATURAL_NUMBER_HPP
 
 #include <sputsoft/numbers/detail/digit_array.hpp>
 #include <sputsoft/numbers/detail/array_allocator.hpp>
@@ -56,5 +56,4 @@ typedef detail::expr<
 } // namespace sputsoft
 } // namespace numbers
 
-#endif	/* _NATURAL_NUMBER_HPP */
-
+#endif	/* _SPUTSOFT_NUMBERS_NATURAL_NUMBER_HPP */

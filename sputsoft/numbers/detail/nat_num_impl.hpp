@@ -440,7 +440,9 @@ private:
   static int comp_num(const Con& x, const Con& y) {
     std::size_t xn = x.size();
     std::size_t yn = y.size();
-    return xn == yn ? LowLevel::comp(x.get(), y.get(), xn) : compare_ints(xn, yn);
+    if (xn != yn) return compare_ints(xn, yn);
+    if (!xn) return 0;
+    LowLevel::comp(x.get(), y.get(), xn);
   }
 
   /* Compare numbers to integer */
@@ -469,10 +471,10 @@ public:
   operator bool() const {
     return !con.is_empty();
   }
-  std::size_t floor_log2() const {
+  std::size_t log2_floor() const {
     std::size_t n = con.size();
     if (!n) return (std::size_t) -1;
-    return sputsoft::numbers::floor_log2(con[n - 1]) + (n - 1)*digit_bits;
+    return sputsoft::numbers::log2_floor(con[n - 1]) + (n - 1)*digit_bits;
   }
 
   expr(unsigned short v) : con() { set_int(con, v); }
