@@ -38,7 +38,7 @@ typedef lowlevel_generic<array_allocator<void> > lowlevel;
 
 } // namespace detail
 
-typedef detail::expr<
+typedef detail::numb<
           detail::natnum<
             ::boost::shared_ptr<
               detail::wrap2<detail::digit_array<unsigned long>, detail::lowlevel>
@@ -47,7 +47,7 @@ typedef detail::expr<
         > natural_number;
 
 
-/*typedef detail::expr<
+/*typedef detail::numb<
           detail::natnum<
             detail::wrap2<detail::digit_array<unsigned long>, detail::lowlevel>
           >

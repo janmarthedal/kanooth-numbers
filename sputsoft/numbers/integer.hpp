@@ -14,7 +14,7 @@
 namespace sputsoft {
 namespace numbers {
 
-typedef detail::expr<detail::intnum<natural_number> > integer;
+typedef detail::numb<detail::intnum<natural_number> > integer;
 
 } // namespace sputsoft
 } // namespace numbers

@@ -7,7 +7,8 @@
 
 #include <iostream>
 #include <sputsoft/numbers/natural_number.hpp>
-#include "sputsoft/numbers/integer.hpp"
+#include <sputsoft/numbers/integer.hpp>
+//#include <sputsoft/numbers/detail/overload.hpp>
 
 void test_natnum()
 {
@@ -18,6 +19,8 @@ void test_natnum()
 
   std::cout << b << std::endl;
 
+  a = 100u;
+
   sputsoft::numbers::set(c, 10u);
   sputsoft::numbers::set(a, b);
   std::cout << "a: " << a << std::endl;
@@ -25,7 +28,7 @@ void test_natnum()
   sputsoft::numbers::add(c, b, 3u);
   sputsoft::numbers::sub(c, b, 5u);
   sputsoft::numbers::mul(c, c, c);
-  unsigned r = sputsoft::numbers::quotrem(b, c, 7u);
+  unsigned r = sputsoft::numbers::quotrem(b, c, 5u);
   std::cout << "c: " << c << std::endl;
   std::cout << "b: " << b << " r: " << r << std::endl;
   std::cout << sputsoft::numbers::rem(b, 100u) << std::endl;
@@ -33,7 +36,7 @@ void test_natnum()
   std::cout << sputsoft::numbers::compare(a, b) << std::endl;
 }
 
-template <typename T, typename S>
+/*template <typename T, typename S>
 T make_number(const S& s) {
   T n;
   sputsoft::numbers::set(n, s);
@@ -154,11 +157,40 @@ void test_int()
   test_div_num(make_int(-20), make_int(7));
   test_div_num(make_int(20), make_int(-7));
   test_div_num(make_int(-20), make_int(-7));
+  test_div_int(make_int(21), 7);
+  test_div_int(make_int(-21), 7);
+  test_div_int(make_int(21), -7);
+  test_div_int(make_int(-21), -7);
+  test_div_num(make_int(21), make_int(7));
+  test_div_num(make_int(-21), make_int(7));
+  test_div_num(make_int(21), make_int(-7));
+  test_div_num(make_int(-21), make_int(-7));
 }
+
+void test_int2()
+{
+  sputsoft::numbers::integer a, b;
+
+  sputsoft::numbers::set(a, "1734675685675464534533456546");
+  std::cout << a << std::endl;
+
+  a = 10;
+
+  sputsoft::numbers::negate(b, a);
+  std::cout << b << std::endl;
+}*/
+
+/*void overload()
+{
+  sputsoft::numbers::natural_number a, b=2u, c=3u;
+  a = b + c;
+  std::cout << a << std::endl;
+}*/
 
 int main()
 {
-  test_int();
+  test_natnum();
+  //test_int2();
 
   return 0;
 }

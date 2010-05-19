@@ -17,11 +17,70 @@ namespace numbers {
 namespace detail {
 
 template <typename R, typename E=R> class expr;
+template <typename Op, typename X, typename Y> struct resolve_binary;
+
+template <typename Op, typename R, typename E1, typename E2>
+struct resolve_binary<Op, expr<R, E1>, expr<R, E2> > {
+  typedef R return_type;
+};
+
+template <class T>
+struct resolve_ref {
+  typedef T ref_type;
+};
+
+/*template <class R>
+struct resolve_ref<expr<R> > {
+  typedef const expr<R>& ref_type;
+};*/
+
+namespace ops {
+  namespace binary {
+    class add {};
+    class subtract {};
+    class multiply {};
+    class divide {};
+    class remainder {};
+    class lshift {};
+    class rshift {};
+  }
+  namespace unary {
+    class negate {};
+  }
+}
+
+template <typename Op, typename X, typename Y>
+class binary {
+private:
+  binary() {}
+public:
+  typename resolve_ref<X>::ref_type x;
+  typename resolve_ref<Y>::ref_type y;
+  binary(const X& _x, const Y& _y) : x(_x), y(_y) {}
+};
+
+template <typename Op, typename X>
+class unary {
+private:
+  unary() {}
+public:
+  typename resolve_ref<X>::ref_type x;
+  unary(const X& _x) : x(_x) {}
+};
+
+/* Named operator specializations for expr-types */
 
 template <typename R, typename V>
 struct set_2_eval<expr<R>, V> {
   static void set(expr<R>& r, const V& v) {
     r.set(v);
+  }
+};
+
+template <typename R, typename V>
+struct negate_2_eval<expr<R>, V> {
+  static void negate(expr<R>& r, const V& v) {
+    r.negate(v);
   }
 };
 

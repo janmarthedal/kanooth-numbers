@@ -10,7 +10,7 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_INT_ABST_HPP
 #define	_SPUTSOFT_NUMBERS_DETAIL_INT_ABST_HPP
 
-#include <sputsoft/numbers/detail/expr.hpp>
+#include <sputsoft/numbers/detail/number_abst.hpp>
 
 namespace sputsoft {
 namespace numbers {
@@ -20,14 +20,14 @@ template <typename T>
 class intnum;
 
 template <typename NUM>
-inline std::ostream& operator<<(std::ostream& os, const expr<intnum<NUM> >& n) {
+inline std::ostream& operator<<(std::ostream& os, const numb<intnum<NUM> >& n) {
   if (n.num && !n.positive) os << "-";
   return os << n.num;
 }
 
 template <typename NUM, typename Forw>
-struct set_4_eval<expr<intnum<NUM> >, Forw> {
-  static void set(expr<intnum<NUM> >& n, Forw first, const Forw last, unsigned base) {
+struct set_4_eval<numb<intnum<NUM> >, Forw> {
+  static void set(numb<intnum<NUM> >& n, Forw first, const Forw last, unsigned base) {
     bool pos=true;
     while (first != last) {
       char c = *first;
@@ -37,7 +37,7 @@ struct set_4_eval<expr<intnum<NUM> >, Forw> {
     }
     NUM t;
     sputsoft::numbers::set(t, first, last, base);
-    n = expr<intnum<NUM> >(t, pos);
+    n = numb<intnum<NUM> >(t, pos);
   }
 };
 

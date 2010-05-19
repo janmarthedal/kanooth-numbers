@@ -35,7 +35,7 @@ template <typename Con, typename LowLevel>
 class wrap2;
 
 template <typename Con, typename LowLevel>
-class expr<natnum<wrap2<Con, LowLevel> > > {
+class numb<natnum<wrap2<Con, LowLevel> > > {
 private:
   Con con;
   typedef typename Con::digit_type digit_type;
@@ -59,7 +59,7 @@ private:
       return (T) c[0];
     else {
       T v = 0;
-      unsigned n=c.size();
+      unsigned n = c.size();
       while (n)
         v = (v << digit_bits) | c[--n];
       return v;
@@ -69,10 +69,12 @@ private:
   /* Set to number */
 
   static void set_num(Con& r, const Con& x) {
-    std::size_t n = x.size();
-    ensure_size(r, n);
-    LowLevel::copy(r.get(), x.get(), n);
-    r.set_size(n);
+    if (r.get() != x.get()) {
+      std::size_t n = x.size();
+      ensure_size(r, n);
+      LowLevel::copy(r.get(), x.get(), n);
+      r.set_size(n);
+    }
   }
 
   /* Set to integer */
@@ -153,7 +155,7 @@ private:
     else if (sizeof(T) <= sizeof(digit_type))
       add_int1(r, x, y);
     else
-      add_num(r, x, expr(y).con);
+      add_num(r, x, numb(y).con);
   }
 
   /* Subtract two numbers */
@@ -211,7 +213,7 @@ private:
     else if (sizeof(T) <= sizeof(digit_type))
       sub_int1(r, x, y);
     else
-      sub_num(r, x, expr(y).con);
+      sub_num(r, x, numb(y).con);
   }
 
   template <typename T>
@@ -223,7 +225,7 @@ private:
     else if (sizeof(T) <= sizeof(digit_type))
       sub_int(r, x - y[0]);
     else
-      sub_num(r, expr(x).con, y);
+      sub_num(r, numb(x).con, y);
   }
 
   /* Multiply two numbers */
@@ -282,7 +284,7 @@ private:
     else if (sizeof(T) <= sizeof(digit_type))
       mul_int1(z, x, y);
     else
-      mul_num(z, x, expr(y).con);
+      mul_num(z, x, numb(y).con);
   }
 
   /* Quotient and remainder from two numbers */
@@ -390,7 +392,7 @@ private:
       quotrem_int0(q, u, v);
     } else {
       Con r(sizeof(T) / sizeof(digit_type));  // work space only
-      quotrem_num(q, r, u, expr(v).con);
+      quotrem_num(q, r, u, numb(v).con);
     }
   }
 
@@ -406,7 +408,7 @@ private:
         return quotrem_int0(q, u, v);
       else {
         Con r(sizeof(T) / sizeof(digit_type));
-        quotrem_num(q, r, u, expr(v).con);
+        quotrem_num(q, r, u, numb(v).con);
         return to_int_type<T>(r);
       }
     }
@@ -425,7 +427,7 @@ private:
       return quotrem_int0(q, u, v);
     } else {
       Con r(sizeof(T) / sizeof(digit_type));
-      quotrem_num(q, r, u, expr(v).con);
+      quotrem_num(q, r, u, numb(v).con);
       return to_int_type<T>(r);
     }
   }
@@ -456,16 +458,18 @@ private:
     else if (sizeof(T) <= sizeof(digit_type))
       return x.size() > 1 ? 1 : compare_ints(x[0], (digit_type) v);
     else
-      return comp_num(x, expr(v).con);
+      return comp_num(x, numb(v).con);
   }
 
 public:
-  expr() : con() {}
-  expr(const expr& rhs) : con() {
-    set_num(con, rhs.con);
+  numb() {}
+  template <typename V>
+  numb(const V& v) {
+    sputsoft::numbers::set(*this, v);
   }
-  expr& operator=(const expr& rhs) {
-    set_num(con, rhs.con);
+  template <typename V>
+  numb& operator=(const V& v) {
+    sputsoft::numbers::set(*this, v);
     return *this;
   }
   operator bool() const {
@@ -477,72 +481,73 @@ public:
     return sputsoft::numbers::log2_floor(con[n - 1]) + (n - 1)*digit_bits;
   }
 
-  expr(unsigned short v) : con() { set_int(con, v); }
   inline void set(unsigned short v) { set_int(con, v); }
-  inline void add(const expr& x, unsigned short y) { add_int(con, x.con, y); }
-  inline void add(unsigned short x, const expr& y) { add_int(con, y.con, x); }
-  inline void sub(const expr& x, unsigned short y) { sub_num_int(con, x.con, y); }
-  inline void sub(unsigned short x, const expr& y) { sub_int_num(con, x, y.con); }
-  inline void mul(const expr& x, unsigned short y) { mul_int(con, x.con, y); }
-  inline void mul(unsigned short x, const expr& y) { mul_int(con, y.con, x); }
-  inline void div(const expr& x, unsigned short y) { quot_int(con, x.con, y); }
-  static inline unsigned short rem(const expr& x, unsigned short y) { return rem_int(x.con, y); }
-  inline unsigned short quotrem(const expr& x, unsigned short y)
-    { return quotrem_int(con, x.con, y); }
+  inline void add(const numb& x, unsigned short y) { add_int(con, x.con, y); }
+  inline void add(unsigned short x, const numb& y) { add_int(con, y.con, x); }
+  inline void sub(const numb& x, unsigned short y) { sub_num_int(con, x.con, y); }
+  inline void sub(unsigned short x, const numb& y) { sub_int_num(con, x, y.con); }
+  inline void mul(const numb& x, unsigned short y) { mul_int(con, x.con, y); }
+  inline void mul(unsigned short x, const numb& y) { mul_int(con, y.con, x); }
+  inline void div(const numb& x, unsigned short y) { quot_int(con, x.con, y); }
+  static inline void rem(unsigned short& r, const numb& x, unsigned short y)
+    { r = rem_int(x.con, y); }
+  static inline void quotrem(numb& q, unsigned short& r, const numb& x, unsigned short y)
+    { r = quotrem_int(q.con, x.con, y); }
   inline int cmp(unsigned short v) const { return comp_int(con, v); }
 
-  expr(unsigned v) : con() { set_int(con, v); }
   inline void set(unsigned v) { set_int(con, v); }
-  inline void add(const expr& x, unsigned y) { add_int(con, x.con, y); }
-  inline void add(unsigned x, const expr& y) { add_int(con, y.con, x); }
-  inline void sub(const expr& x, unsigned y) { sub_num_int(con, x.con, y); }
-  inline void sub(unsigned x, const expr& y) { sub_int_num(con, x, y.con); }
-  inline void mul(const expr& x, unsigned y) { mul_int(con, x.con, y); }
-  inline void mul(unsigned x, const expr& y) { mul_int(con, y.con, x); }
-  inline void div(const expr& x, unsigned y) { quot_int(con, x.con, y); }
-  static inline unsigned rem(const expr& x, unsigned y) { return rem_int(x.con, y); }
-  inline unsigned quotrem(const expr& x, unsigned y) { return quotrem_int(con, x.con, y); }
+  inline void add(const numb& x, unsigned y) { add_int(con, x.con, y); }
+  inline void add(unsigned x, const numb& y) { add_int(con, y.con, x); }
+  inline void sub(const numb& x, unsigned y) { sub_num_int(con, x.con, y); }
+  inline void sub(unsigned x, const numb& y) { sub_int_num(con, x, y.con); }
+  inline void mul(const numb& x, unsigned y) { mul_int(con, x.con, y); }
+  inline void mul(unsigned x, const numb& y) { mul_int(con, y.con, x); }
+  inline void div(const numb& x, unsigned y) { quot_int(con, x.con, y); }
+  static inline void rem(unsigned& r, const numb& x, unsigned y)
+    { r = rem_int(x.con, y); }
+  static inline void quotrem(numb& q, unsigned& r, const numb& x, unsigned y)
+    { r = quotrem_int(q.con, x.con, y); }
   inline int cmp(unsigned v) const { return comp_int(con, v); }
 
-  expr(unsigned long v) : con() { set_int(con, v); }
   inline void set(unsigned long v) { set_int(con, v); }
-  inline void add(const expr& x, unsigned long y) { add_int(con, x.con, y); }
-  inline void add(unsigned long x, const expr& y) { add_int(con, y.con, x); }
-  inline void sub(const expr& x, unsigned long y) { sub_num_int(con, x.con, y); }
-  inline void sub(unsigned long x, const expr& y) { sub_int_num(con, x, y.con); }
-  inline void mul(const expr& x, unsigned long y) { mul_int(con, x.con, y); }
-  inline void mul(unsigned long x, const expr& y) { mul_int(con, y.con, x); }
-  inline void div(const expr& x, unsigned long y) { quot_int(con, x.con, y); }
-  static inline unsigned long rem(const expr& x, unsigned long y) { return rem_int(x.con, y); }
-  inline unsigned long quotrem(const expr& x, unsigned long y)
-    { return quotrem_int(con, x.con, y); }
+  inline void add(const numb& x, unsigned long y) { add_int(con, x.con, y); }
+  inline void add(unsigned long x, const numb& y) { add_int(con, y.con, x); }
+  inline void sub(const numb& x, unsigned long y) { sub_num_int(con, x.con, y); }
+  inline void sub(unsigned long x, const numb& y) { sub_int_num(con, x, y.con); }
+  inline void mul(const numb& x, unsigned long y) { mul_int(con, x.con, y); }
+  inline void mul(unsigned long x, const numb& y) { mul_int(con, y.con, x); }
+  inline void div(const numb& x, unsigned long y) { quot_int(con, x.con, y); }
+  static inline void rem(unsigned long& r, const numb& x, unsigned long y)
+    { r = rem_int(x.con, y); }
+  static inline void quotrem(numb& q, unsigned long& r, const numb& x, unsigned long y)
+    { r = quotrem_int(q.con, x.con, y); }
   inline int cmp(unsigned long v) const { return comp_int(con, v); }
 
 #ifdef SPUTSOFT_HAS_LONG_LONG
-  expr(unsigned long long v) : con() { set_int(con, v); }
   inline void set(unsigned long long v) { set_int(con, v); }
-  inline void add(const expr& x, unsigned long long y) { add_int(con, x.con, y); }
-  inline void add(unsigned long long x, const expr& y) { add_int(con, y.con, x); }
-  inline void sub(const expr& x, unsigned long long y) { sub_num_int(con, x.con, y); }
-  inline void sub(unsigned long long x, const expr& y) { sub_int_num(con, x, y.con); }
-  inline void mul(const expr& x, unsigned long long y) { mul_int(con, x.con, y); }
-  inline void mul(unsigned long long x, const expr& y) { mul_int(con, y.con, x); }
-  inline void div(const expr& x, unsigned long long y) { quot_int(con, x.con, y); }
-  static inline unsigned long long rem(const expr& x, unsigned long long y) { return rem_int(x.con, y); }
-  inline unsigned long long quotrem(const expr& x, unsigned long long y)
-    { return quotrem_int(con, x.con, y); }
+  inline void add(const numb& x, unsigned long long y) { add_int(con, x.con, y); }
+  inline void add(unsigned long long x, const numb& y) { add_int(con, y.con, x); }
+  inline void sub(const numb& x, unsigned long long y) { sub_num_int(con, x.con, y); }
+  inline void sub(unsigned long long x, const numb& y) { sub_int_num(con, x, y.con); }
+  inline void mul(const numb& x, unsigned long long y) { mul_int(con, x.con, y); }
+  inline void mul(unsigned long long x, const numb& y) { mul_int(con, y.con, x); }
+  inline void div(const numb& x, unsigned long long y) { quot_int(con, x.con, y); }
+  static inline void rem(unsigned long long& r, const numb& x, unsigned long long y)
+    { r = rem_int(x.con, y); }
+  static inline void quotrem(numb& q, unsigned long long& r, const numb& x, unsigned long long y)
+    { r = quotrem_int(q.con, x.con, y); }
   inline int cmp(unsigned long long v) const { return comp_int(con, v); }
 #endif
 
-  inline void set(const expr& x) { set_num(con, x.con); }
-  inline void add(const expr& x, const expr& y) { add_num(con, x.con, y.con); }
-  inline void sub(const expr& x, const expr& y) { sub_num(con, x.con, y.con); }
-  inline void mul(const expr& x, const expr& y) { mul_num(con, x.con, y.con); }
-  inline void div(const expr& x, const expr& y) { quot_num(con, x.con, y.con); }
-  inline void rem(const expr& x, const expr& y) { rem_num(con, x.con, y.con); }
-  static inline void quotrem(expr& q, expr& r, const expr& x, const expr& y)
+  inline void set(const numb& x) { set_num(con, x.con); }
+  inline void add(const numb& x, const numb& y) { add_num(con, x.con, y.con); }
+  inline void sub(const numb& x, const numb& y) { sub_num(con, x.con, y.con); }
+  inline void mul(const numb& x, const numb& y) { mul_num(con, x.con, y.con); }
+  inline void div(const numb& x, const numb& y) { quot_num(con, x.con, y.con); }
+  inline void rem(const numb& x, const numb& y) { rem_num(con, x.con, y.con); }
+  static inline void quotrem(numb& q, numb& r, const numb& x, const numb& y)
     { quotrem_num(q.con, r.con, x.con, y.con); }
-  inline int cmp(const expr& v) const { return comp_num(con, v.con); }
+  inline int cmp(const numb& v) const { return comp_num(con, v.con); }
 
 };
 
