@@ -2,7 +2,7 @@
  * File:   main.cpp
  * Author: jmr
  *
- * Created on December 18, 2009, 10:48 AM
+ * Created 2009-12-18 8:48Z
  */
 
 #include <iostream>
@@ -165,7 +165,7 @@ void test_int()
   test_div_num(make_int(-21), make_int(7));
   test_div_num(make_int(21), make_int(-7));
   test_div_num(make_int(-21), make_int(-7));
-}
+}*/
 
 void test_int2()
 {
@@ -178,7 +178,7 @@ void test_int2()
 
   sputsoft::numbers::negate(b, a);
   std::cout << b << std::endl;
-}*/
+}
 
 /*void overload()
 {
@@ -189,8 +189,8 @@ void test_int2()
 
 int main()
 {
-  test_natnum();
-  //test_int2();
+  //test_natnum();
+  test_int2();
 
   return 0;
 }

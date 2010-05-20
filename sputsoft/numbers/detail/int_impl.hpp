@@ -261,11 +261,6 @@ private:
 
 public:
   numb() {}
-  /*numb(const numb& rhs) : num(rhs.num), positive(rhs.positive) {}
-  numb& operator=(const numb& rhs) {
-    set(rhs);
-    return *this;
-  }*/
   template <typename V>
   numb(const V& v) {
     sputsoft::numbers::set(*this, v);
