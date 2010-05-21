@@ -36,7 +36,7 @@ void test_natnum()
   std::cout << sputsoft::numbers::compare(a, b) << std::endl;
 }
 
-/*template <typename T, typename S>
+template <typename T, typename S>
 T make_number(const S& s) {
   T n;
   sputsoft::numbers::set(n, s);
@@ -165,7 +165,7 @@ void test_int()
   test_div_num(make_int(-21), make_int(7));
   test_div_num(make_int(21), make_int(-7));
   test_div_num(make_int(-21), make_int(-7));
-}*/
+}
 
 void test_int2()
 {
@@ -190,7 +190,7 @@ void test_int2()
 int main()
 {
   //test_natnum();
-  test_int2();
+  test_int();
 
   return 0;
 }

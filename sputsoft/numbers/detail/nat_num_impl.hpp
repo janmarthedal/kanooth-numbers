@@ -544,7 +544,7 @@ public:
   inline void sub(const numb& x, const numb& y) { sub_num(con, x.con, y.con); }
   inline void mul(const numb& x, const numb& y) { mul_num(con, x.con, y.con); }
   inline void div(const numb& x, const numb& y) { quot_num(con, x.con, y.con); }
-  inline void rem(const numb& x, const numb& y) { rem_num(con, x.con, y.con); }
+  static inline void rem(numb& r, const numb& x, const numb& y) { rem_num(r.con, x.con, y.con); }
   static inline void quotrem(numb& q, numb& r, const numb& x, const numb& y)
     { quotrem_num(q.con, r.con, x.con, y.con); }
   inline int cmp(const numb& v) const { return comp_num(con, v.con); }

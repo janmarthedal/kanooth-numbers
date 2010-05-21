@@ -19,6 +19,48 @@ namespace detail {
 template <typename T>
 class intnum;
 
+template <typename T>
+struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, unsigned short> {
+  typedef unsigned short return_type;
+};
+
+template <typename T>
+struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, short> {
+  typedef short return_type;
+};
+
+template <typename T>
+struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, unsigned> {
+  typedef unsigned return_type;
+};
+
+template <typename T>
+struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, int> {
+  typedef int return_type;
+};
+
+template <typename T>
+struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, unsigned long> {
+  typedef unsigned long return_type;
+};
+
+template <typename T>
+struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, long> {
+  typedef long return_type;
+};
+
+#ifdef SPUTSOFT_HAS_LONG_LONG
+template <typename T>
+struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, unsigned long long> {
+  typedef unsigned long long return_type;
+};
+
+template <typename T>
+struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, long long> {
+  typedef long long return_type;
+};
+#endif
+
 template <typename NUM>
 inline std::ostream& operator<<(std::ostream& os, const numb<intnum<NUM> >& n) {
   if (n.num && !n.positive) os << "-";

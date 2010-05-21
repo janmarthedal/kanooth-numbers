@@ -78,18 +78,10 @@ template <typename R, typename V1, typename V2>             struct rem_3_eval;
 template <typename R, typename V1, typename V2>             struct rem_floor_3_eval;
 template <typename R, typename V1, typename V2>             struct rem_ceil_3_eval;
 template <typename R, typename V1, typename V2>             struct rem_trunc_3_eval;
-template <typename V1, typename V2>                         struct rem_r2_eval;
-template <typename V1, typename V2>                         struct rem_floor_r2_eval;
-template <typename V1, typename V2>                         struct rem_ceil_r2_eval;
-template <typename V1, typename V2>                         struct rem_trunc_r2_eval;
 template <typename Q, typename R, typename V1, typename V2> struct quotrem_4_eval;
 template <typename Q, typename R, typename V1, typename V2> struct quotrem_floor_4_eval;
 template <typename Q, typename R, typename V1, typename V2> struct quotrem_ceil_4_eval;
 template <typename Q, typename R, typename V1, typename V2> struct quotrem_trunc_4_eval;
-template <typename Q, typename V1, typename V2>             struct quotrem_r3_eval;
-template <typename Q, typename V1, typename V2>             struct quotrem_floor_r3_eval;
-template <typename Q, typename V1, typename V2>             struct quotrem_ceil_r3_eval;
-template <typename Q, typename V1, typename V2>             struct quotrem_trunc_r3_eval;
 
 } // namespace detail
 

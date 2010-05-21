@@ -76,7 +76,7 @@ private:
 
   void rem_num(const number_type& x, const number_type& y) {
     if (!num.unique()) num.reset(new number_type);
-    num->rem(x, y);
+    number_type::rem(*num, x, y);
   }
 
   static void quotrem_num(numb& q, numb& r, const number_type& u, const number_type& v) {
@@ -157,7 +157,7 @@ public:
   inline void sub(const numb& x, const numb& y) { _sub(*x.num, *y.num); }
   inline void mul(const numb& x, const numb& y) { _mul(*x.num, *y.num); }
   inline void div(const numb& x, const numb& y) { div_num(*x.num, *y.num); }
-  inline void rem(const numb& x, const numb& y) { rem_num(*x.num, *y.num); }
+  inline static void rem(numb& r, const numb& x, const numb& y) { r.rem_num(*x.num, *y.num); }
   inline static void quotrem(numb& q, numb& r, const numb& u, const numb& v)
     { quotrem_num(q, r, *u.num, *v.num); }
   inline int cmp(const numb& v) const { return num->cmp(*v.num); }
