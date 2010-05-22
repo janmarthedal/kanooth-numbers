@@ -20,23 +20,23 @@ template <typename T>
 class natnum;
 
 template <typename T>
-struct resolve_binary<ops::binary::remainder, numb<natnum<T> >, unsigned short> {
+struct resolve_binary<ops::binary::rem, numb<natnum<T> >, unsigned short> {
   typedef unsigned short return_type;
 };
 
 template <typename T>
-struct resolve_binary<ops::binary::remainder, numb<natnum<T> >, unsigned> {
+struct resolve_binary<ops::binary::rem, numb<natnum<T> >, unsigned> {
   typedef unsigned return_type;
 };
 
 template <typename T>
-struct resolve_binary<ops::binary::remainder, numb<natnum<T> >, unsigned long> {
+struct resolve_binary<ops::binary::rem, numb<natnum<T> >, unsigned long> {
   typedef unsigned long return_type;
 };
 
 #ifdef SPUTSOFT_HAS_LONG_LONG
 template <typename T>
-struct resolve_binary<ops::binary::remainder, numb<natnum<T> >, unsigned long long> {
+struct resolve_binary<ops::binary::rem, numb<natnum<T> >, unsigned long long> {
   typedef unsigned long long return_type;
 };
 #endif

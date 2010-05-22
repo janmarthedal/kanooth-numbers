@@ -14,6 +14,16 @@ namespace sputsoft {
 namespace numbers {
 namespace detail {
 
+template <class T>
+struct resolve_ref {
+  typedef T ref_type;
+};
+
+template <class T>
+struct resolve_ref<numb<T> > {
+  typedef const numb<T>& ref_type;
+};
+
 template <typename R, typename E> class expr;
 
 template <typename Op, typename R1, typename E1, typename R2, typename E2>
@@ -34,28 +44,19 @@ struct resolve_binary<Op, T, expr<R, E> > {
 template <typename Op, typename R, typename X, typename Y> struct expr_eval;
 
 template <typename R, typename X, typename Y>
-struct expr_eval<ops::binary::, R, X, Y> {
-  inline static void assign(R& r, const X& x, const Y& y) { ::add(r, x, y); }
-  inline static R construct(const X& x, const Y& y) { return ::add(x, y); }
+struct expr_eval<ops::binary::add, R, X, Y> {
+  inline static void assign(R& r, const X& x, const Y& y) { sputsoft::numbers::add(r, x, y); }
+  inline static R construct(const X& x, const Y& y) { return sputsoft::numbers::add(x, y); }
 };
 
 template <typename R, typename X, typename Y>
-struct expr_eval<ops::binary::remainder, R, X, Y> {
-  inline static void assign(R& r, const X& x, const Y& y) { ::rem(r, x, y); }
-  inline static R construct(const X& x, const Y& y) { return ::rem(x, y); }
-};
-
-template <class T>
-struct resolve_ref {
-  typedef T ref_type;
-};
-
-template <class T>
-struct resolve_ref<numb<T> > {
-  typedef const numb<T>& ref_type;
+struct expr_eval<ops::binary::rem, R, X, Y> {
+  inline static void assign(R& r, const X& x, const Y& y) { sputsoft::numbers::rem(r, x, y); }
+  inline static R construct(const X& x, const Y& y) { return sputsoft::numbers::rem(x, y); }
 };
 
 template <typename Op, typename X, typename Y> struct binary;
+template <typename Op, typename X, typename Y> struct unary;
 
 template <typename R, typename Op, typename X, typename Y>
 class expr<R, binary<Op, X, Y> > {
@@ -68,82 +69,82 @@ public:
 };
 
 template <typename R1, typename R2, typename E2>
-struct set_eval<numb<R1>, expr<R2, E2> > {
+struct set_2_eval<numb<R1>, expr<R2, E2> > {
   static void set(numb<R1>& r, const expr<R2, E2>& v) {
     v.assign(r);
   }
 };
 
 template <typename R1, typename E1, typename R2, typename E2>
-expr<typename resolve_binary<ops::binary::plus, R1, R2>::return_type,
-     binary<ops::binary::plus, expr<R1, E1>, expr<R2, E2> > >
+expr<typename resolve_binary<ops::binary::add, R1, R2>::return_type,
+     binary<ops::binary::add, expr<R1, E1>, expr<R2, E2> > >
 operator+(const expr<R1, E1>& x, const expr<R2, E2>& y) {
-  return expr<typename resolve_binary<ops::binary::plus, R1, R2>::return_type,
-     binary<ops::binary::plus, expr<R1, E1>, expr<R2, E2> > >(x, y);
+  return expr<typename resolve_binary<ops::binary::add, R1, R2>::return_type,
+     binary<ops::binary::add, expr<R1, E1>, expr<R2, E2> > >(x, y);
 }
 
 template <typename N1, typename R2, typename E2>
-expr<typename resolve_binary<ops::binary::plus, numb<N1>, R2>::return_type,
-     binary<ops::binary::plus, numb<N1>, expr<R2, E2> > >
+expr<typename resolve_binary<ops::binary::add, numb<N1>, R2>::return_type,
+     binary<ops::binary::add, numb<N1>, expr<R2, E2> > >
 operator+(const numb<N1>& x, const expr<R2, E2>& y) {
-  return expr<typename resolve_binary<ops::binary::plus, numb<N1>, R2>::return_type,
-     binary<ops::binary::plus, numb<N1>, expr<R2, E2> > >(x, y);
+  return expr<typename resolve_binary<ops::binary::add, numb<N1>, R2>::return_type,
+     binary<ops::binary::add, numb<N1>, expr<R2, E2> > >(x, y);
 }
 
 template <typename R1, typename E1, typename N2>
-expr<typename resolve_binary<ops::binary::plus, R1, numb<N2> >::return_type,
-     binary<ops::binary::plus, expr<R1, E1>, numb<N2> > >
+expr<typename resolve_binary<ops::binary::add, R1, numb<N2> >::return_type,
+     binary<ops::binary::add, expr<R1, E1>, numb<N2> > >
 operator+(const expr<R1, E1>& x, const numb<N2>& y) {
-  return expr<typename resolve_binary<ops::binary::plus, R1, numb<N2> >::return_type,
-     binary<ops::binary::plus, expr<R1, E1>, numb<N2> > >(x, y);
+  return expr<typename resolve_binary<ops::binary::add, R1, numb<N2> >::return_type,
+     binary<ops::binary::add, expr<R1, E1>, numb<N2> > >(x, y);
 }
 
 template <typename N1, typename N2>
-expr<typename resolve_binary<ops::binary::plus, numb<N1>, numb<N2> >::return_type,
-     binary<ops::binary::plus, numb<N1>, numb<N2> > >
+expr<typename resolve_binary<ops::binary::add, numb<N1>, numb<N2> >::return_type,
+     binary<ops::binary::add, numb<N1>, numb<N2> > >
 operator+(const numb<N1>& x, const numb<N2>& y) {
-  return expr<typename resolve_binary<ops::binary::plus, numb<N1>, numb<N2> >::return_type,
-     binary<ops::binary::plus, numb<N1>, numb<N2> > >(x, y);
+  return expr<typename resolve_binary<ops::binary::add, numb<N1>, numb<N2> >::return_type,
+     binary<ops::binary::add, numb<N1>, numb<N2> > >(x, y);
 }
 
 template <typename R, typename E>
-expr<typename resolve_binary<ops::binary::plus, unsigned, R>::return_type,
-     binary<ops::binary::plus, unsigned, expr<R, E> > >
+expr<typename resolve_binary<ops::binary::add, unsigned, R>::return_type,
+     binary<ops::binary::add, unsigned, expr<R, E> > >
 operator+(const unsigned& x, const expr<R, E>& y) {
-  return expr<typename resolve_binary<ops::binary::plus, unsigned, R>::return_type,
-     binary<ops::binary::plus, unsigned, expr<R, E> > >(x, y);
+  return expr<typename resolve_binary<ops::binary::add, unsigned, R>::return_type,
+     binary<ops::binary::add, unsigned, expr<R, E> > >(x, y);
 }
 
 template <typename R, typename E>
-expr<typename resolve_binary<ops::binary::plus, R, unsigned>::return_type,
-     binary<ops::binary::plus, expr<R, E>, unsigned> >
+expr<typename resolve_binary<ops::binary::add, R, unsigned>::return_type,
+     binary<ops::binary::add, expr<R, E>, unsigned> >
 operator+(const expr<R, E>& x, const unsigned& y) {
-  return expr<typename resolve_binary<ops::binary::plus, R, unsigned>::return_type,
-     binary<ops::binary::plus, expr<R, E>, unsigned> >(x, y);
+  return expr<typename resolve_binary<ops::binary::add, R, unsigned>::return_type,
+     binary<ops::binary::add, expr<R, E>, unsigned> >(x, y);
 }
 
 template <typename N>
-expr<typename resolve_binary<ops::binary::plus, numb<N>, unsigned>::return_type,
-     binary<ops::binary::plus, numb<N>, unsigned> >
+expr<typename resolve_binary<ops::binary::add, numb<N>, unsigned>::return_type,
+     binary<ops::binary::add, numb<N>, unsigned> >
 operator+(const numb<N>& x, unsigned y) {
-  return expr<typename resolve_binary<ops::binary::plus, numb<N>, unsigned>::return_type,
-     binary<ops::binary::plus, numb<N>, unsigned> >(x, y);
+  return expr<typename resolve_binary<ops::binary::add, numb<N>, unsigned>::return_type,
+     binary<ops::binary::add, numb<N>, unsigned> >(x, y);
 }
 
 template <typename N>
-expr<typename resolve_binary<ops::binary::plus, unsigned, numb<N> >::return_type,
-     binary<ops::binary::plus, unsigned, numb<N> > >
+expr<typename resolve_binary<ops::binary::add, unsigned, numb<N> >::return_type,
+     binary<ops::binary::add, unsigned, numb<N> > >
 operator+(unsigned x, const numb<N>& y) {
-  return expr<typename resolve_binary<ops::binary::plus, unsigned, numb<N> >::return_type,
-     binary<ops::binary::plus, unsigned, numb<N> > >(x, y);
+  return expr<typename resolve_binary<ops::binary::add, unsigned, numb<N> >::return_type,
+     binary<ops::binary::add, unsigned, numb<N> > >(x, y);
 }
 
 template <typename N>
-expr<typename resolve_binary<ops::binary::remainder, numb<N>, unsigned>::return_type,
-     binary<ops::binary::remainder, numb<N>, unsigned> >
+expr<typename resolve_binary<ops::binary::rem, numb<N>, unsigned>::return_type,
+     binary<ops::binary::rem, numb<N>, unsigned> >
 operator%(const numb<N>& x, unsigned y) {
-  return expr<typename resolve_binary<ops::binary::remainder, numb<N>, unsigned>::return_type,
-     binary<ops::binary::remainder, numb<N>, unsigned> >(x, y);
+  return expr<typename resolve_binary<ops::binary::rem, numb<N>, unsigned>::return_type,
+     binary<ops::binary::rem, numb<N>, unsigned> >(x, y);
 }
 
 template <typename N, typename T>

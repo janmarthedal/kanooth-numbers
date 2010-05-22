@@ -19,46 +19,25 @@ namespace detail {
 template <typename T>
 class intnum;
 
-template <typename T>
-struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, unsigned short> {
-  typedef unsigned short return_type;
-};
+#define RESOLVE_INTNUM_REM(TYPE) \
+template <typename T> \
+struct resolve_binary<ops::binary::rem, numb<intnum<T> >, TYPE> { typedef TYPE return_type; }; \
+template <typename T> \
+struct resolve_binary<ops::binary::rem_floor, numb<intnum<T> >, TYPE> { typedef TYPE return_type; }; \
+template <typename T> \
+struct resolve_binary<ops::binary::rem_ceil, numb<intnum<T> >, TYPE> { typedef TYPE return_type; }; \
+template <typename T> \
+struct resolve_binary<ops::binary::rem_trunc, numb<intnum<T> >, TYPE> { typedef TYPE return_type; };
 
-template <typename T>
-struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, short> {
-  typedef short return_type;
-};
-
-template <typename T>
-struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, unsigned> {
-  typedef unsigned return_type;
-};
-
-template <typename T>
-struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, int> {
-  typedef int return_type;
-};
-
-template <typename T>
-struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, unsigned long> {
-  typedef unsigned long return_type;
-};
-
-template <typename T>
-struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, long> {
-  typedef long return_type;
-};
-
+RESOLVE_INTNUM_REM(unsigned short)
+RESOLVE_INTNUM_REM(signed short)
+RESOLVE_INTNUM_REM(unsigned)
+RESOLVE_INTNUM_REM(signed)
+RESOLVE_INTNUM_REM(unsigned long)
+RESOLVE_INTNUM_REM(signed long)
 #ifdef SPUTSOFT_HAS_LONG_LONG
-template <typename T>
-struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, unsigned long long> {
-  typedef unsigned long long return_type;
-};
-
-template <typename T>
-struct resolve_binary<ops::binary::remainder, numb<intnum<T> >, long long> {
-  typedef long long return_type;
-};
+RESOLVE_INTNUM_REM(unsigned long long)
+RESOLVE_INTNUM_REM(signed long long)
 #endif
 
 template <typename NUM>

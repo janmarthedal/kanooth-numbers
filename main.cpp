@@ -8,7 +8,7 @@
 #include <iostream>
 #include <sputsoft/numbers/natural_number.hpp>
 #include <sputsoft/numbers/integer.hpp>
-//#include <sputsoft/numbers/detail/overload.hpp>
+#include <sputsoft/numbers/detail/overload.hpp>
 
 void test_natnum()
 {
@@ -180,17 +180,69 @@ void test_int2()
   std::cout << b << std::endl;
 }
 
-/*void overload()
+using namespace sputsoft::numbers;
+
+void test_natural_number_named_ops()
+{
+  unsigned short usi = 1;
+  unsigned       ui  = 2;
+  unsigned long  uli = 3;
+
+  natural_number n1;          // n1 = 0
+  natural_number n2 = usi;    // n2 = 1
+  natural_number n3 = ui;     // n3 = 2
+  natural_number n4 = uli;    // n4 = 3
+  natural_number n5 = n2;     // n5 = 1
+  natural_number n6(n3);      // n6 = 2
+
+  n1 = n4;                    // n1 = 3
+  set(n5, n4);                // n5 = 3
+  set(n5, usi);               // n5 = 1
+  set(n5, ui);                // n5 = 2
+  set(n5, uli);               // n5 = 3
+
+  add(n2, n1, n3);            // n2 = 3 + 2 = 5
+  add(n5, n2, usi);           // n5 = 5 + 1 = 6
+  add(n6, usi, n5);           // n6 = 1 + 6 = 7
+  add(n5, n6, ui);            // n5 = 7 + 2 = 9
+  add(n6, ui, n5);            // n6 = 2 + 9 = 11
+  add(n5, n6, uli);           // n5 = 11 + 3 = 14
+  add(n6, uli, n5);           // n6 = 3 + 14 = 17
+
+  n5 = add(n5, n6);           // n5 = 14 + 17 = 31
+  n6 = add(n5, usi);          // n6 = 31 + 1 = 32
+  n5 = add(usi, n6);          // n5 = 1 + 32 = 33
+  n6 = add(n5, ui);           // n6 = 33 + 2 = 35
+  n5 = add(ui, n6);           // n5 = 2 + 35 = 37
+  n6 = add(n5, uli);          // n6 = 37 + 3 = 40
+  n5 = add(uli, n6);          // n5 = 3 + 40 = 43
+
+  sub(n6, n5, n1);            // n6 = 43 - 3 = 40
+  sub(n5, n6, usi);           // n5 = 40 - 1 = 39
+  sub(n6, n5, ui);            // n6 = 39 - 2 = 37
+  sub(n5, n6, uli);           // n5 = 37 - 3 = 34
+
+  n6 = sub(n5, n1);           // n6 = 34 - 3 = 31
+  n5 = sub(n6, usi);          // n5 = 31 - 1 = 30
+  n6 = sub(n5, ui);           // n6 = 30 - 2 = 28
+  n5 = sub(n6, uli);          // n5 = 28 - 3 = 25
+
+  std::cout << n5 << std::endl;
+}
+
+void overload()
 {
   sputsoft::numbers::natural_number a, b=2u, c=3u;
   a = b + c;
   std::cout << a << std::endl;
-}*/
+}
 
 int main()
 {
   //test_natnum();
-  test_int();
+  //test_int();
+  //test_natural_number_named_ops();
+  overload();
 
   return 0;
 }
