@@ -1,8 +1,13 @@
 /* 
  * File:   sputsoft/numbers/detail/named_ops.hpp
- * Author: jmr
+ * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-04-30 15:04Z
+ *
+ * (C) Copyright SputSoft 2010
+ * Use, modification and distribution are subject to the
+ * Boost Software License, Version 1.0. (See accompanying file
+ * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  *
  * $Id$
  */
@@ -268,4 +273,4 @@ inline bool equal(const V1& v1, const V2& v2) {
 } // namespace numbers
 } // namespace sputsoft
 
-#endif	/* _SPUTSOFT_NUMBERS_DETAIL_NAMED_OPS_HPP */
+#endif // _SPUTSOFT_NUMBERS_DETAIL_NAMED_OPS_HPP

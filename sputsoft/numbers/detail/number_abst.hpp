@@ -1,14 +1,19 @@
 /* 
- * File:   number_abst.hpp
- * Author: jmr
+ * File:   sputsoft/numbers/detail/number_abst.hpp
+ * Author: Jan Marthedal Rasmussen
  *
- * Created 2010-05-19, 15:10Z
+ * Created 2010-05-19 15:10Z
+ *
+ * (C) Copyright SputSoft 2010
+ * Use, modification and distribution are subject to the
+ * Boost Software License, Version 1.0. (See accompanying file
+ * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  *
  * $Id$
  */
 
-#ifndef _NUMBER_ABST_HPP
-#define	_NUMBER_ABST_HPP
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_NUMBER_ABST_HPP
+#define _SPUTSOFT_NUMBERS_DETAIL_NUMBER_ABST_HPP
 
 #include <sputsoft/detail/types.hpp>
 #include <sputsoft/numbers/detail/named_ops.hpp>
@@ -184,31 +189,31 @@ struct rem_trunc_3_eval<R, numb<T1>, V2> {
   }
 };
 
-template <typename Q, typename R, typename T1, typename V2>
-struct quotrem_4_eval<Q, R, numb<T1>, V2> {
-  static void quotrem(Q& q, R& r, const numb<T1>& v1, const V2& v2) {
-    numb<T1>::quotrem(q, r, v1, v2);
+template <typename T, typename R, typename V1, typename V2>
+struct quotrem_4_eval<numb<T>, R, V1, V2> {
+  static void quotrem(numb<T>& q, R& r, const V1& v1, const V2& v2) {
+    numb<T>::quotrem(q, r, v1, v2);
   }
 };
 
-template <typename Q, typename R, typename T1, typename V2>
-struct quotrem_floor_4_eval<Q, R, numb<T1>, V2> {
-  static void quotrem_floor(Q& q, R& r, const numb<T1>& v1, const V2& v2) {
-    numb<T1>::quotrem_floor(q, r, v1, v2);
+template <typename T, typename R, typename V1, typename V2>
+struct quotrem_floor_4_eval<numb<T>, R, V1, V2> {
+  static void quotrem_floor(numb<T>& q, R& r, const V1& v1, const V2& v2) {
+    numb<T>::quotrem_floor(q, r, v1, v2);
   }
 };
 
-template <typename Q, typename R, typename T1, typename V2>
-struct quotrem_ceil_4_eval<Q, R, numb<T1>, V2> {
-  static void quotrem_ceil(Q& q, R& r, const numb<T1>& v1, const V2& v2) {
-    numb<T1>::quotrem_ceil(q, r, v1, v2);
+template <typename T, typename R, typename V1, typename V2>
+struct quotrem_ceil_4_eval<numb<T>, R, V1, V2> {
+  static void quotrem_ceil(numb<T>& q, R& r, const V1& v1, const V2& v2) {
+    numb<T>::quotrem_ceil(q, r, v1, v2);
   }
 };
 
-template <typename Q, typename R, typename T1, typename V2>
-struct quotrem_trunc_4_eval<Q, R, numb<T1>, V2> {
-  static void quotrem_trunc(Q& q, R& r, const numb<T1>& v1, const V2& v2) {
-    numb<T1>::quotrem_trunc(q, r, v1, v2);
+template <typename T, typename R, typename V1, typename V2>
+struct quotrem_trunc_4_eval<numb<T>, R, V1, V2> {
+  static void quotrem_trunc(numb<T>& q, R& r, const V1& v1, const V2& v2) {
+    numb<T>::quotrem_trunc(q, r, v1, v2);
   }
 };
 
@@ -216,5 +221,4 @@ struct quotrem_trunc_4_eval<Q, R, numb<T1>, V2> {
 } // namespace sputsoft
 } // namespace numbers
 
-#endif	/* _NUMBER_ABST_HPP */
-
+#endif // _SPUTSOFT_NUMBERS_DETAIL_NUMBER_ABST_HPP

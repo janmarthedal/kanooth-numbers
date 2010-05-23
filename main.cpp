@@ -230,11 +230,21 @@ void test_natural_number_named_ops()
   std::cout << n5 << std::endl;
 }
 
+template <typename T>
+T test_f(const T& n)
+{
+  return n + 4;
+}
+
 void overload()
 {
-  sputsoft::numbers::natural_number a, b=2u, c=3u;
-  a = b + c;
-  std::cout << a << std::endl;
+  sputsoft::numbers::integer a, b=2u, c=123u, q, r;
+  a = (b + c) + (b + c);
+  r = (a + c) % b;
+  r = test_f(r);
+  std::cout << r << std::endl;
+  quotrem(q, r, a + c, b);
+  std::cout << q << " " << r << std::endl;
 }
 
 int main()

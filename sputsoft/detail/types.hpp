@@ -1,5 +1,5 @@
 /*
- * File:   types.hpp
+ * File:   sputsoft/detail/types.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-19 09:18Z
@@ -12,8 +12,8 @@
  * $Id: types.hpp 54 2009-12-31 12:03:06Z jan_marthedal $
  */
 
-#ifndef _SPUTSOFT_TYPES_HPP_
-#define _SPUTSOFT_TYPES_HPP_
+#ifndef _SPUTSOFT_DETAIL_TYPES_HPP_
+#define _SPUTSOFT_DETAIL_TYPES_HPP_
 
 #include <boost/integer_traits.hpp>
 
@@ -82,4 +82,4 @@ namespace sputsoft {
 
 } // namespace sputsoft
 
-#endif // _SPUTSOFT_TYPES_HPP_
+#endif // _SPUTSOFT_DETAIL_TYPES_HPP_

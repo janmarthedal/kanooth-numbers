@@ -1,14 +1,19 @@
 /* 
- * File:   abstract_natural_number.hpp
- * Author: jmr
+ * File:   sputsoft/numbers/detail/nat_num_abst.hpp
+ * Author: Jan Marthedal Rasmussen
  *
- * Created on May 2, 2010, 9:55 AM
+ * Created 2010-05-02 7:55Z
+ *
+ * (C) Copyright SputSoft 2010
+ * Use, modification and distribution are subject to the
+ * Boost Software License, Version 1.0. (See accompanying file
+ * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  *
  * $Id$
  */
 
-#ifndef _ABSTRACT_NATURAL_NUMBER_HPP
-#define	_ABSTRACT_NATURAL_NUMBER_HPP
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_ABST_HPP
+#define _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_ABST_HPP
 
 #include <sputsoft/numbers/detail/number_abst.hpp>
 
@@ -87,4 +92,4 @@ struct set_4_eval<numb<natnum<T> >, Forw> {
 } // namespace sputsoft
 } // namespace numbers
 
-#endif	/* _ABSTRACT_NATURAL_NUMBER_HPP */
+#endif // _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_ABST_HPP

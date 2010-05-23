@@ -2,7 +2,7 @@
  * File:   sputsoft/numbers/detail/nat_num_impl.hpp
  * Author: Jan Marthedal Rasmussen
  *
- * Created on 2010-04-30 15:18Z
+ * Created 2010-04-30 15:18Z
  *
  * (C) Copyright SputSoft 2010
  * Use, modification and distribution are subject to the
@@ -10,14 +10,6 @@
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  *
  * $Id$
- */
-
-/*
- * constructor: u, n
- * set: u->n, n->n
- * addition: n+n->n, u+n->n, n+u->n
- * subtraction: n-n->n, u-n->n, n-u->n
- *
  */
 
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_IMPL_HPP
@@ -51,19 +43,27 @@ private:
       Con(size).swap(c);
   }
 
-  template <typename T>
-  static T to_int_type(const Con& c) {
-    if (c.is_empty())
-      return (T) 0;
-    else if (sizeof(T) <= sizeof(digit_type))
+  template <typename T, bool fits> struct to_int_type_spec;
+  template <typename T> struct to_int_type_spec<T, true> {
+    static inline T to_int_type(const Con& c) {
       return (T) c[0];
-    else {
+    }
+  };
+  template <typename T> struct to_int_type_spec<T, false> {
+    static inline T to_int_type(const Con& c) {
       T v = 0;
       unsigned n = c.size();
       while (n)
         v = (v << digit_bits) | c[--n];
       return v;
     }
+  };
+
+  template <typename T>
+  static T to_int_type(const Con& c) {
+    if (c.is_empty())
+      return (T) 0;
+    to_int_type_spec<T, sizeof(T) <= sizeof(digit_type)>::to_int_type(c);
   }
 
   /* Set to number */
@@ -79,15 +79,16 @@ private:
 
   /* Set to integer */
 
-  template <typename T>
-  static void set_int(Con& r, T v) {
-    if (!v)
-      r.set_size(0);
-    else if (sizeof(T) <= sizeof(digit_type)) {
+  template <typename T, bool fits> struct set_int_spec;
+  template <typename T> struct set_int_spec<T, true> {
+    static inline void set_int(Con& r, T v) {
       ensure_size(r, 1);
       r[0] = v;
       r.set_size(1);
-    } else {
+    }
+  };
+  template <typename T> struct set_int_spec<T, false> {
+    static inline void set_int(Con& r, T v) {
       static const T mask = (T(1) << digit_bits) - 1;
       unsigned n = 0;
       ensure_size(r, sizeof(T) / sizeof(digit_type));
@@ -97,6 +98,14 @@ private:
       }
       r.set_size(n);
     }
+  };
+
+  template <typename T>
+  static void set_int(Con& r, T v) {
+    if (!v)
+      r.set_size(0);
+    else
+      set_int_spec<T, sizeof(T) <= sizeof(digit_type)>::set_int(r, v);
   }
 
   /* Add two numbers */

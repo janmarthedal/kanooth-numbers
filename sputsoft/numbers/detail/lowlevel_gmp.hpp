@@ -1,10 +1,10 @@
 /*
- * File:   numbers/gmp/lowlevel.hpp
+ * File:   sputsoft/numbers/detail/lowlevel.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z
  *
- * (C) Copyright SputSoft 2009
+ * (C) Copyright SputSoft 2010
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)

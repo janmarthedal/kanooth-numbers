@@ -2,7 +2,7 @@
  * File:   sputsoft/numbers/detail/nat_num_shared.hpp
  * Author: Jan Marthedal Rasmussen
  *
- * Created on 2010-04-30 15:18Z
+ * Created 2010-04-30 15:18Z
  *
  * (C) Copyright SputSoft 2010
  * Use, modification and distribution are subject to the

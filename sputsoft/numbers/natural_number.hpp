@@ -1,6 +1,6 @@
 /* 
  * File:   sputsoft/numbers/natural_number.hpp
- * Author: jmr
+ * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-05-03 20:12Z
  *
@@ -18,7 +18,6 @@
 #include <sputsoft/numbers/detail/digit_array.hpp>
 #include <sputsoft/numbers/detail/array_allocator.hpp>
 #include <sputsoft/numbers/detail/nat_num_shared.hpp>
-//#include <sputsoft/numbers/detail/nat_num_impl.hpp>
 
 #ifdef SPUTSOFT_USE_GMP
 #include <sputsoft/numbers/detail/lowlevel_gmp.hpp>
@@ -46,14 +45,7 @@ typedef detail::numb<
           >
         > natural_number;
 
-
-/*typedef detail::numb<
-          detail::natnum<
-            detail::wrap2<detail::digit_array<unsigned long>, detail::lowlevel>
-          >
-        > natural_number;*/
-
 } // namespace sputsoft
 } // namespace numbers
 
-#endif	/* _SPUTSOFT_NUMBERS_NATURAL_NUMBER_HPP */
+#endif // _SPUTSOFT_NUMBERS_NATURAL_NUMBER_HPP

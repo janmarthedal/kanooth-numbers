@@ -1,8 +1,13 @@
 /* 
  * File:   sputsoft/numbers/detail/int_abst.hpp
- * Author: jmr
+ * Author: Jan Marthedal Rasmussen
  *
- * Created 2010-05-13 11:00
+ * Created 2010-05-13 11:00Z
+ *
+ * (C) Copyright SputSoft 2010
+ * Use, modification and distribution are subject to the
+ * Boost Software License, Version 1.0. (See accompanying file
+ * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  *
  * $Id$
  */
@@ -39,6 +44,27 @@ RESOLVE_INTNUM_REM(signed long)
 RESOLVE_INTNUM_REM(unsigned long long)
 RESOLVE_INTNUM_REM(signed long long)
 #endif
+
+template <typename T, typename V1, typename V2>
+struct div_3_eval<numb<intnum<T> >, V1, V2> {
+  static void div(numb<intnum<T> >& r, const V1& v1, const V2& v2) {
+    r.div_floor(v1, v2);
+  }
+};
+
+template <typename R, typename T1, typename V2>
+struct rem_3_eval<R, numb<intnum<T1> >, V2> {
+  static void rem(R& r, const numb<intnum<T1> >& v1, const V2& v2) {
+    numb<intnum<T1> >::rem_floor(r, v1, v2);
+  }
+};
+
+template <typename T, typename R, typename V1, typename V2>
+struct quotrem_4_eval<numb<intnum<T> >, R, V1, V2> {
+  static void quotrem(numb<intnum<T> >& q, R& r, const V1& v1, const V2& v2) {
+    numb<intnum<T> >::quotrem_floor(q, r, v1, v2);
+  }
+};
 
 template <typename NUM>
 inline std::ostream& operator<<(std::ostream& os, const numb<intnum<NUM> >& n) {

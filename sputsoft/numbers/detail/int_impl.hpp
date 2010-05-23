@@ -1,12 +1,19 @@
 /* 
- * File:   int_impl.hpp
- * Author: jmr
+ * File:   sputsoft/numbers/detail/int_impl.hpp
+ * Author: Jan Marthedal Rasmussen
  *
- * Created on May 4, 2010, 10:12 PM
+ * Created 2010-05-04 20:12Z
+ *
+ * (C) Copyright SputSoft 2010
+ * Use, modification and distribution are subject to the
+ * Boost Software License, Version 1.0. (See accompanying file
+ * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ *
+ * $Id$
  */
 
-#ifndef _INT_IMPL_HPP
-#define	_INT_IMPL_HPP
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_INT_IMPL_HPP
+#define _SPUTSOFT_NUMBERS_DETAIL_INT_IMPL_HPP
 
 #include <sputsoft/detail/types.hpp>
 #include <sputsoft/numbers/detail/int_abst.hpp>
@@ -361,5 +368,4 @@ public:
 } // namespace sputsoft
 } // namespace numbers
 
-#endif	/* _INT_IMPL_HPP */
-
+#endif // _SPUTSOFT_NUMBERS_DETAIL_INT_IMPL_HPP
