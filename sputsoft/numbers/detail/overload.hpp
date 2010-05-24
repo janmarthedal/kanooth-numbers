@@ -58,69 +58,86 @@ struct resolve_type<expr<R, E> > {
   typedef R type;
 };
 
-template <typename Op, typename R, typename X, typename Y> struct expr_eval;
-
-template <typename R, typename X, typename Y>
-struct expr_eval<ops::binary::add, R, X, Y> {
-  inline static void assign(R& r, const X& x, const Y& y) {
-    sputsoft::numbers::add(r, (typename resolve_type<X>::type) x, (typename resolve_type<Y>::type) y);
-  }
-  inline static R construct(const X& x, const Y& y) {
-    return sputsoft::numbers::add((typename resolve_type<X>::type) x, (typename resolve_type<Y>::type) y);
-  }
-};
-
-template <typename R, typename X, typename Y>
-struct expr_eval<ops::binary::sub, R, X, Y> {
-  inline static void assign(R& r, const X& x, const Y& y) {
-    sputsoft::numbers::sub(r, (typename resolve_type<X>::type) x, (typename resolve_type<Y>::type) y);
-  }
-  inline static R construct(const X& x, const Y& y) {
-    return sputsoft::numbers::sub((typename resolve_type<X>::type) x, (typename resolve_type<Y>::type) y);
-  }
-};
-
-template <typename R, typename X, typename Y>
-struct expr_eval<ops::binary::mul, R, X, Y> {
-  inline static void assign(R& r, const X& x, const Y& y) {
-    sputsoft::numbers::mul(r, (typename resolve_type<X>::type) x, (typename resolve_type<Y>::type) y);
-  }
-  inline static R construct(const X& x, const Y& y) {
-    return sputsoft::numbers::mul((typename resolve_type<X>::type) x, (typename resolve_type<Y>::type) y);
-  }
-};
-
-template <typename R, typename X, typename Y>
-struct expr_eval<ops::binary::div, R, X, Y> {
-  inline static void assign(R& r, const X& x, const Y& y) {
-    sputsoft::numbers::div(r, (typename resolve_type<X>::type) x, (typename resolve_type<Y>::type) y);
-  }
-  inline static R construct(const X& x, const Y& y) {
-    return sputsoft::numbers::div((typename resolve_type<X>::type) x, (typename resolve_type<Y>::type) y);
-  }
-};
-
-template <typename R, typename X, typename Y>
-struct expr_eval<ops::binary::rem, R, X, Y> {
-  inline static void assign(R& r, const X& x, const Y& y) {
-    sputsoft::numbers::rem(r, (typename resolve_type<X>::type) x, (typename resolve_type<Y>::type) y);
-  }
-  inline static R construct(const X& x, const Y& y) {
-    return sputsoft::numbers::rem((typename resolve_type<X>::type) x, (typename resolve_type<Y>::type) y);
-  }
-};
-
 template <typename Op, typename X, typename Y> struct binary;
-template <typename Op, typename X, typename Y> struct unary;
+template <typename Op, typename X> struct unary;
 
-template <typename R, typename Op, typename X, typename Y>
-class expr<R, binary<Op, X, Y> > {
+template <typename R, typename R2, typename X, typename Y>
+struct expr<R, binary<ops::binary::add, X, expr<R2, unary<ops::unary::negate, Y> > > > {
   typename resolve_ref<X>::ref_type x;
   typename resolve_ref<Y>::ref_type y;
+  typedef typename resolve_type<X>::type x_type;
+  typedef typename resolve_type<Y>::type y_type;
+  expr(const X& _x, const expr<R2, unary<ops::unary::negate, Y> >& _y) : x(_x), y(_y.x) {}
+  inline void assign(R& r) const { sputsoft::numbers::sub(r, (x_type) x, (y_type) y); }
+  inline operator R() const { return sputsoft::numbers::sub((x_type) x, (y_type) y); }
+};
+
+template <typename R, typename X, typename Y>
+struct expr<R, binary<ops::binary::add, X, Y> > {
+  typename resolve_ref<X>::ref_type x;
+  typename resolve_ref<Y>::ref_type y;
+  typedef typename resolve_type<X>::type x_type;
+  typedef typename resolve_type<Y>::type y_type;
+  expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
+  inline void assign(R& r) const { sputsoft::numbers::add(r, (x_type) x, (y_type) y); }
+  inline operator R() const { return sputsoft::numbers::add((x_type) x, (y_type) y); }
+};
+
+template <typename R, typename X, typename Y>
+class expr<R, binary<ops::binary::sub, X, Y> > {
+  typename resolve_ref<X>::ref_type x;
+  typename resolve_ref<Y>::ref_type y;
+  typedef typename resolve_type<X>::type x_type;
+  typedef typename resolve_type<Y>::type y_type;
 public:
   expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-  inline void assign(R& r) const { expr_eval<Op, R, X, Y>::assign(r, x, y); }
-  inline operator R() const { return expr_eval<Op, R, X, Y>::construct(x, y); }
+  inline void assign(R& r) const { sputsoft::numbers::sub(r, (x_type) x, (y_type) y); }
+  inline operator R() const { return sputsoft::numbers::sub((x_type) x, (y_type) y); }
+};
+
+template <typename R, typename X, typename Y>
+class expr<R, binary<ops::binary::mul, X, Y> > {
+  typename resolve_ref<X>::ref_type x;
+  typename resolve_ref<Y>::ref_type y;
+  typedef typename resolve_type<X>::type x_type;
+  typedef typename resolve_type<Y>::type y_type;
+public:
+  expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
+  inline void assign(R& r) const { sputsoft::numbers::mul(r, (x_type) x, (y_type) y); }
+  inline operator R() const { return sputsoft::numbers::mul((x_type) x, (y_type) y); }
+};
+
+template <typename R, typename X, typename Y>
+class expr<R, binary<ops::binary::div, X, Y> > {
+  typename resolve_ref<X>::ref_type x;
+  typename resolve_ref<Y>::ref_type y;
+  typedef typename resolve_type<X>::type x_type;
+  typedef typename resolve_type<Y>::type y_type;
+public:
+  expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
+  inline void assign(R& r) const { sputsoft::numbers::div(r, (x_type) x, (y_type) y); }
+  inline operator R() const { return sputsoft::numbers::div((x_type) x, (y_type) y); }
+};
+
+template <typename R, typename X, typename Y>
+class expr<R, binary<ops::binary::rem, X, Y> > {
+  typename resolve_ref<X>::ref_type x;
+  typename resolve_ref<Y>::ref_type y;
+  typedef typename resolve_type<X>::type x_type;
+  typedef typename resolve_type<Y>::type y_type;
+public:
+  expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
+  inline void assign(R& r) const { sputsoft::numbers::rem(r, (x_type) x, (y_type) y); }
+  inline operator R() const { return sputsoft::numbers::rem((x_type) x, (y_type) y); }
+};
+
+template <typename R, typename X>
+struct expr<R, unary<ops::unary::negate, X> > {
+  typename resolve_ref<X>::ref_type x;
+  typedef typename resolve_type<X>::type x_type;
+  expr(const X& _x) : x(_x) {}
+  inline void assign(R& r) const { sputsoft::numbers::negate(r, (x_type) x); }
+  inline operator R() const { return sputsoft::numbers::negate((x_type) x); }
 };
 
 template <typename R1, typename R2, typename E2>
@@ -215,32 +232,170 @@ SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(operator%, rem, unsigned long long)
 SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(operator%, rem, signed long long)
 #endif
 
+template <typename N>
+expr<typename resolve_unary<ops::unary::negate, numb<N> >::return_type,
+     unary<ops::unary::negate, numb<N> > >
+operator-(const numb<N>& x) {
+  return expr<typename resolve_unary<ops::unary::negate, numb<N> >::return_type,
+     unary<ops::unary::negate, numb<N> > >(x);
+}
 
 template <typename N, typename T>
-numb<N>& operator+=(numb<N>& x, const T& y) {
+inline numb<N>& operator+=(numb<N>& x, const T& y) {
   return x = x + y;
 }
 
 template <typename N, typename T>
-numb<N>& operator-=(numb<N>& x, const T& y) {
+inline numb<N>& operator-=(numb<N>& x, const T& y) {
   return x = x - y;
 }
 
 template <typename N, typename T>
-numb<N>& operator*=(numb<N>& x, const T& y) {
+inline numb<N>& operator*=(numb<N>& x, const T& y) {
   return x = x * y;
 }
 
 template <typename N, typename T>
-numb<N>& operator/=(numb<N>& x, const T& y) {
+inline numb<N>& operator/=(numb<N>& x, const T& y) {
   return x = x / y;
 }
 
 template <typename N, typename T>
-numb<N>& operator%=(numb<N>& x, const T& y) {
+inline numb<N>& operator%=(numb<N>& x, const T& y) {
   return x = x % y;
 }
 
+template <typename R1, typename E1, typename R2, typename E2>
+inline bool operator==(const expr<R1, E1>& x, const expr<R2, E2>& y) {
+  return sputsoft::numbers::equal(x, y);
+}
+template <typename R, typename E, typename N>
+inline bool operator==(const expr<R, E>& x, const numb<N>& y) {
+  return sputsoft::numbers::equal(x, y);
+}
+template <typename R, typename E, typename N>
+inline bool operator==(const numb<N>& x, const expr<R, E>& y) {
+  return sputsoft::numbers::equal(x, y);
+}
+template <typename N1, typename N2>
+inline bool operator==(const numb<N1>& x, const numb<N2>& y) {
+  return sputsoft::numbers::equal(x, y);
+}
+
+#define SPUTSOFT_NUMBERS_EQUAL_INT(TYPE) \
+template <typename R, typename E> \
+inline bool operator==(const expr<R, E>& x, TYPE y) { return sputsoft::numbers::equal(x, y); } \
+template <typename R, typename E> \
+inline bool operator==(TYPE x, const expr<R, E>& y) { return sputsoft::numbers::equal(x, y); } \
+template <typename N> \
+inline bool operator==(const numb<N>& x, TYPE y) { return sputsoft::numbers::equal(x, y); } \
+template <typename N> \
+inline bool operator==(TYPE x, const numb<N>& y) { return sputsoft::numbers::equal(x, y); }
+
+SPUTSOFT_NUMBERS_EQUAL_INT(unsigned short)
+SPUTSOFT_NUMBERS_EQUAL_INT(signed short)
+SPUTSOFT_NUMBERS_EQUAL_INT(unsigned)
+SPUTSOFT_NUMBERS_EQUAL_INT(signed)
+SPUTSOFT_NUMBERS_EQUAL_INT(unsigned long)
+SPUTSOFT_NUMBERS_EQUAL_INT(signed long)
+#ifdef SPUTSOFT_HAS_LONG_LONG
+SPUTSOFT_NUMBERS_EQUAL_INT(unsigned long long)
+SPUTSOFT_NUMBERS_EQUAL_INT(signed long long)
+#endif
+
+template <typename R1, typename E1, typename R2, typename E2>
+inline bool operator!=(const expr<R1, E1>& x, const expr<R2, E2>& y) {
+  return !sputsoft::numbers::equal(x, y);
+}
+template <typename R, typename E, typename N>
+inline bool operator!=(const expr<R, E>& x, const numb<N>& y) {
+  return !sputsoft::numbers::equal(x, y);
+}
+template <typename R, typename E, typename N>
+inline bool operator!=(const numb<N>& x, const expr<R, E>& y) {
+  return !sputsoft::numbers::equal(x, y);
+}
+template <typename N1, typename N2>
+inline bool operator!=(const numb<N1>& x, const numb<N2>& y) {
+  return !sputsoft::numbers::equal(x, y);
+}
+
+#define SPUTSOFT_NUMBERS_NOT_EQUAL_INT(TYPE) \
+template <typename R, typename E> \
+inline bool operator!=(const expr<R, E>& x, TYPE y) { return !sputsoft::numbers::equal(x, y); } \
+template <typename R, typename E> \
+inline bool operator!=(TYPE x, const expr<R, E>& y) { return !sputsoft::numbers::equal(x, y); } \
+template <typename N> \
+inline bool operator!=(const numb<N>& x, TYPE y) { return !sputsoft::numbers::equal(x, y); } \
+template <typename N> \
+inline bool operator!=(TYPE x, const numb<N>& y) { return !sputsoft::numbers::equal(x, y); }
+
+SPUTSOFT_NUMBERS_NOT_EQUAL_INT(unsigned short)
+SPUTSOFT_NUMBERS_NOT_EQUAL_INT(signed short)
+SPUTSOFT_NUMBERS_NOT_EQUAL_INT(unsigned)
+SPUTSOFT_NUMBERS_NOT_EQUAL_INT(signed)
+SPUTSOFT_NUMBERS_NOT_EQUAL_INT(unsigned long)
+SPUTSOFT_NUMBERS_NOT_EQUAL_INT(signed long)
+#ifdef SPUTSOFT_HAS_LONG_LONG
+SPUTSOFT_NUMBERS_NOT_EQUAL_INT(unsigned long long)
+SPUTSOFT_NUMBERS_NOT_EQUAL_INT(signed long long)
+#endif
+
+#define SPUTSOFT_NUMBERS_CMP_INT(REL, TYPE) \
+template <typename R, typename E> \
+inline bool operator REL(const expr<R, E>& x, TYPE y) { return sputsoft::numbers::compare(x, y) REL 0; } \
+template <typename R, typename E> \
+inline bool operator REL(TYPE x, const expr<R, E>& y) { return sputsoft::numbers::compare(x, y) REL 0; } \
+template <typename N> \
+inline bool operator REL(const numb<N>& x, TYPE y) { return sputsoft::numbers::compare(x, y) REL 0; } \
+template <typename N> \
+inline bool operator REL(TYPE x, const numb<N>& y) { return sputsoft::numbers::compare(x, y) REL 0; }
+
+#define SPUTSOFT_NUMBERS_CMP(REL) \
+template <typename R1, typename E1, typename R2, typename E2> \
+inline bool operator REL(const expr<R1, E1>& x, const expr<R2, E2>& y) { \
+  return sputsoft::numbers::compare(x, y) REL 0; \
+} \
+template <typename R, typename E, typename N> \
+inline bool operator REL(const expr<R, E>& x, const numb<N>& y) { \
+  return sputsoft::numbers::compare(x, y) REL 0; \
+} \
+template <typename R, typename E, typename N> \
+inline bool operator REL(const numb<N>& x, const expr<R, E>& y) { \
+  return sputsoft::numbers::compare(x, y) REL 0; \
+} \
+template <typename N1, typename N2> \
+inline bool operator REL(const numb<N1>& x, const numb<N2>& y) { \
+  return sputsoft::numbers::compare(x, y) REL 0; \
+} \
+SPUTSOFT_NUMBERS_CMP_INT(REL, unsigned short) \
+SPUTSOFT_NUMBERS_CMP_INT(REL, signed short) \
+SPUTSOFT_NUMBERS_CMP_INT(REL, unsigned) \
+SPUTSOFT_NUMBERS_CMP_INT(REL, signed) \
+SPUTSOFT_NUMBERS_CMP_INT(REL, unsigned long) \
+SPUTSOFT_NUMBERS_CMP_INT(REL, signed long)
+
+SPUTSOFT_NUMBERS_CMP(<)
+SPUTSOFT_NUMBERS_CMP(<=)
+SPUTSOFT_NUMBERS_CMP(>)
+SPUTSOFT_NUMBERS_CMP(>=)
+
+#ifdef SPUTSOFT_HAS_LONG_LONG
+SPUTSOFT_NUMBERS_CMP_INT(<, unsigned long long)
+SPUTSOFT_NUMBERS_CMP_INT(<, signed long long)
+SPUTSOFT_NUMBERS_CMP_INT(<=, unsigned long long)
+SPUTSOFT_NUMBERS_CMP_INT(<=, signed long long)
+SPUTSOFT_NUMBERS_CMP_INT(>, unsigned long long)
+SPUTSOFT_NUMBERS_CMP_INT(>, signed long long)
+SPUTSOFT_NUMBERS_CMP_INT(>=, unsigned long long)
+SPUTSOFT_NUMBERS_CMP_INT(>=, signed long long)
+#endif
+
+
+template <typename R, typename E>
+std::ostream& operator<<(std::ostream& os, const expr<R, E>& e) {
+  return os << (R) e;
+}
 
 } // namespace detail
 } // namespace numbers

@@ -470,6 +470,67 @@ private:
       return comp_num(x, numb(v).con);
   }
 
+  /* Binary shift left */
+
+  static void left_shift_num0(Con& z, const Con& u, std::size_t count) {
+    unsigned whole = count / digit_bits;
+    count %= digit_bits;
+    std::size_t zn = u.size() + whole;
+    if (count) {
+      digit_type s = LowLevel::lshift(z.get() + whole, u.get(), u.size(), count);
+      if (s) z[zn++] = s;
+    } else
+      std::copy_backward(u.get(), u.get() + u.size(), z.get() + zn);
+    std::fill_n(z.get(), whole, 0);
+    z.set_size(zn);
+  }
+
+  static void left_shift_num(Con& z, const Con& u, std::size_t count) {
+    if (u.is_empty())
+      z.set_size(0);
+    else if (!count)
+      set_num(z, u);
+    else {
+      std::size_t n = u.size() + (count + digit_bits - 1) / digit_bits;
+      if (!z.request_size(n)) {
+        Con t(n);
+        left_shift_num0(t, u, count);
+        z.swap(t);
+      } else
+        left_shift_num0(z, u, count);
+    }
+  }
+
+  /* Binary shift right */
+
+  static void right_shift_num0(Con& z, const Con& u, std::size_t count) {
+    unsigned whole = count / digit_bits;
+    count %= digit_bits;
+    std::size_t zn = u.size() - whole;
+    if (count) {
+      LowLevel::rshift(z.get(), u.get() + whole, zn, count);
+      if (!z[zn-1]) --zn;
+    } else
+      std::copy(u.get() + whole, u.get() + u.size(), z.get());
+    z.set_size(zn);
+  }
+
+  static void right_shift_num(Con& z, const Con& u, std::size_t count) {
+    if (u.is_empty() || count >= u.size()*digit_bits)
+      z.set_size(0);
+    else if (!count)
+      set_num(z, u);
+    else {
+      std::size_t n = u.size() - count/digit_bits;
+      if (!z.request_size(n)) {
+        Con t(n);
+        right_shift_num0(t, u, count);
+        z.swap(t);
+      } else
+        right_shift_num0(z, u, count);
+    }
+  }
+
 public:
   numb() {}
   template <typename V>
@@ -557,6 +618,14 @@ public:
   static inline void quotrem(numb& q, numb& r, const numb& x, const numb& y)
     { quotrem_num(q.con, r.con, x.con, y.con); }
   inline int cmp(const numb& v) const { return comp_num(con, v.con); }
+
+  inline void left_shift(const numb& x, std::ptrdiff_t count) {
+    if (count >= 0)
+      left_shift_num(con, x.con, count);
+    else
+      right_shift_num(con, x.con, -count);
+  }
+  inline void right_shift(const numb& x, std::ptrdiff_t count) { left_shift(x, -count); }
 
 };
 

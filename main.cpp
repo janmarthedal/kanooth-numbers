@@ -10,6 +10,12 @@
 #include <sputsoft/numbers/integer.hpp>
 #include <sputsoft/numbers/detail/overload.hpp>
 
+/*
+ * OK negate
+ * comparisons
+ * binary ops
+ */
+
 void test_natnum()
 {
   sputsoft::numbers::natural_number a, b=20u, c;
@@ -238,21 +244,42 @@ T test_f(const T& n)
 
 void overload()
 {
-  sputsoft::numbers::integer a, b=2u, c=123u, q, r;
+  integer a, b=2u, c=123u, q, r;
   a = (b + c) + (b + c);
   r = (a + c) % b;
   r = test_f(r);
   std::cout << r << std::endl;
   quotrem(q, r, a + c, b);
   std::cout << q << " " << r << std::endl;
+  //sputsoft::numbers::negate(c, c);
+  c = a + (-c);
+  std::cout << c << std::endl;
+  std::cout << a << std::endl;
+  if (a >= b)
+    std::cout << "Less" << std::endl;
+  else
+    std::cout << "Not less" << std::endl;
 }
+
+void test_binary()
+{
+  natural_number a=14u, b=9u, c;
+
+  c = binary_shift_left(a, 2);
+  std::cout << c << std::endl;
+
+  c = binary_shift_right(b, 2);
+  std::cout << c << std::endl;
+}
+
 
 int main()
 {
   //test_natnum();
   //test_int();
   //test_natural_number_named_ops();
-  overload();
+  //overload();
+  test_binary();
 
   return 0;
 }

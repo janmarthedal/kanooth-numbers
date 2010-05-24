@@ -85,6 +85,16 @@ private:
     number_type::quotrem(*q.num, *r.num, u, v);
   }
 
+  void left_shift_num(const number_type& x, std::ptrdiff_t count) {
+    if (!num.unique()) num.reset(new number_type);
+    num->left_shift(x, count);
+  }
+
+  void right_shift_num(const number_type& x, std::ptrdiff_t count) {
+    if (!num.unique()) num.reset(new number_type);
+    num->right_shift(x, count);
+  }
+
 public:
   numb() : num(new number_type) {}
   template <typename V>
@@ -161,6 +171,9 @@ public:
   inline static void quotrem(numb& q, numb& r, const numb& u, const numb& v)
     { quotrem_num(q, r, *u.num, *v.num); }
   inline int cmp(const numb& v) const { return num->cmp(*v.num); }
+
+  inline void left_shift(const numb& x, std::ptrdiff_t count) { left_shift_num(*x.num, count); }
+  inline void right_shift(const numb& x, std::ptrdiff_t count) { right_shift_num(*x.num, count); }
 
 };
 

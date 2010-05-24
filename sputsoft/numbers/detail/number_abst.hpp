@@ -217,6 +217,41 @@ struct quotrem_trunc_4_eval<numb<T>, R, V1, V2> {
   }
 };
 
+template <typename T1, typename T2>
+struct cmp_r2_eval<numb<T1>, numb<T2> > {
+  inline static int cmp(const numb<T1>& v1, const numb<T2>& v2) {
+    return v1.cmp(v2);
+  }
+};
+
+template <typename T1, typename T2>
+struct cmp_r2_eval<numb<T1>, T2 > {
+  inline static int cmp(const numb<T1>& v1, const T2& v2) {
+    return v1.cmp(v2);
+  }
+};
+
+template <typename T1, typename T2>
+struct cmp_r2_eval<T1, numb<T2> > {
+  inline static int cmp(const T1& v1, const numb<T2>& v2) {
+    return -v2.cmp(v1);
+  }
+};
+
+template <typename T, typename V>
+struct lshift_3_eval<numb<T>, V> {
+  static inline void lshift(numb<T>& r, const V& v, std::ptrdiff_t count) {
+    r.left_shift(v, count);
+  }
+};
+
+template <typename T, typename V>
+struct rshift_3_eval<numb<T>, V> {
+  static inline void rshift(numb<T>& r, const V& v, std::ptrdiff_t count) {
+    r.right_shift(v, count);
+  }
+};
+
 } // namespace detail
 } // namespace sputsoft
 } // namespace numbers

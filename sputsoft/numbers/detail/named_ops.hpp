@@ -38,14 +38,18 @@ namespace ops {
     struct rshift {};
   }
   namespace unary {
-    struct neg {};
+    struct negate {};
   }
 }
 
 template <typename Op, typename X, typename Y> struct resolve_binary;
-
 template <typename Op, typename T>
 struct resolve_binary<Op, T, T> {
+  typedef T return_type;
+};
+
+template <typename Op, typename T>
+struct resolve_unary {
   typedef T return_type;
 };
 
@@ -77,6 +81,18 @@ struct log2_floor_evaluator {
     std::size_t r = -1;
     while (n) { ++r; n >>= 1; }
     return r;
+  }
+};
+template <typename R, typename V>
+struct lshift_3_eval {
+  static inline void lshift(R& r, const V& v, std::ptrdiff_t count) {
+    r = count >= 0 ? v << count : v >> (-count);
+  }
+};
+template <typename R, typename V>
+struct rshift_3_eval {
+  static inline void rshift(R& r, const V& v, std::ptrdiff_t count) {
+    r = count >= 0 ? v >> count : v << (-count);
   }
 };
 template <typename R, typename Forw>                        struct set_4_eval;
@@ -232,6 +248,16 @@ quotrem_trunc(Q& q, const V1& v1, const V2& v2) {
   return r;
 }
 
+template <typename R, typename V1>
+inline void binary_shift_left(R& r, const V1& v1, std::ptrdiff_t count) {
+  detail::lshift_3_eval<R, V1>::lshift(r, v1, count);
+}
+
+template <typename R, typename V1>
+inline void binary_shift_right(R& r, const V1& v1, std::ptrdiff_t count) {
+  detail::rshift_3_eval<R, V1>::rshift(r, v1, count);
+}
+
 #define BINARY_RESULT_RETURNER(NAME, OP) \
 template <typename V1, typename V2> \
 typename detail::resolve_binary<detail::ops::binary::OP, V1, V2>::return_type \
@@ -252,6 +278,16 @@ BINARY_RESULT_RETURNER(rem, rem)
 BINARY_RESULT_RETURNER(rem_floor, rem_floor)
 BINARY_RESULT_RETURNER(rem_ceil, rem_ceil)
 BINARY_RESULT_RETURNER(rem_trunc, rem_trunc)
+BINARY_RESULT_RETURNER(binary_shift_left, lshift)
+BINARY_RESULT_RETURNER(binary_shift_right, rshift)
+
+template <typename T>
+typename detail::resolve_unary<detail::ops::unary::negate, T>::return_type
+negate(const T& v1) {
+  typename detail::resolve_unary<detail::ops::unary::negate, T>::return_type r;
+  negate(r, v1);
+  return r;
+}
 
 // other
 
