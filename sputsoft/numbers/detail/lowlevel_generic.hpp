@@ -79,7 +79,7 @@ private:
     if (!n) return 1;
     *rp = *xp + 1;
     ++rp; ++xp; --n;
-    copy(rp, xp, n);
+    copy_forward(rp, xp, n);
     return 0;
   }
 
@@ -94,7 +94,7 @@ private:
     if (!n) return 1;
     *rp = *xp - 1;
     ++rp; ++xp; --n;
-    copy(rp, xp, n);
+    copy_forward(rp, xp, n);
     return 0;
   }
 
@@ -246,12 +246,25 @@ private:
 public:
 
   // n >= 0
-  // rp == xp  or  {rp,n} and {xp,n} do not overlap
   template <typename T>
-  static inline void copy(T* z1, const T* x1, const std::size_t n)
+  static inline void copy_forward(T* z1, const T* x1, const std::size_t n)
   {
-    if (!n || z1 == x1) return;
-    std::copy(x1, x1 + n, z1);
+    if (n && z1 != x1)
+      std::copy(x1, x1 + n, z1);
+  }
+
+  // n >= 0
+  template <typename T>
+  static inline void copy_backward(T* z1, const T* x1, const std::size_t n)
+  {
+    if (n && z1 != x1)
+      std::copy_backward(x1, x1 + n, z1 + n);
+  }
+
+  template <typename T>
+  static inline void fill_zero(T* rp, const std::size_t n)
+  {
+    std::fill_n(rp, n, 0);
   }
 
   // n >= 0
@@ -266,7 +279,7 @@ public:
       if (z < y)
         return inc(rp, xp, n);
     }
-    copy(rp, xp, n);
+    copy_forward(rp, xp, n);
     return 0;
   }
 
@@ -291,7 +304,7 @@ public:
       if (x < y)
         return dec(rp, xp, n);
     }
-    copy(rp, xp, n);
+    copy_forward(rp, xp, n);
     return 0;
   }
 

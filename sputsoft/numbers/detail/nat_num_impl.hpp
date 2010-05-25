@@ -72,7 +72,7 @@ private:
     if (r.get() != x.get()) {
       std::size_t n = x.size();
       ensure_size(r, n);
-      LowLevel::copy(r.get(), x.get(), n);
+      LowLevel::copy_forward(r.get(), x.get(), n);
       r.set_size(n);
     }
   }
@@ -480,8 +480,9 @@ private:
       digit_type s = LowLevel::lshift(z.get() + whole, u.get(), u.size(), count);
       if (s) z[zn++] = s;
     } else
-      std::copy_backward(u.get(), u.get() + u.size(), z.get() + zn);
-    std::fill_n(z.get(), whole, 0);
+      LowLevel::copy_backward(z.get() + whole, u.get(), u.size());
+      //std::copy_backward(u.get(), u.get() + u.size(), z.get() + zn);
+    LowLevel::fill_zero(z.get(), whole);
     z.set_size(zn);
   }
 
@@ -511,7 +512,7 @@ private:
       LowLevel::rshift(z.get(), u.get() + whole, zn, count);
       if (!z[zn-1]) --zn;
     } else
-      std::copy(u.get() + whole, u.get() + u.size(), z.get());
+      LowLevel::copy_forward(z.get(), u.get() + whole, zn);
     z.set_size(zn);
   }
 

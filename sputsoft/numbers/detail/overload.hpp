@@ -61,7 +61,7 @@ struct resolve_type<expr<R, E> > {
 template <typename Op, typename X, typename Y> struct binary;
 template <typename Op, typename X> struct unary;
 
-template <typename R, typename R2, typename X, typename Y>
+/*template <typename R, typename R2, typename X, typename Y>
 struct expr<R, binary<ops::binary::add, X, expr<R2, unary<ops::unary::negate, Y> > > > {
   typename resolve_ref<X>::ref_type x;
   typename resolve_ref<Y>::ref_type y;
@@ -70,7 +70,7 @@ struct expr<R, binary<ops::binary::add, X, expr<R2, unary<ops::unary::negate, Y>
   expr(const X& _x, const expr<R2, unary<ops::unary::negate, Y> >& _y) : x(_x), y(_y.x) {}
   inline void assign(R& r) const { sputsoft::numbers::sub(r, (x_type) x, (y_type) y); }
   inline operator R() const { return sputsoft::numbers::sub((x_type) x, (y_type) y); }
-};
+};*/
 
 template <typename R, typename X, typename Y>
 struct expr<R, binary<ops::binary::add, X, Y> > {
@@ -129,6 +129,30 @@ public:
   expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
   inline void assign(R& r) const { sputsoft::numbers::rem(r, (x_type) x, (y_type) y); }
   inline operator R() const { return sputsoft::numbers::rem((x_type) x, (y_type) y); }
+};
+
+template <typename R, typename X, typename Y>
+class expr<R, binary<ops::binary::lshift, X, Y> > {
+  typename resolve_ref<X>::ref_type x;
+  typename resolve_ref<Y>::ref_type y;
+  typedef typename resolve_type<X>::type x_type;
+  typedef typename resolve_type<Y>::type y_type;
+public:
+  expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
+  inline void assign(R& r) const { sputsoft::numbers::binary_shift_left(r, (x_type) x, (y_type) y); }
+  inline operator R() const { return sputsoft::numbers::binary_shift_left((x_type) x, (y_type) y); }
+};
+
+template <typename R, typename X, typename Y>
+class expr<R, binary<ops::binary::rshift, X, Y> > {
+  typename resolve_ref<X>::ref_type x;
+  typename resolve_ref<Y>::ref_type y;
+  typedef typename resolve_type<X>::type x_type;
+  typedef typename resolve_type<Y>::type y_type;
+public:
+  expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
+  inline void assign(R& r) const { sputsoft::numbers::binary_shift_right(r, (x_type) x, (y_type) y); }
+  inline operator R() const { return sputsoft::numbers::binary_shift_right((x_type) x, (y_type) y); }
 };
 
 template <typename R, typename X>
@@ -232,6 +256,43 @@ SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(operator%, rem, unsigned long long)
 SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(operator%, rem, signed long long)
 #endif
 
+#define SPUTSOFT_NUMBERS_OVERLOAD_SHIFT(TYPE) \
+template <typename R, typename E> \
+expr<typename resolve_binary<ops::binary::lshift, R, TYPE>::return_type, \
+     binary<ops::binary::lshift, expr<R, E>, TYPE> > \
+operator<<(const expr<R, E>& x, TYPE y) { \
+  return expr<typename resolve_binary<ops::binary::lshift, R, TYPE>::return_type, \
+     binary<ops::binary::lshift, expr<R, E>, TYPE> >(x, y); \
+} \
+template <typename N> \
+expr<typename resolve_binary<ops::binary::lshift, numb<N>, TYPE>::return_type, \
+     binary<ops::binary::lshift, numb<N>, TYPE> > \
+operator<<(const numb<N>& x, TYPE y) { \
+  return expr<typename resolve_binary<ops::binary::lshift, numb<N>, TYPE>::return_type, \
+     binary<ops::binary::lshift, numb<N>, TYPE> >(x, y); \
+} \
+template <typename R, typename E> \
+expr<typename resolve_binary<ops::binary::rshift, R, TYPE>::return_type, \
+     binary<ops::binary::rshift, expr<R, E>, TYPE> > \
+operator>>(const expr<R, E>& x, TYPE y) { \
+  return expr<typename resolve_binary<ops::binary::rshift, R, TYPE>::return_type, \
+     binary<ops::binary::rshift, expr<R, E>, TYPE> >(x, y); \
+} \
+template <typename N> \
+expr<typename resolve_binary<ops::binary::rshift, numb<N>, TYPE>::return_type, \
+     binary<ops::binary::rshift, numb<N>, TYPE> > \
+operator>>(const numb<N>& x, TYPE y) { \
+  return expr<typename resolve_binary<ops::binary::rshift, numb<N>, TYPE>::return_type, \
+     binary<ops::binary::rshift, numb<N>, TYPE> >(x, y); \
+}
+
+SPUTSOFT_NUMBERS_OVERLOAD_SHIFT(unsigned short)
+SPUTSOFT_NUMBERS_OVERLOAD_SHIFT(signed short)
+SPUTSOFT_NUMBERS_OVERLOAD_SHIFT(unsigned)
+SPUTSOFT_NUMBERS_OVERLOAD_SHIFT(signed)
+SPUTSOFT_NUMBERS_OVERLOAD_SHIFT(unsigned long)
+SPUTSOFT_NUMBERS_OVERLOAD_SHIFT(signed long)
+
 template <typename N>
 expr<typename resolve_unary<ops::unary::negate, numb<N> >::return_type,
      unary<ops::unary::negate, numb<N> > >
@@ -263,6 +324,16 @@ inline numb<N>& operator/=(numb<N>& x, const T& y) {
 template <typename N, typename T>
 inline numb<N>& operator%=(numb<N>& x, const T& y) {
   return x = x % y;
+}
+
+template <typename N, typename T>
+inline numb<N>& operator<<=(numb<N>& x, const T& y) {
+  return x = x << y;
+}
+
+template <typename N, typename T>
+inline numb<N>& operator>>=(numb<N>& x, const T& y) {
+  return x = x >> y;
 }
 
 template <typename R1, typename E1, typename R2, typename E2>

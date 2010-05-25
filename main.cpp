@@ -263,12 +263,12 @@ void overload()
 
 void test_binary()
 {
-  natural_number a=14u, b=9u, c;
+  natural_number a=7u, b=9u, c;
 
-  c = binary_shift_left(a, 2);
+  c = a << (unsigned short) 99;
   std::cout << c << std::endl;
 
-  c = binary_shift_right(b, 2);
+  c <<= -99;
   std::cout << c << std::endl;
 }
 
