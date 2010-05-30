@@ -437,8 +437,8 @@ public:
     xp += n;
     yp += n;
     while (n--) {
-      int x = *--xp;
-      int y = *--yp;
+      T x = *--xp;
+      T y = *--yp;
       if (x < y) return -1;
       if (x > y) return 1;
     }

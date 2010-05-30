@@ -57,15 +57,15 @@ struct resolve_unary {
 
 template <typename R, typename V>
 struct set_2_eval {
-  inline void set(R& r, const V& v) { r = v; }
+  static inline void set(R& r, const V& v) { r = v; }
 };
 template <typename R, typename V>
 struct negate_2_eval {
-  inline void negate(R& r, const V& v) { r = -v; }
+  static inline void negate(R& r, const V& v) { r = -v; }
 };
 template <typename V1, typename V2>
 struct cmp_r2_eval {
-  static int cmp(const V1& v1, const V2& v2) {
+  static inline int cmp(const V1& v1, const V2& v2) {
     return v1 < v2 ? -1 : v1 > v2 ? 1 : 0;
   }
 };

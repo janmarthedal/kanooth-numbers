@@ -46,6 +46,16 @@ struct resolve_binary<ops::binary::rem, numb<natnum<T> >, unsigned long long> {
 };
 #endif
 
+/* Make compatible with integer literals */
+template <typename T>
+struct set_2_eval<numb<natnum<T> >, int> {
+  static inline void set(numb<natnum<T> >& r, int v) {
+    sputsoft::numbers::set(r, (unsigned) v);
+    //set_2_eval<numb<natnum<T> >, int>::set(r, (unsigned) v);
+  }
+};
+/*****************************************/
+
 template <typename T>
 struct log2_floor_evaluator<numb<natnum<T> > > {
   static std::size_t log2_floor(const numb<natnum<T> >& n) {
