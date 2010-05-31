@@ -77,7 +77,7 @@ void PE20()
 }
 
 
-void factorize_ex1()
+void factorize_example()
 {
   natural_number n = "123456789012345678901234567890";
   std::vector<natural_number> factors;
@@ -97,5 +97,5 @@ int main()
   PE3();
   PE16();
   PE20();
-  factorize_ex1();
+  factorize_example();
 }

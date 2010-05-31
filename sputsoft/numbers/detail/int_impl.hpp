@@ -283,6 +283,54 @@ public:
   inline void negate(const numb& v) { set_num(v.num, !v.positive); }
   operator bool() const { return num; }
 
+  inline void set(unsigned short v) { set_int(v); }
+  inline void add(const numb& v1, unsigned short v2) { _add(v1.num, v1.positive, v2, true); }
+  inline void add(unsigned short v1, const numb& v2) { _add(v2.num, v2.positive, v1, true); }
+  inline void sub(const numb& v1, unsigned short v2) { _add(v1.num, v1.positive, v2, false); }
+  inline void sub(unsigned short v1, const numb& v2) { _add(v2.num, v2.positive, v1, false); }
+  inline void mul(const numb& v1, unsigned short v2) { _mul(v1.num, v1.positive, v2, true); }
+  inline void mul(unsigned short v1, const numb& v2) { _mul(v2.num, v2.positive, v1, true); }
+  inline void div_floor(const numb& v1, unsigned short v2) { div_floor_int(v1.num, v1.positive, v2); }
+  static inline void rem_floor(unsigned short& r, const numb& v1, unsigned short v2)
+    { r = rem_floor_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_floor(numb& q, unsigned short& r, const numb& v1, unsigned short v2)
+    { r = q.quotrem_floor_int(v1.num, v1.positive, v2); }
+  inline void div_ceil(const numb& v1, unsigned short v2) { div_ceil_int(v1.num, v1.positive, v2); }
+  static inline void rem_ceil(unsigned short& r, const numb& v1, unsigned short v2)
+    { r = rem_ceil_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_ceil(numb& q, unsigned short& r, const numb& v1, unsigned short v2)
+    { r = q.quotrem_ceil_int(v1.num, v1.positive, v2); }
+  inline void div_trunc(const numb& v1, unsigned short v2) { div_trunc_int(v1.num, v1.positive, v2); }
+  static inline void rem_trunc(unsigned short& r, const numb& v1, unsigned short v2)
+    { r = rem_trunc_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_trunc(numb& q, unsigned short& r, const numb& v1, unsigned short v2)
+    { r = quotrem_trunc_int(v1.num, v1.positive, v2); }
+  inline signed cmp(unsigned short v) const { return cmp_int(num, positive, v); }
+
+  inline void set(signed short v) { set_int(v); }
+  inline void add(const numb& v1, signed short v2) { add_signed_int(v1.num, v1.positive, v2); }
+  inline void add(signed short v1, const numb& v2) { add_signed_int(v2.num, v2.positive, v1); }
+  inline void sub(const numb& v1, signed short v2) { add_signed_int(v1.num, v1.positive, -v2); }
+  inline void sub(signed short v1, const numb& v2) { add_signed_int(v2.num, !v2.positive, v1); }
+  inline void mul(const numb& v1, signed short v2) { mul_signed_int(v1.num, v1.positive, v2); }
+  inline void mul(signed short v1, const numb& v2) { mul_signed_int(v2.num, v2.positive, v1); }
+  inline void div_floor(const numb& v1, signed short v2) { div_floor_int(v1.num, v1.positive, v2); }
+  static inline void rem_floor(signed short& r, const numb& v1, signed short v2)
+    { r = rem_floor_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_floor(numb& q, signed short& r, const numb& v1, signed short v2)
+    { r = q.quotrem_floor_int(v1.num, v1.positive, v2); }
+  inline void div_ceil(const numb& v1, signed short v2) { div_ceil_int(v1.num, v1.positive, v2); }
+  static inline void rem_ceil(signed short& r, const numb& v1, signed short v2)
+    { r = rem_ceil_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_ceil(numb& q, signed short& r, const numb& v1, signed short v2)
+    { r = q.quotrem_ceil_int(v1.num, v1.positive, v2); }
+  inline void div_trunc(const numb& v1, signed short v2) { div_trunc_int(v1.num, v1.positive, v2); }
+  static inline void rem_trunc(signed short& r, const numb& v1, signed short v2)
+    { r = rem_trunc_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_trunc(numb& q, signed short& r, const numb& v1, signed short v2)
+    { r = q.quotrem_trunc_int(v1.num, v1.positive, v2); }
+  inline signed cmp(signed short v) const { return cmp_int(num, positive, v); }
+
   inline void set(unsigned v) { set_int(v); }
   inline void add(const numb& v1, unsigned v2) { _add(v1.num, v1.positive, v2, true); }
   inline void add(unsigned v1, const numb& v2) { _add(v2.num, v2.positive, v1, true); }
@@ -330,6 +378,104 @@ public:
   static inline void quotrem_trunc(numb& q, signed& r, const numb& v1, signed v2)
     { r = q.quotrem_trunc_int(v1.num, v1.positive, v2); }
   inline signed cmp(signed v) const { return cmp_int(num, positive, v); }
+
+  inline void set(unsigned long v) { set_int(v); }
+  inline void add(const numb& v1, unsigned long v2) { _add(v1.num, v1.positive, v2, true); }
+  inline void add(unsigned long v1, const numb& v2) { _add(v2.num, v2.positive, v1, true); }
+  inline void sub(const numb& v1, unsigned long v2) { _add(v1.num, v1.positive, v2, false); }
+  inline void sub(unsigned long v1, const numb& v2) { _add(v2.num, v2.positive, v1, false); }
+  inline void mul(const numb& v1, unsigned long v2) { _mul(v1.num, v1.positive, v2, true); }
+  inline void mul(unsigned long v1, const numb& v2) { _mul(v2.num, v2.positive, v1, true); }
+  inline void div_floor(const numb& v1, unsigned long v2) { div_floor_int(v1.num, v1.positive, v2); }
+  static inline void rem_floor(unsigned long& r, const numb& v1, unsigned long v2)
+    { r = rem_floor_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_floor(numb& q, unsigned long& r, const numb& v1, unsigned long v2)
+    { r = q.quotrem_floor_int(v1.num, v1.positive, v2); }
+  inline void div_ceil(const numb& v1, unsigned long v2) { div_ceil_int(v1.num, v1.positive, v2); }
+  static inline void rem_ceil(unsigned long& r, const numb& v1, unsigned long v2)
+    { r = rem_ceil_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_ceil(numb& q, unsigned long& r, const numb& v1, unsigned long v2)
+    { r = q.quotrem_ceil_int(v1.num, v1.positive, v2); }
+  inline void div_trunc(const numb& v1, unsigned long v2) { div_trunc_int(v1.num, v1.positive, v2); }
+  static inline void rem_trunc(unsigned long& r, const numb& v1, unsigned long v2)
+    { r = rem_trunc_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_trunc(numb& q, unsigned long& r, const numb& v1, unsigned long v2)
+    { r = quotrem_trunc_int(v1.num, v1.positive, v2); }
+  inline signed cmp(unsigned long v) const { return cmp_int(num, positive, v); }
+
+  inline void set(signed long v) { set_int(v); }
+  inline void add(const numb& v1, signed long v2) { add_signed_int(v1.num, v1.positive, v2); }
+  inline void add(signed long v1, const numb& v2) { add_signed_int(v2.num, v2.positive, v1); }
+  inline void sub(const numb& v1, signed long v2) { add_signed_int(v1.num, v1.positive, -v2); }
+  inline void sub(signed long v1, const numb& v2) { add_signed_int(v2.num, !v2.positive, v1); }
+  inline void mul(const numb& v1, signed long v2) { mul_signed_int(v1.num, v1.positive, v2); }
+  inline void mul(signed long v1, const numb& v2) { mul_signed_int(v2.num, v2.positive, v1); }
+  inline void div_floor(const numb& v1, signed long v2) { div_floor_int(v1.num, v1.positive, v2); }
+  static inline void rem_floor(signed long& r, const numb& v1, signed long v2)
+    { r = rem_floor_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_floor(numb& q, signed long& r, const numb& v1, signed long v2)
+    { r = q.quotrem_floor_int(v1.num, v1.positive, v2); }
+  inline void div_ceil(const numb& v1, signed long v2) { div_ceil_int(v1.num, v1.positive, v2); }
+  static inline void rem_ceil(signed long& r, const numb& v1, signed long v2)
+    { r = rem_ceil_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_ceil(numb& q, signed long& r, const numb& v1, signed long v2)
+    { r = q.quotrem_ceil_int(v1.num, v1.positive, v2); }
+  inline void div_trunc(const numb& v1, signed long v2) { div_trunc_int(v1.num, v1.positive, v2); }
+  static inline void rem_trunc(signed long& r, const numb& v1, signed long v2)
+    { r = rem_trunc_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_trunc(numb& q, signed long& r, const numb& v1, signed long v2)
+    { r = q.quotrem_trunc_int(v1.num, v1.positive, v2); }
+  inline signed cmp(signed long v) const { return cmp_int(num, positive, v); }
+
+#ifdef SPUTSOFT_HAS_LONG_LONG
+  inline void set(unsigned long long v) { set_int(v); }
+  inline void add(const numb& v1, unsigned long long v2) { _add(v1.num, v1.positive, v2, true); }
+  inline void add(unsigned long long v1, const numb& v2) { _add(v2.num, v2.positive, v1, true); }
+  inline void sub(const numb& v1, unsigned long long v2) { _add(v1.num, v1.positive, v2, false); }
+  inline void sub(unsigned long long v1, const numb& v2) { _add(v2.num, v2.positive, v1, false); }
+  inline void mul(const numb& v1, unsigned long long v2) { _mul(v1.num, v1.positive, v2, true); }
+  inline void mul(unsigned long long v1, const numb& v2) { _mul(v2.num, v2.positive, v1, true); }
+  inline void div_floor(const numb& v1, unsigned long long v2) { div_floor_int(v1.num, v1.positive, v2); }
+  static inline void rem_floor(unsigned long long& r, const numb& v1, unsigned long long v2)
+    { r = rem_floor_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_floor(numb& q, unsigned long long& r, const numb& v1, unsigned long long v2)
+    { r = q.quotrem_floor_int(v1.num, v1.positive, v2); }
+  inline void div_ceil(const numb& v1, unsigned long long v2) { div_ceil_int(v1.num, v1.positive, v2); }
+  static inline void rem_ceil(unsigned long long& r, const numb& v1, unsigned long long v2)
+    { r = rem_ceil_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_ceil(numb& q, unsigned long long& r, const numb& v1, unsigned long long v2)
+    { r = q.quotrem_ceil_int(v1.num, v1.positive, v2); }
+  inline void div_trunc(const numb& v1, unsigned long long v2) { div_trunc_int(v1.num, v1.positive, v2); }
+  static inline void rem_trunc(unsigned long long& r, const numb& v1, unsigned long long v2)
+    { r = rem_trunc_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_trunc(numb& q, unsigned long long& r, const numb& v1, unsigned long long v2)
+    { r = quotrem_trunc_int(v1.num, v1.positive, v2); }
+  inline signed cmp(unsigned long long v) const { return cmp_int(num, positive, v); }
+
+  inline void set(signed long long v) { set_int(v); }
+  inline void add(const numb& v1, signed long long v2) { add_signed_int(v1.num, v1.positive, v2); }
+  inline void add(signed long long v1, const numb& v2) { add_signed_int(v2.num, v2.positive, v1); }
+  inline void sub(const numb& v1, signed long long v2) { add_signed_int(v1.num, v1.positive, -v2); }
+  inline void sub(signed long long v1, const numb& v2) { add_signed_int(v2.num, !v2.positive, v1); }
+  inline void mul(const numb& v1, signed long long v2) { mul_signed_int(v1.num, v1.positive, v2); }
+  inline void mul(signed long long v1, const numb& v2) { mul_signed_int(v2.num, v2.positive, v1); }
+  inline void div_floor(const numb& v1, signed long long v2) { div_floor_int(v1.num, v1.positive, v2); }
+  static inline void rem_floor(signed long long& r, const numb& v1, signed long long v2)
+    { r = rem_floor_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_floor(numb& q, signed long long& r, const numb& v1, signed long long v2)
+    { r = q.quotrem_floor_int(v1.num, v1.positive, v2); }
+  inline void div_ceil(const numb& v1, signed long long v2) { div_ceil_int(v1.num, v1.positive, v2); }
+  static inline void rem_ceil(signed long long& r, const numb& v1, signed long long v2)
+    { r = rem_ceil_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_ceil(numb& q, signed long long& r, const numb& v1, signed long long v2)
+    { r = q.quotrem_ceil_int(v1.num, v1.positive, v2); }
+  inline void div_trunc(const numb& v1, signed long long v2) { div_trunc_int(v1.num, v1.positive, v2); }
+  static inline void rem_trunc(signed long long& r, const numb& v1, signed long long v2)
+    { r = rem_trunc_int(v1.num, v1.positive, v2); }
+  static inline void quotrem_trunc(numb& q, signed long long& r, const numb& v1, signed long long v2)
+    { r = q.quotrem_trunc_int(v1.num, v1.positive, v2); }
+  inline signed cmp(signed long long v) const { return cmp_int(num, positive, v); }
+#endif
 
   inline void add(const numb& v1, const numb& v2) { _add(v1.num, v1.positive, v2.num, v2.positive); }
   inline void add(const numb& v1, const NUM& v2)  { _add(v1.num, v1.positive, v2, true); }
