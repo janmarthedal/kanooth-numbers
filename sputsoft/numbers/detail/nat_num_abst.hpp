@@ -51,10 +51,30 @@ template <typename T>
 struct set_2_eval<numb<natnum<T> >, int> {
   static inline void set(numb<natnum<T> >& r, int v) {
     sputsoft::numbers::set(r, (unsigned) v);
-    //set_2_eval<numb<natnum<T> >, int>::set(r, (unsigned) v);
   }
 };
 /*****************************************/
+
+template <typename T>
+struct abs_2_eval<numb<natnum<T> >, numb<natnum<T> > > {
+  static inline void abs(numb<natnum<T> >& r, const numb<natnum<T> >& v) {
+    sputsoft::numbers::set(r, v);
+  }
+};
+
+template <typename T>
+struct is_positive_r1_eval<numb<natnum<T> > > {
+  static inline bool is_positive(const numb<natnum<T> >& v) {
+    return !v.is_zero();
+  }
+};
+
+template <typename T>
+struct is_negative_r1_eval<numb<natnum<T> > > {
+  static inline bool is_negative(const numb<natnum<T> >& v) {
+    return false;
+  }
+};
 
 template <typename T>
 struct log2_floor_evaluator<numb<natnum<T> > > {

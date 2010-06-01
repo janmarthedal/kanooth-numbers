@@ -20,6 +20,7 @@
 #include <sputsoft/numbers/natural_number.hpp>
 #include <sputsoft/numbers/integer.hpp>
 #include <sputsoft/numbers/common_functions.hpp>
+#include <sputsoft/numbers/gcd.hpp>
 
 using sputsoft::numbers::natural_number;
 using sputsoft::numbers::integer;
@@ -27,7 +28,9 @@ using sputsoft::numbers::factorize;
 using sputsoft::numbers::factorial;
 using sputsoft::numbers::power;
 using sputsoft::numbers::set;
+using sputsoft::numbers::add;
 using sputsoft::numbers::quotrem;
+using sputsoft::numbers::gcd;
 
 
 natural_number digit_sum(natural_number n)
@@ -91,11 +94,38 @@ void factorize_example()
   std::cout << std::endl;
 }
 
+void gcd_example1()
+{
+  natural_number a = "123456789012345678901234567890";
+  natural_number b = "9876543210";
+
+  natural_number c = gcd(a, b);
+
+  std::cout << c << std::endl;
+}
+
+void gcd_example2()
+{
+  integer a = "123456789012345678901234567890";
+  integer b = "-9876543210";
+
+  integer c = gcd(a, b);
+
+  std::cout << c << std::endl;
+}
+
+void int_example()
+{
+  int a, b=1, c=2;
+  add(a, b, c);
+  std::cout << a << std::endl;
+}
 
 int main()
 {
-  PE3();
+  /*PE3();
   PE16();
   PE20();
-  factorize_example();
+  factorize_example();*/
+  gcd_example2();
 }

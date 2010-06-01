@@ -238,6 +238,13 @@ struct cmp_r2_eval<T1, numb<T2> > {
   }
 };
 
+template <typename T>
+struct is_zero_r1_eval<numb<T> > {
+  static inline bool is_zero(const numb<T>& v) {
+    return v.is_zero();
+  }
+};
+
 template <typename T, typename V>
 struct lshift_3_eval<numb<T>, V> {
   static inline void lshift(numb<T>& r, const V& v, std::ptrdiff_t count) {

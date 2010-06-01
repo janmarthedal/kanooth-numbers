@@ -281,7 +281,10 @@ public:
   inline void set(const numb& v) { set_num(v.num, v.positive); }
   inline void set(const NUM& n) { set_num(n, true); }
   inline void negate(const numb& v) { set_num(v.num, !v.positive); }
-  operator bool() const { return num; }
+  inline bool is_zero() const { return !num; }
+  inline bool is_positive() const { return num && positive; }
+  inline bool is_negative() const { return num && !positive; }
+  inline operator bool() const { return !is_zero(); }
 
   inline void set(unsigned short v) { set_int(v); }
   inline void add(const numb& v1, unsigned short v2) { _add(v1.num, v1.positive, v2, true); }

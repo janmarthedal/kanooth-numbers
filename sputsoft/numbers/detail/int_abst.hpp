@@ -17,12 +17,13 @@
 
 #include <sputsoft/numbers/detail/number_abst.hpp>
 
+#include "int_impl.hpp"
+
 namespace sputsoft {
 namespace numbers {
 namespace detail {
 
-template <typename T>
-class intnum;
+template <typename T> class intnum;
 
 #define RESOLVE_INTNUM_REM(TYPE) \
 template <typename T> \
@@ -45,6 +46,7 @@ RESOLVE_INTNUM_REM(unsigned long long)
 RESOLVE_INTNUM_REM(signed long long)
 #endif
 
+
 template <typename T, typename V1, typename V2>
 struct div_3_eval<numb<intnum<T> >, V1, V2> {
   static void div(numb<intnum<T> >& r, const V1& v1, const V2& v2) {
@@ -63,6 +65,20 @@ template <typename T, typename R, typename V1, typename V2>
 struct quotrem_4_eval<numb<intnum<T> >, R, V1, V2> {
   static void quotrem(numb<intnum<T> >& q, R& r, const V1& v1, const V2& v2) {
     numb<intnum<T> >::quotrem_floor(q, r, v1, v2);
+  }
+};
+
+template <typename T>
+struct is_positive_r1_eval<numb<intnum<T> > > {
+  static inline bool is_positive(const numb<intnum<T> >& v) {
+    return v.is_positive();
+  }
+};
+
+template <typename T>
+struct is_negative_r1_eval<numb<intnum<T> > > {
+  static inline bool is_negative(const numb<intnum<T> >& v) {
+    return v.is_negative();
   }
 };
 

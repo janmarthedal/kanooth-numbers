@@ -21,6 +21,8 @@ namespace sputsoft {
 namespace numbers {
 namespace detail {
 
+/* Operator names, used when overloading and for resolving return types */
+
 namespace ops {
   namespace binary {
     struct add {};
@@ -39,78 +41,45 @@ namespace ops {
   }
   namespace unary {
     struct negate {};
+    struct abs {};
   }
 }
 
 template <typename Op, typename X, typename Y> struct resolve_binary;
 template <typename Op, typename T>
-struct resolve_binary<Op, T, T> {
-  typedef T return_type;
-};
-
-template <typename Op, typename T>
 struct resolve_unary {
   typedef T return_type;
 };
 
-// default evaluators
+// evaluators
 
-template <typename R, typename V>
-struct set_2_eval {
-  static inline void set(R& r, const V& v) { r = v; }
-};
-template <typename R, typename V>
-struct negate_2_eval {
-  static inline void negate(R& r, const V& v) { r = -v; }
-};
-template <typename V1, typename V2>
-struct cmp_r2_eval {
-  static inline int cmp(const V1& v1, const V2& v2) {
-    return v1 < v2 ? -1 : v1 > v2 ? 1 : 0;
-  }
-};
-template <typename V1, typename V2>
-struct equal_r2_eval {
-  static bool equal(const V1& v1, const V2& v2) {
-    return cmp_r2_eval<V1, V2>::cmp(v1, v2) == 0;
-  }
-};
-template <typename T>
-struct log2_floor_evaluator {
-  static std::size_t log2_floor(T n) {
-    std::size_t r = -1;
-    while (n) { ++r; n >>= 1; }
-    return r;
-  }
-};
-template <typename R, typename V>
-struct lshift_3_eval {
-  static inline void lshift(R& r, const V& v, std::ptrdiff_t count) {
-    r = count >= 0 ? v << count : v >> (-count);
-  }
-};
-template <typename R, typename V>
-struct rshift_3_eval {
-  static inline void rshift(R& r, const V& v, std::ptrdiff_t count) {
-    r = count >= 0 ? v >> count : v << (-count);
-  }
-};
 template <typename R, typename Forw>                        struct set_4_eval;
+template <typename R, typename V>                           struct set_2_eval;
+template <typename R, typename V>                           struct negate_2_eval;
+template <typename R, typename V>                           struct abs_2_eval;
 template <typename R, typename V1, typename V2>             struct add_3_eval;
 template <typename R, typename V1, typename V2>             struct sub_3_eval;
 template <typename R, typename V1, typename V2>             struct mul_3_eval;
 template <typename R, typename V1, typename V2>             struct div_3_eval;
+template <typename R, typename V1, typename V2>             struct rem_3_eval;
+template <typename Q, typename R, typename V1, typename V2> struct quotrem_4_eval;
 template <typename R, typename V1, typename V2>             struct div_floor_3_eval;
 template <typename R, typename V1, typename V2>             struct div_ceil_3_eval;
 template <typename R, typename V1, typename V2>             struct div_trunc_3_eval;
-template <typename R, typename V1, typename V2>             struct rem_3_eval;
 template <typename R, typename V1, typename V2>             struct rem_floor_3_eval;
 template <typename R, typename V1, typename V2>             struct rem_ceil_3_eval;
 template <typename R, typename V1, typename V2>             struct rem_trunc_3_eval;
-template <typename Q, typename R, typename V1, typename V2> struct quotrem_4_eval;
 template <typename Q, typename R, typename V1, typename V2> struct quotrem_floor_4_eval;
 template <typename Q, typename R, typename V1, typename V2> struct quotrem_ceil_4_eval;
 template <typename Q, typename R, typename V1, typename V2> struct quotrem_trunc_4_eval;
+template <typename V1, typename V2>                         struct cmp_r2_eval;
+template <typename V1, typename V2>                         struct equal_r2_eval;
+template <typename T>                                       struct is_zero_r1_eval;
+template <typename T>                                       struct is_positive_r1_eval;
+template <typename T>                                       struct is_negative_r1_eval;
+template <typename T>                                       struct log2_floor_evaluator;
+template <typename R, typename V>                           struct lshift_3_eval;
+template <typename R, typename V>                           struct rshift_3_eval;
 
 } // namespace detail
 
@@ -122,6 +91,11 @@ inline void set(R& r, const V& v) {
 template <typename R, typename V>
 inline void negate(R& r, const V& v) {
   detail::negate_2_eval<R, V>::negate(r, v);
+}
+
+template <typename R, typename V>
+inline void abs(R& r, const V& v) {
+  detail::abs_2_eval<R, V>::abs(r, v);
 }
 
 template <typename R, typename Forw>
@@ -289,6 +263,14 @@ negate(const T& v1) {
   return r;
 }
 
+template <typename T>
+typename detail::resolve_unary<detail::ops::unary::abs, T>::return_type
+abs(const T& v1) {
+  typename detail::resolve_unary<detail::ops::unary::abs, T>::return_type r;
+  abs(r, v1);
+  return r;
+}
+
 // other
 
 template <typename T>
@@ -304,6 +286,21 @@ inline int compare(const V1& v1, const V2& v2) {
 template <typename V1, typename V2>
 inline bool equal(const V1& v1, const V2& v2) {
   return detail::equal_r2_eval<V1, V2>::equal(v1, v2);
+}
+
+template <typename T>
+inline bool is_zero(const T& v) {
+  return detail::is_zero_r1_eval<T>::is_zero(v);
+}
+
+template <typename T>
+inline bool is_positive(const T& v) {
+  return detail::is_positive_r1_eval<T>::is_positive(v);
+}
+
+template <typename T>
+inline bool is_negative(const T& v) {
+  return detail::is_negative_r1_eval<T>::is_negative(v);
 }
 
 } // namespace numbers

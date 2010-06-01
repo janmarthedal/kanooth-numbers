@@ -543,9 +543,8 @@ public:
     sputsoft::numbers::set(*this, v);
     return *this;
   }
-  operator bool() const {
-    return !con.is_empty();
-  }
+  inline bool is_zero() const { return con.is_empty(); }
+  inline operator bool() const { return !is_zero(); }
   std::size_t log2_floor() const {
     std::size_t n = con.size();
     if (!n) return (std::size_t) -1;

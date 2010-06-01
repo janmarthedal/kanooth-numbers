@@ -106,7 +106,8 @@ public:
     sputsoft::numbers::set(*this, v);
     return *this;
   }
-  operator bool() const { return *num; }
+  inline bool is_zero() const { return num->is_zero(); }
+  inline operator bool() const { return !is_zero(); }
   std::size_t log2_floor() const { return num->log2_floor(); }
 
   inline void set(unsigned short v) { _set(v); }

@@ -17,6 +17,7 @@
 
 #include <sputsoft/numbers/natural_number.hpp>
 #include <sputsoft/numbers/detail/int_impl.hpp>
+#include <sputsoft/numbers/detail/default_ops.hpp>
 #include <sputsoft/numbers/detail/overload.hpp>
 
 namespace sputsoft {
