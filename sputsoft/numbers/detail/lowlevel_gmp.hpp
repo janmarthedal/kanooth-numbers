@@ -29,18 +29,30 @@ struct lowlevel_gmp {
   static inline void copy_forward(digit_type* rp, const digit_type* xp,
                                   const std::size_t n) {
     if (n && rp != xp)
+#if __GNU_MP__ >= 5
       mpn_copyi(rp, xp, n);
+#else
+      std::copy(xp, xp + n, rp);
+#endif
   }
 
   // n >= 0
   static inline void copy_backward(digit_type* rp, const digit_type* xp,
                                    const std::size_t n) {
     if (n && rp != xp)
+#if __GNU_MP__ >= 5
       mpn_copyd(rp, xp, n);
+#else
+      std::copy_backward(xp, xp + n, rp + n);
+#endif
   }
 
   static inline void fill_zero(digit_type* rp, const std::size_t n) {
+#if __GNU_MP__ >= 5
     mpn_zero(rp, n);
+#else
+    std::fill_n(rp, n, 0);
+#endif
   }
 
   // n >= 0

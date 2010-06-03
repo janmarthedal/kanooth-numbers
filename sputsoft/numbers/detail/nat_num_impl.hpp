@@ -453,7 +453,7 @@ private:
     std::size_t yn = y.size();
     if (xn != yn) return compare_ints(xn, yn);
     if (!xn) return 0;
-    LowLevel::comp(x.get(), y.get(), xn);
+    return LowLevel::comp(x.get(), y.get(), xn);
   }
 
   /* Compare numbers to integer */

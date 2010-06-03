@@ -20,7 +20,7 @@
 #include <sputsoft/numbers/natural_number.hpp>
 #include <sputsoft/numbers/integer.hpp>
 #include <sputsoft/numbers/common_functions.hpp>
-#include <sputsoft/numbers/gcd.hpp>
+#include <sputsoft/numbers/number_theory.hpp>
 
 using sputsoft::numbers::natural_number;
 using sputsoft::numbers::integer;
@@ -35,26 +35,17 @@ using sputsoft::numbers::gcd;
 
 natural_number digit_sum(natural_number n)
 {
-  natural_number res, q;
-  unsigned r;
-
-  while (n) {
-    quotrem(q, r, n, 10u);
-    res += r;
-    n = q;
-  }
-
+  natural_number res;
+  while (n)
+    res += quotrem(n, n, 10u);
   return res;
 }
 
 // Find largest prime factor of 600851475143
 void PE3()
 {
-  natural_number n;
   std::vector<natural_number> factors;
-
-  n = "600851475143";
-
+  natural_number n = "600851475143";
   std::cout << "Number: " << n << std::endl;
   factorize(n, std::back_inserter(factors));
   std::cout << "Largest prime factor: " << factors.back() << std::endl << std::endl;
@@ -91,27 +82,18 @@ void factorize_example()
   std::cout << "Factors:";
   for (std::vector<natural_number>::const_iterator p=factors.begin(); p != factors.end(); ++p)
     std::cout << " " << *p;
-  std::cout << std::endl;
+  std::cout << std::endl << std::endl;
 }
 
-void gcd_example1()
-{
-  natural_number a = "123456789012345678901234567890";
-  natural_number b = "9876543210";
-
-  natural_number c = gcd(a, b);
-
-  std::cout << c << std::endl;
-}
-
-void gcd_example2()
+void gcd_example()
 {
   integer a = "123456789012345678901234567890";
   integer b = "-9876543210";
+  integer c;
+  
+  gcd(c, a, b);
 
-  integer c = gcd(a, b);
-
-  std::cout << c << std::endl;
+  std::cout << "gcd(" << a << "," << b << ") = " << c << std::endl << std::endl;
 }
 
 void int_example()
@@ -123,9 +105,9 @@ void int_example()
 
 int main()
 {
-  /*PE3();
+  PE3();
   PE16();
   PE20();
-  factorize_example();*/
-  gcd_example2();
+  factorize_example();
+  gcd_example();
 }

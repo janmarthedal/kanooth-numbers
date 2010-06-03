@@ -86,12 +86,11 @@ struct log2_floor_evaluator<numb<natnum<T> > > {
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const numb<natnum<T> >& n)
 {
-  typedef numb<natnum<T> > num_type;
   unsigned max_digits = n ? log2_floor(n) / 3 + 2 : 2;
   char st[max_digits];
   char* p = st + max_digits;
   *--p = 0;
-  num_type t = n;
+  numb<natnum<T> > t = n;
   do {
     unsigned r = quotrem(t, t, 10u);
     *--p = (char) r + '0';

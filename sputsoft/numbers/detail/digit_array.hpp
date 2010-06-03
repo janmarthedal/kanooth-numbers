@@ -32,16 +32,26 @@ private:
 public:
   typedef T digit_type;
   digit_array() : used(0), allocated(0), digits(0) {}
+  // min_size > 0
   explicit digit_array(std::size_t min_size) : used(0) {
     std::pair<T*, std::ptrdiff_t> m = alloc.allocate(min_size);
     allocated = m.second;
     digits = m.first;
   }
   digit_array(const digit_array& other) : used(other.used) {
-    std::pair<T*, std::ptrdiff_t> m = alloc.allocate(used);
-    allocated = m.second;
-    digits = m.first;
-    std::copy(other.digits, other.digits + used, digits);
+    if (other.used) {
+      std::pair<T*, std::ptrdiff_t> m = alloc.allocate(used);
+      digits = m.first;
+      allocated = m.second;
+      std::copy(other.digits, other.digits + other.used, digits);
+    } else {
+      digits = 0;
+      allocated = 0;
+    }
+  }
+  digit_array& operator=(const digit_array& other) {
+    digit_array(other).swap(*this);
+    return *this;
   }
   ~digit_array() {
     if (digits) alloc.deallocate(digits, allocated);
@@ -54,7 +64,7 @@ public:
   std::size_t size() const { return used; }
   void set_size(std::size_t n) { used = n; }
   bool request_size(std::size_t n) const { return n <= allocated; }
-  bool is_empty() const { return used == 0; }
+  bool is_empty() const { return !used; }
   const T* get() const { return digits; }
   T* get() { return digits; }
   const T& operator[](std::size_t n) const { return digits[n]; }

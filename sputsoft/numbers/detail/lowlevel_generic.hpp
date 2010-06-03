@@ -152,44 +152,48 @@ private:
   }
 
   template <typename T>
-  static void double_div(T uhigh, T ulow, T v, T& quot, T& rem)
+  static unsigned nlz(T v)
+  {
+    const unsigned int digitbits = boost::integer_traits<T>::digits;
+    const T mask = ((T) 1) << (digitbits - 1);
+    unsigned s = 0;
+    while (!(v & mask)) {
+      v <<= 1;
+      ++s;
+    }
+    return s;
+  }
+
+  // Assumes nlz(v) = 0
+  template <typename T>
+  static void double_div_normalized(T uhigh, T ulow, T v, T& quot, T& rem)
   {
     const unsigned int digitbits = boost::integer_traits<T>::digits;
     const unsigned int halfbits = digitbits / 2;
     const T lowmask = (((T) 1) << halfbits) - 1;
     const T highmask = lowmask << halfbits;
-
     const T v1 = v >> halfbits;
+    const T v0 = v & lowmask;
     const T u1 = ulow >> halfbits;
     const T u0 = ulow & lowmask;
     T q1, q0, r;
 
-    if (!v1) {
-      r = (uhigh << halfbits) | u1;
-      q1 = r / v;
-      r  = r % v;
-      r = (r << halfbits) | u0;
-      q0 = r / v;
-      r  = r % v;
-    } else {
-      const T v0 = v & lowmask;
-      q1 = uhigh / v1;
-      r  = uhigh % v1;
-      while ((q1 & highmask) || q1*v0 > ((r << halfbits) | u1)) {
-        --q1;
-        r += v1;
-        if (r & highmask) break;
-      }
-      r = ((r << halfbits) | u1) - q1*v0;
-      q0 = r / v1;
-      r = r % v1;
-      while ((q0 & highmask) || q0*v0 > ((r << halfbits) | u0)) {
-        --q0;
-        r += v1;
-        if (r & highmask) break;
-      }
-      r = ((r << halfbits) | u0) - q0*v0;
+    q1 = uhigh / v1;
+    r  = uhigh % v1;
+    while ((q1 & highmask) || q1*v0 > ((r << halfbits) | u1)) {
+      --q1;
+      r += v1;
+      if (r & highmask) break;
     }
+    r = ((r << halfbits) | u1) - q1*v0;
+    q0 = r / v1;
+    r = r % v1;
+    while ((q0 & highmask) || q0*v0 > ((r << halfbits) | u0)) {
+      --q0;
+      r += v1;
+      if (r & highmask) break;
+    }
+    r = ((r << halfbits) | u0) - q0*v0;
 
     quot = (q1 << halfbits) | q0;
     rem = r;
@@ -230,7 +234,7 @@ private:
       rh = ujn1 + vn1;
       if (rh < vn1) return qh;
     } else
-      double_div(ujn, ujn1, vn1, qh, rh);
+      double_div_normalized(ujn, ujn1, vn1, qh, rh);
 
     double_mult(qh, vn2, low, high);
     while (high > rh || (high == rh && low > ujn2)) {
@@ -332,20 +336,22 @@ public:
   }
 
   template <typename T>
-  static inline T quotrem_1(T* z1, const T* x1, std::size_t n, const T y) {
-    const T* x2 = x1 + n;
+  static inline T quotrem_1(T* z1, const T* x1, std::size_t n, T y) {
     T* z2 = z1 + n;
-    T r = 0;
-    while (x2 != x1)
-      double_div(r, *--x2, y, *--z2, r);
-    return r;
-  }
-
-  template <typename T>
-  static std::size_t floor_log2(T n) {
-    std::size_t r = -1;
-    while (n) { ++r; n >>= 1; }
-    return r;
+    unsigned s = nlz(y);
+    if (s) {
+      T r = lshift(z1, x1, n, s);
+      y <<= s;
+      while (z2-- != z1)
+        double_div_normalized(r, *z2, y, *z2, r);
+      return r >> s;
+    } else {
+      const T* x2 = x1 + n;
+      T r = 0;
+      while (x2 != x1)
+        double_div_normalized(r, *--x2, y, *--z2, r);
+      return r;
+    }
   }
 
   // un >= vn >= 1, vp[vn-1] != 0
@@ -361,7 +367,7 @@ public:
       std::pair<T*, std::ptrdiff_t> walloc;
       T* t1 = talloc.first;
       const T* w1;
-      unsigned shift = boost::integer_traits<T>::digits - floor_log2(v1[vn-1]) - 1;
+      unsigned shift = nlz(v1[vn-1]);
       // normalize
       if (shift) {
         walloc = alloc.allocate(vn);
