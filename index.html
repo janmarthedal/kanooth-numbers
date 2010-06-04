@@ -4,38 +4,79 @@ $Id$
 <html>
   <head>
     <title>Sputsoft Numbers</title>
+    <style type="text/css">
+      span.code {
+        font-family: monospace;
+      }
+    </style>
   </head>
   <body>
+    <h1>Sputsoft Numbers</h1>
+
     <p>
-      Sputsoft Numbers is a C++ library for
-      doing multiple-precision arithmetic.
+      Sputsoft Numbers is a C++ library for doing multiple-precision arithmetic.
       The underlying theory and design can be found among the
-      <a href="http://sputsoft.com/tag/multiple-precision/">multiple-precision articles</a>.
+      <a href="http://sputsoft.com/tag/multiple-precision/">multiple-precision articles</a> at
+      <a href="http://sputsoft.com">sputsoft.com</a>.
     </p>
 
     <p>
-      The library is header-only and portable, relying on some
-      <a href="http://www.boost.org/">boost</a> libraries (also header-only). It is possible,
-      however, to obtain high-performance code by choosing the <a href="http://gmplib.org/">GMP</a>
-      backend. This requires no code changes, but only setting a preprocessor macro and linking to
-      the GMP library.
+      The library is header-only and highly portable, relying only on some
+      <a href="http://www.boost.org/">boost</a> libraries. It is possible, however, to obtain highly
+      optimized code by choosing the <a href="http://gmplib.org/">GMP</a> backend. This requires no
+      code changes, but only setting a preprocessor macro and linking to the GMP library
+      (see below).
     </p>
 
-    <h3>Overall structure</h3>
+    <h3>Installation and Basic Usage</h3>
 
     <p>
-      ergege eg weg erg
+      Since the library is header-only, you only need to place all the files from the library
+      somewhere locally and instruct your C++ compiler to use the directory containing the
+      <span class="code">sputsoft</span> folder as an include directory. The
+      <a href="http://www.boost.org/">boost</a> libraries needed are
+      <a href="http://www.boost.org/doc/libs/1_43_0/libs/integer/doc/html/boost_integer/traits.html">integer traits</a>
+      and <a href="http://www.boost.org/doc/libs/1_43_0/libs/smart_ptr/shared_ptr.htm">shared pointer</a>.
+      So, assuming that boost is somewhere among your compiler's standard include search paths,
+      you should be able to compile using, e.g.,
     </p>
-
-    <h3>Number Types</h3>
-
-    <h4>Natural number</h4>
-    
+    <pre>
+  g++ -I. test.cpp
+    </pre>
     <p>
-      ergege eg weg erg
+      if using the GNU C++ compiler and the current directory contains the
+      <span class="code">sputsoft</span> folder.
     </p>
 
-    <h4>Integer</h4>
+    <p>
+      By default, the library uses generic and portable C++ code for the low-level arithmetic
+      routines. If you wish to use the low-level routines from the
+      <a href="http://gmplib.org/">GMP</a> library, you can compile the program from above as
+    </p>
+    <pre>
+  g++ -I. test.cpp -DSPUTSOFT_USE_GMP -lgmp
+    </pre>
+    <p>
+      assuming that the GMP library is installed and available on the platform.
+    </p>
+
+    <h3>Data Types, Initialization and Assignment</h3>
+
+    <p>
+      The data types currently supported are <span class="code">natural_number</span> and
+      <span class="code">integer</span>. They can be initialized in four ways: No initializer
+      (set to zero), set to built-in integer, set to C/C++ string, or set to the value of another
+      variable of the same type. For instance,
+      <pre>
+  natural_number a;
+  natural_number b = 2u;
+  natural_number c = "1234";
+  natural_number d = b;
+      </pre>
+      Assignment is done using the '=' operator or <span class="code">set</span>.
+    </p>
+
+    <h3>Basic Arithmetic</h3>
 
     <p>
       ergege eg weg erg
@@ -43,8 +84,9 @@ $Id$
 
     <h3>Source Code and Downloading</h3>
 
-    <p>The current release is version 0.2 and is
-      <a href="http://sourceforge.net/projects/numbers/">hosted</a> at
+    <p>
+      The current release is version 0.2 and is
+      <a href="http://sourceforge.net/projects/sputarithmetic/">hosted</a> at
       <a href="http://sourceforge.net">SourceForge</a>. The library can be
       <a href="https://sourceforge.net/projects/sputarithmetic/files/">downloaded</a> or the latest
       source code can be
@@ -52,8 +94,31 @@ $Id$
     </p>
       
     <p>
-       Bug reports, suggestions for improvements, and other comments are very welcome.
+      Bug reports, suggestions for improvements, and other comments are very welcome.
     </p>
 
   </body>
 </html>
+
+<!--
+set
+
+N <- u
+(N <- int)
+N <- string
+N <- const char*
+N <- N
+
+add
+
+N <- N, N
+N <- N, u
+N <- u, N
+
+sub
+
+N <- N, N
+N <- N, u
+(u <- u, N)
+
+-->
