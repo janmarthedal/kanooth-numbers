@@ -139,8 +139,8 @@ class expr<R, binary<ops::binary::lshift, X, Y> > {
   typedef typename resolve_type<Y>::type y_type;
 public:
   expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-  inline void assign(R& r) const { sputsoft::numbers::binary_shift_left(r, (x_type) x, (y_type) y); }
-  inline operator R() const { return sputsoft::numbers::binary_shift_left((x_type) x, (y_type) y); }
+  inline void assign(R& r) const { sputsoft::numbers::bit_shift_left(r, (x_type) x, (y_type) y); }
+  inline operator R() const { return sputsoft::numbers::bit_shift_left((x_type) x, (y_type) y); }
 };
 
 template <typename R, typename X, typename Y>
@@ -151,8 +151,8 @@ class expr<R, binary<ops::binary::rshift, X, Y> > {
   typedef typename resolve_type<Y>::type y_type;
 public:
   expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-  inline void assign(R& r) const { sputsoft::numbers::binary_shift_right(r, (x_type) x, (y_type) y); }
-  inline operator R() const { return sputsoft::numbers::binary_shift_right((x_type) x, (y_type) y); }
+  inline void assign(R& r) const { sputsoft::numbers::bit_shift_right(r, (x_type) x, (y_type) y); }
+  inline operator R() const { return sputsoft::numbers::bit_shift_right((x_type) x, (y_type) y); }
 };
 
 template <typename R, typename X>

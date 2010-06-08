@@ -223,12 +223,12 @@ quotrem_trunc(Q& q, const V1& v1, const V2& v2) {
 }
 
 template <typename R, typename V1>
-inline void binary_shift_left(R& r, const V1& v1, std::ptrdiff_t count) {
+inline void bit_shift_left(R& r, const V1& v1, std::ptrdiff_t count) {
   detail::lshift_3_eval<R, V1>::lshift(r, v1, count);
 }
 
 template <typename R, typename V1>
-inline void binary_shift_right(R& r, const V1& v1, std::ptrdiff_t count) {
+inline void bit_shift_right(R& r, const V1& v1, std::ptrdiff_t count) {
   detail::rshift_3_eval<R, V1>::rshift(r, v1, count);
 }
 
@@ -252,8 +252,8 @@ BINARY_RESULT_RETURNER(rem, rem)
 BINARY_RESULT_RETURNER(rem_floor, rem_floor)
 BINARY_RESULT_RETURNER(rem_ceil, rem_ceil)
 BINARY_RESULT_RETURNER(rem_trunc, rem_trunc)
-BINARY_RESULT_RETURNER(binary_shift_left, lshift)
-BINARY_RESULT_RETURNER(binary_shift_right, rshift)
+BINARY_RESULT_RETURNER(bit_shift_left, lshift)
+BINARY_RESULT_RETURNER(bit_shift_right, rshift)
 
 template <typename T>
 typename detail::resolve_unary<detail::ops::unary::negate, T>::return_type

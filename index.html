@@ -60,23 +60,61 @@ $Id$
       assuming that the GMP library is installed and available on the platform.
     </p>
 
-    <h3>Data Types, Initialization and Assignment</h3>
+    <p>
+      Unless explicitly stated, every data type and function from reside in the
+      <span class="code">sputsoft::numbers</span> namespace.
+    </p>
+
+    <h3>Data Types</h3>
 
     <p>
       The data types currently supported are <span class="code">natural_number</span> and
-      <span class="code">integer</span>. They can be initialized in four ways: No initializer
-      (set to zero), set to built-in integer, set to C/C++ string, or set to the value of another
-      variable of the same type. For instance,
-      <pre>
+      <span class="code">integer</span>. They are initialized when declared and automatically
+      clean up when going out of scope.
+    </p>
+    <p>
+      All functions operating on these numbers have the form
+      <i>name(output numbers, ..., input numbers, ...)</i>. For instance,
+      <span class="code">add(z, x, y)</span> adds <span class="code">x</span> and
+      <span class="code">y</span> and puts the result into <span class="code">z</span>. Most of
+      these functions also have value-returning versions that create a temporary object to put the
+      result into. For instance, the following two lines do the same thing
+    </p>
+    <pre>
+  add(z, x, y)
+  set(z, add(x, y))
+    </pre>
+    <p>
+      The first of these statements, however, is likely to be more efficient since creating a
+      temporary may be avoidable.
+    </p>
+    <p>
+      The operators <span class="code">=</span>, <span class="code">+</span>,
+      <span class="code">-</span>, <span class="code">*</span>, <span class="code">/</span>,
+      <span class="code">%</span>, <span class="code">&lang;&lang;</span>, and
+      <span class="code">&rang;&rang;</span> have  been overloaded to represent
+      <span class="code">set</span>, <span class="code">add</span>, <span class="code">sub</span>,
+      <span class="code">mul</span>, <span class="code">div</span>, <span class="code">rem</span>,
+      <span class="code">bit_shift_left</span>, and <span class="code">bit_shift_right</span>,
+      respectively.
+    </p>
+
+    <h4>Natural Number</h4>
+
+    <p>
+      Natural numbers can be initialized in four ways: No initializer (set to zero),
+      set to built-in unsigned integer, set to C/C++ string (<span class="code">const char*</span>
+      or <span class="code">std::string</span>), or set to the value of another variable of the same
+      type. For instance,
+    </p>
+    <pre>
   natural_number a;
   natural_number b = 2u;
   natural_number c = "1234";
   natural_number d = b;
-      </pre>
-      Assignment is done using the '=' operator or <span class="code">set</span>.
-    </p>
+    </pre>
 
-    <h3>Basic Arithmetic</h3>
+    <h4>Integer</h4>
 
     <p>
       ergege eg weg erg
@@ -97,28 +135,30 @@ $Id$
       Bug reports, suggestions for improvements, and other comments are very welcome.
     </p>
 
+    <h3>Function Reference</h3>
+
+    <h4><span class="code">add</span>, <span class="code">+</span></h4>
+
+    <table border="1">
+      <tr><td>Result</td><td>Summand 1</td><td>Summand 2</td></tr>
+      <tr><td>N</td><td>N</td><td>N</td></tr>
+      <tr><td>N</td><td>N</td><td>u</td></tr>
+      <tr><td>N</td><td>u</td><td>N</td></tr>
+      <tr><td>I</td><td>I</td><td>I</td></tr>
+      <tr><td>I</td><td>I</td><td>N</td></tr>
+      <tr><td>I</td><td>N</td><td>I</td></tr>
+      <tr><td>I</td><td>I</td><td>u</td></tr>
+      <tr><td>I</td><td>u</td><td>I</td></tr>
+      <tr><td>I</td><td>I</td><td>s</td></tr>
+      <tr><td>I</td><td>s</td><td>I</td></tr>
+    </table>
+
+    <table border="1">
+      <tr><td>Result</td>   <td>N</td><td>N</td><td>N</td><td>I</td><td>I</td><td>I</td><td>I</td><td>I</td><td>I</td><td>I</td></tr>
+      <tr><td>Summand 1</td><td>N</td><td>N</td><td>u</td><td>I</td><td>I</td><td>N</td><td>I</td><td>u</td><td>I</td><td>s</td></tr>
+      <tr><td>Summand 2</td><td>N</td><td>u</td><td>N</td><td>I</td><td>N</td><td>I</td><td>u</td><td>I</td><td>s</td><td>I</td></tr>
+    </table>
+
   </body>
 </html>
 
-<!--
-set
-
-N <- u
-(N <- int)
-N <- string
-N <- const char*
-N <- N
-
-add
-
-N <- N, N
-N <- N, u
-N <- u, N
-
-sub
-
-N <- N, N
-N <- N, u
-(u <- u, N)
-
--->

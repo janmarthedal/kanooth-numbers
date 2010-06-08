@@ -119,7 +119,7 @@ struct log2_floor_evaluator {
   static std::size_t log2_floor(T n) {
     std::size_t r = -1;
     while (n) {
-      sputsoft::numbers::binary_shift_right(n, n, 1);
+      sputsoft::numbers::bit_shift_right(n, n, 1);
       ++r;
     }
     return r;
