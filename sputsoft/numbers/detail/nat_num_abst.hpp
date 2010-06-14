@@ -46,11 +46,85 @@ struct resolve_binary<ops::binary::rem, numb<natnum<T> >, unsigned long long> {
 };
 #endif
 
-/* Make compatible with integer literals */
+/* Make compatible with int literals */
+template <typename T>
+struct resolve_binary<ops::binary::rem, numb<natnum<T> >, int> {
+  typedef unsigned return_type;
+};
+
 template <typename T>
 struct set_2_eval<numb<natnum<T> >, int> {
   static inline void set(numb<natnum<T> >& r, int v) {
     sputsoft::numbers::set(r, (unsigned) v);
+  }
+};
+template <typename T>
+struct add_3_eval<numb<natnum<T> >, numb<natnum<T> >, int> {
+  static inline void add(numb<natnum<T> >& r, const numb<natnum<T> >& v1, int v2) {
+    if (v2 >= 0)
+      sputsoft::numbers::add(r, v1, (unsigned) v2);
+    else
+      sputsoft::numbers::sub(r, v1, (unsigned) -v2);
+  }
+};
+template <typename T>
+struct add_3_eval<numb<natnum<T> >, int, numb<natnum<T> > > {
+  static inline void add(numb<natnum<T> >& r, int v1, const numb<natnum<T> >& v2) {
+    if (v1 >= 0)
+      sputsoft::numbers::add(r, (unsigned) v1, v2);
+    else
+      sputsoft::numbers::sub(r, (unsigned) -v1, v2);
+  }
+};
+template <typename T>
+struct sub_3_eval<numb<natnum<T> >, numb<natnum<T> >, int> {
+  static inline void sub(numb<natnum<T> >& r, const numb<natnum<T> >& v1, int v2) {
+    if (v2 >= 0)
+      sputsoft::numbers::sub(r, v1, (unsigned) v2);
+    else
+      sputsoft::numbers::add(r, v1, (unsigned) -v2);
+  }
+};
+template <typename T>
+struct mul_3_eval<numb<natnum<T> >, numb<natnum<T> >, int> {
+  static inline void mul(numb<natnum<T> >& r, const numb<natnum<T> >& v1, int v2) {
+    sputsoft::numbers::mul(r, v1, (unsigned) v2);
+  }
+};
+template <typename T>
+struct mul_3_eval<numb<natnum<T> >, int, numb<natnum<T> > > {
+  static inline void mul(numb<natnum<T> >& r, int v1, const numb<natnum<T> >& v2) {
+    sputsoft::numbers::mul(r, (unsigned) v1, v2);
+  }
+};
+template <typename T>
+struct div_3_eval<numb<natnum<T> >, int, numb<natnum<T> > > {
+  static inline void div(numb<natnum<T> >& r, const numb<natnum<T> >& v1, int v2) {
+    sputsoft::numbers::div(r, v1, (unsigned) v2);
+  }
+};
+template <typename T>
+struct rem_3_eval<unsigned, numb<natnum<T> >, int> {
+  static inline void rem(unsigned& r, const numb<natnum<T> >& v1, int v2) {
+    sputsoft::numbers::rem(r, v1, (unsigned) v2);
+  }
+};
+template <typename T>
+struct quotrem_4_eval<numb<natnum<T> >, unsigned, numb<natnum<T> >, int> {
+  static inline void quotrem(numb<natnum<T> >& q, unsigned& r, const numb<natnum<T> >& v1, int v2) {
+    sputsoft::numbers::quotrem(q, r, v1, (unsigned) v2);
+  }
+};
+template <typename T>
+struct cmp_r2_eval<numb<natnum<T> >, int> {
+  static inline int cmp(const numb<natnum<T> >& v1, int v2) {
+    return sputsoft::numbers::compare(v1, (unsigned) v2);
+  }
+};
+template <typename T>
+struct cmp_r2_eval<int, numb<natnum<T> > > {
+  static inline int cmp(int v1, const numb<natnum<T> >& v2) {
+    return sputsoft::numbers::compare((unsigned) v1, v2);
   }
 };
 /*****************************************/
@@ -65,7 +139,7 @@ struct abs_2_eval<numb<natnum<T> >, numb<natnum<T> > > {
 template <typename T>
 struct is_positive_r1_eval<numb<natnum<T> > > {
   static inline bool is_positive(const numb<natnum<T> >& v) {
-    return !v.is_zero();
+    return !sputsoft::numbers::is_zero(v);
   }
 };
 

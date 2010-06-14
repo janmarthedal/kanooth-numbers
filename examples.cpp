@@ -14,8 +14,6 @@
 
 #include <iostream>
 #include <vector>
-//#include <boost/cstdint.hpp>
-//#include <boost/integer_traits.hpp>
 
 #include <sputsoft/numbers/natural_number.hpp>
 #include <sputsoft/numbers/integer.hpp>
@@ -37,7 +35,7 @@ natural_number digit_sum(natural_number n)
 {
   natural_number res;
   while (n)
-    res += quotrem(n, n, 10u);
+    res += quotrem(n, n, 10);
   return res;
 }
 

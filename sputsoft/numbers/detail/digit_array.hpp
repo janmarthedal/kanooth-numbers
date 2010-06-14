@@ -49,8 +49,9 @@ public:
       allocated = 0;
     }
   }
-  digit_array& operator=(const digit_array& other) {
-    digit_array(other).swap(*this);
+  // see http://cpp-next.com/archive/2009/08/want-speed-pass-by-value/
+  digit_array& operator=(digit_array other) {
+    other.swap(*this);
     return *this;
   }
   ~digit_array() {
