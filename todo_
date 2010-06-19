@@ -1,3 +1,5 @@
+Comparing all types
+abs: integer -> nat_num?
 Bitwise ops for nat num
 Bitwise ops for integers
 Integer square root

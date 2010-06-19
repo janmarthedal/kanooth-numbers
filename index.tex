@@ -12,9 +12,11 @@
 
 \maketitle
 
+
 Sputsoft Numbers is a C++ library for doing multiple-precision arithmetic. The underlying theory and design can be found among the \href{http://sputsoft.com/tag/multiple-precision/}{multiple-precision articles}.
 
 The library is header-only and highly portable, relying only on some \href{http://www.boost.org}{boost} libraries. It is possible, however, to obtain highly optimized code by choosing the \href{http://gmplib.org/}{GMP} backend. This requires no code changes, but only setting a preprocessor macro and linking to the GMP library (see below).
+
 
 %-------------------------------------
 \section{Installation and Basic Usage}
@@ -32,7 +34,8 @@ By default, the library uses generic and portable C++ code for the low-level ari
 \end{verbatim}
 assuming that the GMP library is installed and available on the platform.
 
-Unless explicitly stated, every data type and function from reside in the \texttt{sputsoft::numbers} namespace.
+Unless explicitly stated, every data type and function from the library reside in the \texttt{sputsoft::numbers} namespace.
+
 
 %-------------------
 \section{Data Types}
@@ -40,13 +43,15 @@ Unless explicitly stated, every data type and function from reside in the \textt
 
 The data types currently supported are \texttt{natural\_number} and \texttt{integer}. They are initialized when declared and automatically clean up when going out of scope.
 
+When the following refers to built-in unsigned integers, it refers to \texttt{unsigned short int}, \texttt{unsigned int}, \texttt{unsigned long int}, and \texttt{unsigned long long int} if the compiler supports it. Built-in signed integers refer to \texttt{signed short int}, \texttt{signed int}, \texttt{signed long int}, and \texttt{signed long long int} if the compiler supports it.
+
 \subsection{Named Operators}
 
 All functions operating on these numbers have the form \emph{name(output numbers, ..., input numbers, ...)}. For instance, \texttt{add(z, x, y)} adds \texttt{x} and \texttt{y} and puts the result into \texttt{z}.
 
-For each function \emph{func}\texttt{(z, x, y)} representing a binary operator, the following rules hold. All exceptions to these general rules will be mentioned below.
+Unless noted otherwise below, the following rules hold for each function \emph{bin\_func}\texttt{(z, x, y)} representing a binary operator:
 \begin{itemize}
-\item If \texttt{z} is of type \texttt{integer} then either \texttt{x} or \texttt{y} must be a \texttt{natural\_number} or a \texttt{integer}, and the other argument must be an \texttt{integer}, a \texttt{natural\_number}, a signed built-in integer (\texttt{signed short int}, \texttt{signed int}, \texttt{signed long int}, and \texttt{signed long long int} if the compiler supports it), or an unsigned built-in integer (\texttt{unsigned short int}, \texttt{unsigned int}, \texttt{unsigned long int}, and \texttt{unsigned long long int} if the compiler supports it).
+\item If \texttt{z} is of type \texttt{integer} then either \texttt{x} or \texttt{y} must be a \texttt{natural\_number} or an \texttt{integer}, and the other argument must be an \texttt{integer}, a \texttt{natural\_number}, a built-in signed integer, or an built-in unsigned integer.
 \item If \texttt{z} is of type \texttt{natural\_number} then either \texttt{x} or \texttt{y} must be a \texttt{natural\_number}, and the other argument must be a \texttt{natural\_number}, an unsigned built-in integer, or a non-negative \texttt{int} (to support literal constants).
 \end{itemize}
 
@@ -57,19 +62,22 @@ Most functions also have return-by-value versions that create a temporary object
 \end{verbatim}
 The first of these statements, however, is likely to be more efficient since creating a temporary may be avoidable.
 
-For each function \emph{func}\texttt{(x, y)} representing a binary operator, the following rules hold in general:
+Unless noted otherwise, the following rules hold for each function \emph{bin\_func}\texttt{(x, y)} representing a binary operator:
 \begin{itemize}
 \item If one argument is an \texttt{integer} and the other argument is an \texttt{integer}, a \texttt{natural\_number}, a signed built-in integer, or an unsigned built-in integer, then the result is an \texttt{integer}.
 \item If one argument is a \texttt{natural\_number} and the other argument is a \texttt{natural\_number}, an unsigned built-in integer, or a non-negative \texttt{int}, then the result is a \texttt{natural\_number}.
 \end{itemize}
 
+For unary operators \emph{un\_func}\texttt{(z, x)}, the types of \texttt{z} and \texttt{x} should be the same. Similarly, the value-returning unary functions \emph{un\_func}\texttt{(x)} return a value of the same type. Again, unless noted otherwise below.
+
 \subsection{Overloaded Operators}
 
-The binary operators \texttt{=}, \texttt{+}, \texttt{-}, \texttt{*}, \texttt{/}, \texttt{\%}, \texttt{<<}, and \texttt{>>} have been overloaded to represent \texttt{set}, \texttt{add}, \texttt{sub}, \texttt{mul}, \texttt{div}, \texttt{rem}, \texttt{bit\_shift\_left}, and \texttt{bit\_shift\_right}, respectively. The unary \texttt{-} corresponds to \texttt{negate}. There is no one-to-one correspondence, though, and optimizations are often applied in compound expressions. For instance, \texttt{z = x + y} translates into \texttt{add(z, x, y)} and not the direct translation \texttt{set(z, add(x, y))}, which creates a temporary number to hold the sum.
+The binary operators \texttt{=}, \texttt{+}, \texttt{-}, \texttt{*}, \texttt{/}, and \texttt{\%} have been overloaded to represent \texttt{set}, \texttt{add}, \texttt{sub}, \texttt{mul}, \texttt{div}, and \texttt{rem}, respectively. The unary \texttt{-} corresponds to \texttt{negate}. There is no one-to-one correspondence, though, and optimizations are often applied in compound expressions. For instance, \texttt{z = x + y} translates into \texttt{add(z, x, y)} and not the direct translation \texttt{set(z, add(x, y))}, which creates a temporary number to hold the sum.
 
 \subsection{Passing and Returning by Value}
 
 The magnitude of each number is pointed to using reference counting. This makes passing and returning by value extremely cheap.
+
 
 %--------------------------------------
 \section{Initialization and Assignment}
@@ -116,17 +124,18 @@ The number type \texttt{integer} can be initialized using the same right-hand si
 \end{verbatim}
 Again, the same (non-empty) right-hand sides can be used for assignment using \texttt{set} or \texttt{=}.
 
-%----------------------
-\section{Changing Sign}
-%----------------------
 
-\subsection{Natural Number details}
+%------------------------------------
+\section{Positive, Negative, or Zero}
+%------------------------------------
 
-erger erg er
+The functions \texttt{is\_positive}, \texttt{is\_negative}, \texttt{is\_zero} tell whether a number is positive, negative, or zero, respectively. \texttt{integer}s can have their sign changed using \texttt{negate} or the unary \texttt{-}:
+\begin{verbatim}
+  negate(z, x);  set(z, negate(x));  z = -x;
+\end{verbatim}
 
-\subsection{Integer details}
+The absolute value of a number can be obtained using \texttt{abs}.
 
-ergege eg weg erg
 
 %--------------------------------------------------
 \section{Addition, Subtraction, and Multiplication}
@@ -134,9 +143,9 @@ ergege eg weg erg
 
 These operations are performed by \texttt{add}/\texttt{+}, \texttt{sub}/\texttt{-}, and \texttt{mul}/\texttt{*}. Both result-to-reference and return-by-value forms are supported, such that each of the following lines perform semantically equivalent computations:
 \begin{verbatim}
-  add(z, x, y);  set(z, add(x, y));
-  sub(z, x, y);  set(z, sub(x, y));
-  mul(z, x, y);  set(z, mul(x, y));
+  add(z, x, y);  set(z, add(x, y));  z = x + y;
+  sub(z, x, y);  set(z, sub(x, y));  z = x - y;
+  mul(z, x, y);  set(z, mul(x, y));  z = x * y;
 \end{verbatim}
 As mentioned earlier, the result-to-reference forms are likely to be faster than the return-by-value forms.
 
@@ -161,10 +170,9 @@ Both the quotient and the remainder can be obtained through a single call using 
   rem(r, x, y);
 \end{verbatim}
 
-The return-by-value version is \texttt{quotrem(q, x, y)}, where the quotient is put in \texttt{q} and the remainder is returned, as if the following was performed:
+The return-by-value version is \texttt{quotrem(q, x, y)}, where the quotient is put in \texttt{q} and the remainder is returned:
 \begin{verbatim}
-  div(q, x, y);
-  return rem(x, y);
+  set(r, quotrem(q, x, y));
 \end{verbatim}
 
 \subsection{Integer details}
@@ -182,17 +190,15 @@ As mentioned earlier, each \texttt{rem}-function fits the corresponding \texttt{
 
 The functions \texttt{div} and \texttt{rem} are synonymous with \texttt{div\_floor} and \texttt{rem\_floor}, respectively.
 
+
 %--------------------
 \section{Comparisons}
 %--------------------
 
-\subsection{Natural Number details}
+Equality can be determined by \texttt{equal}. \texttt{compare(x, y)} $\rightarrow$ \texttt{int} returns a negative/positive/zero value if \texttt{x} is strictly less than/strictly greater than/equal to \texttt{y}.
 
-erger erg er
+The operators \texttt{==}, \texttt{!=}, \texttt{<}, \texttt{>}, \texttt{<=}, \texttt{>=} are all overloaded.
 
-\subsection{Integer details}
-
-ergege eg weg erg
 
 %------------------------------------
 \section{Source Code and Downloading}
