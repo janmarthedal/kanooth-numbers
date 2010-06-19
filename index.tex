@@ -55,10 +55,10 @@ Unless noted otherwise below, the following rules hold for each function \emph{b
 \item If \texttt{z} is of type \texttt{natural\_number} then either \texttt{x} or \texttt{y} must be a \texttt{natural\_number}, and the other argument must be a \texttt{natural\_number}, an unsigned built-in integer, or a non-negative \texttt{int} (to support literal constants).
 \end{itemize}
 
-Most functions also have return-by-value versions that create a temporary object to put the result into. For instance, the following two lines do the same thing
+Most functions also have return-by-value versions that create a temporary object to put the result into. For instance, the following two lines do the same thing:
 \begin{verbatim}
-  add(z, x, y)
-  set(z, add(x, y))
+  add(z, x, y);
+  set(z, add(x, y));
 \end{verbatim}
 The first of these statements, however, is likely to be more efficient since creating a temporary may be avoidable.
 
@@ -68,7 +68,7 @@ Unless noted otherwise, the following rules hold for each function \emph{bin\_fu
 \item If one argument is a \texttt{natural\_number} and the other argument is a \texttt{natural\_number}, an unsigned built-in integer, or a non-negative \texttt{int}, then the result is a \texttt{natural\_number}.
 \end{itemize}
 
-For unary operators \emph{un\_func}\texttt{(z, x)}, the types of \texttt{z} and \texttt{x} should be the same. Similarly, the value-returning unary functions \emph{un\_func}\texttt{(x)} return a value of the same type. Again, unless noted otherwise below.
+For unary operators \emph{un\_func}\texttt{(z, x)}, the types of \texttt{z} and \texttt{x} should be the same. Similarly, the value-returning unary functions \emph{un\_func}\texttt{(x)} return a value of the same type. Exceptions to these general rules are noted below.
 
 \subsection{Overloaded Operators}
 
@@ -85,14 +85,14 @@ The magnitude of each number is pointed to using reference counting. This makes 
 
 \subsection{Natural Number details}
 
-Natural numbers can be initialized in four ways:
+Natural numbers can be initialized in five ways:
 \begin{itemize}
 \item No initializer (set to zero).
-\item Set to built-in unsigned integer (\texttt{unsigned short int}, \texttt{unsigned int}, \texttt{unsigned long int}, and \texttt{unsigned long long int} if the compiler supports it)
+\item Set to built-in unsigned integer.
+\item Set to non-negative \texttt{int} (to support literal constants).
 \item Set to C/C++ string (\texttt{const char*} or \texttt{std::string})
 \item Set to the value of another variable of the same type.
 \end{itemize}
-A fifth way using plain \texttt{int} is also supported in order to be able to use literal constants. Note, however, that negative integers will initialize the \texttt{natural\_number} to an undefined value.
 
 For instance:
 \begin{verbatim}
@@ -115,7 +115,7 @@ After initialization, the same (non-empty) right-hand sides can be used for assi
 
 \subsection{Integer details}
 
-The number type \texttt{integer} can be initialized using the same right-hand sides as \texttt{natural\_number}s. In addition, signed built-in integers (\texttt{signed short int}, \texttt{signed int}, \texttt{signed long int}, and \texttt{signed long long int} if the compiler supports it) can be used, and the C/C++ strings can have leading \texttt{+}'s or \texttt{-}'s. For instance:
+The number type \texttt{integer} can be initialized using the same right-hand sides as \texttt{natural\_number}s. In addition, built-in signed integers can be used and the C/C++ strings can have leading \texttt{+}'s or \texttt{-}'s. For instance:
 \begin{verbatim}
   integer a;
   integer b = 3l;
@@ -132,6 +132,13 @@ Again, the same (non-empty) right-hand sides can be used for assignment using \t
 The functions \texttt{is\_positive}, \texttt{is\_negative}, \texttt{is\_zero} tell whether a number is positive, negative, or zero, respectively. \texttt{integer}s can have their sign changed using \texttt{negate} or the unary \texttt{-}:
 \begin{verbatim}
   negate(z, x);  set(z, negate(x));  z = -x;
+\end{verbatim}
+
+The library's numbers have implicit conversion to \texttt{bool}, which makes it possible to check if a number is zero, e.g.:
+\begin{verbatim}
+  void f(integer x) {
+    std::cout << "Variable is " << (x ? "non-zero" : "zero") << std::endl;
+  }
 \end{verbatim}
 
 The absolute value of a number can be obtained using \texttt{abs}.
