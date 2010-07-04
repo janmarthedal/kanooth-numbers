@@ -69,11 +69,6 @@ private:
     number_type::quotrem(*q.num, r, v1, v2);
   }
 
-  void div_num(const number_type& x, const number_type& y) {
-    if (!num.unique()) num.reset(new number_type);
-    num->div(x, y);
-  }
-
   void rem_num(const number_type& x, const number_type& y) {
     if (!num.unique()) num.reset(new number_type);
     number_type::rem(*num, x, y);
@@ -85,6 +80,11 @@ private:
     number_type::quotrem(*q.num, *r.num, u, v);
   }
 
+  void bit_and_num(const number_type& x, const number_type& y) {
+    if (!num.unique()) num.reset(new number_type);
+    number_type::bitwise_and(*num, x, y);
+  }
+
   void left_shift_num(const number_type& x, std::ptrdiff_t count) {
     if (!num.unique()) num.reset(new number_type);
     num->left_shift(x, count);
@@ -93,6 +93,30 @@ private:
   void right_shift_num(const number_type& x, std::ptrdiff_t count) {
     if (!num.unique()) num.reset(new number_type);
     num->right_shift(x, count);
+  }
+
+  template <typename V2>
+  void bit_and(const number_type& v1, const V2& v2) {
+    if (!num.unique()) num.reset(new number_type);
+    num->bitwise_and(v1, v2);
+  }
+
+  template <typename V2>
+  void bit_or(const number_type& v1, const V2& v2) {
+    if (!num.unique()) num.reset(new number_type);
+    num->bitwise_or(v1, v2);
+  }
+
+  template <typename V2>
+  void bit_xor(const number_type& v1, const V2& v2) {
+    if (!num.unique()) num.reset(new number_type);
+    num->bitwise_xor(v1, v2);
+  }
+
+  template <typename V2>
+  void bit_and_not(const number_type& v1, const V2& v2) {
+    if (!num.unique()) num.reset(new number_type);
+    num->bitwise_and_not(v1, v2);
   }
 
 public:
@@ -133,6 +157,15 @@ public:
   static inline void rem(unsigned& r, const numb& x, unsigned y) { rem_int(r, *x.num, y); }
   static inline void quotrem(numb& q, unsigned& r, const numb& x, unsigned y)
     { quotrem_int(q, r, *x.num, y); }
+  static inline unsigned bitwise_and(const numb& x, unsigned y)
+    { return number_type::bitwise_and(*x.num, y); }
+  inline void bitwise_or(const numb& x, unsigned y) { bit_or(*x.num, y); }
+  inline void bitwise_or(unsigned x, const numb& y) { bit_or(*y.num, x); }
+  inline void bitwise_xor(const numb& x, unsigned y) { bit_xor(*x.num, y); }
+  inline void bitwise_xor(unsigned x, const numb& y) { bit_xor(*y.num, x); }
+  static inline unsigned bitwise_and_not(unsigned x, const numb& y)
+    { return number_type::bitwise_and_not(x, *y.num); }
+  inline void bitwise_and_not(const numb& x, unsigned y) { bit_and_not(*x.num, y); }
   inline int cmp(unsigned v) const { return num->cmp(v); }
 
   inline void set(unsigned long v) { _set(v); }
@@ -167,10 +200,14 @@ public:
   inline void add(const numb& x, const numb& y) { _add(*x.num, *y.num); }
   inline void sub(const numb& x, const numb& y) { _sub(*x.num, *y.num); }
   inline void mul(const numb& x, const numb& y) { _mul(*x.num, *y.num); }
-  inline void div(const numb& x, const numb& y) { div_num(*x.num, *y.num); }
-  inline static void rem(numb& r, const numb& x, const numb& y) { r.rem_num(*x.num, *y.num); }
-  inline static void quotrem(numb& q, numb& r, const numb& u, const numb& v)
+  inline void div(const numb& x, const numb& y) { _div(*x.num, *y.num); }
+  static inline void rem(numb& r, const numb& x, const numb& y) { r.rem_num(*x.num, *y.num); }
+  static inline void quotrem(numb& q, numb& r, const numb& u, const numb& v)
     { quotrem_num(q, r, *u.num, *v.num); }
+  inline void bitwise_and(const numb& x, const numb& y) { bit_and(*x.num, *y.num); }
+  inline void bitwise_or(const numb& x, const numb& y) { bit_or(*x.num, *y.num); }
+  inline void bitwise_xor(const numb& x, const numb& y) { bit_xor(*x.num, *y.num); }
+  inline void bitwise_and_not(const numb& x, const numb& y) { bit_and_not(*x.num, *y.num); }
   inline int cmp(const numb& v) const { return num->cmp(*v.num); }
 
   inline void left_shift(const numb& x, std::ptrdiff_t count) { left_shift_num(*x.num, count); }

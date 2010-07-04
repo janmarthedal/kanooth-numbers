@@ -138,6 +138,42 @@ struct lowlevel_gmp {
     return mpn_cmp(xp, yp, n);
   }
 
+  static void bitwise_and(digit_type* zp, const digit_type* xp, const digit_type* yp, std::size_t n) {
+#if __GNU_MP__ >= 5
+    mpn_and_n(zp, xp, yp, n);
+#else
+    while (n--)
+      *zp++ = *xp++ & *yp++;
+#endif
+  }
+
+  static void bitwise_or(digit_type* zp, const digit_type* xp, const digit_type* yp, std::size_t n) {
+#if __GNU_MP__ >= 5
+    mpn_ior_n(zp, xp, yp, n);
+#else
+    while (n--)
+      *zp++ = *xp++ | *yp++;
+#endif
+  }
+
+  static void bitwise_xor(digit_type* zp, const digit_type* xp, const digit_type* yp, std::size_t n) {
+#if __GNU_MP__ >= 5
+    mpn_xor_n(zp, xp, yp, n);
+#else
+    while (n--)
+      *zp++ = *xp++ ^ *yp++;
+#endif
+  }
+
+  static void bitwise_and_not(digit_type* zp, const digit_type* xp, const digit_type* yp, std::size_t n) {
+#if __GNU_MP__ >= 5
+    mpn_andn_n(zp, xp, yp, n);
+#else
+    while (n--)
+      *zp++ = *xp++ & ~*yp++;
+#endif
+  }
+
 };
 
 } // namespace detail

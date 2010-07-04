@@ -289,7 +289,7 @@ private:
     if (x.is_empty() || !y)
       z.set_size(0);
     else if (y == T(1))
-      set_int(z, T(0));
+      set_num(z, x);
     else if (sizeof(T) <= sizeof(digit_type))
       mul_int1(z, x, y);
     else
@@ -441,6 +441,194 @@ private:
     }
   }
 
+  /* Bitwise and two numbers */
+
+  // x.size() >= y.size() >= 1
+  static void bit_and_num0(Con& r, const Con& x, const Con& y) {
+    std::size_t n = y.size();
+    LowLevel::bitwise_and(r.get(), x.get(), y.get(), n);
+    while (n && !r[n-1]) --n;
+    r.set_size(n);
+  }
+
+  // x.size() >= y.size() >= 1
+  static void bit_and_num1(Con& r, const Con& x, const Con& y) {
+    std::size_t n = y.size();
+    if (!r.request_size(n)) {
+      Con t(n);
+      bit_and_num0(t, x, y);
+      r.swap(t);
+    } else
+      bit_and_num0(r, x, y);
+  }
+
+  static void bit_and_num(Con& r, const Con& x, const Con& y) {
+    if (y.is_empty() || x.is_empty()) r.set_size(0);
+    else if (x.size() >= y.size())    bit_and_num1(r, x, y);
+    else                              bit_and_num1(r, y, x);
+  }
+
+  /* Bitwise and number and integer */
+
+  template <typename T>
+  static T bit_and_int(const Con& x, const T y) {
+    if (x.is_empty())
+      return 0;
+    else if (sizeof(T) <= sizeof(digit_type))
+      return sputsoft::numbers::bitwise_and((T) x[0], y);
+    else {
+      Con r(sizeof(T) / sizeof(digit_type));
+      bit_and_num(r, x, numb(y).con);
+      return to_int_type<T>(r);
+    }
+  }
+
+  /* Bitwise or two numbers */
+
+  // x.size() >= y.size() >= 1
+  static void bit_or_num0(Con& r, const Con& x, const Con& y) {
+    std::size_t xn = x.size();
+    std::size_t yn = y.size();
+    LowLevel::bitwise_or(r.get(), x.get(), y.get(), yn);
+    LowLevel::copy_forward(r.get() + yn, x.get() + yn, xn - yn);
+    r.set_size(xn);
+  }
+
+  // x.size() >= y.size() >= 1
+  static void bit_or_num1(Con& r, const Con& x, const Con& y) {
+    std::size_t n = x.size();
+    if (!r.request_size(n)) {
+      Con t(n);
+      bit_or_num0(t, x, y);
+      r.swap(t);
+    } else
+      bit_or_num0(r, x, y);
+  }
+
+  static void bit_or_num(Con& r, const Con& x, const Con& y) {
+    if (x.is_empty())              set_num(r, y);
+    else if (y.is_empty())         set_num(r, x);
+    else if (x.size() >= y.size()) bit_or_num1(r, x, y);
+    else                           bit_or_num1(r, y, x);
+  }
+
+  /* Bitwise or number and integer */
+
+  template <typename T>
+  static void bit_or_int(Con& r, const Con& x, const T y) {
+    if (x.is_empty())
+      set_int(r, y);
+    else if (sizeof(T) <= sizeof(digit_type)) {
+      set_num(r, x);
+      sputsoft::numbers::bitwise_or(r[0], r[0], y);
+    } else
+      bit_or_num(r, x, numb(y).con);
+  }
+
+  /* Bitwise xor two numbers */
+
+  // x.size() >= y.size() >= 1
+  static void bit_xor_num0(Con& r, const Con& x, const Con& y) {
+    std::size_t xn = x.size();
+    std::size_t yn = y.size();
+    LowLevel::bitwise_xor(r.get(), x.get(), y.get(), yn);
+    if (xn == yn)
+      while (xn && !r[xn-1]) --xn;
+    else
+      LowLevel::copy_forward(r.get() + yn, x.get() + yn, xn - yn);
+    r.set_size(xn);
+  }
+
+  // x.size() >= y.size() >= 1
+  static void bit_xor_num1(Con& r, const Con& x, const Con& y) {
+    std::size_t n = x.size();
+    if (!r.request_size(n)) {
+      Con t(n);
+      bit_xor_num0(t, x, y);
+      r.swap(t);
+    } else
+      bit_xor_num0(r, x, y);
+  }
+
+  static void bit_xor_num(Con& r, const Con& x, const Con& y) {
+    if (x.is_empty())              set_num(r, y);
+    else if (y.is_empty())         set_num(r, x);
+    else if (x.size() >= y.size()) bit_xor_num1(r, x, y);
+    else                           bit_xor_num1(r, y, x);
+  }
+
+  /* Bitwise or number and integer */
+
+  template <typename T>
+  static void bit_xor_int(Con& r, const Con& x, const T y) {
+    if (x.is_empty())
+      set_int(r, y);
+    else if (sizeof(T) <= sizeof(digit_type)) {
+      set_num(r, x);
+      sputsoft::numbers::bitwise_xor(r[0], r[0], y);
+    } else
+      bit_xor_num(r, x, numb(y).con);
+  }
+
+  /* Bitwise and not two numbers */
+
+  static void bit_and_not_num0(Con& r, const Con& x, const Con& y) {
+    std::size_t xn = x.size();
+    std::size_t yn = y.size();
+    if (yn < xn) {
+      LowLevel::bitwise_and_not(r.get(), x.get(), y.get(), yn);
+      LowLevel::copy_forward(r.get() + yn, x.get() + yn, xn - yn);
+    } else {
+      LowLevel::bitwise_and_not(r.get(), x.get(), y.get(), xn);
+      while (xn && !r[xn-1]) --xn;
+    }
+    r.set_size(xn);
+  }
+
+  static void bit_and_not_num(Con& r, const Con& x, const Con& y) {
+    std::size_t xn = x.size();
+    if (!xn)
+      r.set_size(0);
+    else if (y.is_empty())
+      set_num(r, x);
+    else if (!r.request_size(xn)) {
+      Con t(xn);
+      bit_and_not_num0(t, x, y);
+      r.swap(t);
+    } else
+      bit_and_not_num0(r, x, y);
+  }
+
+  /* Bitwise and number and integer */
+
+  template <typename T>
+  static T bit_and_not_int_num(const T x, const Con& y) {
+    if (!x)
+      return 0;
+    else if (y.is_empty())
+      return x;
+    else if (sizeof(T) <= sizeof(digit_type))
+      return sputsoft::numbers::bitwise_and_not(x, (T) y[0]);
+    else {
+      Con r(sizeof(T) / sizeof(digit_type));
+      bit_and_not_num(r, numb(x).con, y);
+      return to_int_type<T>(r);
+    }
+  }
+
+  template <typename T>
+  static void bit_and_not_num_int(Con& r, const Con& x, const T y) {
+    if (x.is_empty())
+      r.set_size(0);
+    else if (!y)
+      set_num(r, x);
+    else if (sizeof(T) <= sizeof(digit_type)) {
+      set_num(r, x);
+      sputsoft::numbers::bitwise_and_not(r[0], r[0], (digit_type) y);
+    } else
+      bit_and_not_num(r, x, numb(y).con);
+  }
+
   /* Compare two numbers */
 
   template <typename T>
@@ -577,6 +765,14 @@ public:
     { r = rem_int(x.con, y); }
   static inline void quotrem(numb& q, unsigned& r, const numb& x, unsigned y)
     { r = quotrem_int(q.con, x.con, y); }
+  static inline unsigned bitwise_and(const numb& x, unsigned y) { return bit_and_int(x.con, y); }
+  inline void bitwise_or(const numb& x, unsigned y) { bit_or_int(con, x.con, y); }
+  inline void bitwise_or(unsigned x, const numb& y) { bit_or_int(con, y.con, x); }
+  inline void bitwise_xor(const numb& x, unsigned y) { bit_xor_int(con, x.con, y); }
+  inline void bitwise_xor(unsigned x, const numb& y) { bit_xor_int(con, y.con, x); }
+  static inline unsigned bitwise_and_not(unsigned x, const numb& y)
+    { return bit_and_not_int_num(x, y.con); }
+  inline void bitwise_and_not(const numb& x, unsigned y) { bit_and_not_num_int(con, x.con, y); }
   inline int cmp(unsigned v) const { return comp_int(con, v); }
 
   inline void set(unsigned long v) { set_int(con, v); }
@@ -617,6 +813,10 @@ public:
   static inline void rem(numb& r, const numb& x, const numb& y) { rem_num(r.con, x.con, y.con); }
   static inline void quotrem(numb& q, numb& r, const numb& x, const numb& y)
     { quotrem_num(q.con, r.con, x.con, y.con); }
+  inline void bitwise_and(const numb& x, const numb& y) { bit_and_num(con, x.con, y.con); }
+  inline void bitwise_or(const numb& x, const numb& y) { bit_or_num(con, x.con, y.con); }
+  inline void bitwise_xor(const numb& x, const numb& y) { bit_xor_num(con, x.con, y.con); }
+  inline void bitwise_and_not(numb& x, const numb& y) { bit_and_not_num(con, x.con, y.con); }
   inline int cmp(const numb& v) const { return comp_num(con, v.con); }
 
   inline void left_shift(const numb& x, std::ptrdiff_t count) {

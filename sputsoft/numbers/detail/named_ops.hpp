@@ -36,6 +36,10 @@ namespace ops {
     struct rem_floor {};
     struct rem_ceil {};
     struct rem_trunc {};
+    struct bit_and {};
+    struct bit_and_not {};
+    struct bit_or {};
+    struct bit_xor {};
     struct lshift {};
     struct rshift {};
   }
@@ -72,6 +76,10 @@ template <typename R, typename V1, typename V2>             struct rem_trunc_3_e
 template <typename Q, typename R, typename V1, typename V2> struct quotrem_floor_4_eval;
 template <typename Q, typename R, typename V1, typename V2> struct quotrem_ceil_4_eval;
 template <typename Q, typename R, typename V1, typename V2> struct quotrem_trunc_4_eval;
+template <typename R, typename V1, typename V2>             struct and_3_eval;
+template <typename R, typename V1, typename V2>             struct or_3_eval;
+template <typename R, typename V1, typename V2>             struct xor_3_eval;
+template <typename R, typename V1, typename V2>             struct and_not_3_eval;
 template <typename V1, typename V2>                         struct cmp_r2_eval;
 template <typename V1, typename V2>                         struct equal_r2_eval;
 template <typename T>                                       struct is_zero_r1_eval;
@@ -188,6 +196,26 @@ inline void quotrem_trunc(Q& q, R& r, const V1& v1, const V2& v2) {
   detail::quotrem_trunc_4_eval<Q, R, V1, V2>::quotrem_trunc(q, r, v1, v2);
 }
 
+template <typename R, typename V1, typename V2>
+inline void bitwise_and(R& r, const V1& v1, const V2& v2) {
+  detail::and_3_eval<R, V1, V2>::bit_and(r, v1, v2);
+}
+
+template <typename R, typename V1, typename V2>
+inline void bitwise_or(R& r, const V1& v1, const V2& v2) {
+  detail::or_3_eval<R, V1, V2>::bit_or(r, v1, v2);
+}
+
+template <typename R, typename V1, typename V2>
+inline void bitwise_xor(R& r, const V1& v1, const V2& v2) {
+  detail::xor_3_eval<R, V1, V2>::bit_xor(r, v1, v2);
+}
+
+template <typename R, typename V1, typename V2>
+inline void bitwise_and_not(R& r, const V1& v1, const V2& v2) {
+  detail::and_not_3_eval<R, V1, V2>::bit_and_not(r, v1, v2);
+}
+
 // returns result by value
 
 template <typename Q, typename V1, typename V2>
@@ -252,6 +280,10 @@ BINARY_RESULT_RETURNER(rem, rem)
 BINARY_RESULT_RETURNER(rem_floor, rem_floor)
 BINARY_RESULT_RETURNER(rem_ceil, rem_ceil)
 BINARY_RESULT_RETURNER(rem_trunc, rem_trunc)
+BINARY_RESULT_RETURNER(bitwise_and, bit_and)
+BINARY_RESULT_RETURNER(bitwise_or, bit_or)
+BINARY_RESULT_RETURNER(bitwise_xor, bit_xor)
+BINARY_RESULT_RETURNER(bitwise_and_not, bit_and_not)
 BINARY_RESULT_RETURNER(bit_shift_left, lshift)
 BINARY_RESULT_RETURNER(bit_shift_right, rshift)
 

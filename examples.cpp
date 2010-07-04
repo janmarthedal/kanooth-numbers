@@ -20,24 +20,7 @@
 #include <sputsoft/numbers/common_functions.hpp>
 #include <sputsoft/numbers/number_theory.hpp>
 
-using sputsoft::numbers::natural_number;
-using sputsoft::numbers::integer;
-using sputsoft::numbers::factorize;
-using sputsoft::numbers::factorial;
-using sputsoft::numbers::power;
-using sputsoft::numbers::set;
-using sputsoft::numbers::add;
-using sputsoft::numbers::quotrem;
-using sputsoft::numbers::gcd;
-
-
-natural_number digit_sum(natural_number n)
-{
-  natural_number res;
-  while (n)
-    res += quotrem(n, n, 10);
-  return res;
-}
+using namespace sputsoft::numbers;
 
 // Find largest prime factor of 600851475143
 void PE3()
@@ -55,7 +38,7 @@ void PE16()
 {
   natural_number n = power(natural_number(2), 1000);
   std::cout << "2^1000 = " << n << std::endl;
-  std::cout << "Digit sum: " << digit_sum(n) << std::endl << std::endl;
+  std::cout << "Digit sum: " << sideways_sum(n, 10) << std::endl << std::endl;
   // Answer: 1366
 }
 
@@ -64,10 +47,9 @@ void PE20()
 {
   natural_number n = factorial<natural_number>(100);
   std::cout << "100! = " << n << std::endl;
-  std::cout << "Digit sum: " << digit_sum(n) << std::endl << std::endl;
+  std::cout << "Digit sum: " << sideways_sum(n, 10) << std::endl << std::endl;
   // Answer: 648
 }
-
 
 void factorize_example()
 {
@@ -94,18 +76,34 @@ void gcd_example()
   std::cout << "gcd(" << a << "," << b << ") = " << c << std::endl << std::endl;
 }
 
-void int_example()
+void bits()
 {
-  int a, b=1, c=2;
-  add(a, b, c);
+  natural_number a, b, c, d;
+  unsigned e;
+
+  set(a, "11101000010101101010", 2);
+  set(b,   "101000101111000111", 2);
+  //set(d, "11101000111111101111", 2);  // a | b
+  set(d,   "101000000101000010", 2);  // a & b
+  //set(d, "11101000010100111111", 2);  // a ^ 85
+  //set(d, "11000000111010101101", 2);  // a ^ b
+  //set(d,         "101010000101", 2);  // b & ~a
+  //set(d, "11000000010000101000", 2);  // a & ~b
+
+  bitwise_and_not(c, a, 85u);
+  bitwise_and(e, a, ~85u);
+
   std::cout << a << std::endl;
+  std::cout << e << std::endl;
+  std::cout << c << std::endl;
 }
 
 int main()
 {
-  PE3();
+  /*PE3();
   PE16();
   PE20();
   factorize_example();
-  gcd_example();
+  gcd_example();*/
+  bits();
 }

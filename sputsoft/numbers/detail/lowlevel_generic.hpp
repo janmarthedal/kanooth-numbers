@@ -406,7 +406,7 @@ public:
 
   // n > 0, z1 >= x1, 1 <= count < digit_bits
   template <typename T>
-  static inline T lshift(T* z1, const T* x1, std::size_t n, unsigned count) {
+  static T lshift(T* z1, const T* x1, std::size_t n, unsigned count) {
     const unsigned int rcount = boost::integer_traits<T>::digits - count;
     T* z2 = z1 + n;
     const T* x2 = x1 + n;
@@ -423,7 +423,7 @@ public:
 
   // n > 0, z1 <= x1, 1 <= count < digit_bits
   template <typename T>
-  static inline T rshift(T* z1, const T* x1, std::size_t n, unsigned count) {
+  static T rshift(T* z1, const T* x1, std::size_t n, unsigned count) {
     const unsigned int rcount = boost::integer_traits<T>::digits - count;
     const T* x2 = x1 + n;
     T xl, xh = *x1++;
@@ -438,7 +438,7 @@ public:
   }
 
   template <typename T>
-  static inline int comp(const T* xp, const T* yp, std::size_t n) {
+  static int comp(const T* xp, const T* yp, std::size_t n) {
     if (xp == yp) return 0;
     xp += n;
     yp += n;
@@ -449,6 +449,30 @@ public:
       if (x > y) return 1;
     }
     return 0;
+  }
+
+  template <typename T>
+  static void bitwise_and(T* zp, const T* xp, const T* yp, std::size_t n) {
+    while (n--)
+      *zp++ = *xp++ & *yp++;
+  }
+
+  template <typename T>
+  static void bitwise_or(T* zp, const T* xp, const T* yp, std::size_t n) {
+    while (n--)
+      *zp++ = *xp++ | *yp++;
+  }
+
+  template <typename T>
+  static void bitwise_xor(T* zp, const T* xp, const T* yp, std::size_t n) {
+    while (n--)
+      *zp++ = *xp++ ^ *yp++;
+  }
+
+  template <typename T>
+  static void bitwise_and_not(T* zp, const T* xp, const T* yp, std::size_t n) {
+    while (n--)
+      *zp++ = *xp++ & ~*yp++;
   }
 
 };

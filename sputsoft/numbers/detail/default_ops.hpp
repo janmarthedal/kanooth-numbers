@@ -79,6 +79,26 @@ struct quotrem_4_eval {
   }
 };
 
+template <typename R, typename V1, typename V2>
+struct and_3_eval {
+  static inline void bit_and(R& r, const V1& v1, const V2& v2) { r = v1 & v2; }
+};
+
+template <typename R, typename V1, typename V2>
+struct or_3_eval {
+  static inline void bit_or(R& r, const V1& v1, const V2& v2) { r = v1 | v2; }
+};
+
+template <typename R, typename V1, typename V2>
+struct xor_3_eval {
+  static inline void bit_xor(R& r, const V1& v1, const V2& v2) { r = v1 ^ v2; }
+};
+
+template <typename R, typename V1, typename V2>
+struct and_not_3_eval {
+  static inline void bit_and_not(R& r, const V1& v1, const V2& v2) { r = v1 & ~v2; }
+};
+
 template <typename V1, typename V2>
 struct cmp_r2_eval {
   static inline int cmp(const V1& v1, const V2& v2) {

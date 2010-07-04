@@ -217,6 +217,34 @@ struct quotrem_trunc_4_eval<numb<T>, R, V1, V2> {
   }
 };
 
+template <typename T, typename V1, typename V2>
+struct and_3_eval<numb<T>, V1, V2> {
+  static void bit_and(numb<T>& r, const V1& v1, const V2& v2) {
+    r.bitwise_and(v1, v2);
+  }
+};
+
+template <typename T, typename V1, typename V2>
+struct or_3_eval<numb<T>, V1, V2> {
+  static void bit_or(numb<T>& r, const V1& v1, const V2& v2) {
+    r.bitwise_or(v1, v2);
+  }
+};
+
+template <typename T, typename V1, typename V2>
+struct xor_3_eval<numb<T>, V1, V2> {
+  static void bit_xor(numb<T>& r, const V1& v1, const V2& v2) {
+    r.bitwise_xor(v1, v2);
+  }
+};
+
+template <typename T, typename V1, typename V2>
+struct and_not_3_eval<numb<T>, V1, V2> {
+  static void bit_and_not(numb<T>& r, const V1& v1, const V2& v2) {
+    r.bitwise_and_not(v1, v2);
+  }
+};
+
 template <typename T1, typename T2>
 struct cmp_r2_eval<numb<T1>, numb<T2> > {
   inline static int cmp(const numb<T1>& v1, const numb<T2>& v2) {

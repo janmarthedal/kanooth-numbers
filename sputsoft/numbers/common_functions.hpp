@@ -21,7 +21,7 @@ namespace numbers {
 template <typename NUM>
 NUM factorial(std::size_t n)
 {
-  NUM r(1);
+  NUM r = 1;
   for (std::size_t k=2; k <= n; ++k)
     r *= k;
   return r;
@@ -42,6 +42,35 @@ NUM power(NUM n, std::size_t p)
   }
   return y;
 }
+
+template <typename NUM>
+NUM sqrt_floor(NUM n)
+{
+  if (n <= 1) return n;
+  NUM a = n, b;
+  while (true) {
+    b = (a + n/a)/2;
+    if (b >= a) return a;
+    a = (b + n/b)/2;
+    if (a >= b) return b;
+  }
+}
+
+template <typename R, typename E>
+inline R sqrt_floor(const detail::expr<R, E>& ex)
+{
+  return sqrt_floor((R) ex);
+}
+
+template <typename NUM>
+NUM sideways_sum(NUM n, unsigned base)
+{
+  NUM res;
+  while (n)
+    res += quotrem(n, n, base);
+  return res;
+}
+
 
 } // numbers
 } // sputsoft
