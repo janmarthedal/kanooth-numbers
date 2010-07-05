@@ -40,8 +40,8 @@ private:
     num->add(v1, v2);
   }
 
-  template <typename V2>
-  void _sub(const number_type& v1, const V2& v2) {
+  template <typename V1, typename V2>
+  void _sub(const V1& v1, const V2& v2) {
     if (!num.unique()) num.reset(new number_type);
     num->sub(v1, v2);
   }
@@ -138,6 +138,9 @@ public:
   inline void add(const numb& x, unsigned short y) { _add(*x.num, y); }
   inline void add(unsigned short x, const numb& y) { _add(*y.num, x); }
   inline void sub(const numb& x, unsigned short y) { _sub(*x.num, y); }
+  inline void sub(unsigned short x, const numb& y) { _sub(x, *y.num); }
+  static inline unsigned short subi(unsigned short x, const numb& y)
+    { return number_type::subi(x, *y.num); }
   inline void mul(const numb& x, unsigned short y) { _mul(*x.num, y); }
   inline void mul(unsigned short x, const numb& y) { _mul(*y.num, x); }
   inline void div(const numb& x, unsigned short y) { _div(*x.num, y); }
@@ -151,6 +154,8 @@ public:
   inline void add(const numb& x, unsigned y) { _add(*x.num, y); }
   inline void add(unsigned x, const numb& y) { _add(*y.num, x); }
   inline void sub(const numb& x, unsigned y) { _sub(*x.num, y); }
+  inline void sub(unsigned x, const numb& y) { _sub(x, *y.num); }
+  static inline unsigned subi(unsigned x, const numb& y) { return number_type::subi(x, *y.num); }
   inline void mul(const numb& x, unsigned y) { _mul(*x.num, y); }
   inline void mul(unsigned x, const numb& y) { _mul(*y.num, x); }
   inline void div(const numb& x, unsigned y) { _div(*x.num, y); }
@@ -172,6 +177,9 @@ public:
   inline void add(const numb& x, unsigned long y) { _add(*x.num, y); }
   inline void add(unsigned long x, const numb& y) { _add(*y.num, x); }
   inline void sub(const numb& x, unsigned long y) { _sub(*x.num, y); }
+  inline void sub(unsigned long x, const numb& y) { _sub(x, *y.num); }
+  static inline unsigned long subi(unsigned long x, const numb& y)
+    { return number_type::subi(x, *y.num); }
   inline void mul(const numb& x, unsigned long y) { _mul(*x.num, y); }
   inline void mul(unsigned long x, const numb& y) { _mul(*y.num, x); }
   inline void div(const numb& x, unsigned long y) { _div(*x.num, y); }
@@ -186,6 +194,9 @@ public:
   inline void add(const numb& x, unsigned long long y) { _add(*x.num, y); }
   inline void add(unsigned long long x, const numb& y) { _add(*y.num, x); }
   inline void sub(const numb& x, unsigned long long y) { _sub(*x.num, y); }
+  inline void sub(unsigned long long x, const numb& y) { _sub(x, *y.num); }
+  static inline unsigned long long subi(unsigned long long x, const numb& y)
+    { return number_type::subi(x, *y.num); }
   inline void mul(const numb& x, unsigned long long y) { _mul(*x.num, y); }
   inline void mul(unsigned long long x, const numb& y) { _mul(*y.num, x); }
   inline void div(const numb& x, unsigned long long y) { _div(*x.num, y); }

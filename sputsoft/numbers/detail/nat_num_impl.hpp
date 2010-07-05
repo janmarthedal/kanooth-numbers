@@ -226,15 +226,8 @@ private:
   }
 
   template <typename T>
-  static void sub_int_num(Con& r, const T x, const Con& y) {
-    if (!x)
-      r.set_size(0);
-    else if (y.is_empty())
-      set_int(r, x);
-    else if (sizeof(T) <= sizeof(digit_type))
-      sub_int(r, x - y[0]);
-    else
-      sub_num(r, numb(x).con, y);
+  static T sub_int_num(const T x, const Con& y) {
+    return sputsoft::numbers::sub(x, to_int_type<T>(y));
   }
 
   /* Multiply two numbers */
@@ -743,7 +736,9 @@ public:
   inline void add(const numb& x, unsigned short y) { add_int(con, x.con, y); }
   inline void add(unsigned short x, const numb& y) { add_int(con, y.con, x); }
   inline void sub(const numb& x, unsigned short y) { sub_num_int(con, x.con, y); }
-  inline void sub(unsigned short x, const numb& y) { sub_int_num(con, x, y.con); }
+  inline void sub(unsigned short x, const numb& y) { set_int(con, sub_int_num(x, y.con)); }
+  static inline unsigned short subi(unsigned short x, const numb& y)
+    { return sub_int_num(x, y.con); }
   inline void mul(const numb& x, unsigned short y) { mul_int(con, x.con, y); }
   inline void mul(unsigned short x, const numb& y) { mul_int(con, y.con, x); }
   inline void div(const numb& x, unsigned short y) { quot_int(con, x.con, y); }
@@ -757,7 +752,8 @@ public:
   inline void add(const numb& x, unsigned y) { add_int(con, x.con, y); }
   inline void add(unsigned x, const numb& y) { add_int(con, y.con, x); }
   inline void sub(const numb& x, unsigned y) { sub_num_int(con, x.con, y); }
-  inline void sub(unsigned x, const numb& y) { sub_int_num(con, x, y.con); }
+  inline void sub(unsigned x, const numb& y) { set_int(con, sub_int_num(x, y.con)); }
+  static inline unsigned subi(unsigned x, const numb& y) { return sub_int_num(x, y.con); }
   inline void mul(const numb& x, unsigned y) { mul_int(con, x.con, y); }
   inline void mul(unsigned x, const numb& y) { mul_int(con, y.con, x); }
   inline void div(const numb& x, unsigned y) { quot_int(con, x.con, y); }
@@ -779,7 +775,8 @@ public:
   inline void add(const numb& x, unsigned long y) { add_int(con, x.con, y); }
   inline void add(unsigned long x, const numb& y) { add_int(con, y.con, x); }
   inline void sub(const numb& x, unsigned long y) { sub_num_int(con, x.con, y); }
-  inline void sub(unsigned long x, const numb& y) { sub_int_num(con, x, y.con); }
+  inline void sub(unsigned long x, const numb& y) { set_int(con, sub_int_num(x, y.con)); }
+  static inline unsigned long subi(unsigned long x, const numb& y) { return sub_int_num(x, y.con); }
   inline void mul(const numb& x, unsigned long y) { mul_int(con, x.con, y); }
   inline void mul(unsigned long x, const numb& y) { mul_int(con, y.con, x); }
   inline void div(const numb& x, unsigned long y) { quot_int(con, x.con, y); }
@@ -794,7 +791,8 @@ public:
   inline void add(const numb& x, unsigned long long y) { add_int(con, x.con, y); }
   inline void add(unsigned long long x, const numb& y) { add_int(con, y.con, x); }
   inline void sub(const numb& x, unsigned long long y) { sub_num_int(con, x.con, y); }
-  inline void sub(unsigned long long x, const numb& y) { sub_int_num(con, x, y.con); }
+  inline void sub(unsigned long long x, const numb& y) { set_int(con, sub_int_num(x, y.con)); }
+  static inline unsigned long long subi(unsigned long long x, const numb& y) { return sub_int_num(x, y.con); }
   inline void mul(const numb& x, unsigned long long y) { mul_int(con, x.con, y); }
   inline void mul(unsigned long long x, const numb& y) { mul_int(con, y.con, x); }
   inline void div(const numb& x, unsigned long long y) { quot_int(con, x.con, y); }
@@ -816,7 +814,7 @@ public:
   inline void bitwise_and(const numb& x, const numb& y) { bit_and_num(con, x.con, y.con); }
   inline void bitwise_or(const numb& x, const numb& y) { bit_or_num(con, x.con, y.con); }
   inline void bitwise_xor(const numb& x, const numb& y) { bit_xor_num(con, x.con, y.con); }
-  inline void bitwise_and_not(numb& x, const numb& y) { bit_and_not_num(con, x.con, y.con); }
+  inline void bitwise_and_not(const numb& x, const numb& y) { bit_and_not_num(con, x.con, y.con); }
   inline int cmp(const numb& v) const { return comp_num(con, v.con); }
 
   inline void left_shift(const numb& x, std::ptrdiff_t count) {
