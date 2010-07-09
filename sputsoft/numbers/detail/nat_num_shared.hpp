@@ -162,14 +162,16 @@ public:
   static inline void rem(unsigned& r, const numb& x, unsigned y) { rem_int(r, *x.num, y); }
   static inline void quotrem(numb& q, unsigned& r, const numb& x, unsigned y)
     { quotrem_int(q, r, *x.num, y); }
-  static inline unsigned bitwise_and(const numb& x, unsigned y)
-    { return number_type::bitwise_and(*x.num, y); }
+  static inline unsigned bitwise_andi(const numb& x, unsigned y)
+    { return number_type::bitwise_andi(*x.num, y); }
+  inline void bitwise_and(const numb& x, unsigned y) { bit_and(*x.num, y); }
+  inline void bitwise_and(unsigned x, const numb& y) { bit_and(*y.num, x); }
   inline void bitwise_or(const numb& x, unsigned y) { bit_or(*x.num, y); }
   inline void bitwise_or(unsigned x, const numb& y) { bit_or(*y.num, x); }
   inline void bitwise_xor(const numb& x, unsigned y) { bit_xor(*x.num, y); }
   inline void bitwise_xor(unsigned x, const numb& y) { bit_xor(*y.num, x); }
-  static inline unsigned bitwise_and_not(unsigned x, const numb& y)
-    { return number_type::bitwise_and_not(x, *y.num); }
+  static inline unsigned bitwise_and_noti(unsigned x, const numb& y)
+    { return number_type::bitwise_and_noti(x, *y.num); }
   inline void bitwise_and_not(const numb& x, unsigned y) { bit_and_not(*x.num, y); }
   inline int cmp(unsigned v) const { return num->cmp(v); }
 

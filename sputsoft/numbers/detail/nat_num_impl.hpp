@@ -761,12 +761,14 @@ public:
     { r = rem_int(x.con, y); }
   static inline void quotrem(numb& q, unsigned& r, const numb& x, unsigned y)
     { r = quotrem_int(q.con, x.con, y); }
-  static inline unsigned bitwise_and(const numb& x, unsigned y) { return bit_and_int(x.con, y); }
+  static inline unsigned bitwise_andi(const numb& x, unsigned y) { return bit_and_int(x.con, y); }
+  inline void bitwise_and(const numb& x, unsigned y) { set_int(con, bit_and_int(x.con, y)); }
+  inline void bitwise_and(unsigned x, const numb& y) { set_int(con, bit_and_int(y.con, x)); }
   inline void bitwise_or(const numb& x, unsigned y) { bit_or_int(con, x.con, y); }
   inline void bitwise_or(unsigned x, const numb& y) { bit_or_int(con, y.con, x); }
   inline void bitwise_xor(const numb& x, unsigned y) { bit_xor_int(con, x.con, y); }
   inline void bitwise_xor(unsigned x, const numb& y) { bit_xor_int(con, y.con, x); }
-  static inline unsigned bitwise_and_not(unsigned x, const numb& y)
+  static inline unsigned bitwise_and_noti(unsigned x, const numb& y)
     { return bit_and_not_int_num(x, y.con); }
   inline void bitwise_and_not(const numb& x, unsigned y) { bit_and_not_num_int(con, x.con, y); }
   inline int cmp(unsigned v) const { return comp_int(con, v); }

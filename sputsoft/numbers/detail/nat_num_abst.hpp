@@ -22,9 +22,6 @@ namespace numbers {
 namespace detail {
 
 template <typename T>
-class natnum;
-
-template <typename T>
 struct resolve_binary<ops::binary::rem, numb<natnum<T> >, unsigned short> {
   typedef unsigned short return_type;
 };
@@ -47,10 +44,6 @@ struct resolve_binary<ops::binary::bit_and_not, unsigned short, numb<natnum<T> >
 
 template <typename T>
 struct resolve_binary<ops::binary::rem, numb<natnum<T> >, unsigned> {
-  typedef unsigned return_type;
-};
-template <typename T>
-struct resolve_binary<ops::binary::sub, unsigned, numb<natnum<T> > > {
   typedef unsigned return_type;
 };
 template <typename T>
@@ -116,10 +109,6 @@ struct resolve_binary<ops::binary::rem, numb<natnum<T> >, int> {
   typedef unsigned return_type;
 };
 template <typename T>
-struct resolve_binary<ops::binary::sub, int, numb<natnum<T> > > {
-  typedef unsigned return_type;
-};
-template <typename T>
 struct resolve_binary<ops::binary::bit_and, numb<natnum<T> >, int> {
   typedef unsigned return_type;
 };
@@ -133,14 +122,14 @@ struct resolve_binary<ops::binary::bit_and_not, int, numb<natnum<T> > > {
 };
 
 template <typename T>
-struct set_2_eval<numb<natnum<T> >, int> {
-  static inline void set(numb<natnum<T> >& r, int v) {
+struct evaluator_rv<ops::unary::identity, numb<natnum<T> >, int> {
+  void operator()(numb<natnum<T> >& r, int v) const {
     sputsoft::numbers::set(r, (unsigned) v);
   }
 };
 template <typename T>
-struct add_3_eval<numb<natnum<T> >, numb<natnum<T> >, int> {
-  static inline void add(numb<natnum<T> >& r, const numb<natnum<T> >& v1, int v2) {
+struct evaluator_rvv<ops::binary::add, numb<natnum<T> >, numb<natnum<T> >, int> {
+  void operator()(numb<natnum<T> >& r, const numb<natnum<T> >& v1, int v2) const {
     if (v2 >= 0)
       sputsoft::numbers::add(r, v1, (unsigned) v2);
     else
@@ -148,8 +137,8 @@ struct add_3_eval<numb<natnum<T> >, numb<natnum<T> >, int> {
   }
 };
 template <typename T>
-struct add_3_eval<numb<natnum<T> >, int, numb<natnum<T> > > {
-  static inline void add(numb<natnum<T> >& r, int v1, const numb<natnum<T> >& v2) {
+struct evaluator_rvv<ops::binary::add, numb<natnum<T> >, int, numb<natnum<T> > > {
+  void operator()(numb<natnum<T> >& r, int v1, const numb<natnum<T> >& v2) const {
     if (v1 >= 0)
       sputsoft::numbers::add(r, v2, (unsigned) v1);
     else
@@ -157,47 +146,26 @@ struct add_3_eval<numb<natnum<T> >, int, numb<natnum<T> > > {
   }
 };
 template <typename T>
-struct sub_3_eval<numb<natnum<T> >, numb<natnum<T> >, int> {
-  static inline void sub(numb<natnum<T> >& r, const numb<natnum<T> >& v1, int v2) {
-    if (v2 >= 0)
-      sputsoft::numbers::sub(r, v1, (unsigned) v2);
-    else
-      sputsoft::numbers::add(r, v1, (unsigned) -v2);
-  }
-};
-template <typename T>
-struct sub_3_eval<numb<natnum<T> >, int, numb<natnum<T> > > {
-  static inline void sub(numb<natnum<T> >& r, int v1, const numb<natnum<T> >& v2) {
-    sputsoft::numbers::sub(r, (unsigned) v1, v2);
-  }
-};
-template <typename T>
-struct sub_3_eval<unsigned, int, numb<natnum<T> > > {
-  static inline void sub(unsigned& r, int v1, const numb<natnum<T> >& v2) {
-    sputsoft::numbers::sub(r, (unsigned) v1, v2);
-  }
-};
-template <typename T>
-struct mul_3_eval<numb<natnum<T> >, numb<natnum<T> >, int> {
-  static inline void mul(numb<natnum<T> >& r, const numb<natnum<T> >& v1, int v2) {
+struct evaluator_rvv<ops::binary::mul, numb<natnum<T> >, numb<natnum<T> >, int> {
+  void operator()(numb<natnum<T> >& r, const numb<natnum<T> >& v1, int v2) const {
     sputsoft::numbers::mul(r, v1, (unsigned) v2);
   }
 };
 template <typename T>
-struct mul_3_eval<numb<natnum<T> >, int, numb<natnum<T> > > {
-  static inline void mul(numb<natnum<T> >& r, int v1, const numb<natnum<T> >& v2) {
+struct evaluator_rvv<ops::binary::mul, numb<natnum<T> >, int, numb<natnum<T> > > {
+  void operator()(numb<natnum<T> >& r, int v1, const numb<natnum<T> >& v2) const {
     sputsoft::numbers::mul(r, (unsigned) v1, v2);
   }
 };
 template <typename T>
-struct div_3_eval<numb<natnum<T> >, numb<natnum<T> >, int> {
-  static inline void div(numb<natnum<T> >& r, const numb<natnum<T> >& v1, int v2) {
+struct evaluator_rvv<ops::binary::div, numb<natnum<T> >, numb<natnum<T> >, int> {
+  void operator()(numb<natnum<T> >& r, const numb<natnum<T> >& v1, int v2) const {
     sputsoft::numbers::div(r, v1, (unsigned) v2);
   }
 };
 template <typename T>
-struct rem_3_eval<unsigned, numb<natnum<T> >, int> {
-  static inline void rem(unsigned& r, const numb<natnum<T> >& v1, int v2) {
+struct evaluator_rvv<ops::binary::rem, unsigned, numb<natnum<T> >, int> {
+  void operator()(unsigned& r, const numb<natnum<T> >& v1, int v2) const {
     sputsoft::numbers::rem(r, v1, (unsigned) v2);
   }
 };
@@ -208,15 +176,17 @@ struct quotrem_4_eval<numb<natnum<T> >, unsigned, numb<natnum<T> >, int> {
   }
 };
 template <typename T>
-struct and_3_eval<unsigned, numb<natnum<T> >, int> {
-  static inline void bit_and(unsigned& r, const numb<natnum<T> >& v1, int v2) {
-    sputsoft::numbers::bitwise_and(r, v1, (unsigned) v2);
+struct function_vv<ops::binary::bit_and, int, numb<natnum<T> > > {
+  typedef typename resolve_binary<ops::binary::bit_and, int, numb<natnum<T> > >::return_type return_type;
+  return_type operator()(int v1, const numb<natnum<T> >& v2) const {
+    return sputsoft::numbers::bitwise_and((unsigned) v1, v2);
   }
 };
 template <typename T>
-struct and_3_eval<unsigned, int, numb<natnum<T> > > {
-  static inline void bit_and(unsigned& r, int v1, const numb<natnum<T> >& v2) {
-    sputsoft::numbers::bitwise_and(r, (unsigned) v1, v2);
+struct function_vv<ops::binary::bit_and, numb<natnum<T> >, int> {
+  typedef typename resolve_binary<ops::binary::bit_and, numb<natnum<T> >, int>::return_type return_type;
+  return_type operator()(const numb<natnum<T> >& v1, int v2) const {
+    return sputsoft::numbers::bitwise_and(v1, (unsigned) v2);
   }
 };
 template <typename T>
@@ -269,75 +239,86 @@ struct cmp_r2_eval<int, numb<natnum<T> > > {
 };
 /*****************************************/
 
+/* Unary abs */
+
 template <typename T>
-struct sub_3_eval<unsigned short, unsigned short, numb<natnum<T> > > {
-  static void sub(unsigned short& r, unsigned short v1, const numb<natnum<T> >& v2) {
-    r = numb<natnum<T> >::subi(v1, v2);
+struct function_v<ops::unary::abs, numb<natnum<T> > > {
+  numb<natnum<T> > operator()(const numb<natnum<T> >& v) const {
+    return v;
+  }
+};
+
+/* Binary sub */
+
+template <typename T>
+struct resolve_binary<ops::binary::sub, unsigned, numb<natnum<T> > > {
+  typedef unsigned return_type;
+};
+
+template <typename T>
+struct function_vv<ops::binary::sub, unsigned, numb<natnum<T> > > {
+  unsigned operator()(unsigned v1, const numb<natnum<T> >& v2) const {
+    return numb<natnum<T> >::subi(v1, v2);
   }
 };
 
 template <typename T>
-struct sub_3_eval<unsigned, unsigned, numb<natnum<T> > > {
-  static void sub(unsigned& r, unsigned v1, const numb<natnum<T> >& v2) {
-    r = numb<natnum<T> >::subi(v1, v2);
+struct resolve_binary<ops::binary::sub, int, numb<natnum<T> > > {
+  typedef unsigned return_type;
+};
+
+template <typename T>
+struct evaluator_rvv<ops::binary::sub, numb<natnum<T> >, numb<natnum<T> >, int> {
+  void operator()(numb<natnum<T> >& r, const numb<natnum<T> >& v1, int v2) const {
+    if (v2 >= 0)
+      sputsoft::numbers::sub(r, v1, (unsigned) v2);
+    else
+      sputsoft::numbers::add(r, v1, (unsigned) -v2);
+  }
+};
+template <typename T>
+struct evaluator_rvv<ops::binary::sub, numb<natnum<T> >, int, numb<natnum<T> > > {
+  void operator()(numb<natnum<T> >& r, int v1, const numb<natnum<T> >& v2) const {
+    sputsoft::numbers::sub(r, (unsigned) v1, v2);
+  }
+};
+template <typename T>
+struct function_vv<ops::binary::sub, int, numb<natnum<T> > > {
+  typedef typename resolve_binary<ops::binary::sub, unsigned, numb<natnum<T> > >::return_type return_type;
+  return_type sub(int v1, const numb<natnum<T> >& v2) {
+    return sputsoft::numbers::sub((unsigned) v1, v2);
+  }
+};
+
+/* bitwise_and */
+
+template <typename T>
+struct evaluator_rvv<ops::binary::bit_and, numb<natnum<T> >, numb<natnum<T> >, numb<natnum<T> > > {
+  void operator()(numb<natnum<T> >& r, const numb<natnum<T> >& v1, const numb<natnum<T> >& v2) const {
+    r.bitwise_and(v1, v2);
   }
 };
 
 template <typename T>
-struct sub_3_eval<unsigned long, unsigned long, numb<natnum<T> > > {
-  static void sub(unsigned long& r, unsigned long v1, const numb<natnum<T> >& v2) {
-    r = numb<natnum<T> >::subi(v1, v2);
-  }
-};
-
-#ifdef SPUTSOFT_HAS_LONG_LONG
-template <typename T>
-struct sub_3_eval<unsigned long long, unsigned long long, numb<natnum<T> > > {
-  static void sub(unsigned long long& r, unsigned long long v1, const numb<natnum<T> >& v2) {
-    r = numb<natnum<T> >::subi(v1, v2);
-  }
-};
-#endif
-
-template <typename T>
-struct and_3_eval<unsigned short, numb<natnum<T> >, unsigned short> {
-  static void bit_and(unsigned short& r, const numb<natnum<T> >& v1, unsigned short v2) {
-    r = numb<natnum<T> >::bitwise_and(v1, v2);
+struct function_vv<ops::binary::bit_and, numb<natnum<T> >, unsigned> {
+  unsigned operator()(const numb<natnum<T> >& v1, unsigned v2) const {
+    return numb<natnum<T> >::bitwise_andi(v1, v2);
   }
 };
 
 template <typename T>
-struct and_3_eval<unsigned short, unsigned short, numb<natnum<T> > > {
-  static void bit_and(unsigned short& r, unsigned short v1, const numb<natnum<T> >& v2) {
-    r = numb<natnum<T> >::bitwise_and(v2, v1);
+struct function_vv<ops::binary::bit_and, unsigned, numb<natnum<T> > > {
+  unsigned operator()(unsigned v1, const numb<natnum<T> >& v2) const {
+    return numb<natnum<T> >::bitwise_andi(v2, v1);
   }
 };
 
-template <typename T>
-struct and_3_eval<unsigned, numb<natnum<T> >, unsigned> {
-  static void bit_and(unsigned& r, const numb<natnum<T> >& v1, unsigned v2) {
-    r = numb<natnum<T> >::bitwise_and(v1, v2);
-  }
-};
-
-template <typename T>
-struct and_3_eval<unsigned, unsigned, numb<natnum<T> > > {
-  static void bit_and(unsigned& r, unsigned v1, const numb<natnum<T> >& v2) {
-    r = numb<natnum<T> >::bitwise_and(v2, v1);
-  }
-};
+/* */
 
 template <typename T>
 struct and_not_3_eval<unsigned, unsigned, numb<natnum<T> > > {
   static void bit_and_not(unsigned& r, unsigned v1, const numb<natnum<T> >& v2) {
-    r = numb<natnum<T> >::bitwise_and_not(v1, v2);
-  }
-};
-
-template <typename T>
-struct abs_2_eval<numb<natnum<T> >, numb<natnum<T> > > {
-  static inline void abs(numb<natnum<T> >& r, const numb<natnum<T> >& v) {
-    sputsoft::numbers::set(r, v);
+    r = numb<natnum<T> >::bitwise_and_noti(v1, v2);
   }
 };
 

@@ -15,7 +15,7 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_DEFAULT_OPS_HPP
 #define	_SPUTSOFT_NUMBERS_DETAIL_DEFAULT_OPS_HPP
 
-#include "named_ops.hpp"
+#include <sputsoft/numbers/detail/named_ops.hpp>
 
 namespace sputsoft {
 namespace numbers {
@@ -26,19 +26,58 @@ struct resolve_binary<Op, T, T> {
   typedef T return_type;
 };
 
+/* Unary */
+
+template <typename Op, typename R, typename V>
+struct evaluator_rv {
+  void operator()(R& r, const V& v) const {
+    sputsoft::numbers::set(r, function_v<Op, V>()(v));
+  }
+};
+
+template <typename Op, typename V>
+struct function_v {
+  typedef typename resolve_unary<Op, V>::return_type return_type;
+  return_type operator()(const V& v) const {
+    return_type r;
+    evaluator_rv<Op, return_type, V>()(r, v);
+    return r;
+  }
+};
+
+/* Unary identity */
+
 template <typename R, typename V>
-struct set_2_eval {
-  static inline void set(R& r, const V& v) { r = v; }
+struct evaluator_rv<ops::unary::identity, R, V> {
+  void operator()(R& r, const V& v) const {
+    r = v;
+  }
+};
+
+/* Unary negate */
+
+template <typename T>
+struct resolve_unary<ops::unary::negate, T> {
+  typedef typename sputsoft::number_traits<T>::signed_type return_type;
+};
+
+template <typename V>
+struct function_v<ops::unary::negate, V> {
+  typedef typename resolve_unary<ops::unary::negate, V>::return_type return_type;
+  return_type operator()(const V& v) { return -((return_type) v); }
+};
+
+/* Unary abs */
+
+template <typename T>
+struct resolve_unary<ops::unary::abs, T> {
+  typedef typename sputsoft::number_traits<T>::unsigned_type return_type;
 };
 
 template <typename R, typename V>
-struct negate_2_eval {
-  static inline void negate(R& r, const V& v) { r = -v; }
-};
-
-template <typename R, typename V>
-struct abs_2_eval {
-  static inline void abs(R& r, const V& v) {
+struct evaluator_rv<ops::unary::abs, R, V> {
+  typedef typename resolve_unary<ops::unary::abs, V>::return_type return_type;
+  void operator()(R& r, const V& v) const {
     if (sputsoft::numbers::is_negative(v))
       sputsoft::numbers::negate(r, v);
     else
@@ -46,30 +85,100 @@ struct abs_2_eval {
   }
 };
 
-template <typename R, typename V1, typename V2>
-struct add_3_eval {
-  static inline void add(R& r, const V1& v1, const V2& v2) { r = v1 + v2; }
+/* Binary */
+
+template <typename Op>
+struct resolve_binary<Op, unsigned, unsigned> {
+  typedef unsigned return_type;
 };
 
-template <typename R, typename V1, typename V2>
-struct sub_3_eval {
-  static inline void sub(R& r, const V1& v1, const V2& v2) { r = v1 - v2; }
+template <typename Op>
+struct resolve_binary<Op, unsigned, signed> {
+  typedef unsigned return_type;
 };
 
-template <typename R, typename V1, typename V2>
-struct mul_3_eval {
-  static inline void mul(R& r, const V1& v1, const V2& v2) { r = v1 * v2; }
+template <typename Op>
+struct resolve_binary<Op, signed, unsigned> {
+  typedef unsigned return_type;
 };
 
-template <typename R, typename V1, typename V2>
-struct div_3_eval {
-  static inline void div(R& r, const V1& v1, const V2& v2) { r = v1 / v2; }
+template <typename Op, typename R, typename V1, typename V2>
+struct evaluator_rvv {
+  void operator()(R& r, const V1& v1, const V2& v2) const {
+    sputsoft::numbers::set(r, function_vv<Op, V1, V2>()(v1, v2));
+  }
 };
 
-template <typename R, typename V1, typename V2>
-struct rem_3_eval {
-  static inline void rem(R& r, const V1& v1, const V2& v2) { r = v1 % v2; }
+template <typename Op, typename V1, typename V2>
+struct function_vv {
+  typedef typename resolve_binary<Op, V1, V2>::return_type return_type;
+  return_type operator()(const V1& v1, const V2& v2) const {
+    return_type r;
+    evaluator_rvv<Op, return_type, V1, V2>()(r, v1, v2);
+    return r;
+  }
 };
+
+/* Binary add */
+
+template <typename V1, typename V2>
+struct function_vv<ops::binary::add, V1, V2> {
+  typedef typename resolve_binary<ops::binary::add, V1, V2>::return_type return_type;
+  return_type operator()(const V1& v1, const V2& v2) const {
+    return v1 + v2;
+  }
+};
+
+/* Binary sub */
+
+template <typename V1, typename V2>
+struct function_vv<ops::binary::sub, V1, V2> {
+  typedef typename resolve_binary<ops::binary::sub, V1, V2>::return_type return_type;
+  return_type operator()(const V1& v1, const V2& v2) const {
+    return v1 - v2;
+  }
+};
+
+/* Binary mul */
+
+template <typename V1, typename V2>
+struct function_vv<ops::binary::mul, V1, V2> {
+  typedef typename resolve_binary<ops::binary::mul, V1, V2>::return_type return_type;
+  return_type operator()(const V1& v1, const V2& v2) const {
+    return v1 * v2;
+  }
+};
+
+/* Binary div */
+
+template <typename V1, typename V2>
+struct function_vv<ops::binary::div, V1, V2> {
+  typedef typename resolve_binary<ops::binary::div, V1, V2>::return_type return_type;
+  return_type operator()(const V1& v1, const V2& v2) const {
+    return v1 / v2;
+  }
+};
+
+/* Binary rem */
+
+template <typename V1, typename V2>
+struct function_vv<ops::binary::rem, V1, V2> {
+  typedef typename resolve_binary<ops::binary::rem, V1, V2>::return_type return_type;
+  return_type operator()(const V1& v1, const V2& v2) const {
+    return v1 % v2;
+  }
+};
+
+/* Binary bit_and */
+
+template <typename V1, typename V2>
+struct function_vv<ops::binary::bit_and, V1, V2> {
+  typedef typename resolve_binary<ops::binary::bit_and, V1, V2>::return_type return_type;
+  return_type operator()(const V1& v1, const V2& v2) const {
+    return v1 & v2;
+  }
+};
+
 
 template <typename Q, typename R, typename V1, typename V2>
 struct quotrem_4_eval {
@@ -77,11 +186,6 @@ struct quotrem_4_eval {
     sputsoft::numbers::div(q, v1, v2);
     sputsoft::numbers::rem(r, v1, v2);
   }
-};
-
-template <typename R, typename V1, typename V2>
-struct and_3_eval {
-  static inline void bit_and(R& r, const V1& v1, const V2& v2) { r = v1 & v2; }
 };
 
 template <typename R, typename V1, typename V2>

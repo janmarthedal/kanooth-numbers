@@ -76,7 +76,7 @@ void gcd_example()
   std::cout << "gcd(" << a << "," << b << ") = " << c << std::endl << std::endl;
 }
 
-void bits()
+void bits1()
 {
   natural_number a, b, c, d;
   unsigned e;
@@ -98,12 +98,24 @@ void bits()
   std::cout << c << std::endl;
 }
 
+void bits2()
+{
+  integer a = -2, b = 7, c;
+
+  bitwise_and(c, a, b);
+  std::cout << c << std::endl;
+  bitwise_and(c, -5, b);
+  std::cout << c << std::endl;
+  /*bitwise_and(c, b, 5);
+  std::cout << c << std::endl;*/
+}
+
 int main()
 {
-  /*PE3();
+  PE3();
   PE16();
   PE20();
   factorize_example();
-  gcd_example();*/
-  bits();
+  gcd_example();
+  bits2();
 }

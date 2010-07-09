@@ -285,6 +285,7 @@ public:
   inline bool is_positive() const { return num && positive; }
   inline bool is_negative() const { return num && !positive; }
   inline operator bool() const { return !is_zero(); }
+  inline void set_abs(NUM& n) const { sputsoft::numbers::set(n, num); }
 
   inline void set(unsigned short v) { set_int(v); }
   inline void add(const numb& v1, unsigned short v2) { _add(v1.num, v1.positive, v2, true); }
@@ -511,7 +512,6 @@ public:
   static inline void quotrem_trunc(numb& q, numb& r, const numb& u, const numb& v)
     { quotrem_trunc_num(q, r, u.num, u.positive, v.num, v.positive); }
   inline signed cmp(const numb& v) const { return _cmp(num, positive, v.num, v.positive); }
-
 };
 
 } // namespace detail

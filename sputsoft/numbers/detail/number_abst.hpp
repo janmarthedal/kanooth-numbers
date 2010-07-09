@@ -23,6 +23,8 @@ namespace numbers {
 namespace detail {
 
 template <typename N> class numb;
+template <typename T> class natnum;
+template <typename T> class intnum;
 
 template <typename Op, typename T>
 struct resolve_binary<Op, numb<T>, unsigned short> {
@@ -99,43 +101,36 @@ struct resolve_binary<Op, unsigned long long, numb<T> > {
 #endif
 
 template <typename T, typename V>
-struct set_2_eval<numb<T>, V> {
-  static void set(numb<T>& r, const V& v) {
+struct evaluator_rv<ops::unary::identity, numb<T>, V> {
+  void operator()(numb<T>& r, const V& v) const {
     r.set(v);
   }
 };
 
-template <typename T, typename V>
-struct negate_2_eval<numb<T>, V> {
-  static void negate(numb<T>& r, const V& v) {
-    r.negate(v);
-  }
-};
-
 template <typename T, typename V1, typename V2>
-struct add_3_eval<numb<T>, V1, V2> {
-  static void add(numb<T>& r, const V1& v1, const V2& v2) {
+struct evaluator_rvv<ops::binary::add, numb<T>, V1, V2> {
+  void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
     r.add(v1, v2);
   }
 };
 
 template <typename T, typename V1, typename V2>
-struct sub_3_eval<numb<T>, V1, V2> {
-  static void sub(numb<T>& r, const V1& v1, const V2& v2) {
+struct evaluator_rvv<ops::binary::sub, numb<T>, V1, V2> {
+  void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
     r.sub(v1, v2);
   }
 };
 
 template <typename T, typename V1, typename V2>
-struct mul_3_eval<numb<T>, V1, V2> {
-  static void mul(numb<T>& r, const V1& v1, const V2& v2) {
+struct evaluator_rvv<ops::binary::mul, numb<T>, V1, V2> {
+  void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
     r.mul(v1, v2);
   }
 };
 
 template <typename T, typename V1, typename V2>
-struct div_3_eval<numb<T>, V1, V2> {
-  static void div(numb<T>& r, const V1& v1, const V2& v2) {
+struct evaluator_rvv<ops::binary::div, numb<T>, V1, V2> {
+  void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
     r.div(v1, v2);
   }
 };
@@ -161,10 +156,10 @@ struct div_trunc_3_eval<numb<T>, V1, V2> {
   }
 };
 
-template <typename R, typename T1, typename V2>
-struct rem_3_eval<R, numb<T1>, V2> {
-  static void rem(R& r, const numb<T1>& v1, const V2& v2) {
-    numb<T1>::rem(r, v1, v2);
+template <typename R, typename T, typename V>
+struct evaluator_rvv<ops::binary::rem, R, numb<T>, V> {
+  void operator()(R& r, const numb<T>& v1, const V& v2) const {
+    numb<T>::rem(r, v1, v2);
   }
 };
 
@@ -214,13 +209,6 @@ template <typename T, typename R, typename V1, typename V2>
 struct quotrem_trunc_4_eval<numb<T>, R, V1, V2> {
   static void quotrem_trunc(numb<T>& q, R& r, const V1& v1, const V2& v2) {
     numb<T>::quotrem_trunc(q, r, v1, v2);
-  }
-};
-
-template <typename T, typename V1, typename V2>
-struct and_3_eval<numb<T>, V1, V2> {
-  static void bit_and(numb<T>& r, const V1& v1, const V2& v2) {
-    r.bitwise_and(v1, v2);
   }
 };
 
@@ -288,7 +276,20 @@ struct rshift_3_eval<numb<T>, V> {
 };
 
 } // namespace detail
-} // namespace sputsoft
 } // namespace numbers
+
+template <typename T>
+struct number_traits<numbers::detail::numb<numbers::detail::natnum<T> > > {
+  typedef numbers::detail::numb<numbers::detail::natnum<T> > unsigned_type;
+  typedef numbers::detail::numb<numbers::detail::intnum< numbers::detail::numb<numbers::detail::natnum<T> > > > signed_type;
+};
+
+template <typename N>
+struct number_traits<numbers::detail::numb<numbers::detail::intnum<N> > > {
+  typedef N unsigned_type;
+  typedef numbers::detail::numb<numbers::detail::intnum<N> > signed_type;
+};
+
+} // namespace sputsoft
 
 #endif // _SPUTSOFT_NUMBERS_DETAIL_NUMBER_ABST_HPP

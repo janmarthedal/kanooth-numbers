@@ -165,8 +165,8 @@ struct expr<R, unary<ops::unary::negate, X> > {
 };
 
 template <typename R1, typename R2, typename E2>
-struct set_2_eval<numb<R1>, expr<R2, E2> > {
-  static void set(numb<R1>& r, const expr<R2, E2>& v) {
+struct evaluator_rv<ops::unary::identity, numb<R1>, expr<R2, E2> > {
+  void operator()(numb<R1>& r, const expr<R2, E2>& v) const {
     v.assign(r);
   }
 };
