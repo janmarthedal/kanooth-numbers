@@ -90,7 +90,7 @@ void bits1()
   //set(d,         "101010000101", 2);  // b & ~a
   //set(d, "11000000010000101000", 2);  // a & ~b
 
-  bitwise_and_not(c, a, 85u);
+  //bitwise_and_not(c, a, 85u);
   bitwise_and(e, a, ~85u);
 
   std::cout << a << std::endl;
@@ -112,10 +112,10 @@ void bits2()
 
 int main()
 {
-  PE3();
+  /*PE3();
   PE16();
   PE20();
   factorize_example();
-  gcd_example();
-  bits2();
+  gcd_example();*/
+  bits1();
 }

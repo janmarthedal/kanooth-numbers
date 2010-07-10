@@ -301,7 +301,7 @@ private:
     r.set_size(vn);
   }
 
-  static void quot_num(Con& q, const Con& u, const Con& v) {
+  static void div_num(Con& q, const Con& u, const Con& v) {
     std::size_t un = u.size();
     std::size_t vn = v.size();
     if (!vn)
@@ -417,7 +417,7 @@ private:
   }
 
   template <typename T>
-  static T quotrem_int(Con& q, const Con& u, const T v) {
+  static T quotrem_i(Con& q, const Con& u, const T v) {
     if (!v)
       division_by_zero();
     else if (u.is_empty()) {
@@ -744,8 +744,6 @@ public:
   inline void div(const numb& x, unsigned short y) { quot_int(con, x.con, y); }
   static inline void rem(unsigned short& r, const numb& x, unsigned short y)
     { r = rem_int(x.con, y); }
-  static inline void quotrem(numb& q, unsigned short& r, const numb& x, unsigned short y)
-    { r = quotrem_int(q.con, x.con, y); }
   inline int cmp(unsigned short v) const { return comp_int(con, v); }
 
   inline void set(unsigned v) { set_int(con, v); }
@@ -759,13 +757,6 @@ public:
   inline void div(const numb& x, unsigned y) { quot_int(con, x.con, y); }
   static inline void rem(unsigned& r, const numb& x, unsigned y)
     { r = rem_int(x.con, y); }
-  static inline void quotrem(numb& q, unsigned& r, const numb& x, unsigned y)
-    { r = quotrem_int(q.con, x.con, y); }
-  static inline unsigned bitwise_andi(const numb& x, unsigned y) { return bit_and_int(x.con, y); }
-  inline void bitwise_and(const numb& x, unsigned y) { set_int(con, bit_and_int(x.con, y)); }
-  inline void bitwise_and(unsigned x, const numb& y) { set_int(con, bit_and_int(y.con, x)); }
-  inline void bitwise_or(const numb& x, unsigned y) { bit_or_int(con, x.con, y); }
-  inline void bitwise_or(unsigned x, const numb& y) { bit_or_int(con, y.con, x); }
   inline void bitwise_xor(const numb& x, unsigned y) { bit_xor_int(con, x.con, y); }
   inline void bitwise_xor(unsigned x, const numb& y) { bit_xor_int(con, y.con, x); }
   static inline unsigned bitwise_and_noti(unsigned x, const numb& y)
@@ -784,8 +775,6 @@ public:
   inline void div(const numb& x, unsigned long y) { quot_int(con, x.con, y); }
   static inline void rem(unsigned long& r, const numb& x, unsigned long y)
     { r = rem_int(x.con, y); }
-  static inline void quotrem(numb& q, unsigned long& r, const numb& x, unsigned long y)
-    { r = quotrem_int(q.con, x.con, y); }
   inline int cmp(unsigned long v) const { return comp_int(con, v); }
 
 #ifdef SPUTSOFT_HAS_LONG_LONG
@@ -800,16 +789,21 @@ public:
   inline void div(const numb& x, unsigned long long y) { quot_int(con, x.con, y); }
   static inline void rem(unsigned long long& r, const numb& x, unsigned long long y)
     { r = rem_int(x.con, y); }
-  static inline void quotrem(numb& q, unsigned long long& r, const numb& x, unsigned long long y)
-    { r = quotrem_int(q.con, x.con, y); }
   inline int cmp(unsigned long long v) const { return comp_int(con, v); }
 #endif
+
+  template <typename T>
+  inline T quotrem_int(const numb& x, T y) { return quotrem_i(con, x.con, y); }
+  template <typename T>
+  inline void bitwise_or_int(const numb& x, T y) { bit_or_int(con, x.con, y); }
+  template <typename T>
+  static inline T bitwise_and_int(const numb& x, T y) { return bit_and_int(x.con, y); }
 
   inline void set(const numb& x) { set_num(con, x.con); }
   inline void add(const numb& x, const numb& y) { add_num(con, x.con, y.con); }
   inline void sub(const numb& x, const numb& y) { sub_num(con, x.con, y.con); }
   inline void mul(const numb& x, const numb& y) { mul_num(con, x.con, y.con); }
-  inline void div(const numb& x, const numb& y) { quot_num(con, x.con, y.con); }
+  inline void div(const numb& x, const numb& y) { div_num(con, x.con, y.con); }
   static inline void rem(numb& r, const numb& x, const numb& y) { rem_num(r.con, x.con, y.con); }
   static inline void quotrem(numb& q, numb& r, const numb& x, const numb& y)
     { quotrem_num(q.con, r.con, x.con, y.con); }

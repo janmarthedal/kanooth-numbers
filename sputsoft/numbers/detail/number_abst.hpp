@@ -136,22 +136,22 @@ struct evaluator_rvv<ops::binary::div, numb<T>, V1, V2> {
 };
 
 template <typename T, typename V1, typename V2>
-struct div_floor_3_eval<numb<T>, V1, V2> {
-  static void div_floor(numb<T>& r, const V1& v1, const V2& v2) {
+struct evaluator_rvv<ops::binary::div_floor, numb<T>, V1, V2> {
+  void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
     r.div_floor(v1, v2);
   }
 };
 
 template <typename T, typename V1, typename V2>
-struct div_ceil_3_eval<numb<T>, V1, V2> {
-  static void div_ceil(numb<T>& r, const V1& v1, const V2& v2) {
+struct evaluator_rvv<ops::binary::div_ceil, numb<T>, V1, V2> {
+  void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
     r.div_ceil(v1, v2);
   }
 };
 
 template <typename T, typename V1, typename V2>
-struct div_trunc_3_eval<numb<T>, V1, V2> {
-  static void div_trunc(numb<T>& r, const V1& v1, const V2& v2) {
+struct evaluator_rvv<ops::binary::div_trunc, numb<T>, V1, V2> {
+  void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
     r.div_trunc(v1, v2);
   }
 };
@@ -163,73 +163,45 @@ struct evaluator_rvv<ops::binary::rem, R, numb<T>, V> {
   }
 };
 
-template <typename R, typename T1, typename V2>
-struct rem_floor_3_eval<R, numb<T1>, V2> {
-  static void rem_floor(R& r, const numb<T1>& v1, const V2& v2) {
-    numb<T1>::rem_floor(r, v1, v2);
+template <typename R, typename T, typename V>
+struct evaluator_rvv<ops::binary::rem_floor, R, numb<T>, V> {
+  void operator()(R& r, const numb<T>& v1, const V& v2) const {
+    numb<T>::rem_floor(r, v1, v2);
   }
 };
 
-template <typename R, typename T1, typename V2>
-struct rem_ceil_3_eval<R, numb<T1>, V2> {
-  static void rem_ceil(R& r, const numb<T1>& v1, const V2& v2) {
-    numb<T1>::rem_ceil(r, v1, v2);
+template <typename R, typename T, typename V>
+struct evaluator_rvv<ops::binary::rem_ceil, R, numb<T>, V> {
+  void operator()(R& r, const numb<T>& v1, const V& v2) const {
+    numb<T>::rem_ceil(r, v1, v2);
   }
 };
 
-template <typename R, typename T1, typename V2>
-struct rem_trunc_3_eval<R, numb<T1>, V2> {
-  static void rem_trunc(R& r, const numb<T1>& v1, const V2& v2) {
-    numb<T1>::rem_trunc(r, v1, v2);
-  }
-};
-
-template <typename T, typename R, typename V1, typename V2>
-struct quotrem_4_eval<numb<T>, R, V1, V2> {
-  static void quotrem(numb<T>& q, R& r, const V1& v1, const V2& v2) {
-    numb<T>::quotrem(q, r, v1, v2);
+template <typename R, typename T, typename V>
+struct evaluator_rvv<ops::binary::rem_trunc, R, numb<T>, V> {
+  void operator()(R& r, const numb<T>& v1, const V& v2) const {
+    numb<T>::rem_trunc(r, v1, v2);
   }
 };
 
 template <typename T, typename R, typename V1, typename V2>
-struct quotrem_floor_4_eval<numb<T>, R, V1, V2> {
-  static void quotrem_floor(numb<T>& q, R& r, const V1& v1, const V2& v2) {
+struct evaluator_rrvv<ops::binary::quotrem_floor, numb<T>, R, V1, V2> {
+  void operator()(numb<T>& q, R& r, const V1& v1, const V2& v2) const {
     numb<T>::quotrem_floor(q, r, v1, v2);
   }
 };
 
 template <typename T, typename R, typename V1, typename V2>
-struct quotrem_ceil_4_eval<numb<T>, R, V1, V2> {
-  static void quotrem_ceil(numb<T>& q, R& r, const V1& v1, const V2& v2) {
+struct evaluator_rrvv<ops::binary::quotrem_ceil, numb<T>, R, V1, V2> {
+  void operator()(numb<T>& q, R& r, const V1& v1, const V2& v2) const {
     numb<T>::quotrem_ceil(q, r, v1, v2);
   }
 };
 
 template <typename T, typename R, typename V1, typename V2>
-struct quotrem_trunc_4_eval<numb<T>, R, V1, V2> {
-  static void quotrem_trunc(numb<T>& q, R& r, const V1& v1, const V2& v2) {
+struct evaluator_rrvv<ops::binary::quotrem_trunc, numb<T>, R, V1, V2> {
+  void operator()(numb<T>& q, R& r, const V1& v1, const V2& v2) const {
     numb<T>::quotrem_trunc(q, r, v1, v2);
-  }
-};
-
-template <typename T, typename V1, typename V2>
-struct or_3_eval<numb<T>, V1, V2> {
-  static void bit_or(numb<T>& r, const V1& v1, const V2& v2) {
-    r.bitwise_or(v1, v2);
-  }
-};
-
-template <typename T, typename V1, typename V2>
-struct xor_3_eval<numb<T>, V1, V2> {
-  static void bit_xor(numb<T>& r, const V1& v1, const V2& v2) {
-    r.bitwise_xor(v1, v2);
-  }
-};
-
-template <typename T, typename V1, typename V2>
-struct and_not_3_eval<numb<T>, V1, V2> {
-  static void bit_and_not(numb<T>& r, const V1& v1, const V2& v2) {
-    r.bitwise_and_not(v1, v2);
   }
 };
 

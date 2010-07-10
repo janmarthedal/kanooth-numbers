@@ -69,8 +69,8 @@ struct evaluator_rvv<ops::binary::rem, R, numb<intnum<T> >, V> {
 };
 
 template <typename T, typename R, typename V1, typename V2>
-struct quotrem_4_eval<numb<intnum<T> >, R, V1, V2> {
-  static void quotrem(numb<intnum<T> >& q, R& r, const V1& v1, const V2& v2) {
+struct evaluator_rrvv<ops::binary::quotrem, numb<intnum<T> >, R, V1, V2> {
+  void operator()(numb<intnum<T> >& q, R& r, const V1& v1, const V2& v2) const {
     numb<intnum<T> >::quotrem_floor(q, r, v1, v2);
   }
 };
@@ -102,13 +102,13 @@ struct evaluator_rv<ops::unary::abs, T, numb<intnum<T> > > {
 
 /* bitwise_not */
 
-template <typename T, typename V>
+/*template <typename T, typename V>
 struct not_2_eval<numb<intnum<T> >, V> {
   static void bit_not(numb<intnum<T> >& r, const V& v) {
     sputsoft::numbers::negate(r, v);
     sputsoft::numbers::sub(r, r, 1);
   }
-};
+};*/
 
 /* bitwise_and */
 
@@ -155,7 +155,7 @@ struct evaluator_rvv<ops::binary::bit_and, numb<intnum<N> >, int, numb<intnum<N>
 
 /* bitwise_or */
 
-template <typename N, typename V1, typename V2>
+/*template <typename N, typename V1, typename V2>
 struct or_3_eval<numb<intnum<N> >, V1, V2> {
   static void bit_or(numb<intnum<N> >& r, const V1& v1, const V2& v2) {
     typename resolve_unary<ops::unary::abs, V1>::return_type n1 = bit_abs(v1);
@@ -174,7 +174,7 @@ struct or_3_eval<numb<intnum<N> >, V1, V2> {
       sputsoft::numbers::set(r, n1);
     }
   }
-};
+};*/
 
 template <typename T>
 struct is_positive_r1_eval<numb<intnum<T> > > {

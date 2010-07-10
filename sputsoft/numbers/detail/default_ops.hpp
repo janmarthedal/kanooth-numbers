@@ -85,6 +85,12 @@ struct evaluator_rv<ops::unary::abs, R, V> {
   }
 };
 
+template <typename V>
+struct function_v<ops::unary::bit_not, V> {
+  typedef typename resolve_unary<ops::unary::bit_not, V>::return_type return_type;
+  return_type operator()(const V& v) { return ~v; }
+};
+
 /* Binary */
 
 template <typename Op>
@@ -169,6 +175,25 @@ struct function_vv<ops::binary::rem, V1, V2> {
   }
 };
 
+/* Quotient and remainder */
+
+template <typename Q, typename R, typename V1, typename V2>
+struct evaluator_rrvv<ops::binary::quotrem, Q, R, V1, V2> {
+  void operator()(Q& q, R& r, const V1& v1, const V2& v2) const {
+    sputsoft::numbers::div(q, v1, v2);
+    sputsoft::numbers::rem(r, v1, v2);
+  }
+};
+
+template <typename Q, typename V1, typename V2>
+struct function_rvv<ops::binary::quotrem, Q, V1, V2> {
+  typedef typename resolve_binary<ops::binary::rem, V1, V2>::return_type return_type;
+  return_type operator()(Q& q, const V1& v1, const V2& v2) const {
+    sputsoft::numbers::div(q, v1, v2);
+    return sputsoft::numbers::rem(v1, v2);
+  }
+};
+
 /* Binary bit_and */
 
 template <typename V1, typename V2>
@@ -179,28 +204,28 @@ struct function_vv<ops::binary::bit_and, V1, V2> {
   }
 };
 
-
-template <typename Q, typename R, typename V1, typename V2>
-struct quotrem_4_eval {
-  static inline void quotrem(Q& q, R& r, const V1& v1, const V2& v2) {
-    sputsoft::numbers::div(q, v1, v2);
-    sputsoft::numbers::rem(r, v1, v2);
+template <typename V1, typename V2>
+struct function_vv<ops::binary::bit_or, V1, V2> {
+  typedef typename resolve_binary<ops::binary::bit_or, V1, V2>::return_type return_type;
+  return_type operator()(const V1& v1, const V2& v2) const {
+    return v1 | v2;
   }
 };
 
-template <typename R, typename V1, typename V2>
-struct or_3_eval {
-  static inline void bit_or(R& r, const V1& v1, const V2& v2) { r = v1 | v2; }
+template <typename V1, typename V2>
+struct function_vv<ops::binary::bit_xor, V1, V2> {
+  typedef typename resolve_binary<ops::binary::bit_xor, V1, V2>::return_type return_type;
+  return_type operator()(const V1& v1, const V2& v2) const {
+    return v1 ^ v2;
+  }
 };
 
-template <typename R, typename V1, typename V2>
-struct xor_3_eval {
-  static inline void bit_xor(R& r, const V1& v1, const V2& v2) { r = v1 ^ v2; }
-};
-
-template <typename R, typename V1, typename V2>
-struct and_not_3_eval {
-  static inline void bit_and_not(R& r, const V1& v1, const V2& v2) { r = v1 & ~v2; }
+template <typename V1, typename V2>
+struct function_vv<ops::binary::bit_and_not, V1, V2> {
+  typedef typename resolve_binary<ops::binary::bit_and_not, V1, V2>::return_type return_type;
+  return_type operator()(const V1& v1, const V2& v2) const {
+    return sputsoft::numbers::bitwise_and(v1, sputsoft::numbers::bitwise_not(v2));
+  }
 };
 
 template <typename V1, typename V2>
