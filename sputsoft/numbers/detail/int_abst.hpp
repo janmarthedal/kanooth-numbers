@@ -77,11 +77,6 @@ struct evaluator_rrvv<ops::binary::quotrem, numb<intnum<T> >, R, V1, V2> {
 
 /* Unary negate */
 
-template <typename T>
-struct resolve_unary<ops::unary::negate, numb<intnum<T> > > {
-  typedef T return_type;
-};
-
 template <typename N>
 struct evaluator_rv<ops::unary::negate, numb<intnum<N> >, numb<intnum<N> > > {
   void operator()(numb<intnum<N> >& r, const numb<intnum<N> >& v) const{
@@ -126,9 +121,9 @@ struct function_v<ops::unary::bit_not, numb<intnum<T> > > {
 
 template <typename T>
 struct function_v<ops::unary::bit_not, numb<natnum<T> > > {
-  numb<intnum<T> > operator()(const numb<natnum<T> >& v) {
-    numb<intnum<T> > r;
-    evaluator_rv<ops::unary::bit_not, numb<intnum<T> >, numb<natnum<T> > >()(r, v);
+  numb<intnum<numb<natnum<T> > > > operator()(const numb<natnum<T> >& v) {
+    numb<intnum<numb<natnum<T> > > > r;
+    evaluator_rv<ops::unary::bit_not, numb<intnum<numb<natnum<T> > > >, numb<natnum<T> > >()(r, v);
     return r;
   }
 };
@@ -153,26 +148,23 @@ struct evaluator_rvv<ops::binary::bit_and, numb<intnum<N> >, V1, V2> {
 
 /* bitwise_or */
 
-/*template <typename N, typename V1, typename V2>
-struct or_3_eval<numb<intnum<N> >, V1, V2> {
-  static void bit_or(numb<intnum<N> >& r, const V1& v1, const V2& v2) {
-    typename resolve_unary<ops::unary::abs, V1>::return_type n1 = bit_abs(v1);
-    typename resolve_unary<ops::unary::abs, V2>::return_type n2 = bit_abs(v2);
+template <typename N, typename V1, typename V2>
+struct evaluator_rvv<ops::binary::bit_or, numb<intnum<N> >, V1, V2> {
+  inline void operator()(numb<intnum<N> >& r, const V1& v1, const V2& v2) const {
     if (sputsoft::numbers::is_negative(v1)) {
-      if (sputsoft::numbers::is_negative(v2))
-        sputsoft::numbers::bitwise_and(n1, n1, n2);
-      else
-        sputsoft::numbers::bitwise_and_not(n1, n1, n2);
-      sputsoft::numbers::bitwise_not(r, n1);
+      if (sputsoft::numbers::is_negative(v2)) {
+        r.bitwise_and_pos(sputsoft::numbers::bitwise_not(v1), sputsoft::numbers::bitwise_not(v2));
+      } else
+        r.bitwise_and_not_pos(sputsoft::numbers::bitwise_not(v1), v2);
+      sputsoft::numbers::bitwise_not(r, r);
     } else if (sputsoft::numbers::is_negative(v2)) {
-      sputsoft::numbers::bitwise_and_not(n1, n1, n2);
-      sputsoft::numbers::set(r, n1);
-    } else {
-      sputsoft::numbers::bitwise_or(n1, n1, n2);
-      sputsoft::numbers::set(r, n1);
-    }
+      r.bitwise_and_not_pos(sputsoft::numbers::bitwise_not(v2), v1);
+      sputsoft::numbers::bitwise_not(r, r);
+    } else
+      r.bitwise_and_pos(v1, v2);
   }
-};*/
+};
+
 
 template <typename T>
 struct is_positive_r1_eval<numb<intnum<T> > > {

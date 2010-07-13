@@ -100,6 +100,9 @@ struct function_v<ops::unary::bit_not, V> {
 
 /* Binary */
 
+//template <typename Op, typename T1, bool N1, bool S1, typename T1, bool N1, bool S1>
+//struct resolve_binary2;
+
 template <typename Op>
 struct resolve_binary<Op, unsigned, unsigned> {
   typedef unsigned return_type;

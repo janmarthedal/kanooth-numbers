@@ -108,6 +108,8 @@ void bits2()
   std::cout << c << std::endl;
   bitwise_and(c, b, 5);
   std::cout << c << std::endl;
+  bitwise_and(c, -2, 7);
+  std::cout << c << std::endl;
 }
 
 int main()
