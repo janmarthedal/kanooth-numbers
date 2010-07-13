@@ -31,17 +31,9 @@ template <typename T>
 struct resolve_binary<ops::binary::sub, unsigned short, numb<natnum<T> > > {
   typedef unsigned short return_type;
 };
-template <typename T>
-struct resolve_binary<ops::binary::bit_and_not, unsigned short, numb<natnum<T> > > {
-  typedef unsigned short return_type;
-};
 
 template <typename T>
 struct resolve_binary<ops::binary::rem, numb<natnum<T> >, unsigned> {
-  typedef unsigned return_type;
-};
-template <typename T>
-struct resolve_binary<ops::binary::bit_and_not, unsigned, numb<natnum<T> > > {
   typedef unsigned return_type;
 };
 
@@ -51,10 +43,6 @@ struct resolve_binary<ops::binary::rem, numb<natnum<T> >, unsigned long> {
 };
 template <typename T>
 struct resolve_binary<ops::binary::sub, unsigned long, numb<natnum<T> > > {
-  typedef unsigned long return_type;
-};
-template <typename T>
-struct resolve_binary<ops::binary::bit_and_not, unsigned long, numb<natnum<T> > > {
   typedef unsigned long return_type;
 };
 
@@ -67,19 +55,11 @@ template <typename T>
 struct resolve_binary<ops::binary::sub, unsigned long long, numb<natnum<T> > > {
   typedef unsigned long long return_type;
 };
-template <typename T>
-struct resolve_binary<ops::binary::bit_and_not, unsigned long long, numb<natnum<T> > > {
-  typedef unsigned long long return_type;
-};
 #endif
 
 /* Make compatible with int literals */
 template <typename T>
 struct resolve_binary<ops::binary::rem, numb<natnum<T> >, int> {
-  typedef unsigned return_type;
-};
-template <typename T>
-struct resolve_binary<ops::binary::bit_and_not, int, numb<natnum<T> > > {
   typedef unsigned return_type;
 };
 
@@ -325,6 +305,66 @@ template <typename T>
 struct evaluator_rvv<ops::binary::bit_xor, numb<natnum<T> >, unsigned, numb<natnum<T> > > {
   void operator()(numb<natnum<T> >& r, unsigned v1, const numb<natnum<T> >& v2) const {
     r.bitwise_xor_int(v2, v1);
+  }
+};
+
+/* bitwise_and_not */
+
+template <typename T>
+struct resolve_binary<ops::binary::bit_and_not, int, numb<natnum<T> > > {
+  typedef unsigned return_type;
+};
+template <typename T>
+struct resolve_binary<ops::binary::bit_and_not, unsigned short, numb<natnum<T> > > {
+  typedef unsigned short return_type;
+};
+template <typename T>
+struct resolve_binary<ops::binary::bit_and_not, unsigned, numb<natnum<T> > > {
+  typedef unsigned return_type;
+};
+template <typename T>
+struct resolve_binary<ops::binary::bit_and_not, unsigned long, numb<natnum<T> > > {
+  typedef unsigned long return_type;
+};
+#ifdef SPUTSOFT_HAS_LONG_LONG
+template <typename T>
+struct resolve_binary<ops::binary::bit_and_not, unsigned long long, numb<natnum<T> > > {
+  typedef unsigned long long return_type;
+};
+#endif
+
+template <typename T>
+struct evaluator_rvv<ops::binary::bit_and_not, numb<natnum<T> >, numb<natnum<T> >, numb<natnum<T> > > {
+  void operator()(numb<natnum<T> >& r, const numb<natnum<T> >& v1, const numb<natnum<T> >& v2) const {
+    r.bitwise_and_not(v1, v2);
+  }
+};
+
+template <typename T>
+struct evaluator_rvv<ops::binary::bit_and_not, numb<natnum<T> >, numb<natnum<T> >, unsigned> {
+  void operator()(numb<natnum<T> >& r, const numb<natnum<T> >& v1, unsigned v2) const {
+    r.bitwise_and_not_ni(v1, v2);
+  }
+};
+
+template <typename T>
+struct function_vv<ops::binary::bit_and_not, unsigned, numb<natnum<T> > > {
+  unsigned operator()(unsigned v1, const numb<natnum<T> >& v2) const {
+    return numb<natnum<T> >::bitwise_and_not_in(v1, v2);
+  }
+};
+
+template <typename T>
+struct evaluator_rvv<ops::binary::bit_and_not, numb<natnum<T> >, numb<natnum<T> >, int> {
+  void operator()(numb<natnum<T> >& r, const numb<natnum<T> >& v1, int v2) const {
+    sputsoft::numbers::bitwise_and_not(v1, (unsigned) v2);
+  }
+};
+
+template <typename T>
+struct function_vv<ops::binary::bit_and_not, int, numb<natnum<T> > > {
+  unsigned operator()(int v1, const numb<natnum<T> >& v2) const {
+    return sputsoft::numbers::bitwise_and_not((unsigned) v1, v2);
   }
 };
 

@@ -99,6 +99,16 @@ struct resolve_binary<Op, unsigned, unsigned> {
 };
 
 template <typename Op>
+struct resolve_binary<Op, long unsigned, unsigned> {
+  typedef long unsigned return_type;
+};
+
+template <typename Op>
+struct resolve_binary<Op, unsigned, long unsigned> {
+  typedef long unsigned return_type;
+};
+
+template <typename Op>
 struct resolve_binary<Op, unsigned, signed> {
   typedef unsigned return_type;
 };

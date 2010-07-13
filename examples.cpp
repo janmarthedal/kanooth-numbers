@@ -106,8 +106,8 @@ void bits2()
   std::cout << c << std::endl;
   bitwise_and(c, -5, b);
   std::cout << c << std::endl;
-  /*bitwise_and(c, b, 5);
-  std::cout << c << std::endl;*/
+  bitwise_and(c, b, 5);
+  std::cout << c << std::endl;
 }
 
 int main()
@@ -117,5 +117,5 @@ int main()
   PE20();
   factorize_example();
   gcd_example();*/
-  bits1();
+  bits2();
 }

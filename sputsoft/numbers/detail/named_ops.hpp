@@ -104,14 +104,10 @@ inline void set(R& r, const V& v) {
   detail::evaluator_rv<detail::ops::unary::identity, R, V>()(r, v);
 }
 
-/* Unary negate */
-
 template <typename R, typename V>
 inline void negate(R& r, const V& v) {
   detail::evaluator_rv<detail::ops::unary::negate, R, V>()(r, v);
 }
-
-/* Unary abs */
 
 template <typename R, typename V>
 inline void abs(R& r, const V& v) {
@@ -271,7 +267,6 @@ typename detail::resolve_binary<detail::ops::binary::rem_trunc, V1, V2>::return_
 quotrem_trunc(Q& q, const V1& v1, const V2& v2) {
   return detail::function_rvv<detail::ops::binary::quotrem_trunc, Q, V1, V2>()(q, v1, v2);
 }
-
 
 #define BINARY_RESULT_RETURNER(NAME, OP) \
 template <typename V1, typename V2> \

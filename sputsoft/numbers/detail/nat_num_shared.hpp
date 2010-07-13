@@ -101,9 +101,9 @@ private:
     num->bitwise_and_not(v1, v2);
   }
 
-  number_type* uniquify() {
+  number_type& uniquify() {
     if (!num.unique()) num.reset(new number_type);
-    return num.get();
+    return *num;
   }
 
 public:
@@ -191,7 +191,7 @@ public:
   template <typename T>
   inline T quotrem_int(const numb& x, T y) {
     const number_type& xn = *x.num;
-    return uniquify()->quotrem_int(xn, y);
+    return uniquify().quotrem_int(xn, y);
   }
   template <typename T>
   static inline T bitwise_and_int(const numb& x, T y) {
@@ -200,12 +200,21 @@ public:
   template <typename T>
   inline void bitwise_or_int(const numb& x, T y) {
     const number_type& xn = *x.num;
-    uniquify()->bitwise_or_int(xn, y);
+    uniquify().bitwise_or_int(xn, y);
   }
   template <typename T>
   inline void bitwise_xor_int(const numb& x, T y) {
     const number_type& xn = *x.num;
-    uniquify()->bitwise_xor_int(xn, y);
+    uniquify().bitwise_xor_int(xn, y);
+  }
+  template <typename T>
+  inline void bitwise_and_not_ni(const numb& x, T y) {
+    const number_type& xn = *x.num;
+    uniquify().bitwise_and_not_ni(xn, y);
+  }
+  template <typename T>
+  static inline T bitwise_and_not_in(T x, const numb& y) {
+    return number_type::bitwise_and_not_in(x, *y.num);
   }
 
   inline void set(const numb& x) { num = x.num; }
@@ -216,18 +225,26 @@ public:
   static inline void rem(numb& r, const numb& x, const numb& y) { r.rem_num(*x.num, *y.num); }
   static inline void quotrem(numb& q, numb& r, const numb& u, const numb& v)
     { quotrem_num(q, r, *u.num, *v.num); }
-  inline void bitwise_and(const numb& x, const numb& y) { bit_and(*x.num, *y.num); }
+  inline void bitwise_and(const numb& x, const numb& y) {
+    const number_type& xn = *x.num;
+    const number_type& yn = *y.num;
+    uniquify().bitwise_and(xn, yn);
+  }
   inline void bitwise_or(const numb& x, const numb& y) {
     const number_type& xn = *x.num;
     const number_type& yn = *y.num;
-    uniquify()->bitwise_or(xn, yn);
+    uniquify().bitwise_or(xn, yn);
   }
   inline void bitwise_xor(const numb& x, const numb& y) {
     const number_type& xn = *x.num;
     const number_type& yn = *y.num;
-    uniquify()->bitwise_xor(xn, yn);
+    uniquify().bitwise_xor(xn, yn);
   }
-  inline void bitwise_and_not(const numb& x, const numb& y) { bit_and_not(*x.num, *y.num); }
+  inline void bitwise_and_not(const numb& x, const numb& y) {
+    const number_type& xn = *x.num;
+    const number_type& yn = *y.num;
+    uniquify().bitwise_and_not(xn, yn);
+  }
   inline int cmp(const numb& v) const { return num->cmp(*v.num); }
 
   inline void left_shift(const numb& x, std::ptrdiff_t count) { left_shift_num(*x.num, count); }

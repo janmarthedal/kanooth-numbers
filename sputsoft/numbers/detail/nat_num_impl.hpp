@@ -757,11 +757,6 @@ public:
   inline void div(const numb& x, unsigned y) { quot_int(con, x.con, y); }
   static inline void rem(unsigned& r, const numb& x, unsigned y)
     { r = rem_int(x.con, y); }
-  inline void bitwise_xor(const numb& x, unsigned y) { bit_xor_int(con, x.con, y); }
-  inline void bitwise_xor(unsigned x, const numb& y) { bit_xor_int(con, y.con, x); }
-  static inline unsigned bitwise_and_noti(unsigned x, const numb& y)
-    { return bit_and_not_int_num(x, y.con); }
-  inline void bitwise_and_not(const numb& x, unsigned y) { bit_and_not_num_int(con, x.con, y); }
   inline int cmp(unsigned v) const { return comp_int(con, v); }
 
   inline void set(unsigned long v) { set_int(con, v); }
@@ -795,9 +790,15 @@ public:
   template <typename T>
   inline T quotrem_int(const numb& x, T y) { return quotrem_i(con, x.con, y); }
   template <typename T>
+  static inline T bitwise_and_int(const numb& x, T y) { return bit_and_int(x.con, y); }
+  template <typename T>
   inline void bitwise_or_int(const numb& x, T y) { bit_or_int(con, x.con, y); }
   template <typename T>
-  static inline T bitwise_and_int(const numb& x, T y) { return bit_and_int(x.con, y); }
+  inline void bitwise_xor_int(const numb& x, T y) { bit_or_int(con, x.con, y); }
+  template <typename T>
+  static inline T bitwise_and_not_in(T x, const numb& y) { return bit_and_not_int_num(x, y.con); }
+  template <typename T>
+  inline void bitwise_and_not_ni(const numb& x, T y) { bit_and_not_num_int(con, x.con, y); }
 
   inline void set(const numb& x) { set_num(con, x.con); }
   inline void add(const numb& x, const numb& y) { add_num(con, x.con, y.con); }
