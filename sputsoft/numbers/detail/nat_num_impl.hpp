@@ -16,7 +16,7 @@
 #define _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_IMPL_HPP
 
 #include <boost/integer_traits.hpp>
-#include <sputsoft/detail/types.hpp>
+#include <sputsoft/type_traits.hpp>
 #include <sputsoft/numbers/detail/nat_num_abst.hpp>
 
 namespace sputsoft {

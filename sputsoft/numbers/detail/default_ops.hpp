@@ -58,7 +58,7 @@ struct evaluator_rv<ops::unary::identity, R, V> {
 
 template <typename T>
 struct resolve_unary<ops::unary::negate, T> {
-  typedef typename sputsoft::number_traits<T>::signed_type return_type;
+  typedef typename sputsoft::make_signed<T>::type return_type;
 };
 
 template <typename V>
@@ -71,7 +71,7 @@ struct function_v<ops::unary::negate, V> {
 
 template <typename T>
 struct resolve_unary<ops::unary::abs, T> {
-  typedef typename sputsoft::number_traits<T>::unsigned_type return_type;
+  typedef typename sputsoft::make_unsigned<T>::type return_type;
 };
 
 template <typename R, typename V>

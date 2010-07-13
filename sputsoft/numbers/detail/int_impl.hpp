@@ -15,7 +15,7 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_INT_IMPL_HPP
 #define _SPUTSOFT_NUMBERS_DETAIL_INT_IMPL_HPP
 
-#include <sputsoft/detail/types.hpp>
+#include <sputsoft/type_traits.hpp>
 #include <sputsoft/numbers/detail/int_abst.hpp>
 
 namespace sputsoft {
@@ -105,7 +105,7 @@ private:
 
   template <typename T>
   T quotrem_floor_int(const NUM& v1, bool p1, T v2) {
-    typedef typename sputsoft::number_traits<T>::unsigned_type unsigned_type;
+    typedef typename sputsoft::make_unsigned<T>::type unsigned_type;
     bool p2 = v2 >= 0;
     unsigned_type v2u = p2 ? v2 : -v2;
     unsigned_type ru = sputsoft::numbers::quotrem(num, v1, v2u);
@@ -119,7 +119,7 @@ private:
 
   template <typename T>
   void div_floor_int(const NUM& v1, bool p1, T v2) {
-    typedef typename sputsoft::number_traits<T>::unsigned_type unsigned_type;
+    typedef typename sputsoft::make_unsigned<T>::type unsigned_type;
     bool p2 = v2 >= 0;
     unsigned_type v2u = p2 ? v2 : -v2;
     positive = p1 == p2;
@@ -133,7 +133,7 @@ private:
 
   template <typename T>
   static T rem_floor_int(const NUM& v1, bool p1, T v2) {
-    typedef typename sputsoft::number_traits<T>::unsigned_type unsigned_type;
+    typedef typename sputsoft::make_unsigned<T>::type unsigned_type;
     bool p2 = v2 >= 0;
     unsigned_type v2u = p2 ? v2 : -v2;
     unsigned_type ru = sputsoft::numbers::rem(v1, v2u);
@@ -173,7 +173,7 @@ private:
 
   template <typename T>
   T quotrem_ceil_int(const NUM& v1, bool p1, T v2) {
-    typedef typename sputsoft::number_traits<T>::unsigned_type unsigned_type;
+    typedef typename sputsoft::make_unsigned<T>::type unsigned_type;
     bool p2 = v2 >= 0;
     unsigned_type v2u = p2 ? v2 : -v2;
     unsigned_type ru = sputsoft::numbers::quotrem(num, v1, v2u);
@@ -187,7 +187,7 @@ private:
 
   template <typename T>
   void div_ceil_int(const NUM& v1, bool p1, T v2) {
-    typedef typename sputsoft::number_traits<T>::unsigned_type unsigned_type;
+    typedef typename sputsoft::make_unsigned<T>::type unsigned_type;
     bool p2 = v2 >= 0;
     unsigned_type r = sputsoft::numbers::quotrem(num, v1, (unsigned_type) (p2 ? v2 : -v2));
     positive = p1 == p2;
@@ -197,7 +197,7 @@ private:
 
   template <typename T>
   static T rem_ceil_int(const NUM& v1, bool p1, T v2) {
-    typedef typename sputsoft::number_traits<T>::unsigned_type unsigned_type;
+    typedef typename sputsoft::make_unsigned<T>::type unsigned_type;
     bool p2 = v2 >= 0;
     unsigned_type v2u = p2 ? v2 : -v2;
     unsigned_type ru = sputsoft::numbers::rem(v1, v2u);
@@ -226,7 +226,7 @@ private:
 
   template <typename T>
   T quotrem_trunc_int(const NUM& v1, bool p1, T v2) {
-    typedef typename sputsoft::number_traits<T>::unsigned_type unsigned_type;
+    typedef typename sputsoft::make_unsigned<T>::type unsigned_type;
     bool p2 = v2 >= 0;
     unsigned_type ru = sputsoft::numbers::quotrem(num, v1, (unsigned_type) (p2 ? v2 : -v2));
     positive = p1 == p2;
@@ -242,7 +242,7 @@ private:
 
   template <typename T>
   static T rem_trunc_int(const NUM& v1, bool p1, T v2) {
-    typedef typename sputsoft::number_traits<T>::unsigned_type unsigned_type;
+    typedef typename sputsoft::make_unsigned<T>::type unsigned_type;
     bool p2 = v2 >= 0;
     unsigned_type ru = sputsoft::numbers::rem(v1, (unsigned_type) (p2 ? v2 : -v2));
     return (T) (p1 ? ru : -ru);

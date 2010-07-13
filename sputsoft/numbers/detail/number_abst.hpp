@@ -15,7 +15,7 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_NUMBER_ABST_HPP
 #define _SPUTSOFT_NUMBERS_DETAIL_NUMBER_ABST_HPP
 
-#include <sputsoft/detail/types.hpp>
+#include <sputsoft/type_traits.hpp>
 #include <sputsoft/numbers/detail/named_ops.hpp>
 
 namespace sputsoft {
@@ -23,8 +23,6 @@ namespace numbers {
 namespace detail {
 
 template <typename N> class numb;
-template <typename T> class natnum;
-template <typename T> class intnum;
 
 template <typename Op, typename T>
 struct resolve_binary<Op, numb<T>, unsigned short> {
@@ -249,19 +247,6 @@ struct rshift_3_eval<numb<T>, V> {
 
 } // namespace detail
 } // namespace numbers
-
-template <typename T>
-struct number_traits<numbers::detail::numb<numbers::detail::natnum<T> > > {
-  typedef numbers::detail::numb<numbers::detail::natnum<T> > unsigned_type;
-  typedef numbers::detail::numb<numbers::detail::intnum< numbers::detail::numb<numbers::detail::natnum<T> > > > signed_type;
-};
-
-template <typename N>
-struct number_traits<numbers::detail::numb<numbers::detail::intnum<N> > > {
-  typedef N unsigned_type;
-  typedef numbers::detail::numb<numbers::detail::intnum<N> > signed_type;
-};
-
 } // namespace sputsoft
 
 #endif // _SPUTSOFT_NUMBERS_DETAIL_NUMBER_ABST_HPP

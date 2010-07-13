@@ -16,10 +16,22 @@
 #define _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_ABST_HPP
 
 #include <sputsoft/numbers/detail/number_abst.hpp>
-
-#include "default_ops.hpp"
+#include <sputsoft/numbers/detail/default_ops.hpp>
 
 namespace sputsoft {
+namespace numbers {
+namespace detail {
+
+template <typename T> class natnum;
+
+} // namespace detail
+} // namespace numbers
+
+template <typename T>
+struct make_unsigned<numbers::detail::numb<numbers::detail::natnum<T> > > {
+  typedef numbers::detail::numb<numbers::detail::natnum<T> > type;
+};
+
 namespace numbers {
 namespace detail {
 
@@ -441,7 +453,7 @@ struct set_4_eval<numb<natnum<T> >, Forw> {
 };
 
 } // namespace detail
-} // namespace sputsoft
 } // namespace numbers
+} // namespace sputsoft
 
 #endif // _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_ABST_HPP

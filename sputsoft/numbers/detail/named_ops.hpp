@@ -16,7 +16,7 @@
 #define	_SPUTSOFT_NUMBERS_DETAIL_NAMED_OPS_HPP
 
 #include <cstring>
-#include <sputsoft/detail/types.hpp>
+#include <sputsoft/type_traits.hpp>
 #include <sputsoft/numbers/detail/number_abst.hpp>
 
 namespace sputsoft {

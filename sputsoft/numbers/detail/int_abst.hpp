@@ -15,12 +15,33 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_INT_ABST_HPP
 #define	_SPUTSOFT_NUMBERS_DETAIL_INT_ABST_HPP
 
-#include <sputsoft/detail/types.hpp>
+#include <sputsoft/type_traits.hpp>
 #include <sputsoft/numbers/detail/number_abst.hpp>
 
-#include "int_impl.hpp"
-
 namespace sputsoft {
+namespace numbers {
+namespace detail {
+
+template <typename T> class intnum;
+
+} // namespace detail
+} // namespace numbers
+
+template <typename T>
+struct make_unsigned<numbers::detail::numb<numbers::detail::intnum<T> > > {
+  typedef T type;
+};
+
+template <typename T>
+struct make_signed<numbers::detail::numb<numbers::detail::intnum<T> > > {
+  typedef numbers::detail::numb<numbers::detail::intnum<T> > type;
+};
+
+template <typename T>
+struct make_signed<numbers::detail::numb<numbers::detail::natnum<T> > > {
+  typedef numbers::detail::numb<numbers::detail::intnum<numbers::detail::numb<numbers::detail::natnum<T> > > > type;
+};
+
 namespace numbers {
 namespace detail {
 
@@ -46,11 +67,6 @@ RESOLVE_INTNUM_REM(signed long)
 RESOLVE_INTNUM_REM(unsigned long long)
 RESOLVE_INTNUM_REM(signed long long)
 #endif
-
-template <typename T>
-struct resolve_unary<ops::unary::abs, numb<intnum<T> > > {
-  typedef T return_type;
-};
 
 /***************/
 
