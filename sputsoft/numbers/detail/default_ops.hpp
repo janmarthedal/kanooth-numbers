@@ -85,6 +85,13 @@ struct evaluator_rv<ops::unary::abs, R, V> {
   }
 };
 
+/* Unary bit_not */
+
+template <typename T>
+struct resolve_unary<ops::unary::bit_not, T> {
+  typedef typename resolve_unary<ops::unary::negate, T>::return_type return_type;
+};
+
 template <typename V>
 struct function_v<ops::unary::bit_not, V> {
   typedef typename resolve_unary<ops::unary::bit_not, V>::return_type return_type;

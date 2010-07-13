@@ -29,36 +29,48 @@ namespace sputsoft {
   struct number_traits<unsigned short> {
     typedef unsigned short unsigned_type;
     typedef signed short signed_type;
+    BOOST_STATIC_CONSTANT(bool, is_native = true);
+    BOOST_STATIC_CONSTANT(bool, is_signed = false);
   };
 
   template <>
   struct number_traits<signed short> {
     typedef unsigned short unsigned_type;
     typedef signed short signed_type;
+    BOOST_STATIC_CONSTANT(bool, is_native = true);
+    BOOST_STATIC_CONSTANT(bool, is_signed = true);
   };
 
   template <>
   struct number_traits<unsigned> {
     typedef unsigned unsigned_type;
     typedef signed signed_type;
+    BOOST_STATIC_CONSTANT(bool, is_native = true);
+    BOOST_STATIC_CONSTANT(bool, is_signed = false);
   };
 
   template <>
   struct number_traits<signed> {
     typedef unsigned unsigned_type;
     typedef signed signed_type;
+    BOOST_STATIC_CONSTANT(bool, is_native = true);
+    BOOST_STATIC_CONSTANT(bool, is_signed = true);
   };
 
   template <>
   struct number_traits<unsigned long> {
     typedef unsigned long unsigned_type;
     typedef signed long signed_type;
+    BOOST_STATIC_CONSTANT(bool, is_native = true);
+    BOOST_STATIC_CONSTANT(bool, is_signed = false);
   };
 
   template <>
   struct number_traits<signed long> {
     typedef unsigned long unsigned_type;
     typedef signed long signed_type;
+    BOOST_STATIC_CONSTANT(bool, is_native = true);
+    BOOST_STATIC_CONSTANT(bool, is_signed = true);
   };
 
 #ifdef SPUTSOFT_HAS_LONG_LONG
@@ -66,12 +78,16 @@ namespace sputsoft {
   struct number_traits<unsigned long long> {
     typedef unsigned long long unsigned_type;
     typedef signed long long signed_type;
+    BOOST_STATIC_CONSTANT(bool, is_native = true);
+    BOOST_STATIC_CONSTANT(bool, is_signed = false);
   };
 
   template <>
   struct number_traits<signed long long> {
     typedef unsigned long long unsigned_type;
     typedef signed long long signed_type;
+    BOOST_STATIC_CONSTANT(bool, is_native = true);
+    BOOST_STATIC_CONSTANT(bool, is_signed = true);
   };
 #endif
 

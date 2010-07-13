@@ -481,6 +481,86 @@ public:
   inline signed cmp(signed long long v) const { return cmp_int(num, positive, v); }
 #endif
 
+  template <typename V1, typename V2>
+  inline void bitwise_and_pos(const V1& v1, const V2& v2) {
+    sputsoft::numbers::bitwise_and(num, v1, v2);
+    positive = true;
+  }
+  template <typename V1>
+  inline void bitwise_and_pos(const V1& v1, const numb& v2) {
+    sputsoft::numbers::bitwise_and(num, v1, v2.num);
+    positive = true;
+  }
+  template <typename V2>
+  inline void bitwise_and_pos(const numb& v1, const V2& v2) {
+    sputsoft::numbers::bitwise_and(num, v1.num, v2);
+    positive = true;
+  }
+  inline void bitwise_and_pos(const numb& v1, const numb& v2) {
+    sputsoft::numbers::bitwise_and(num, v1.num, v2.num);
+    positive = true;
+  }
+
+  template <typename V1, typename V2>
+  inline void bitwise_or_pos(const V1& v1, const V2& v2) {
+    sputsoft::numbers::bitwise_or(num, v1, v2);
+    positive = true;
+  }
+  template <typename V1>
+  inline void bitwise_or_pos(const V1& v1, const numb& v2) {
+    sputsoft::numbers::bitwise_or(num, v1, v2.num);
+    positive = true;
+  }
+  template <typename V2>
+  inline void bitwise_or_pos(const numb& v1, const V2& v2) {
+    sputsoft::numbers::bitwise_or(num, v1.num, v2);
+    positive = true;
+  }
+  inline void bitwise_or_pos(const numb& v1, const numb& v2) {
+    sputsoft::numbers::bitwise_or(num, v1.num, v2.num);
+    positive = true;
+  }
+
+  template <typename V1, typename V2>
+  inline void bitwise_xor_pos(const V1& v1, const V2& v2) {
+    sputsoft::numbers::bitwise_xor(num, v1, v2);
+    positive = true;
+  }
+  template <typename V1>
+  inline void bitwise_xor_pos(const V1& v1, const numb& v2) {
+    sputsoft::numbers::bitwise_xor(num, v1, v2.num);
+    positive = true;
+  }
+  template <typename V2>
+  inline void bitwise_xor_pos(const numb& v1, const V2& v2) {
+    sputsoft::numbers::bitwise_xor(num, v1.num, v2);
+    positive = true;
+  }
+  inline void bitwise_xor_pos(const numb& v1, const numb& v2) {
+    sputsoft::numbers::bitwise_xor(num, v1.num, v2.num);
+    positive = true;
+  }
+
+  template <typename V1, typename V2>
+  inline void bitwise_and_not_pos(const V1& v1, const V2& v2) {
+    sputsoft::numbers::bitwise_and_not(num, v1, v2);
+    positive = true;
+  }
+  template <typename V1>
+  inline void bitwise_and_not_pos(const V1& v1, const numb& v2) {
+    sputsoft::numbers::bitwise_and_not(num, v1, v2.num);
+    positive = true;
+  }
+  template <typename V2>
+  inline void bitwise_and_not_pos(const numb& v1, const V2& v2) {
+    sputsoft::numbers::bitwise_and_not(num, v1.num, v2);
+    positive = true;
+  }
+  inline void bitwise_and_not_pos(const numb& v1, const numb& v2) {
+    sputsoft::numbers::bitwise_and_not(num, v1.num, v2.num);
+    positive = true;
+  }
+
   inline void add(const numb& v1, const numb& v2) { _add(v1.num, v1.positive, v2.num, v2.positive); }
   inline void add(const numb& v1, const NUM& v2)  { _add(v1.num, v1.positive, v2, true); }
   inline void add(const NUM& v1,  const numb& v2) { _add(v1, true, v2.num, v2.positive); }

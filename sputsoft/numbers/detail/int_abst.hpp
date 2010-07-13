@@ -77,6 +77,11 @@ struct evaluator_rrvv<ops::binary::quotrem, numb<intnum<T> >, R, V1, V2> {
 
 /* Unary negate */
 
+template <typename T>
+struct resolve_unary<ops::unary::negate, numb<intnum<T> > > {
+  typedef T return_type;
+};
+
 template <typename N>
 struct evaluator_rv<ops::unary::negate, numb<intnum<N> >, numb<intnum<N> > > {
   void operator()(numb<intnum<N> >& r, const numb<intnum<N> >& v) const{
@@ -102,61 +107,47 @@ struct evaluator_rv<ops::unary::abs, T, numb<intnum<T> > > {
 
 /* bitwise_not */
 
-/*template <typename T, typename V>
-struct not_2_eval<numb<intnum<T> >, V> {
-  static void bit_not(numb<intnum<T> >& r, const V& v) {
+template <typename T, typename V>
+struct evaluator_rv<ops::unary::bit_not, numb<intnum<T> >, V> {
+  void operator()(numb<intnum<T> >& r, const V& v) const {
     sputsoft::numbers::negate(r, v);
     sputsoft::numbers::sub(r, r, 1);
   }
-};*/
+};
+
+template <typename T>
+struct function_v<ops::unary::bit_not, numb<intnum<T> > > {
+  numb<intnum<T> > operator()(const numb<intnum<T> >& v) {
+    numb<intnum<T> > r;
+    evaluator_rv<ops::unary::bit_not, numb<intnum<T> >, numb<intnum<T> > >()(r, v);
+    return r;
+  }
+};
+
+template <typename T>
+struct function_v<ops::unary::bit_not, numb<natnum<T> > > {
+  numb<intnum<T> > operator()(const numb<natnum<T> >& v) {
+    numb<intnum<T> > r;
+    evaluator_rv<ops::unary::bit_not, numb<intnum<T> >, numb<natnum<T> > >()(r, v);
+    return r;
+  }
+};
 
 /* bitwise_and */
 
-template <typename V>
-typename resolve_unary<ops::unary::abs, V>::return_type bit_abs(const V& v) {
-  typename resolve_unary<ops::unary::abs, V>::return_type n = sputsoft::numbers::abs(v);
-  if (sputsoft::numbers::is_negative(v))
-    sputsoft::numbers::sub(n, n, 1);
-  return n;
-}
-
 template <typename N, typename V1, typename V2>
-void bitwise_and_help(numb<intnum<N> >& r, const V1& v1, const V2& v2) {
-  typename resolve_unary<ops::unary::abs, V1>::return_type n1 = bit_abs(v1);
-  typename resolve_unary<ops::unary::abs, V2>::return_type n2 = bit_abs(v2);
-  if (sputsoft::numbers::is_negative(v1)) {
-    if (sputsoft::numbers::is_negative(v2)) {
-      sputsoft::numbers::bitwise_or(n1, n1, n2);
-      sputsoft::numbers::bitwise_not(r, n1);
-    } else {
-      sputsoft::numbers::bitwise_and_not(n2, n2, n1);
-      sputsoft::numbers::set(r, n2);
-    }
-  } else if (sputsoft::numbers::is_negative(v2)) {
-    sputsoft::numbers::bitwise_and_not(n1, n1, n2);
-    sputsoft::numbers::set(r, n1);
-  } else
-    sputsoft::numbers::bitwise_and(r, n1, n2);
-}
-
-template <typename N>
-struct evaluator_rvv<ops::binary::bit_and, numb<intnum<N> >, numb<intnum<N> >, numb<intnum<N> > > {
-  inline void operator()(numb<intnum<N> >& r, const numb<intnum<N> >& v1, const numb<intnum<N> >& v2) const {
-    bitwise_and_help(r, v1, v2);
-  }
-};
-
-template <typename N>
-struct evaluator_rvv<ops::binary::bit_and, numb<intnum<N> >, int, numb<intnum<N> > > {
-  inline void operator()(numb<intnum<N> >& r, int v1, const numb<intnum<N> >& v2) const {
-    bitwise_and_help(r, v1, v2);
-  }
-};
-
-template <typename N>
-struct evaluator_rvv<ops::binary::bit_and, numb<intnum<N> >, numb<intnum<N> >, int> {
-  inline void operator()(numb<intnum<N> >& r, const numb<intnum<N> >& v1, int v2) const {
-    bitwise_and_help(r, v1, v2);
+struct evaluator_rvv<ops::binary::bit_and, numb<intnum<N> >, V1, V2> {
+  inline void operator()(numb<intnum<N> >& r, const V1& v1, const V2& v2) const {
+    if (sputsoft::numbers::is_negative(v1)) {
+      if (sputsoft::numbers::is_negative(v2)) {
+        r.bitwise_or_pos(sputsoft::numbers::bitwise_not(v1), sputsoft::numbers::bitwise_not(v2));
+        sputsoft::numbers::bitwise_not(r, r);
+      } else
+        r.bitwise_and_not_pos(v2, sputsoft::numbers::bitwise_not(v1));
+    } else if (sputsoft::numbers::is_negative(v2))
+      r.bitwise_and_not_pos(v1, sputsoft::numbers::bitwise_not(v2));
+    else
+      r.bitwise_and_pos(v1, v2);
   }
 };
 
