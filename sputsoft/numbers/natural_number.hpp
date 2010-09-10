@@ -41,7 +41,7 @@ typedef lowlevel_generic<array_allocator<void> > lowlevel;
 
 typedef detail::numb<
           detail::natnum<
-            ::boost::shared_ptr<
+            sputsoft::shared_ptr<
               detail::wrap2<detail::digit_array<unsigned long>, detail::lowlevel>
             >
           >

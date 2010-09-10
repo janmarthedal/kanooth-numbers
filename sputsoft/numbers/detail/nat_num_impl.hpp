@@ -15,7 +15,6 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_IMPL_HPP
 #define _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_IMPL_HPP
 
-#include <boost/integer_traits.hpp>
 #include <sputsoft/type_traits.hpp>
 #include <sputsoft/numbers/detail/nat_num_abst.hpp>
 
@@ -31,7 +30,7 @@ class numb<natnum<wrap2<Con, LowLevel> > > {
 private:
   Con con;
   typedef typename Con::digit_type digit_type;
-  static const unsigned digit_bits = boost::integer_traits<digit_type>::digits;
+  static const unsigned digit_bits = sputsoft::number_bits<digit_type>::value;
 
   static int division_by_zero() {
     int y = 0;  // hide warning

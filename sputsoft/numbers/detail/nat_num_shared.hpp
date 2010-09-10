@@ -16,17 +16,17 @@
 #define	_SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_SHARED_HPP
 
 #include <sputsoft/numbers/detail/nat_num_impl.hpp>
-#include <boost/shared_ptr.hpp>
+#include <sputsoft/shared_ptr.hpp>
 
 namespace sputsoft {
 namespace numbers {
 namespace detail {
 
 template <typename Con, typename LowLevel>
-class numb<natnum<boost::shared_ptr<wrap2<Con, LowLevel> > > > {
+class numb<natnum<sputsoft::shared_ptr<wrap2<Con, LowLevel> > > > {
 private:
   typedef numb<natnum<wrap2<Con, LowLevel> > > number_type;
-  boost::shared_ptr<number_type> num;
+  sputsoft::shared_ptr<number_type> num;
 
   template <typename T>
   void _set(T v) {

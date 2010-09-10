@@ -114,10 +114,10 @@ void bits2()
 
 int main()
 {
-  /*PE3();
+  PE3();
   PE16();
   PE20();
   factorize_example();
-  gcd_example();*/
+  gcd_example();
   bits2();
 }
