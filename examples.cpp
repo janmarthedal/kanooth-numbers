@@ -69,8 +69,9 @@ void factorize_example()
 void gcd_example()
 {
   integer a = "123456789012345678901234567890";
-  integer b = "-9876543210";
-  integer c;
+  //integer b = "-9876543210";
+  long b = -9876543210L;
+  natural_number c;
   
   gcd(c, a, b);
 
@@ -134,6 +135,8 @@ int main()
   /*bits2();
   common_type<natural_number, int>::type a = 1;
   t(a);*/
+  unsigned v = 0xe0000;
+  std::cout << v << " " << log2_floor(v) << std::endl;
 
   return 0;
 }

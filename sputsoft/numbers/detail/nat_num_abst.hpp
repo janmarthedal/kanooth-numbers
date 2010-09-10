@@ -419,8 +419,8 @@ struct is_negative_r1_eval<numb<natnum<T> > > {
 };
 
 template <typename T>
-struct log2_floor_evaluator<numb<natnum<T> > > {
-  static std::size_t log2_floor(const numb<natnum<T> >& n) {
+struct log2_floor_eval<numb<natnum<T> > > {
+  std::size_t operator()(const numb<natnum<T> >& n) const {
     return n.log2_floor();
   }
 };

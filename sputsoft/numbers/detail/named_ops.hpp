@@ -70,7 +70,7 @@ template <typename V1, typename V2>                         struct equal_r2_eval
 template <typename T>                                       struct is_zero_r1_eval;
 template <typename T>                                       struct is_positive_r1_eval;
 template <typename T>                                       struct is_negative_r1_eval;
-template <typename T>                                       struct log2_floor_evaluator;
+template <typename T>                                       struct log2_floor_eval;
 template <typename R, typename V>                           struct lshift_3_eval;
 template <typename R, typename V>                           struct rshift_3_eval;
 
@@ -297,7 +297,7 @@ BINARY_RESULT_RETURNER(bit_shift_right, rshift)
 
 template <typename T>
 inline std::size_t log2_floor(T n) {
-  return detail::log2_floor_evaluator<T>::log2_floor(n);
+  return detail::log2_floor_eval<T>()(n);
 }
 
 template <typename V1, typename V2>

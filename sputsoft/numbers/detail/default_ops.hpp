@@ -74,7 +74,13 @@ struct resolve_unary<ops::unary::abs, T> {
   typedef typename sputsoft::make_unsigned<T>::type return_type;
 };
 
-template <typename R, typename V>
+template <typename V>
+struct function_v<ops::unary::abs, V> {
+  typedef typename resolve_unary<ops::unary::abs, V>::return_type return_type;
+  return_type operator()(const V& v) { return v < 0 ? -v : v; }
+};
+
+/*template <typename R, typename V>
 struct evaluator_rv<ops::unary::abs, R, V> {
   typedef typename resolve_unary<ops::unary::abs, V>::return_type return_type;
   void operator()(R& r, const V& v) const {
@@ -83,7 +89,7 @@ struct evaluator_rv<ops::unary::abs, R, V> {
     else
       sputsoft::numbers::set(r, v);
   }
-};
+};*/
 
 /* Unary bit_not */
 
@@ -283,17 +289,66 @@ struct is_negative_r1_eval {
   }
 };
 
+/**************** log2 floor ****************/
+
+short log2_floor_table[256] = {
+ -1, 0, 1,1, 2,2,2,2, 3,3,3,3,3,3,3,3, 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+ 5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
+ 6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+ 6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+ 7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+ 7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+ 7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+ 7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7 };
+
+template <typename T, bool ok, unsigned bits>
+struct log2_floor_eval2;
+
 template <typename T>
-struct log2_floor_evaluator {
-  static std::size_t log2_floor(T n) {
-    std::size_t r = -1;
-    while (n) {
-      sputsoft::numbers::bit_shift_right(n, n, 1);
-      ++r;
-    }
-    return r;
+struct log2_floor_eval2<T, true, 8> {
+  std::size_t operator()(const T n) const {
+    return log2_floor_table[n];
   }
 };
+
+template <typename T>
+struct log2_floor_eval2<T, true, 16> {
+  std::size_t operator()(T n) const {
+    static const T ones = -1;
+    std::size_t r = 0;
+    if (n & (ones << 8)) { n >>= 8; r += 8; }
+    return r + log2_floor_table[n];
+  }
+};
+
+template <typename T>
+struct log2_floor_eval2<T, true, 32> {
+  std::size_t operator()(T n) const {
+    static const T ones = -1;
+    std::size_t r = 0;
+    if (n & (ones << 16)) { n >>= 16; r += 16; }
+    if (n & (ones <<  8)) { n >>=  8; r +=  8; }
+    return r + log2_floor_table[n];
+  }
+};
+
+template <typename T>
+struct log2_floor_eval2<T, true, 64> {
+  std::size_t operator()(T n) const {
+    static const T ones = -1;
+    std::size_t r = 0;
+    if (n & (ones << 32)) { n >>= 32; r += 32; }
+    if (n & (ones << 16)) { n >>= 16; r += 16; }
+    if (n & (ones <<  8)) { n >>=  8; r +=  8; }
+    return r + log2_floor_table[n];
+  }
+};
+
+template <typename T>
+struct log2_floor_eval : log2_floor_eval2<T, !sputsoft::is_signed<T>::value,
+                                          sputsoft::number_bits<T>::value> {};
+
+/********************************************/
 
 template <typename R, typename V>
 struct lshift_3_eval {
