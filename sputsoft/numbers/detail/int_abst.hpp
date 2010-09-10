@@ -16,7 +16,8 @@
 #define	_SPUTSOFT_NUMBERS_DETAIL_INT_ABST_HPP
 
 #include <sputsoft/type_traits.hpp>
-#include <sputsoft/numbers/detail/number_abst.hpp>
+#include <sputsoft/numbers/common_type.hpp>
+#include <sputsoft/numbers/detail/nat_num_abst.hpp>
 
 namespace sputsoft {
 namespace numbers {
@@ -44,6 +45,12 @@ struct make_signed<numbers::detail::numb<numbers::detail::natnum<T> > > {
 
 namespace numbers {
 namespace detail {
+
+template <typename T>
+struct type_rank<numb<intnum<T> > >
+{
+  static const int value = 21;
+};
 
 /* Return types */
 

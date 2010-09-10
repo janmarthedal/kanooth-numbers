@@ -43,6 +43,9 @@ namespace sputsoft {
     static const unsigned value = boost::integer_traits<T>::digits;
   };
 
+  template <typename T>
+  struct is_signed : public boost::is_signed<T> {};
+
 #else
 
   template <typename T> struct make_signed;
@@ -73,7 +76,12 @@ namespace sputsoft {
   struct number_bits {
     static const unsigned value = std::numeric_limits<T>::digits;
   };
-  
+
+  template <typename T>
+  struct is_signed {
+    static const bool value = std::numeric_limits<T>::is_signed;
+  };
+
 #endif
 
   template <typename T>

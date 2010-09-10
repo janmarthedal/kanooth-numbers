@@ -15,6 +15,8 @@
 #ifndef _SPUTSOFT_NUMBERS_NUMBER_THEORY_HPP
 #define _SPUTSOFT_NUMBERS_NUMBER_THEORY_HPP
 
+#include <sputsoft/numbers/common_type.hpp>
+
 namespace sputsoft {
 namespace numbers {
 
@@ -45,21 +47,39 @@ void factorize(NUM n, Out out)
   }
 }
 
-template <typename NUM>
-void gcd(NUM& r, NUM a, NUM b)
+namespace detail {
+
+template <typename R, typename T>
+void gcd_impl(R& r, T a, T b)
 {
   while (true) {
-    if (is_zero(b)) { abs(r, a); break; }
+    if (is_zero(b)) { set(r, a); break; }
     rem(a, a, b);
-    if (is_zero(a)) { abs(r, b); break; }
+    if (is_zero(a)) { set(r, b); break; }
     rem(b, b, a);
   }
 }
 
-template <typename NUM>
-NUM gcd(NUM a, NUM b)
+}
+
+template <typename T1, typename T2>
+struct gcd_return_type
+  : public common_type<
+             typename detail::resolve_unary<detail::ops::unary::abs, T1>::return_type,
+             typename detail::resolve_unary<detail::ops::unary::abs, T2>::return_type> {};
+
+template <typename R, typename T1, typename T2>
+void gcd(R& r, const T1& a, const T2& b) {
+  typename gcd_return_type<T1, T2>::type a_, b_;
+  abs(a_, a);
+  abs(b_, b);
+  detail::gcd_impl(r, a_, b_);
+}
+
+template <typename T1, typename T2>
+typename gcd_return_type<T1, T2>::type gcd(const T1& a, const T2& b)
 {
-  NUM r;
+  typename gcd_return_type<T1, T2>::type r;
   gcd(r, a, b);
   return r;
 }

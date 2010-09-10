@@ -15,6 +15,7 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_ABST_HPP
 #define _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_ABST_HPP
 
+#include <sputsoft/numbers/common_type.hpp>
 #include <sputsoft/numbers/detail/number_abst.hpp>
 #include <sputsoft/numbers/detail/default_ops.hpp>
 
@@ -34,6 +35,12 @@ struct make_unsigned<numbers::detail::numb<numbers::detail::natnum<T> > > {
 
 namespace numbers {
 namespace detail {
+
+template <typename T>
+struct type_rank<numb<natnum<T> > >
+{
+  static const int value = 20;
+};
 
 template <typename T>
 struct resolve_binary<ops::binary::rem, numb<natnum<T> >, unsigned short> {

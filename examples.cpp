@@ -19,6 +19,7 @@
 #include <sputsoft/numbers/integer.hpp>
 #include <sputsoft/numbers/common_functions.hpp>
 #include <sputsoft/numbers/number_theory.hpp>
+#include <sputsoft/numbers/common_type.hpp>
 
 using namespace sputsoft::numbers;
 
@@ -112,12 +113,27 @@ void bits2()
   std::cout << c << std::endl;
 }
 
+void t(short v) {  std::cout << "short " << v << std::endl; }
+void t(unsigned short v) { std::cout << "unsigned short " << v << std::endl; }
+void t(int v) {  std::cout << "int " << v << std::endl; }
+void t(unsigned int v) { std::cout << "unsigned int " << v << std::endl; }
+void t(long v) {  std::cout << "long " << v << std::endl; }
+void t(unsigned long v) { std::cout << "unsigned long " << v << std::endl; }
+void t(long long v) {  std::cout << "long long " << v << std::endl; }
+void t(unsigned long long v) { std::cout << "unsigned long long " << v << std::endl; }
+void t(natural_number v) {  std::cout << "natural_number " << v << std::endl; }
+void t(integer v) { std::cout << "integer " << v << std::endl; }
+
 int main()
 {
-  PE3();
+  /*PE3();
   PE16();
   PE20();
-  factorize_example();
+  factorize_example();*/
   gcd_example();
-  bits2();
+  /*bits2();
+  common_type<natural_number, int>::type a = 1;
+  t(a);*/
+
+  return 0;
 }
