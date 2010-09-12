@@ -23,8 +23,7 @@ namespace sputsoft {
 
 #ifdef SPUTSOFT_USE_BOOST
 
-template <typename T>
-class shared_ptr : public boost::shared_ptr<T> {};
+using boost::shared_ptr;
 
 #else
 

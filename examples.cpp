@@ -125,18 +125,22 @@ void t(unsigned long long v) { std::cout << "unsigned long long " << v << std::e
 void t(natural_number v) {  std::cout << "natural_number " << v << std::endl; }
 void t(integer v) { std::cout << "integer " << v << std::endl; }
 
+
 int main()
 {
-  /*PE3();
+  PE3();
   PE16();
   PE20();
-  factorize_example();*/
+  factorize_example();
   gcd_example();
-  /*bits2();
-  common_type<natural_number, int>::type a = 1;
-  t(a);*/
-  unsigned v = 0xe0000;
-  std::cout << v << " " << log2_floor(v) << std::endl;
+  bits2();
+
+  integer a, b=2, c=3;
+
+  a = b + (1 + c);
+  a = -(b + c);
+
+  std::cout << a << std::endl;
 
   return 0;
 }

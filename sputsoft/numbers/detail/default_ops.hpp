@@ -345,8 +345,9 @@ struct log2_floor_eval2<T, true, 64> {
 };
 
 template <typename T>
-struct log2_floor_eval : log2_floor_eval2<T, !sputsoft::is_signed<T>::value,
-                                          sputsoft::number_bits<T>::value> {};
+struct log2_floor_eval
+  : log2_floor_eval2<T, sputsoft::is_native_int<T>::value && !sputsoft::is_signed<T>::value,
+                     sputsoft::number_bits<T>::value> {};
 
 /********************************************/
 

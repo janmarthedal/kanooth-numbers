@@ -15,11 +15,19 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP
 #define _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP
 
+#include <sputsoft/type_traits.hpp>
 #include <sputsoft/numbers/detail/named_ops.hpp>
 
 namespace sputsoft {
 namespace numbers {
 namespace detail {
+
+// Local stuff
+namespace {
+
+template <typename R, typename E> class expr;
+template <typename Op, typename X, typename Y> struct binary;
+template <typename Op, typename X> struct unary;
 
 template <class T>
 struct resolve_ref {
@@ -29,23 +37,6 @@ struct resolve_ref {
 template <class T>
 struct resolve_ref<numb<T> > {
   typedef const numb<T>& ref_type;
-};
-
-template <typename R, typename E> class expr;
-
-template <typename Op, typename R1, typename E1, typename R2, typename E2>
-struct resolve_binary<Op, expr<R1, E1>, expr<R2, E2> > {
-  typedef typename resolve_binary<Op, R1, R2>::return_type return_type;
-};
-
-template <typename Op, typename R, typename E, typename T>
-struct resolve_binary<Op, expr<R, E>, T> {
-  typedef typename resolve_binary<Op, R, T>::return_type return_type;
-};
-
-template <typename Op, typename T, typename R, typename E>
-struct resolve_binary<Op, T, expr<R, E> > {
-  typedef typename resolve_binary<Op, T, R>::return_type return_type;
 };
 
 template <typename T>
@@ -58,10 +49,54 @@ struct resolve_type<expr<R, E> > {
   typedef R type;
 };
 
-template <typename Op, typename X, typename Y> struct binary;
-template <typename Op, typename X> struct unary;
+template <typename T> struct is_numb_or_expr : public sputsoft::false_type {};
+template <typename N> struct is_numb_or_expr<numb<N> > : public sputsoft::true_type {};
+template <typename R, typename E> struct is_numb_or_expr<expr<R, E> >
+  : public sputsoft::true_type {};
 
-/*template <typename R, typename R2, typename X, typename Y>
+template <typename Op, typename T1, typename T2, bool Ok>
+struct approve_binop_overload2 {};
+
+template <typename Op, typename T1, typename T2>
+struct approve_binop_overload2<Op, T1, T2, true> {
+  typedef expr<typename resolve_binary<Op, typename resolve_type<T1>::type,
+                                       typename resolve_type<T2>::type>::return_type,
+               binary<Op, T1, T2> > return_type;
+  return_type operator()(const T1& x, const T2& y) {
+    return return_type(x, y);
+  }
+};
+
+template <typename Op, typename T1, typename T2>
+struct approve_binop_overload
+  : approve_binop_overload2<Op, T1, T2,
+        (is_numb_or_expr<T1>::value &&
+          (is_numb_or_expr<T2>::value || is_native_int<T2>::value)) ||
+        (is_numb_or_expr<T2>::value &&
+          (is_numb_or_expr<T1>::value || is_native_int<T1>::value))> {};
+
+template <typename Op, typename T1, typename T2>
+struct approve_shift_overload
+  : approve_binop_overload2<Op, T1, T2, is_numb_or_expr<T1>::value && is_native_int<T2>::value> {};
+
+template <typename Op, typename T, bool Ok>
+struct approve_unop_overload2 {};
+
+template <typename Op, typename T>
+struct approve_unop_overload2<Op, T, true> {
+  typedef expr<typename resolve_unary<Op, typename resolve_type<T>::type >::return_type,
+               unary<Op, T> > return_type;
+  return_type operator()(const T& x) {
+    return return_type(x);
+  }
+};
+
+template <typename Op, typename T>
+struct approve_unop_overload
+  : approve_unop_overload2<Op, T, is_numb_or_expr<T>::value> {};
+
+/*
+template <typename R, typename R2, typename X, typename Y>
 struct expr<R, binary<ops::binary::add, X, expr<R2, unary<ops::unary::negate, Y> > > > {
   typename resolve_ref<X>::ref_type x;
   typename resolve_ref<Y>::ref_type y;
@@ -70,7 +105,8 @@ struct expr<R, binary<ops::binary::add, X, expr<R2, unary<ops::unary::negate, Y>
   expr(const X& _x, const expr<R2, unary<ops::unary::negate, Y> >& _y) : x(_x), y(_y.x) {}
   inline void assign(R& r) const { sputsoft::numbers::sub(r, (x_type) x, (y_type) y); }
   inline operator R() const { return sputsoft::numbers::sub((x_type) x, (y_type) y); }
-};*/
+};
+*/
 
 template <typename R, typename X, typename Y>
 struct expr<R, binary<ops::binary::add, X, Y> > {
@@ -164,6 +200,8 @@ struct expr<R, unary<ops::unary::negate, X> > {
   inline operator R() const { return sputsoft::numbers::negate((x_type) x); }
 };
 
+} // local namespace
+
 template <typename R1, typename R2, typename E2>
 struct evaluator_rv<ops::unary::identity, numb<R1>, expr<R2, E2> > {
   void operator()(numb<R1>& r, const expr<R2, E2>& v) const {
@@ -171,134 +209,52 @@ struct evaluator_rv<ops::unary::identity, numb<R1>, expr<R2, E2> > {
   }
 };
 
-#define SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(OVERLOAD, OPNAME, TYPE) \
-template <typename R, typename E> \
-expr<typename resolve_binary<ops::binary::OPNAME, TYPE, R>::return_type, \
-     binary<ops::binary::OPNAME, TYPE, expr<R, E> > > \
-OVERLOAD(const TYPE& x, const expr<R, E>& y) { \
-  return expr<typename resolve_binary<ops::binary::OPNAME, TYPE, R>::return_type, \
-     binary<ops::binary::OPNAME, TYPE, expr<R, E> > >(x, y); \
-} \
-template <typename R, typename E> \
-expr<typename resolve_binary<ops::binary::OPNAME, R, TYPE>::return_type, \
-     binary<ops::binary::OPNAME, expr<R, E>, TYPE> > \
-OVERLOAD(const expr<R, E>& x, const TYPE& y) { \
-  return expr<typename resolve_binary<ops::binary::OPNAME, R, TYPE>::return_type, \
-     binary<ops::binary::OPNAME, expr<R, E>, TYPE> >(x, y); \
-} \
-template <typename N> \
-expr<typename resolve_binary<ops::binary::OPNAME, numb<N>, TYPE>::return_type, \
-     binary<ops::binary::OPNAME, numb<N>, TYPE> > \
-OVERLOAD(const numb<N>& x, TYPE y) { \
-  return expr<typename resolve_binary<ops::binary::OPNAME, numb<N>, TYPE>::return_type, \
-     binary<ops::binary::OPNAME, numb<N>, TYPE> >(x, y); \
-} \
-template <typename N> \
-expr<typename resolve_binary<ops::binary::OPNAME, TYPE, numb<N> >::return_type, \
-     binary<ops::binary::OPNAME, TYPE, numb<N> > > \
-OVERLOAD(TYPE x, const numb<N>& y) { \
-  return expr<typename resolve_binary<ops::binary::OPNAME, TYPE, numb<N> >::return_type, \
-     binary<ops::binary::OPNAME, TYPE, numb<N> > >(x, y); \
+template <typename T1, typename T2>
+typename approve_binop_overload<ops::binary::add, T1, T2>::return_type
+operator+(const T1& x, const T2& y) {
+  return approve_binop_overload<ops::binary::add, T1, T2>()(x, y);
 }
 
-#define SPUTSOFT_NUMBERS_OVERLOAD_BINARY(OVERLOAD, OPNAME) \
-template <typename R1, typename E1, typename R2, typename E2> \
-expr<typename resolve_binary<ops::binary::OPNAME, R1, R2>::return_type, \
-     binary<ops::binary::OPNAME, expr<R1, E1>, expr<R2, E2> > > \
-OVERLOAD(const expr<R1, E1>& x, const expr<R2, E2>& y) { \
-  return expr<typename resolve_binary<ops::binary::OPNAME, R1, R2>::return_type, \
-     binary<ops::binary::OPNAME, expr<R1, E1>, expr<R2, E2> > >(x, y); \
-} \
-template <typename N1, typename R2, typename E2> \
-expr<typename resolve_binary<ops::binary::OPNAME, numb<N1>, R2>::return_type, \
-     binary<ops::binary::OPNAME, numb<N1>, expr<R2, E2> > > \
-OVERLOAD(const numb<N1>& x, const expr<R2, E2>& y) { \
-  return expr<typename resolve_binary<ops::binary::OPNAME, numb<N1>, R2>::return_type, \
-     binary<ops::binary::OPNAME, numb<N1>, expr<R2, E2> > >(x, y); \
-} \
-template <typename R1, typename E1, typename N2> \
-expr<typename resolve_binary<ops::binary::OPNAME, R1, numb<N2> >::return_type, \
-     binary<ops::binary::OPNAME, expr<R1, E1>, numb<N2> > > \
-OVERLOAD(const expr<R1, E1>& x, const numb<N2>& y) { \
-  return expr<typename resolve_binary<ops::binary::OPNAME, R1, numb<N2> >::return_type, \
-     binary<ops::binary::OPNAME, expr<R1, E1>, numb<N2> > >(x, y); \
-} \
-template <typename N1, typename N2> \
-expr<typename resolve_binary<ops::binary::OPNAME, numb<N1>, numb<N2> >::return_type, \
-     binary<ops::binary::OPNAME, numb<N1>, numb<N2> > > \
-OVERLOAD(const numb<N1>& x, const numb<N2>& y) { \
-  return expr<typename resolve_binary<ops::binary::OPNAME, numb<N1>, numb<N2> >::return_type, \
-     binary<ops::binary::OPNAME, numb<N1>, numb<N2> > >(x, y); \
-} \
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(OVERLOAD, OPNAME, unsigned short) \
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(OVERLOAD, OPNAME, signed short) \
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(OVERLOAD, OPNAME, unsigned) \
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(OVERLOAD, OPNAME, signed) \
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(OVERLOAD, OPNAME, unsigned long) \
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(OVERLOAD, OPNAME, signed long)
-
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY(operator+, add)
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY(operator-, sub)
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY(operator*, mul)
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY(operator/, div)
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY(operator%, rem)
-
-#ifdef SPUTSOFT_HAS_LONG_LONG
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(operator+, add, unsigned long long)
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(operator+, add, signed long long)
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(operator-, sub, unsigned long long)
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(operator-, sub, signed long long)
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(operator*, mul, unsigned long long)
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(operator*, mul, signed long long)
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(operator/, div, unsigned long long)
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(operator/, div, signed long long)
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(operator%, rem, unsigned long long)
-SPUTSOFT_NUMBERS_OVERLOAD_BINARY_INT(operator%, rem, signed long long)
-#endif
-
-#define SPUTSOFT_NUMBERS_OVERLOAD_SHIFT(TYPE) \
-template <typename R, typename E> \
-expr<typename resolve_binary<ops::binary::lshift, R, TYPE>::return_type, \
-     binary<ops::binary::lshift, expr<R, E>, TYPE> > \
-operator<<(const expr<R, E>& x, TYPE y) { \
-  return expr<typename resolve_binary<ops::binary::lshift, R, TYPE>::return_type, \
-     binary<ops::binary::lshift, expr<R, E>, TYPE> >(x, y); \
-} \
-template <typename N> \
-expr<typename resolve_binary<ops::binary::lshift, numb<N>, TYPE>::return_type, \
-     binary<ops::binary::lshift, numb<N>, TYPE> > \
-operator<<(const numb<N>& x, TYPE y) { \
-  return expr<typename resolve_binary<ops::binary::lshift, numb<N>, TYPE>::return_type, \
-     binary<ops::binary::lshift, numb<N>, TYPE> >(x, y); \
-} \
-template <typename R, typename E> \
-expr<typename resolve_binary<ops::binary::rshift, R, TYPE>::return_type, \
-     binary<ops::binary::rshift, expr<R, E>, TYPE> > \
-operator>>(const expr<R, E>& x, TYPE y) { \
-  return expr<typename resolve_binary<ops::binary::rshift, R, TYPE>::return_type, \
-     binary<ops::binary::rshift, expr<R, E>, TYPE> >(x, y); \
-} \
-template <typename N> \
-expr<typename resolve_binary<ops::binary::rshift, numb<N>, TYPE>::return_type, \
-     binary<ops::binary::rshift, numb<N>, TYPE> > \
-operator>>(const numb<N>& x, TYPE y) { \
-  return expr<typename resolve_binary<ops::binary::rshift, numb<N>, TYPE>::return_type, \
-     binary<ops::binary::rshift, numb<N>, TYPE> >(x, y); \
+template <typename T1, typename T2>
+typename approve_binop_overload<ops::binary::sub, T1, T2>::return_type
+operator-(const T1& x, const T2& y) {
+  return approve_binop_overload<ops::binary::sub, T1, T2>()(x, y);
 }
 
-SPUTSOFT_NUMBERS_OVERLOAD_SHIFT(unsigned short)
-SPUTSOFT_NUMBERS_OVERLOAD_SHIFT(signed short)
-SPUTSOFT_NUMBERS_OVERLOAD_SHIFT(unsigned)
-SPUTSOFT_NUMBERS_OVERLOAD_SHIFT(signed)
-SPUTSOFT_NUMBERS_OVERLOAD_SHIFT(unsigned long)
-SPUTSOFT_NUMBERS_OVERLOAD_SHIFT(signed long)
+template <typename T1, typename T2>
+typename approve_binop_overload<ops::binary::mul, T1, T2>::return_type
+operator*(const T1& x, const T2& y) {
+  return approve_binop_overload<ops::binary::mul, T1, T2>()(x, y);
+}
 
-template <typename N>
-expr<typename resolve_unary<ops::unary::negate, numb<N> >::return_type,
-     unary<ops::unary::negate, numb<N> > >
-operator-(const numb<N>& x) {
-  return expr<typename resolve_unary<ops::unary::negate, numb<N> >::return_type,
-     unary<ops::unary::negate, numb<N> > >(x);
+template <typename T1, typename T2>
+typename approve_binop_overload<ops::binary::div, T1, T2>::return_type
+operator/(const T1& x, const T2& y) {
+  return approve_binop_overload<ops::binary::div, T1, T2>()(x, y);
+}
+
+template <typename T1, typename T2>
+typename approve_binop_overload<ops::binary::rem, T1, T2>::return_type
+operator%(const T1& x, const T2& y) {
+  return approve_binop_overload<ops::binary::rem, T1, T2>()(x, y);
+}
+
+template <typename T1, typename T2>
+typename approve_shift_overload<ops::binary::lshift, T1, T2>::return_type
+operator<<(const T1& x, const T2& y) {
+  return approve_shift_overload<ops::binary::lshift, T1, T2>()(x, y);
+}
+
+template <typename T1, typename T2>
+typename approve_shift_overload<ops::binary::rshift, T1, T2>::return_type
+operator>>(const T1& x, const T2& y) {
+  return approve_shift_overload<ops::binary::rshift, T1, T2>()(x, y);
+}
+
+template <typename T>
+typename approve_unop_overload<ops::unary::negate, T>::return_type
+operator-(const T& x) {
+  return approve_unop_overload<ops::unary::negate, T>()(x);
 }
 
 template <typename N, typename T>

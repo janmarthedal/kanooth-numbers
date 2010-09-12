@@ -16,7 +16,9 @@
 #define _SPUTSOFT_TYPE_TRAITS_HPP_
 
 #ifdef SPUTSOFT_USE_BOOST
-#include <boost/type_traits.hpp>
+#include <boost/type_traits/make_signed.hpp>
+#include <boost/type_traits/make_unsigned.hpp>
+#include <boost/type_traits/is_signed.hpp>
 #include <boost/integer_traits.hpp>
 #ifdef BOOST_HAS_LONG_LONG
 #define SPUTSOFT_HAS_LONG_LONG
@@ -33,22 +35,27 @@ namespace sputsoft {
 #ifdef SPUTSOFT_USE_BOOST
 
   template <typename T>
-  struct make_signed : boost::make_signed<T> {};
-
-  template <typename T>
-  struct make_unsigned : boost::make_unsigned<T> {};
-
-  template <typename T>
   struct number_bits {
     static const unsigned value = boost::integer_traits<T>::digits;
   };
 
-  template <typename T>
-  struct is_signed : public boost::is_signed<T> {};
+  template <typename T> struct make_signed : boost::make_signed<T> {};
+  template <typename T> struct make_unsigned : boost::make_unsigned<T> {};
+  template <typename T> struct is_signed : public boost::is_signed<T> {};
+
+  using boost::true_type;
+  using boost::false_type;
 
 #else
 
-  template <typename T> struct make_signed;
+  template <typename T, T val>
+  struct integral_constant {
+    static const T value = val;
+  };
+  typedef integral_constant<bool, true>  true_type;
+  typedef integral_constant<bool, false> false_type;
+
+  template <typename T> struct make_signed {};
   template <> struct make_signed<unsigned short> { typedef signed short type; };
   template <> struct make_signed<signed short> { typedef signed short type; };
   template <> struct make_signed<unsigned int> { typedef signed int type; };
@@ -60,7 +67,7 @@ namespace sputsoft {
   template <> struct make_signed<signed long long> { typedef signed long long type; };
 #endif
 
-  template <typename T> struct make_unsigned;
+  template <typename T> struct make_unsigned {};
   template <> struct make_unsigned<unsigned short> { typedef unsigned short type; };
   template <> struct make_unsigned<signed short> { typedef unsigned short type; };
   template <> struct make_unsigned<unsigned int> { typedef unsigned int type; };
@@ -73,14 +80,10 @@ namespace sputsoft {
 #endif
   
   template <typename T>
-  struct number_bits {
-    static const unsigned value = std::numeric_limits<T>::digits;
-  };
+  struct number_bits : public integral_constant<unsigned, std::numeric_limits<T>::digits> {};
 
   template <typename T>
-  struct is_signed {
-    static const bool value = std::numeric_limits<T>::is_signed;
-  };
+  struct is_signed : public integral_constant <bool, std::numeric_limits<T>::is_signed> {};
 
 #endif
 
@@ -88,6 +91,18 @@ namespace sputsoft {
   inline typename make_unsigned<T>::type to_unsigned(const T& v) {
     return (typename make_unsigned<T>::type) v;
   }
+
+  template <typename T> struct is_native_int : public false_type {};
+  template <> struct is_native_int<unsigned short> : public true_type {};
+  template <> struct is_native_int<signed short>   : public true_type {};
+  template <> struct is_native_int<unsigned int>   : public true_type {};
+  template <> struct is_native_int<signed int>     : public true_type {};
+  template <> struct is_native_int<unsigned long>  : public true_type {};
+  template <> struct is_native_int<signed long>    : public true_type {};
+#ifdef SPUTSOFT_HAS_LONG_LONG
+  template <> struct is_native_int<unsigned long long> : public true_type {};
+  template <> struct is_native_int<signed long long>   : public true_type {};
+#endif
 
 } // namespace sputsoft
 
