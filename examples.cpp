@@ -128,19 +128,19 @@ void t(integer v) { std::cout << "integer " << v << std::endl; }
 
 int main()
 {
-  PE3();
+  /*PE3();
   PE16();
   PE20();
   factorize_example();
   gcd_example();
-  bits2();
+  bits2();*/
 
   integer a, b=2, c=3;
 
-  a = b + (1 + c);
-  a = -(b + c);
-
-  std::cout << a << std::endl;
+  if (b+c <= 2)
+    std::cout << "Yes" << std::endl;
+  else
+    std::cout << "No" << std::endl;
 
   return 0;
 }

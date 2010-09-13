@@ -32,6 +32,11 @@
 
 namespace sputsoft {
 
+  template <typename T, T val>
+  struct integral_constant {
+    static const T value = val;
+  };
+
 #ifdef SPUTSOFT_USE_BOOST
 
   template <typename T>
@@ -48,10 +53,6 @@ namespace sputsoft {
 
 #else
 
-  template <typename T, T val>
-  struct integral_constant {
-    static const T value = val;
-  };
   typedef integral_constant<bool, true>  true_type;
   typedef integral_constant<bool, false> false_type;
 
