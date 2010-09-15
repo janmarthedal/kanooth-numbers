@@ -37,10 +37,7 @@ namespace numbers {
 namespace detail {
 
 template <typename T>
-struct type_rank<numb<natnum<T> > >
-{
-  static const int value = 20;
-};
+struct type_rank<numb<natnum<T> > > : public integral_constant<int, 20> {};
 
 template <typename T>
 struct resolve_binary<ops::binary::rem, numb<natnum<T> >, unsigned short> {

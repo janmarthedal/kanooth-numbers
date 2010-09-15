@@ -24,7 +24,7 @@
 using namespace sputsoft::numbers;
 
 // Find largest prime factor of 600851475143
-void PE3()
+/*void PE3()
 {
   std::vector<natural_number> factors;
   natural_number n = "600851475143";
@@ -124,6 +124,20 @@ void t(long long v) {  std::cout << "long long " << v << std::endl; }
 void t(unsigned long long v) { std::cout << "unsigned long long " << v << std::endl; }
 void t(natural_number v) {  std::cout << "natural_number " << v << std::endl; }
 void t(integer v) { std::cout << "integer " << v << std::endl; }
+*/
+
+template <typename T>
+struct retval {};
+
+template <>
+struct retval<int> {
+  typedef void type;
+};
+
+template <typename T>
+typename retval<T>::type testfunc(T v) {
+  std::cout << v << std::endl;
+}
 
 
 int main()
@@ -135,12 +149,18 @@ int main()
   gcd_example();
   bits2();*/
 
-  integer a, b=2, c=3;
+  /*integer a, b=2, c=3;
+  sputsoft::numbers::add(a, b, sputsoft::numbers::add(b, c));
+  std::cout << a << std::endl;*/
 
-  if (b+c <= 2)
-    std::cout << "Yes" << std::endl;
-  else
-    std::cout << "No" << std::endl;
+  int a=7, b;
+  long c=0;
+
+  testfunc(a);
+  testfunc(c);
+
+  b = sputsoft::numbers::rem(a, 3);
+  std::cout << b << std::endl;
 
   return 0;
 }

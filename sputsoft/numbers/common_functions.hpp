@@ -18,7 +18,7 @@
 namespace sputsoft {
 namespace numbers {
 
-template <typename NUM>
+/*template <typename NUM>
 NUM factorial(std::size_t n)
 {
   NUM r = 1;
@@ -70,7 +70,7 @@ NUM sideways_sum(NUM n, unsigned base)
     res += quotrem(n, n, base);
   return res;
 }
-
+*/
 
 } // numbers
 } // sputsoft

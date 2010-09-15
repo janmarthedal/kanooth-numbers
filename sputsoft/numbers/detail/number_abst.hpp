@@ -98,9 +98,18 @@ struct resolve_binary<Op, unsigned long long, numb<T> > {
 };
 #endif
 
+template <typename Op, typename T, typename V1, typename V2>
+struct function_rt_vv<Op, numb<T>, V1, V2> {
+  inline numb<T> operator()(const V1& v1, const V2& v2) const {
+    numb<T> r;
+    evaluator_rvv<Op, numb<T>, V1, V2>()(r, v1, v2);
+    return r;
+  }
+};
+
 template <typename T, typename V>
 struct evaluator_rv<ops::unary::identity, numb<T>, V> {
-  void operator()(numb<T>& r, const V& v) const {
+  inline void operator()(numb<T>& r, const V& v) const {
     r.set(v);
   }
 };

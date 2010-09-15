@@ -15,6 +15,7 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP
 #define _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP
 
+/*
 #include <sputsoft/type_traits.hpp>
 #include <sputsoft/numbers/detail/named_ops.hpp>
 
@@ -98,12 +99,6 @@ namespace {
   struct approve_unop_overload
     : approve_unop_overload2<Op, T, is_numb_or_expr<T>::value> {};
 
-  template <typename T>
-  const T& eval_expr(const T& v) { return v; }
-
-  template <typename R, typename E>
-  R eval_expr(const expr<R, E>& e) { return (R) e; }
-
   struct cmp_equal {
     template <typename T1, typename T2>
     inline bool operator()(const T1& x, const T2& y) const {
@@ -153,14 +148,14 @@ namespace {
   struct approve_cmp_overload2<Op, T1, T2, true> {
     typedef bool return_type;
     inline bool operator()(const T1& x, const T2& y) const {
-      return Op()(eval_expr(x), eval_expr(y));
+      return Op()(sputsoft::numbers::eval(x), sputsoft::numbers::eval(y));
     }
   };
 
   template <typename Op, typename T1, typename T2>
   struct approve_cmp_overload
     : public approve_cmp_overload2<Op, T1, T2, approve_binop_args<T1, T2>::value> {};
-
+*/
   /*
   template <typename R, typename R2, typename X, typename Y>
   struct expr<R, binary<ops::binary::add, X, expr<R2, unary<ops::unary::negate, Y> > > > {
@@ -173,16 +168,14 @@ namespace {
     inline operator R() const { return sputsoft::numbers::sub((x_type) x, (y_type) y); }
   };
   */
-
+/*
   template <typename R, typename X, typename Y>
   struct expr<R, binary<ops::binary::add, X, Y> > {
     typename resolve_ref<X>::ref_type x;
     typename resolve_ref<Y>::ref_type y;
-    typedef typename resolve_type<X>::type x_type;
-    typedef typename resolve_type<Y>::type y_type;
     expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    inline void assign(R& r) const { sputsoft::numbers::add(r, (x_type) x, (y_type) y); }
-    inline operator R() const { return sputsoft::numbers::add((x_type) x, (y_type) y); }
+    inline void assign(R& r) const { sputsoft::numbers::add(r, x, y); }
+    inline operator R() const { return sputsoft::numbers::add(x, y); }
   };
 
   template <typename R, typename X, typename Y>
@@ -267,6 +260,16 @@ namespace {
   };
 
 } // local namespace
+
+template <typename R, typename E>
+struct resolve_unary<ops::unary::identity, expr<R, E> > {
+  typedef R return_type;
+};
+
+template <typename R, typename E>
+struct function_v<ops::unary::identity, expr<R, E> > {
+  R operator()(const expr<R, E>& e) const { return (R) e; }
+};
 
 template <typename R1, typename R2, typename E2>
 struct evaluator_rv<ops::unary::identity, numb<R1>, expr<R2, E2> > {
@@ -402,5 +405,5 @@ std::ostream& operator<<(std::ostream& os, const expr<R, E>& e) {
 } // namespace detail
 } // namespace numbers
 } // namespace sputsoft
-
+*/
 #endif // _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP
