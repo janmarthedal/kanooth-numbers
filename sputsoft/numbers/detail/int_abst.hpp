@@ -56,13 +56,13 @@ struct type_rank<numb<intnum<T> > >
 
 #define RESOLVE_INTNUM_REM(TYPE) \
 template <typename T> \
-struct resolve_binary<ops::binary::rem, numb<intnum<T> >, TYPE> { typedef TYPE return_type; }; \
+struct binary_result<ops::binary::rem, numb<intnum<T> >, TYPE> { typedef TYPE return_type; }; \
 template <typename T> \
-struct resolve_binary<ops::binary::rem_floor, numb<intnum<T> >, TYPE> { typedef TYPE return_type; }; \
+struct binary_result<ops::binary::rem_floor, numb<intnum<T> >, TYPE> { typedef TYPE return_type; }; \
 template <typename T> \
-struct resolve_binary<ops::binary::rem_ceil, numb<intnum<T> >, TYPE> { typedef TYPE return_type; }; \
+struct binary_result<ops::binary::rem_ceil, numb<intnum<T> >, TYPE> { typedef TYPE return_type; }; \
 template <typename T> \
-struct resolve_binary<ops::binary::rem_trunc, numb<intnum<T> >, TYPE> { typedef TYPE return_type; };
+struct binary_result<ops::binary::rem_trunc, numb<intnum<T> >, TYPE> { typedef TYPE return_type; };
 
 RESOLVE_INTNUM_REM(unsigned short)
 RESOLVE_INTNUM_REM(signed short)

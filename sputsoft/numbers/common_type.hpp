@@ -42,17 +42,12 @@ struct choose_type<true, T, F> { typedef T type; };
 }
 
 template <typename T1, typename T2>
-struct common_type {
-private:
-  typedef typename detail::choose_type<detail::type_rank<T1>::value >= detail::type_rank<T2>::value,
-          T1, T2>::type type__;
-public:
-  typedef typename detail::choose_type<
-            sputsoft::is_signed<T1>::value || sputsoft::is_signed<T2>::value,
-            typename sputsoft::make_signed<type__>::type,
-            type__
-          >::type type;
-};
+struct common_type
+  : public sputsoft::make_signed_if<sputsoft::is_signed<T1>::value || sputsoft::is_signed<T2>::value,
+                 typename detail::choose_type<
+                            detail::type_rank<T1>::value >= detail::type_rank<T2>::value, T1, T2
+                                             >::type
+                       > {};
 
 
 } // numbers

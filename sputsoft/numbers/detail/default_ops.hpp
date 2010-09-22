@@ -17,18 +17,15 @@
 
 #include <sputsoft/numbers/detail/named_ops.hpp>
 
+#include "nat_num_abst.hpp"
+
 namespace sputsoft {
 namespace numbers {
 namespace detail {
 
-template <typename Op, typename T>
-struct resolve_binary<Op, T, T> {
-  typedef T return_type;
-};
-
 /* Unary */
 
-template <typename Op, typename R, typename V>
+/*template <typename Op, typename R, typename V>
 struct evaluator_rv {
   void operator()(R& r, const V& v) const {
     sputsoft::numbers::set(r, function_v<Op, V>()(v));
@@ -43,7 +40,7 @@ struct function_v {
     evaluator_rv<Op, return_type, V>()(r, v);
     return r;
   }
-};
+};*/
 
 /* Unary identity */
 
@@ -56,14 +53,14 @@ struct evaluator_rv<ops::unary::identity, R, V> {
 
 /* Unary eval/identity */
 
-template <typename T>
+/*template <typename T>
 struct function_v<ops::unary::identity, T> {
   inline const T& operator()(const T& v) const { return v; }
-};
+};*/
 
 /* Unary negate */
 
-template <typename T>
+/*template <typename T>
 struct resolve_unary<ops::unary::negate, T> {
   typedef typename sputsoft::make_signed<T>::type return_type;
 };
@@ -72,11 +69,11 @@ template <typename V>
 struct function_v<ops::unary::negate, V> {
   typedef typename resolve_unary<ops::unary::negate, V>::return_type return_type;
   return_type operator()(const V& v) const { return -((return_type) v); }
-};
+};*/
 
 /* Unary abs */
 
-template <typename T>
+/*template <typename T>
 struct resolve_unary<ops::unary::abs, T> {
   typedef typename sputsoft::make_unsigned<T>::type return_type;
 };
@@ -85,11 +82,11 @@ template <typename V>
 struct function_v<ops::unary::abs, V> {
   typedef typename resolve_unary<ops::unary::abs, V>::return_type return_type;
   return_type operator()(const V& v) const { return v < 0 ? -v : v; }
-};
+};*/
 
 /* Unary bit_not */
 
-template <typename T>
+/*template <typename T>
 struct resolve_unary<ops::unary::bit_not, T> {
   typedef typename resolve_unary<ops::unary::negate, T>::return_type return_type;
 };
@@ -98,37 +95,9 @@ template <typename V>
 struct function_v<ops::unary::bit_not, V> {
   typedef typename resolve_unary<ops::unary::bit_not, V>::return_type return_type;
   return_type operator()(const V& v) const { return ~v; }
-};
+};*/
 
 /* Binary */
-
-//template <typename Op, typename T1, bool N1, bool S1, typename T1, bool N1, bool S1>
-//struct resolve_binary2;
-
-template <typename Op>
-struct resolve_binary<Op, unsigned, unsigned> {
-  typedef unsigned return_type;
-};
-
-template <typename Op>
-struct resolve_binary<Op, long unsigned, unsigned> {
-  typedef long unsigned return_type;
-};
-
-template <typename Op>
-struct resolve_binary<Op, unsigned, long unsigned> {
-  typedef long unsigned return_type;
-};
-
-template <typename Op>
-struct resolve_binary<Op, unsigned, signed> {
-  typedef unsigned return_type;
-};
-
-template <typename Op>
-struct resolve_binary<Op, signed, unsigned> {
-  typedef unsigned return_type;
-};
 
 template <typename Op, typename R, typename V1, typename V2>
 struct evaluator_rvv {
@@ -159,42 +128,44 @@ struct function_rt_vv_default<ops::binary::add, R, V1, V2> {
 /* Binary sub */
 
 template <typename V1, typename V2>
-struct function_vv<ops::binary::sub, V1, V2> {
-  typedef typename resolve_binary<ops::binary::sub, V1, V2>::return_type return_type;
-  return_type operator()(const V1& v1, const V2& v2) const {
+struct binary_result<ops::binary::sub, V1, V2>
+  : public choose_type<!sputsoft::is_signed<V1>::value && !sputsoft::is_signed<V2>::value,
+                       V1, typename sputsoft::numbers::common_type<V1, V2>::type> {};
+
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::sub, R, V1, V2> {
+  inline R operator()(const V1& v1, const V2& v2) const {
     return v1 - v2;
   }
 };
 
 /* Binary mul */
 
-template <typename V1, typename V2>
+/*template <typename V1, typename V2>
 struct function_vv<ops::binary::mul, V1, V2> {
   typedef typename resolve_binary<ops::binary::mul, V1, V2>::return_type return_type;
   return_type operator()(const V1& v1, const V2& v2) const {
     return v1 * v2;
   }
-};
+};*/
 
 /* Binary div */
 
-template <typename V1, typename V2>
+/*template <typename V1, typename V2>
 struct function_vv<ops::binary::div, V1, V2> {
   typedef typename resolve_binary<ops::binary::div, V1, V2>::return_type return_type;
   return_type operator()(const V1& v1, const V2& v2) const {
     return v1 / v2;
   }
-};
+};*/
 
 /* Binary rem */
 
-/*template <typename V1, typename V2>
-struct function_vv<ops::binary::rem, V1, V2> {
-  typedef typename resolve_binary<ops::binary::rem, V1, V2>::return_type return_type;
-  return_type operator()(const V1& v1, const V2& v2) const {
-    return v1 % v2;
-  }
-};*/
+template <typename V1, typename V2>
+struct binary_result<ops::binary::rem, V1, V2>
+  : public choose_type<sputsoft::is_integral<V1>::value && sputsoft::is_integral<V2>::value,
+        typename sputsoft::make_signed_if<sputsoft::is_signed<V1>::value, V2>::type,
+        typename sputsoft::numbers::common_type<V1, V2>::type> {};
 
 template <typename R, typename V1, typename V2>
 struct function_rt_vv_default<ops::binary::rem, R, V1, V2> {
@@ -205,7 +176,7 @@ struct function_rt_vv_default<ops::binary::rem, R, V1, V2> {
 
 /* Quotient and remainder */
 
-template <typename Q, typename R, typename V1, typename V2>
+/*template <typename Q, typename R, typename V1, typename V2>
 struct evaluator_rrvv<ops::binary::quotrem, Q, R, V1, V2> {
   void operator()(Q& q, R& r, const V1& v1, const V2& v2) const {
     sputsoft::numbers::div(q, v1, v2);
@@ -220,11 +191,11 @@ struct function_rvv<ops::binary::quotrem, Q, V1, V2> {
     sputsoft::numbers::div(q, v1, v2);
     return sputsoft::numbers::rem(v1, v2);
   }
-};
+};*/
 
 /* Binary bit_and */
 
-template <typename V1, typename V2>
+/*template <typename V1, typename V2>
 struct function_vv<ops::binary::bit_and, V1, V2> {
   typedef typename resolve_binary<ops::binary::bit_and, V1, V2>::return_type return_type;
   return_type operator()(const V1& v1, const V2& v2) const {
@@ -289,11 +260,11 @@ struct is_negative_r1_eval {
   static inline bool is_negative(const T& v) {
     return v < 0;
   }
-};
+};*/
 
-/**************** log2 floor ****************/
+/**************** floor log2 ****************/
 
-short log2_floor_table[256] = {
+short floor_log2_table[256] = {
  -1, 0, 1,1, 2,2,2,2, 3,3,3,3,3,3,3,3, 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
  5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
  6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
@@ -304,56 +275,56 @@ short log2_floor_table[256] = {
  7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7 };
 
 template <typename T, bool ok, unsigned bits>
-struct log2_floor_eval2;
+struct floor_log2_eval2;
 
 template <typename T>
-struct log2_floor_eval2<T, true, 8> {
+struct floor_log2_eval2<T, true, 8> {
   std::size_t operator()(const T n) const {
-    return log2_floor_table[n];
+    return floor_log2_table[n];
   }
 };
 
 template <typename T>
-struct log2_floor_eval2<T, true, 16> {
+struct floor_log2_eval2<T, true, 16> {
   std::size_t operator()(T n) const {
     static const T ones = -1;
     std::size_t r = 0;
     if (n & (ones << 8)) { n >>= 8; r += 8; }
-    return r + log2_floor_table[n];
+    return r + floor_log2_table[n];
   }
 };
 
 template <typename T>
-struct log2_floor_eval2<T, true, 32> {
+struct floor_log2_eval2<T, true, 32> {
   std::size_t operator()(T n) const {
     static const T ones = -1;
     std::size_t r = 0;
     if (n & (ones << 16)) { n >>= 16; r += 16; }
     if (n & (ones <<  8)) { n >>=  8; r +=  8; }
-    return r + log2_floor_table[n];
+    return r + floor_log2_table[n];
   }
 };
 
 template <typename T>
-struct log2_floor_eval2<T, true, 64> {
+struct floor_log2_eval2<T, true, 64> {
   std::size_t operator()(T n) const {
     static const T ones = -1;
     std::size_t r = 0;
     if (n & (ones << 32)) { n >>= 32; r += 32; }
     if (n & (ones << 16)) { n >>= 16; r += 16; }
     if (n & (ones <<  8)) { n >>=  8; r +=  8; }
-    return r + log2_floor_table[n];
+    return r + floor_log2_table[n];
   }
 };
 
 template <typename T>
-struct log2_floor_eval
-  : log2_floor_eval2<T, sputsoft::is_native_int<T>::value && !sputsoft::is_signed<T>::value,
+struct floor_log2_eval
+  : floor_log2_eval2<T, sputsoft::is_native_int<T>::value && !sputsoft::is_signed<T>::value,
                      sputsoft::number_bits<T>::value> {};
 
 /********************************************/
 
-template <typename R, typename V>
+/*template <typename R, typename V>
 struct lshift_3_eval {
   static inline void lshift(R& r, const V& v, std::ptrdiff_t count) {
     r = count == 0 ? v : count > 0 ? v << count : v >> (-count);
@@ -365,7 +336,7 @@ struct rshift_3_eval {
   static inline void rshift(R& r, const V& v, std::ptrdiff_t count) {
     r = count == 0 ? v : count > 0 ? v >> count : v << (-count);
   }
-};
+};*/
 
 } // namespace detail
 } // namespace numbers

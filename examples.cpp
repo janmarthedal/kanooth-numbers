@@ -13,13 +13,14 @@
  */
 
 #include <iostream>
-#include <vector>
+//#include <vector>
 
 #include <sputsoft/numbers/natural_number.hpp>
-#include <sputsoft/numbers/integer.hpp>
-#include <sputsoft/numbers/common_functions.hpp>
-#include <sputsoft/numbers/number_theory.hpp>
-#include <sputsoft/numbers/common_type.hpp>
+
+//#include <sputsoft/numbers/integer.hpp>
+//#include <sputsoft/numbers/common_functions.hpp>
+//#include <sputsoft/numbers/number_theory.hpp>
+//#include <sputsoft/numbers/common_type.hpp>
 
 using namespace sputsoft::numbers;
 
@@ -153,14 +154,13 @@ int main()
   sputsoft::numbers::add(a, b, sputsoft::numbers::add(b, c));
   std::cout << a << std::endl;*/
 
-  int a=7, b;
-  long c=0;
+  int a=7, b=2;
+  natural_number c=17, d=3;
 
-  testfunc(a);
-  testfunc(c);
+  //sub(c, 41u, c);
+  std::cout << sub(41, c) << std::endl;
 
-  b = sputsoft::numbers::rem(a, 3);
-  std::cout << b << std::endl;
+  //std::cout << sputsoft::numbers::detail::type_rank<natural_number>::value << std::endl;
 
   return 0;
 }

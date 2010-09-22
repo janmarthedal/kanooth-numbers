@@ -462,7 +462,7 @@ private:
 
   /* Bitwise and number and integer */
 
-  template <typename T>
+  /*template <typename T>
   static T bit_and_int(const Con& x, const T y) {
     if (x.is_empty())
       return 0;
@@ -475,7 +475,7 @@ private:
     }
   }
 
-  /* Bitwise or two numbers */
+  // Bitwise or two numbers
 
   // x.size() >= y.size() >= 1
   static void bit_or_num0(Con& r, const Con& x, const Con& y) {
@@ -504,7 +504,7 @@ private:
     else                           bit_or_num1(r, y, x);
   }
 
-  /* Bitwise or number and integer */
+  // Bitwise or number and integer
 
   template <typename T>
   static void bit_or_int(Con& r, const Con& x, const T y) {
@@ -517,7 +517,7 @@ private:
       bit_or_num(r, x, numb(y).con);
   }
 
-  /* Bitwise xor two numbers */
+  // Bitwise xor two numbers
 
   // x.size() >= y.size() >= 1
   static void bit_xor_num0(Con& r, const Con& x, const Con& y) {
@@ -549,7 +549,7 @@ private:
     else                           bit_xor_num1(r, y, x);
   }
 
-  /* Bitwise or number and integer */
+  // Bitwise or number and integer
 
   template <typename T>
   static void bit_xor_int(Con& r, const Con& x, const T y) {
@@ -562,7 +562,7 @@ private:
       bit_xor_num(r, x, numb(y).con);
   }
 
-  /* Bitwise and not two numbers */
+  // Bitwise and not two numbers
 
   static void bit_and_not_num0(Con& r, const Con& x, const Con& y) {
     std::size_t xn = x.size();
@@ -591,7 +591,7 @@ private:
       bit_and_not_num0(r, x, y);
   }
 
-  /* Bitwise and number and integer */
+  // Bitwise and number and integer
 
   template <typename T>
   static T bit_and_not_int_num(const T x, const Con& y) {
@@ -621,7 +621,7 @@ private:
       bit_and_not_num(r, x, numb(y).con);
   }
 
-  /* Compare two numbers */
+  // Compare two numbers
 
   template <typename T>
   static inline int compare_ints(const T a, const T b) {
@@ -636,7 +636,7 @@ private:
     return LowLevel::comp(x.get(), y.get(), xn);
   }
 
-  /* Compare numbers to integer */
+  // Compare numbers to integer
 
   template <typename T>
   static int comp_int(const Con& x, const T v) {
@@ -650,7 +650,7 @@ private:
       return comp_num(x, numb(v).con);
   }
 
-  /* Binary shift left */
+  // Binary shift left
 
   static void left_shift_num0(Con& z, const Con& u, std::size_t count) {
     unsigned whole = count / digit_bits;
@@ -682,7 +682,7 @@ private:
     }
   }
 
-  /* Binary shift right */
+  // Binary shift right
 
   static void right_shift_num0(Con& z, const Con& u, std::size_t count) {
     unsigned whole = count / digit_bits;
@@ -710,7 +710,7 @@ private:
       } else
         right_shift_num0(z, u, count);
     }
-  }
+  }*/
 
 public:
   numb() {}
@@ -725,64 +725,46 @@ public:
   }
   inline bool is_zero() const { return con.is_empty(); }
   inline operator bool() const { return !is_zero(); }
-  std::size_t log2_floor() const {
+  std::size_t floor_log2() const {
     std::size_t n = con.size();
     if (!n) return (std::size_t) -1;
-    return sputsoft::numbers::log2_floor(con[n - 1]) + (n - 1)*digit_bits;
+    return sputsoft::numbers::floor_log2(con[n - 1]) + (n - 1)*digit_bits;
   }
 
-  inline void set(unsigned short v) { set_int(con, v); }
-  inline void add(const numb& x, unsigned short y) { add_int(con, x.con, y); }
-  inline void add(unsigned short x, const numb& y) { add_int(con, y.con, x); }
-  inline void sub(const numb& x, unsigned short y) { sub_num_int(con, x.con, y); }
-  inline void sub(unsigned short x, const numb& y) { set_int(con, sub_int_num(x, y.con)); }
-  static inline unsigned short subi(unsigned short x, const numb& y)
-    { return sub_int_num(x, y.con); }
-  inline void mul(const numb& x, unsigned short y) { mul_int(con, x.con, y); }
-  inline void mul(unsigned short x, const numb& y) { mul_int(con, y.con, x); }
-  inline void div(const numb& x, unsigned short y) { quot_int(con, x.con, y); }
-  static inline void rem(unsigned short& r, const numb& x, unsigned short y)
-    { r = rem_int(x.con, y); }
+  inline void set(const numb& x) { set_num(con, x.con); }
+  template <typename T>
+  inline void set(T v) { set_int(con, sputsoft::to_unsigned<T>(v)); }
+
+  inline void add(const numb& x, const numb& y) { add_num(con, x.con, y.con); }
+  template <typename T>
+  inline void add(const numb& x, T y) { add_int(con, x.con, sputsoft::to_unsigned<T>(y)); }
+  template <typename T>
+  inline void add(T x, const numb& y) { add_int(con, y.con, sputsoft::to_unsigned<T>(x)); }
+
+  inline void sub(const numb& x, const numb& y) { sub_num(con, x.con, y.con); }
+  template <typename T>
+  inline void sub(const numb& x, T y) { sub_num_int(con, x.con, y); }
+  template <typename T>
+  static inline T sub(T x, const numb& y) { return sub_int_num(x, y.con); }
+
+  inline void mul(const numb& x, const numb& y) { mul_num(con, x.con, y.con); }
+  template <typename T>
+  inline void mul(const numb& x, T y) { mul_int(con, x.con, y); }
+  template <typename T>
+  inline void mul(T x, const numb& y) { mul_int(con, y.con, x); }
+
+  inline void div(const numb& x, const numb& y) { div_num(con, x.con, y.con); }
+  template <typename T>
+  inline void div(const numb& x, T y) { quot_int(con, x.con, y); }
+
+  inline void rem(const numb& x, const numb& y) { rem_num(con, x.con, y.con); }
+  template <typename T>
+  static inline T rem(const numb& x, T y) { return rem_int(x.con, y); }
+
   inline int cmp(unsigned short v) const { return comp_int(con, v); }
-
-  inline void set(unsigned v) { set_int(con, v); }
-  inline void add(const numb& x, unsigned y) { add_int(con, x.con, y); }
-  inline void add(unsigned x, const numb& y) { add_int(con, y.con, x); }
-  inline void sub(const numb& x, unsigned y) { sub_num_int(con, x.con, y); }
-  inline void sub(unsigned x, const numb& y) { set_int(con, sub_int_num(x, y.con)); }
-  static inline unsigned subi(unsigned x, const numb& y) { return sub_int_num(x, y.con); }
-  inline void mul(const numb& x, unsigned y) { mul_int(con, x.con, y); }
-  inline void mul(unsigned x, const numb& y) { mul_int(con, y.con, x); }
-  inline void div(const numb& x, unsigned y) { quot_int(con, x.con, y); }
-  static inline void rem(unsigned& r, const numb& x, unsigned y)
-    { r = rem_int(x.con, y); }
   inline int cmp(unsigned v) const { return comp_int(con, v); }
-
-  inline void set(unsigned long v) { set_int(con, v); }
-  inline void add(const numb& x, unsigned long y) { add_int(con, x.con, y); }
-  inline void add(unsigned long x, const numb& y) { add_int(con, y.con, x); }
-  inline void sub(const numb& x, unsigned long y) { sub_num_int(con, x.con, y); }
-  inline void sub(unsigned long x, const numb& y) { set_int(con, sub_int_num(x, y.con)); }
-  static inline unsigned long subi(unsigned long x, const numb& y) { return sub_int_num(x, y.con); }
-  inline void mul(const numb& x, unsigned long y) { mul_int(con, x.con, y); }
-  inline void mul(unsigned long x, const numb& y) { mul_int(con, y.con, x); }
-  inline void div(const numb& x, unsigned long y) { quot_int(con, x.con, y); }
-  static inline void rem(unsigned long& r, const numb& x, unsigned long y)
-    { r = rem_int(x.con, y); }
   inline int cmp(unsigned long v) const { return comp_int(con, v); }
-
 #ifdef SPUTSOFT_HAS_LONG_LONG
-  inline void set(unsigned long long v) { set_int(con, v); }
-  inline void add(const numb& x, unsigned long long y) { add_int(con, x.con, y); }
-  inline void add(unsigned long long x, const numb& y) { add_int(con, y.con, x); }
-  inline void sub(const numb& x, unsigned long long y) { sub_num_int(con, x.con, y); }
-  inline void sub(unsigned long long x, const numb& y) { set_int(con, sub_int_num(x, y.con)); }
-  static inline unsigned long long subi(unsigned long long x, const numb& y) { return sub_int_num(x, y.con); }
-  inline void mul(const numb& x, unsigned long long y) { mul_int(con, x.con, y); }
-  inline void mul(unsigned long long x, const numb& y) { mul_int(con, y.con, x); }
-  inline void div(const numb& x, unsigned long long y) { quot_int(con, x.con, y); }
-  static inline void rem(unsigned long long& r, const numb& x, unsigned long long y)
-    { r = rem_int(x.con, y); }
   inline int cmp(unsigned long long v) const { return comp_int(con, v); }
 #endif
 
@@ -799,12 +781,6 @@ public:
   template <typename T>
   inline void bitwise_and_not_ni(const numb& x, T y) { bit_and_not_num_int(con, x.con, y); }
 
-  inline void set(const numb& x) { set_num(con, x.con); }
-  inline void add(const numb& x, const numb& y) { add_num(con, x.con, y.con); }
-  inline void sub(const numb& x, const numb& y) { sub_num(con, x.con, y.con); }
-  inline void mul(const numb& x, const numb& y) { mul_num(con, x.con, y.con); }
-  inline void div(const numb& x, const numb& y) { div_num(con, x.con, y.con); }
-  static inline void rem(numb& r, const numb& x, const numb& y) { rem_num(r.con, x.con, y.con); }
   static inline void quotrem(numb& q, numb& r, const numb& x, const numb& y)
     { quotrem_num(q.con, r.con, x.con, y.con); }
   inline void bitwise_and(const numb& x, const numb& y) { bit_and_num(con, x.con, y.con); }

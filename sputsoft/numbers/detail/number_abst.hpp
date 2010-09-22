@@ -24,88 +24,7 @@ namespace detail {
 
 template <typename N> class numb;
 
-template <typename Op, typename T>
-struct resolve_binary<Op, numb<T>, unsigned short> {
-  typedef numb<T> return_type;
-};
-template <typename Op, typename T>
-struct resolve_binary<Op, unsigned short, numb<T> > {
-  typedef numb<T> return_type;
-};
-
-template <typename Op, typename T>
-struct resolve_binary<Op, numb<T>, short> {
-  typedef numb<T> return_type;
-};
-template <typename Op, typename T>
-struct resolve_binary<Op, short, numb<T> > {
-  typedef numb<T> return_type;
-};
-
-template <typename Op, typename T>
-struct resolve_binary<Op, numb<T>, unsigned> {
-  typedef numb<T> return_type;
-};
-template <typename Op, typename T>
-struct resolve_binary<Op, unsigned, numb<T> > {
-  typedef numb<T> return_type;
-};
-
-template <typename Op, typename T>
-struct resolve_binary<Op, numb<T>, int> {
-  typedef numb<T> return_type;
-};
-template <typename Op, typename T>
-struct resolve_binary<Op, int, numb<T> > {
-  typedef numb<T> return_type;
-};
-
-template <typename Op, typename T>
-struct resolve_binary<Op, numb<T>, unsigned long> {
-  typedef numb<T> return_type;
-};
-template <typename Op, typename T>
-struct resolve_binary<Op, unsigned long, numb<T> > {
-  typedef numb<T> return_type;
-};
-
-template <typename Op, typename T>
-struct resolve_binary<Op, numb<T>, long> {
-  typedef numb<T> return_type;
-};
-template <typename Op, typename T>
-struct resolve_binary<Op, long, numb<T> > {
-  typedef numb<T> return_type;
-};
-
-#ifdef SPUTSOFT_HAS_LONG_LONG
-template <typename Op, typename T>
-struct resolve_binary<Op, numb<T>, long long> {
-  typedef numb<T> return_type;
-};
-template <typename Op, typename T>
-struct resolve_binary<Op, long long, numb<T> > {
-  typedef numb<T> return_type;
-};
-
-template <typename Op, typename T>
-struct resolve_binary<Op, numb<T>, unsigned long long> {
-  typedef numb<T> return_type;
-};
-template <typename Op, typename T>
-struct resolve_binary<Op, unsigned long long, numb<T> > {
-  typedef numb<T> return_type;
-};
-#endif
-
-template <typename Op, typename T, typename V1, typename V2>
-struct function_rt_vv<Op, numb<T>, V1, V2> {
-  inline numb<T> operator()(const V1& v1, const V2& v2) const {
-    numb<T> r;
-    evaluator_rvv<Op, numb<T>, V1, V2>()(r, v1, v2);
-    return r;
-  }
-};
+// evaluator_rv
 
 template <typename T, typename V>
 struct evaluator_rv<ops::unary::identity, numb<T>, V> {
@@ -114,34 +33,128 @@ struct evaluator_rv<ops::unary::identity, numb<T>, V> {
   }
 };
 
-template <typename T, typename V1, typename V2>
-struct evaluator_rvv<ops::binary::add, numb<T>, V1, V2> {
-  void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
+// function_rt_vv
+
+namespace {
+
+template <typename Op, typename R, typename V1, typename V2>
+struct to_numb_function_rt_vv {
+  R operator()(const V1& v1, const V2& v2) const {
+    R r;
+    evaluator_rvv<Op, R, V1, V2>()(r, v1, v2);
+    return r;
+  }
+};
+
+template <typename Op, typename R, typename V1, typename V2, typename EVAL>
+struct simple_eval_vv;
+
+template <typename R, typename V1, typename V2, typename EVAL>
+struct simple_eval_vv<ops::binary::rem, R, V1, V2, EVAL> {
+  R operator()(const V1& v1, const V2& v2) const {
+    return EVAL::rem(v1, v2);
+  }
+};
+
+template <typename R, typename V1, typename V2, typename EVAL>
+struct simple_eval_vv<ops::binary::sub, R, V1, V2, EVAL> {
+  R operator()(const V1& v1, const V2& v2) const {
+    return EVAL::sub(v1, v2);
+  }
+};
+
+template <typename Op, typename R, typename V1, typename V2>
+struct to_simple_function_rt_vv
+  : static_eval_vv<Op, R, V1, V2,
+           typename choose_type<type_rank<V1>::value >= type_rank<V2>::value, V1, V2>::type> {};
+
+}
+
+template <typename Op, typename N1, typename N2, typename N3>
+struct function_rt_vv<Op, numb<N1>, numb<N2>, numb<N3> >
+  : to_numb_function_rt_vv<Op, numb<N1>, numb<N2>, numb<N3> > {};
+
+template <typename Op, typename N1, typename N2, typename V>
+struct function_rt_vv<Op, numb<N1>, numb<N2>, V>
+  : to_numb_function_rt_vv<Op, numb<N1>, numb<N2>, V> {};
+
+template <typename Op, typename N1, typename V, typename N2>
+struct function_rt_vv<Op, numb<N1>, V, numb<N2> >
+  : to_numb_function_rt_vv<Op, numb<N1>, V, numb<N2> > {};
+
+template <typename Op, typename R, typename N1, typename N2>
+struct function_rt_vv<Op, R, numb<N1>, numb<N2> >
+  : to_simple_function_rt_vv<Op, R, numb<N1>, numb<N2> > {};
+
+template <typename Op, typename R, typename V, typename N>
+struct function_rt_vv<Op, R, V, numb<N> >
+  : to_simple_function_rt_vv<Op, R, V, numb<N> > {};
+
+template <typename Op, typename R, typename N, typename V>
+struct function_rt_vv<Op, R, numb<N>, V>
+  : to_simple_function_rt_vv<Op, R, numb<N>, V> {};
+
+// evaluator_rvv
+
+namespace {
+
+template <typename Op, typename R, typename V1, typename V2>
+struct numb_assign_vv;
+
+template <typename N, typename V1, typename V2>
+struct numb_assign_vv<ops::binary::add, N, V1, V2> {
+  void operator()(N& r, const V1& v1, const V2& v2) const {
     r.add(v1, v2);
   }
 };
 
-template <typename T, typename V1, typename V2>
-struct evaluator_rvv<ops::binary::sub, numb<T>, V1, V2> {
-  void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
+template <typename N, typename V1, typename V2>
+struct numb_assign_vv<ops::binary::sub, N, V1, V2> {
+  void operator()(N& r, const V1& v1, const V2& v2) const {
     r.sub(v1, v2);
   }
 };
 
-template <typename T, typename V1, typename V2>
-struct evaluator_rvv<ops::binary::mul, numb<T>, V1, V2> {
-  void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
+template <typename N, typename V1, typename V2>
+struct numb_assign_vv<ops::binary::mul, N, V1, V2> {
+  void operator()(N& r, const V1& v1, const V2& v2) const {
     r.mul(v1, v2);
   }
 };
 
-template <typename T, typename V1, typename V2>
-struct evaluator_rvv<ops::binary::div, numb<T>, V1, V2> {
-  void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
+template <typename N, typename V1, typename V2>
+struct numb_assign_vv<ops::binary::div, N, V1, V2> {
+  void operator()(N& r, const V1& v1, const V2& v2) const {
     r.div(v1, v2);
   }
 };
 
+template <typename N, typename V1, typename V2>
+struct numb_assign_vv<ops::binary::rem, N, V1, V2> {
+  void operator()(N& r, const V1& v1, const V2& v2) const {
+    r.rem(v1, v2);
+  }
+};
+
+template <typename Op, typename N, typename R, typename V1, typename V2>
+struct numb_evaluator_rvv {
+  void operator()(N& r, const V1& v1, const V2& v2) const {
+    sputsoft::numbers::set(r, function_vv<Op, V1, V2>()(v1, v2));
+  }
+};
+
+template <typename Op, typename N1, typename N2, typename V1, typename V2>
+struct numb_evaluator_rvv<Op, numb<N1>, numb<N2>, V1, V2>
+  : public numb_assign_vv<Op, numb<N1>, V1, V2> {};
+
+}
+
+template <typename Op, typename N, typename V1, typename V2>
+struct evaluator_rvv<Op, numb<N>, V1, V2>
+  : public numb_evaluator_rvv<Op, numb<N>, typename binary_result<Op, V1, V2>::type, V1, V2> {};
+
+
+/*
 template <typename T, typename V1, typename V2>
 struct evaluator_rvv<ops::binary::div_floor, numb<T>, V1, V2> {
   void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
@@ -252,7 +265,7 @@ struct rshift_3_eval<numb<T>, V> {
   static inline void rshift(numb<T>& r, const V& v, std::ptrdiff_t count) {
     r.right_shift(v, count);
   }
-};
+};*/
 
 } // namespace detail
 } // namespace numbers

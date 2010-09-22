@@ -19,6 +19,7 @@
 #include <boost/type_traits/make_signed.hpp>
 #include <boost/type_traits/make_unsigned.hpp>
 #include <boost/type_traits/is_signed.hpp>
+#include <boost/type_traits/is_integral.hpp>
 #include <boost/integer_traits.hpp>
 #ifdef BOOST_HAS_LONG_LONG
 #define SPUTSOFT_HAS_LONG_LONG
@@ -47,6 +48,7 @@ namespace sputsoft {
   template <typename T> struct make_signed : boost::make_signed<T> {};
   template <typename T> struct make_unsigned : boost::make_unsigned<T> {};
   template <typename T> struct is_signed : public boost::is_signed<T> {};
+  template <typename T> struct is_integral : public boost::is_integral<T> {};
 
   using boost::true_type;
   using boost::false_type;
@@ -86,6 +88,18 @@ namespace sputsoft {
   template <typename T>
   struct is_signed : public integral_constant <bool, std::numeric_limits<T>::is_signed> {};
 
+  template <typename T> struct is_integral : public false_type {};
+  template <> struct is_integral<unsigned short> : public true_type {};
+  template <> struct is_integral<signed short> : public true_type {};
+  template <> struct is_integral<unsigned int> : public true_type {};
+  template <> struct is_integral<signed int> : public true_type {};
+  template <> struct is_integral<unsigned long> : public true_type {};
+  template <> struct is_integral<signed long> : public true_type {};
+#ifdef SPUTSOFT_HAS_LONG_LONG
+  template <> struct is_integral<unsigned long long> : public true_type {};
+  template <> struct is_integral<signed long long> : public true_type {};
+#endif
+
 #endif
 
   template <typename T>
@@ -104,6 +118,13 @@ namespace sputsoft {
   template <> struct is_native_int<unsigned long long> : public true_type {};
   template <> struct is_native_int<signed long long>   : public true_type {};
 #endif
+
+template <bool C, typename T>
+struct make_signed_if {
+  typedef T type;
+};
+template <typename T>
+struct make_signed_if<true, T> : public make_signed<T> {};
 
 } // namespace sputsoft
 

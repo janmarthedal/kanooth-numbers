@@ -17,9 +17,10 @@
 
 #include <sputsoft/numbers/detail/digit_array.hpp>
 #include <sputsoft/numbers/detail/array_allocator.hpp>
-#include <sputsoft/numbers/detail/nat_num_shared.hpp>
+//#include <sputsoft/numbers/detail/nat_num_shared.hpp>
+#include <sputsoft/numbers/detail/nat_num_impl.hpp>
 #include <sputsoft/numbers/detail/default_ops.hpp>
-#include <sputsoft/numbers/detail/overload.hpp>
+//#include <sputsoft/numbers/detail/overload.hpp>
 
 #ifdef SPUTSOFT_USE_GMP
 #include <sputsoft/numbers/detail/lowlevel_gmp.hpp>
@@ -41,9 +42,9 @@ typedef lowlevel_generic<array_allocator<void> > lowlevel;
 
 typedef detail::numb<
           detail::natnum<
-            sputsoft::shared_ptr<
+            //sputsoft::shared_ptr<
               detail::wrap2<detail::digit_array<unsigned long>, detail::lowlevel>
-            >
+            //>
           >
         > natural_number;
 
