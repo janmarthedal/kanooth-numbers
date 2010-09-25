@@ -237,23 +237,6 @@ struct function_rt_vv_default<ops::binary::rem, R, V1, V2> {
 
 /* Quotient and remainder */
 
-/*template <typename Q, typename R, typename V1, typename V2>
-struct evaluator_rrvv<ops::binary::quotrem, Q, R, V1, V2> {
-  void operator()(Q& q, R& r, const V1& v1, const V2& v2) const {
-    sputsoft::numbers::div(q, v1, v2);
-    sputsoft::numbers::rem(r, v1, v2);
-  }
-};
-
-template <typename Q, typename V1, typename V2>
-struct function_rvv<ops::binary::quotrem, Q, V1, V2> {
-  typedef typename resolve_binary<ops::binary::rem, V1, V2>::return_type return_type;
-  return_type operator()(Q& q, const V1& v1, const V2& v2) const {
-    sputsoft::numbers::div(q, v1, v2);
-    return sputsoft::numbers::rem(v1, v2);
-  }
-};*/
-
 template <typename Q, typename R, typename V1, typename V2>
 struct function_divrem {
   R operator()(Q& q, const V1& v1, const V2& v2) const {
@@ -269,6 +252,14 @@ struct function_floor_divrem {
     R r = sputsoft::numbers::floor_rem(v1, v2);
     sputsoft::numbers::floor_div(q, v1, v2);    // may change v1 if q==v1
     return r;
+  }
+};
+
+template <typename Q, typename R, typename V1, typename V2>
+struct divrem_evaluator {
+  void operator()(Q& q, R& r, const V1& v1, const V2& v2) const {
+    sputsoft::numbers::div(q, v1, v2);
+    sputsoft::numbers::rem(r, v1, v2);
   }
 };
 
@@ -340,6 +331,58 @@ struct is_negative_r1_eval {
     return v < 0;
   }
 };*/
+
+template <typename V1, typename V2>
+struct compare_eval {
+  inline int operator()(const V1& v1, const V2& v2) const {
+    return v1 < v2 ? -1 : v1 > v2 ? 1 : 0;
+  }
+};
+
+namespace {
+
+template <typename Op, typename V1, typename V2>
+struct bool_compare_eval_default;
+
+template <typename V1, typename V2>
+struct bool_compare_eval_default<ops::binary_compare::equal, V1, V2> {
+  inline bool operator()(const V1& v1, const V2& v2) const {
+    return v1 == v2;
+  }
+};
+
+template <typename V1, typename V2>
+struct bool_compare_eval_default<ops::binary_compare::less, V1, V2> {
+  inline bool operator()(const V1& v1, const V2& v2) const {
+    return v1 < v2;
+  }
+};
+
+template <typename V1, typename V2>
+struct bool_compare_eval_default<ops::binary_compare::greater, V1, V2> {
+  inline bool operator()(const V1& v1, const V2& v2) const {
+    return v1 > v2;
+  }
+};
+
+template <typename V1, typename V2>
+struct bool_compare_eval_default<ops::binary_compare::less_or_equal, V1, V2> {
+  inline bool operator()(const V1& v1, const V2& v2) const {
+    return v1 <= v2;
+  }
+};
+
+template <typename V1, typename V2>
+struct bool_compare_eval_default<ops::binary_compare::greater_or_equal, V1, V2> {
+  inline bool operator()(const V1& v1, const V2& v2) const {
+    return v1 >= v2;
+  }
+};
+
+}
+
+template <typename Op, typename V1, typename V2>
+struct bool_compare_eval : public bool_compare_eval_default<Op, V1, V2> {};
 
 /**************** floor log2 ****************/
 

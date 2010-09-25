@@ -18,16 +18,16 @@
 namespace sputsoft {
 namespace numbers {
 
-/*template <typename NUM>
+template <typename NUM>
 NUM factorial(std::size_t n)
 {
-  NUM r = 1;
+  NUM r = 1u;
   for (std::size_t k=2; k <= n; ++k)
-    r *= k;
+    mul(r, r, k);
   return r;
 }
 
-template <typename NUM>
+/*template <typename NUM>
 NUM power(NUM n, std::size_t p)
 {
   NUM y = 1, z = n;

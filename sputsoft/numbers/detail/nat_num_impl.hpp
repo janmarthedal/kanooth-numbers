@@ -618,7 +618,7 @@ private:
       sputsoft::numbers::bitwise_and_not(r[0], r[0], (digit_type) y);
     } else
       bit_and_not_num(r, x, numb(y).con);
-  }
+  }*/
 
   // Compare two numbers
 
@@ -651,7 +651,7 @@ private:
 
   // Binary shift left
 
-  static void left_shift_num0(Con& z, const Con& u, std::size_t count) {
+  /*static void left_shift_num0(Con& z, const Con& u, std::size_t count) {
     unsigned whole = count / digit_bits;
     count %= digit_bits;
     std::size_t zn = u.size() + whole;
@@ -732,13 +732,13 @@ public:
 
   inline void set(const numb& x) { set_num(con, x.con); }
   template <typename T>
-  inline void set(T v) { set_int(con, sputsoft::to_unsigned<T>(v)); }
+  inline void set(T v) { set_int(con, to_unsigned<T>(v)); }
 
   inline void add(const numb& x, const numb& y) { add_num(con, x.con, y.con); }
   template <typename T>
-  inline void add(const numb& x, T y) { add_int(con, x.con, sputsoft::to_unsigned<T>(y)); }
+  inline void add(const numb& x, T y) { add_int(con, x.con, to_unsigned<T>(y)); }
   template <typename T>
-  inline void add(T x, const numb& y) { add_int(con, y.con, sputsoft::to_unsigned<T>(x)); }
+  inline void add(T x, const numb& y) { add_int(con, y.con, to_unsigned<T>(x)); }
 
   inline void sub(const numb& x, const numb& y) { sub_num(con, x.con, y.con); }
   template <typename T>
@@ -763,14 +763,16 @@ public:
   template <typename T>
   inline T divrem(const numb& x, T y) { return quotrem_i(con, x.con, y); }
 
-  inline int cmp(unsigned short v) const { return comp_int(con, v); }
-  inline int cmp(unsigned v) const { return comp_int(con, v); }
-  inline int cmp(unsigned long v) const { return comp_int(con, v); }
-#ifdef SPUTSOFT_HAS_LONG_LONG
-  inline int cmp(unsigned long long v) const { return comp_int(con, v); }
-#endif
-
+  inline int cmp(const numb& v) const { return comp_num(con, v.con); }
   template <typename T>
+  inline int cmp(T v) const {
+    return (is_signed<T>::value && v < 0) ? 1 : comp_int(con, to_unsigned<T>(v));
+  }
+
+  static inline void divrem(numb& q, numb& r, const numb& x, const numb& y)
+    { quotrem_num(q.con, r.con, x.con, y.con); }
+
+  /*template <typename T>
   static inline T bitwise_and_int(const numb& x, T y) { return bit_and_int(x.con, y); }
   template <typename T>
   inline void bitwise_or_int(const numb& x, T y) { bit_or_int(con, x.con, y); }
@@ -781,13 +783,10 @@ public:
   template <typename T>
   inline void bitwise_and_not_ni(const numb& x, T y) { bit_and_not_num_int(con, x.con, y); }
 
-  static inline void quotrem(numb& q, numb& r, const numb& x, const numb& y)
-    { quotrem_num(q.con, r.con, x.con, y.con); }
   inline void bitwise_and(const numb& x, const numb& y) { bit_and_num(con, x.con, y.con); }
   inline void bitwise_or(const numb& x, const numb& y) { bit_or_num(con, x.con, y.con); }
   inline void bitwise_xor(const numb& x, const numb& y) { bit_xor_num(con, x.con, y.con); }
   inline void bitwise_and_not(const numb& x, const numb& y) { bit_and_not_num(con, x.con, y.con); }
-  inline int cmp(const numb& v) const { return comp_num(con, v.con); }
 
   inline void left_shift(const numb& x, std::ptrdiff_t count) {
     if (count >= 0)
@@ -795,7 +794,7 @@ public:
     else
       right_shift_num(con, x.con, -count);
   }
-  inline void right_shift(const numb& x, std::ptrdiff_t count) { left_shift(x, -count); }
+  inline void right_shift(const numb& x, std::ptrdiff_t count) { left_shift(x, -count); }*/
 
 };
 

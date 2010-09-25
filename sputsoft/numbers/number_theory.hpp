@@ -22,30 +22,30 @@ namespace numbers {
 
 // TODO: Optimize this. Use d = 2, 3, 6k-1, 6k+1 for k=1, 2, ...
 //       and change condition to d^2 <= n (or equivalent)
-/*template <typename NUM, typename Out>
+template <typename NUM, typename Out>
 void factorize(NUM n, Out out)
 {
-  NUM two=2, q, r;
+  NUM q, r;
 
-  while (two <= n) {
-    quotrem(q, r, n, two);
+  while (greater_or_equal(n, 2u)) {
+    divrem(q, r, n, 2u);
     if (!r) {
-      *out++ = two;
+      *out++ = 2u;
       n = q;
     } else
       break;
   }
 
-  NUM d=3;
-  while (d <= n) {
-    quotrem(q, r, n, d);
+  NUM d=3u;
+  while (greater_or_equal(n, d)) {
+    divrem(q, r, n, d);
     if (!r) {
       *out++ = d;
       n = q;
     } else
-      d += two;
+      add(d, d, 2u);
   }
-}*/
+}
 
 template <typename T1, typename T2>
 struct gcd_return_type

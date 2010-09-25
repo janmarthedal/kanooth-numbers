@@ -168,8 +168,15 @@ struct evaluator_rvv<Op, numb<N>, V1, V2>
 
 template <typename N, typename R, typename V1, typename V2>
 struct function_divrem<numb<N>, R, V1, V2> {
-  R operator()(numb<N>& q, const V1& v1, const V2& v2) const {
+  inline R operator()(numb<N>& q, const V1& v1, const V2& v2) const {
     return q.divrem(v1, v2);
+  }
+};
+
+template <typename N, typename R, typename V1, typename V2>
+struct divrem_evaluator<numb<N>, R, V1, V2> {
+  inline void operator()(numb<N>& q, R& r, const V1& v1, const V2& v2) const {
+    numb<N>::divrem(q, r, v1, v2);
   }
 };
 
@@ -285,6 +292,49 @@ struct rshift_3_eval<numb<T>, V> {
     r.right_shift(v, count);
   }
 };*/
+
+template <typename N1, typename N2>
+struct compare_eval<numb<N1>, numb<N2> > {
+  inline int operator()(const numb<N1>& v1, const numb<N2>& v2) const {
+    return detail::type_rank<numb<N1> >::value >= detail::type_rank<numb<N2> >::value
+            ? v1.cmp(v2) : -v2.cmp(v1);
+  }
+};
+
+template <typename N, typename V>
+struct compare_eval<numb<N>, V> {
+  inline int operator()(const numb<N>& v1, const V& v2) const {
+    return v1.cmp(v2);
+  }
+};
+
+template <typename V, typename N>
+struct compare_eval<V, numb<N> > {
+  inline int operator()(const V& v1, const numb<N>& v2) const {
+    return -v2.cmp(v1);
+  }
+};
+
+template <typename Op, typename N1, typename N2>
+struct bool_compare_eval<Op, numb<N1>, numb<N2> > {
+  inline int operator()(const numb<N1>& v1, const numb<N2>& v2) const {
+    return bool_compare_eval<Op, int, int>()(compare(v1, v2), 0);
+  }
+};
+
+template <typename Op, typename N, typename V>
+struct bool_compare_eval<Op, numb<N>, V> {
+  inline int operator()(const numb<N>& v1, const V& v2) const {
+    return bool_compare_eval<Op, int, int>()(compare(v1, v2), 0);
+  }
+};
+
+template <typename Op, typename V, typename N>
+struct bool_compare_eval<Op, V, numb<N> > {
+  inline int operator()(const V& v1, const numb<N>& v2) const {
+    return bool_compare_eval<Op, int, int>()(compare(v1, v2), 0);
+  }
+};
 
 } // namespace detail
 } // namespace numbers

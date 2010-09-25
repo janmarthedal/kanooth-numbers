@@ -16,16 +16,14 @@
 //#include <vector>
 
 #include <sputsoft/numbers/natural_number.hpp>
-
 //#include <sputsoft/numbers/integer.hpp>
-//#include <sputsoft/numbers/common_functions.hpp>
-//#include <sputsoft/numbers/number_theory.hpp>
-//#include <sputsoft/numbers/common_type.hpp>
+#include <sputsoft/numbers/common_functions.hpp>
+#include <sputsoft/numbers/number_theory.hpp>
 
 using namespace sputsoft::numbers;
 
 // Find largest prime factor of 600851475143
-/*void PE3()
+void PE3()
 {
   std::vector<natural_number> factors;
   natural_number n = "600851475143";
@@ -36,7 +34,7 @@ using namespace sputsoft::numbers;
 }
 
 // Add the (decimal) digits of 2^1000
-void PE16()
+/*void PE16()
 {
   natural_number n = power(natural_number(2), 1000);
   std::cout << "2^1000 = " << n << std::endl;
@@ -51,9 +49,9 @@ void PE20()
   std::cout << "100! = " << n << std::endl;
   std::cout << "Digit sum: " << sideways_sum(n, 10) << std::endl << std::endl;
   // Answer: 648
-}
+}*/
 
-void factorize_example()
+/*void factorize_example()
 {
   natural_number n = "123456789012345678901234567890";
   std::vector<natural_number> factors;
@@ -65,9 +63,9 @@ void factorize_example()
   for (std::vector<natural_number>::const_iterator p=factors.begin(); p != factors.end(); ++p)
     std::cout << " " << *p;
   std::cout << std::endl << std::endl;
-}
+}*/
 
-void gcd_example()
+/*void gcd_example()
 {
   integer a = "123456789012345678901234567890";
   //integer b = "-9876543210";
@@ -143,8 +141,8 @@ typename retval<T>::type testfunc(T v) {
 
 int main()
 {
-  /*PE3();
-  PE16();
+  PE3();
+  /*PE16();
   PE20();
   factorize_example();
   gcd_example();
@@ -162,6 +160,13 @@ int main()
 
   std::cout << c << std::endl;
   std::cout << u << std::endl;
+
+  b = compare(-2, c);
+  std::cout << b << std::endl;
+
+  std::cout << sputsoft::numbers::less(c, 2) << std::endl;
+
+  std::cout << factorial<natural_number>(50) << std::endl;
 
   return 0;
 }
