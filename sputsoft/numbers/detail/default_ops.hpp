@@ -17,11 +17,35 @@
 
 #include <sputsoft/numbers/detail/named_ops.hpp>
 
-#include "nat_num_abst.hpp"
-
 namespace sputsoft {
 namespace numbers {
 namespace detail {
+
+namespace {
+
+template <bool C, typename R, typename V>
+struct identity_enabler {};
+
+template <typename R, typename V>
+struct identity_enabler<true, R, V>
+  : public enable_if<(detail::type_rank<R>::value >= detail::type_rank<V>::value)
+                      && (is_signed<R>::value || !is_signed<V>::value), void> {};
+
+}
+
+template <typename Op, typename R, typename V1, typename V2>
+struct function_rt_vv_default;
+
+template <typename Op, typename R, typename V1, typename V2>
+struct function_rt_vv : public function_rt_vv_default<Op, R, V1, V2> {};
+
+template <typename R, typename V>
+struct enabler_rv<ops::unary::identity, R, V>
+  : identity_enabler<is_number<R>::value && is_number<V>::value, R, V> {};
+
+template <typename Op, typename R, typename V1, typename V2>
+struct enabler_rvv
+  : public enabler_rv<ops::unary::identity, R, typename binary_result<Op, V1, V2>::type> {};
 
 /* Unary */
 
@@ -46,7 +70,7 @@ struct function_v {
 
 template <typename R, typename V>
 struct evaluator_rv<ops::unary::identity, R, V> {
-  void operator()(R& r, const V& v) const {
+  inline void operator()(R& r, const V& v) const {
     r = v;
   }
 };
@@ -97,6 +121,15 @@ struct function_v<ops::unary::bit_not, V> {
   return_type operator()(const V& v) const { return ~v; }
 };*/
 
+template <typename T>
+struct unary_result<ops::unary::trunc, T> : public enable_if<sputsoft::is_integral<T>::value, T> {};
+
+template <typename T>
+struct unary_result<ops::unary::floor, T> : public unary_result<ops::unary::trunc, T> {};
+
+template <typename T>
+struct unary_result<ops::unary::ceil, T> : public unary_result<ops::unary::trunc, T> {};
+
 /* Binary */
 
 template <typename Op, typename R, typename V1, typename V2>
@@ -105,16 +138,6 @@ struct evaluator_rvv {
     sputsoft::numbers::set(r, function_vv<Op, V1, V2>()(v1, v2));
   }
 };
-
-/*template <typename Op, typename V1, typename V2>
-struct function_vv {
-  typedef typename resolve_binary<Op, V1, V2>::return_type return_type;
-  return_type operator()(const V1& v1, const V2& v2) const {
-    return_type r;
-    evaluator_rvv<Op, return_type, V1, V2>()(r, v1, v2);
-    return r;
-  }
-};*/
 
 /* Binary add */
 
@@ -141,23 +164,61 @@ struct function_rt_vv_default<ops::binary::sub, R, V1, V2> {
 
 /* Binary mul */
 
-/*template <typename V1, typename V2>
-struct function_vv<ops::binary::mul, V1, V2> {
-  typedef typename resolve_binary<ops::binary::mul, V1, V2>::return_type return_type;
-  return_type operator()(const V1& v1, const V2& v2) const {
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::mul, R, V1, V2> {
+  inline R operator()(const V1& v1, const V2& v2) const {
     return v1 * v2;
   }
-};*/
+};
 
-/* Binary div */
+/* Binary (floor, ceil, trunc) div */
 
-/*template <typename V1, typename V2>
-struct function_vv<ops::binary::div, V1, V2> {
-  typedef typename resolve_binary<ops::binary::div, V1, V2>::return_type return_type;
-  return_type operator()(const V1& v1, const V2& v2) const {
+template <typename V1, typename V2>
+struct binary_result<ops::binary::div, V1, V2>
+  : public choose_type<sputsoft::is_integral<V1>::value && sputsoft::is_integral<V2>::value,
+        typename sputsoft::make_signed_if<sputsoft::is_signed<V2>::value, V1>::type,
+        typename sputsoft::numbers::common_type<V1, V2>::type> {};
+
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::div, R, V1, V2> {
+  inline R operator()(const V1& v1, const V2& v2) const {
     return v1 / v2;
   }
-};*/
+};
+
+template <typename V1, typename V2>
+struct binary_result<ops::binary::trunc_div, V1, V2>
+  : public unary_result<ops::unary::trunc,
+                        typename binary_result<ops::binary::div, V1, V2>::type> {};
+
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::trunc_div, R, V1, V2> {
+  inline R operator()(const V1& v1, const V2& v2) const {
+    return sputsoft::numbers::trunc(sputsoft::numbers::div(v1, v2));
+  }
+};
+
+template <typename V1, typename V2>
+struct binary_result<ops::binary::floor_div, V1, V2>
+  : public binary_result<ops::binary::trunc_div, V1, V2> {};
+
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::floor_div, R, V1, V2> {
+  inline R operator()(const V1& v1, const V2& v2) const {
+    return sputsoft::numbers::floor(sputsoft::numbers::div(v1, v2));
+  }
+};
+
+template <typename V1, typename V2>
+struct binary_result<ops::binary::ceil_div, V1, V2>
+  : public binary_result<ops::binary::trunc_div, V1, V2> {};
+
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::ceil_div, R, V1, V2> {
+  inline R operator()(const V1& v1, const V2& v2) const {
+    return sputsoft::numbers::ceil(sputsoft::numbers::div(v1, v2));
+  }
+};
 
 /* Binary rem */
 
@@ -192,6 +253,24 @@ struct function_rvv<ops::binary::quotrem, Q, V1, V2> {
     return sputsoft::numbers::rem(v1, v2);
   }
 };*/
+
+template <typename Q, typename R, typename V1, typename V2>
+struct function_divrem {
+  R operator()(Q& q, const V1& v1, const V2& v2) const {
+    R r = sputsoft::numbers::rem(v1, v2);
+    sputsoft::numbers::div(q, v1, v2);    // may change v1 if q==v1
+    return r;
+  }
+};
+
+template <typename Q, typename R, typename V1, typename V2>
+struct function_floor_divrem {
+  R operator()(Q& q, const V1& v1, const V2& v2) const {
+    R r = sputsoft::numbers::floor_rem(v1, v2);
+    sputsoft::numbers::floor_div(q, v1, v2);    // may change v1 if q==v1
+    return r;
+  }
+};
 
 /* Binary bit_and */
 

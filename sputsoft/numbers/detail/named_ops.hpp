@@ -15,12 +15,16 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_NAMED_OPS_HPP
 #define	_SPUTSOFT_NUMBERS_DETAIL_NAMED_OPS_HPP
 
-//#include <cstring>
+#include <cstring>
 #include <sputsoft/type_traits.hpp>
 #include <sputsoft/numbers/common_type.hpp>
 
 namespace sputsoft {
 namespace numbers {
+
+template <typename T>
+struct is_number : public is_native_int<T> {};
+
 namespace detail {
 
 namespace ops {
@@ -29,17 +33,13 @@ namespace ops {
     struct sub {};
     struct mul {};
     struct div {};
-    struct div_floor {};
-    struct div_ceil {};
-    struct div_trunc {};
+    struct floor_div {};
+    struct ceil_div {};
+    struct trunc_div {};
     struct rem {};
-    struct rem_floor {};
-    struct rem_ceil {};
-    struct rem_trunc {};
-    struct quotrem {};
-    struct quotrem_floor {};
-    struct quotrem_ceil {};
-    struct quotrem_trunc {};
+    struct floor_rem {};
+    struct ceil_rem {};
+    struct trunc_rem {};
     struct bit_and {};
     struct bit_and_not {};
     struct bit_or {};
@@ -51,6 +51,9 @@ namespace ops {
     struct identity {};
     struct negate {};
     struct abs {};
+    struct floor {};
+    struct ceil {};
+    struct trunc {};
     struct bit_not {};
   }
 }
@@ -63,8 +66,7 @@ struct unary_result {};
 
 // evaluators
 
-/*template <typename R, typename Forw> struct set_4_eval;
-template <typename V1, typename V2>                         struct cmp_r2_eval;
+/*template <typename V1, typename V2>                         struct cmp_r2_eval;
 template <typename V1, typename V2>                         struct equal_r2_eval;
 template <typename T>                                       struct is_zero_r1_eval;
 template <typename T>                                       struct is_positive_r1_eval;
@@ -73,38 +75,48 @@ template <typename R, typename V>                           struct lshift_3_eval
 template <typename R, typename V>                           struct rshift_3_eval;
 template <typename Op, typename Q, typename R, typename V1, typename V2> struct evaluator_rrvv;*/
 
+template <typename R, typename Forw> struct set_4_eval;
 template <typename T> struct floor_log2_eval;
+
+// Evaluators
 
 template <typename Op, typename R, typename V1, typename V2> struct evaluator_rvv;
 template <typename Op, typename R, typename V> struct evaluator_rv;
 
-template <typename Op, typename Q, typename V1, typename V2> struct function_rvv;
+// Enablers
 
-template <typename Op, typename R, typename V1, typename V2> struct function_rt_vv_default;
+template <bool C, typename T>
+struct enable_if {
+  static const bool enabled = false;
+};
+
+template <typename T>
+struct enable_if<true, T> {
+  static const bool enabled = true;
+  typedef T type;
+};
+
+template <typename Op, typename R, typename V>
+struct enabler_rv : public enable_if<false, void> {};
 
 template <typename Op, typename R, typename V1, typename V2>
-struct function_rt_vv : public function_rt_vv_default<Op, R, V1, V2> {};
+struct enabler_rvv;
 
-template <typename Op, typename V1, typename V2>
-struct function_vv
-  : public function_rt_vv<Op, typename binary_result<Op, V1, V2>::type, V1, V2> {};
+// Functions
 
 template <typename Op, typename V> struct function_v;
 
-template <typename Op, typename R, typename V>
-struct enabler_rv {};
-
-template <bool C, typename T> struct enable_if {};
-template <typename T> struct enable_if<true, T> { typedef T type; };
-
-template <typename R, typename V>
-struct enabler_rv<ops::unary::identity, R, V>
-  : public enable_if<(detail::type_rank<R>::value >= detail::type_rank<V>::value)
-                      && (is_signed<R>::value || !is_signed<V>::value), void> {};
-
 template <typename Op, typename R, typename V1, typename V2>
-struct enabler_rvv
-  : public enabler_rv<ops::unary::identity, R, typename binary_result<Op, V1, V2>::type> {};
+struct function_rt_vv;
+
+template <typename Op, typename V1, typename V2>
+struct function_vv : public function_rt_vv<Op, typename binary_result<Op, V1, V2>::type, V1, V2> {};
+
+template <typename Q, typename R, typename V1, typename V2>
+struct function_divrem;
+
+template <typename Q, typename R, typename V1, typename V2>
+struct function_floor_divrem;
 
 } // namespace detail
 
@@ -119,20 +131,25 @@ inline typename eval_type<T>::type eval(const T& v) {
   return detail::function_v<detail::ops::unary::identity, T>()(v);
 }*/
 
-/*template <typename R, typename Forw>
-inline void set(R& r, Forw first, const Forw last, unsigned base=10) {
-  detail::set_4_eval<R, Forw>::set(r, first, last, base);
+// Unary
+
+template <typename R, typename Forw>
+inline typename detail::enable_if<is_number<R>::value, void>::type
+set(R& r, Forw first, const Forw last, unsigned base=10) {
+  detail::set_4_eval<R, Forw>()(r, first, last, base);
 }
 
 template <typename R>
-inline void set(R& r, const std::string& st, unsigned base=10) {
+inline typename detail::enable_if<is_number<R>::value, void>::type
+set(R& r, const std::string& st, unsigned base) {
   set(r, st.begin(), st.end(), base);
 }
 
 template <typename R>
-inline void set(R& r, const char* st, unsigned base=10) {
+inline typename detail::enable_if<is_number<R>::value, void>::type
+set(R& r, const char* st, unsigned base=10) {
   set(r, st, st + std::strlen(st), base);
-}*/
+}
 
 template <typename R, typename V>
 inline typename detail::enabler_rv<detail::ops::unary::identity, R, V>::type
@@ -140,15 +157,43 @@ set(R& r, const V& v) {
   detail::evaluator_rv<detail::ops::unary::identity, R, V>()(r, v);
 }
 
-/*template <typename R, typename V>
-inline void negate(R& r, const V& v) {
+template <typename R, typename V>
+inline typename detail::enabler_rv<detail::ops::unary::negate, R, V>::type
+negate(R& r, const V& v) {
   detail::evaluator_rv<detail::ops::unary::negate, R, V>()(r, v);
 }
 
 template <typename R, typename V>
-inline void abs(R& r, const V& v) {
+inline typename detail::enabler_rv<detail::ops::unary::abs, R, V>::type
+abs(R& r, const V& v) {
   detail::evaluator_rv<detail::ops::unary::abs, R, V>()(r, v);
-}*/
+}
+
+template <typename R, typename V>
+inline typename detail::enabler_rv<detail::ops::unary::trunc, R, V>::type
+trunc(R& r, const V& v) {
+  detail::evaluator_rv<detail::ops::unary::trunc, R, V>()(r, v);
+}
+
+template <typename R, typename V>
+inline typename detail::enabler_rv<detail::ops::unary::floor, R, V>::type
+floor(R& r, const V& v) {
+  detail::evaluator_rv<detail::ops::unary::floor, R, V>()(r, v);
+}
+
+template <typename R, typename V>
+inline typename detail::enabler_rv<detail::ops::unary::ceil, R, V>::type
+ceil(R& r, const V& v) {
+  detail::evaluator_rv<detail::ops::unary::ceil, R, V>()(r, v);
+}
+
+template <typename R, typename V>
+inline typename detail::enabler_rv<detail::ops::unary::bit_not, R, V>::type
+bitwise_not(R& r, const V& v) {
+  detail::evaluator_rv<detail::ops::unary::bit_not, R, V>()(r, v);
+}
+
+// Binary
 
 template <typename R, typename V1, typename V2>
 inline typename detail::enabler_rvv<detail::ops::binary::add, R, V1, V2>::type
@@ -180,35 +225,74 @@ rem(R& r, const V1& v1, const V2& v2) {
   detail::evaluator_rvv<detail::ops::binary::rem, R, V1, V2>()(r, v1, v2);
 }
 
-/*
 template <typename R, typename V1, typename V2>
-inline void div_floor(R& r, const V1& v1, const V2& v2) {
-  detail::evaluator_rvv<detail::ops::binary::div_floor, R, V1, V2>()(r, v1, v2);
+inline typename detail::enabler_rvv<detail::ops::binary::floor_div, R, V1, V2>::type
+floor_div(R& r, const V1& v1, const V2& v2) {
+  detail::evaluator_rvv<detail::ops::binary::floor_div, R, V1, V2>()(r, v1, v2);
 }
 
 template <typename R, typename V1, typename V2>
-inline void div_ceil(R& r, const V1& v1, const V2& v2) {
-  detail::evaluator_rvv<detail::ops::binary::div_ceil, R, V1, V2>()(r, v1, v2);
+inline typename detail::enabler_rvv<detail::ops::binary::floor_rem, R, V1, V2>::type
+floor_rem(R& r, const V1& v1, const V2& v2) {
+  detail::evaluator_rvv<detail::ops::binary::floor_rem, R, V1, V2>()(r, v1, v2);
 }
 
 template <typename R, typename V1, typename V2>
-inline void div_trunc(R& r, const V1& v1, const V2& v2) {
-  detail::evaluator_rvv<detail::ops::binary::div_trunc, R, V1, V2>()(r, v1, v2);
+inline typename detail::enabler_rvv<detail::ops::binary::ceil_div, R, V1, V2>::type
+ceil_div(R& r, const V1& v1, const V2& v2) {
+  detail::evaluator_rvv<detail::ops::binary::ceil_div, R, V1, V2>()(r, v1, v2);
 }
 
 template <typename R, typename V1, typename V2>
-inline void rem_floor(R& r, const V1& v1, const V2& v2) {
-  detail::evaluator_rvv<detail::ops::binary::rem_floor, R, V1, V2>()(r, v1, v2);
+inline typename detail::enabler_rvv<detail::ops::binary::ceil_rem, R, V1, V2>::type
+ceil_rem(R& r, const V1& v1, const V2& v2) {
+  detail::evaluator_rvv<detail::ops::binary::ceil_rem, R, V1, V2>()(r, v1, v2);
 }
 
 template <typename R, typename V1, typename V2>
-inline void rem_ceil(R& r, const V1& v1, const V2& v2) {
-  detail::evaluator_rvv<detail::ops::binary::rem_ceil, R, V1, V2>()(r, v1, v2);
+inline typename detail::enabler_rvv<detail::ops::binary::trunc_div, R, V1, V2>::type
+trunc_div(R& r, const V1& v1, const V2& v2) {
+  detail::evaluator_rvv<detail::ops::binary::trunc_div, R, V1, V2>()(r, v1, v2);
 }
 
 template <typename R, typename V1, typename V2>
-inline void rem_trunc(R& r, const V1& v1, const V2& v2) {
-  detail::evaluator_rvv<detail::ops::binary::rem_trunc, R, V1, V2>()(r, v1, v2);
+inline typename detail::enabler_rvv<detail::ops::binary::trunc_rem, R, V1, V2>::type
+trunc_rem(R& r, const V1& v1, const V2& v2) {
+  detail::evaluator_rvv<detail::ops::binary::trunc_rem, R, V1, V2>()(r, v1, v2);
+}
+
+template <typename R, typename V1, typename V2>
+inline typename detail::enabler_rvv<detail::ops::binary::bit_and, R, V1, V2>::type
+bitwise_and(R& r, const V1& v1, const V2& v2) {
+  detail::evaluator_rvv<detail::ops::binary::bit_and, R, V1, V2>()(r, v1, v2);
+}
+
+template <typename R, typename V1, typename V2>
+inline typename detail::enabler_rvv<detail::ops::binary::bit_or, R, V1, V2>::type
+bitwise_or(R& r, const V1& v1, const V2& v2) {
+  detail::evaluator_rvv<detail::ops::binary::bit_or, R, V1, V2>()(r, v1, v2);
+}
+
+template <typename R, typename V1, typename V2>
+inline typename detail::enabler_rvv<detail::ops::binary::bit_xor, R, V1, V2>::type
+bitwise_xor(R& r, const V1& v1, const V2& v2) {
+  detail::evaluator_rvv<detail::ops::binary::bit_xor, R, V1, V2>()(r, v1, v2);
+}
+
+template <typename R, typename V1, typename V2>
+inline typename detail::enabler_rvv<detail::ops::binary::bit_and_not, R, V1, V2>::type
+bitwise_and_not(R& r, const V1& v1, const V2& v2) {
+  detail::evaluator_rvv<detail::ops::binary::bit_and_not, R, V1, V2>()(r, v1, v2);
+}
+
+/*template <typename R, typename V1>
+inline void bit_shift_left(R& r, const V1& v1, std::ptrdiff_t count) {
+  detail::lshift_3_eval<R, V1>::lshift(r, v1, count);
+}
+
+template <typename R, typename V1>
+inline void bit_shift_right(R& r, const V1& v1, std::ptrdiff_t count) {
+  detail::rshift_3_eval<R, V1>::rshift(r, v1, count);
 }
 
 template <typename Q, typename R, typename V1, typename V2>
@@ -230,41 +314,7 @@ template <typename Q, typename R, typename V1, typename V2>
 inline void quotrem_trunc(Q& q, R& r, const V1& v1, const V2& v2) {
   detail::evaluator_rrvv<detail::ops::binary::quotrem_trunc, Q, R, V1, V2>()(q, r, v1, v2);
 }
-
-template <typename R, typename V1, typename V2>
-inline void bitwise_and(R& r, const V1& v1, const V2& v2) {
-  detail::evaluator_rvv<detail::ops::binary::bit_and, R, V1, V2>()(r, v1, v2);
-}
-
-template <typename R, typename V1, typename V2>
-inline void bitwise_or(R& r, const V1& v1, const V2& v2) {
-  detail::evaluator_rvv<detail::ops::binary::bit_or, R, V1, V2>()(r, v1, v2);
-}
-
-template <typename R, typename V1, typename V2>
-inline void bitwise_xor(R& r, const V1& v1, const V2& v2) {
-  detail::evaluator_rvv<detail::ops::binary::bit_xor, R, V1, V2>()(r, v1, v2);
-}
-
-template <typename R, typename V1, typename V2>
-inline void bitwise_and_not(R& r, const V1& v1, const V2& v2) {
-  detail::evaluator_rvv<detail::ops::binary::bit_and_not, R, V1, V2>()(r, v1, v2);
-}
-
-template <typename R, typename V>
-inline void bitwise_not(R& r, const V& v) {
-  detail::evaluator_rv<detail::ops::unary::bit_not, R, V>()(r, v);
-}
-
-template <typename R, typename V1>
-inline void bit_shift_left(R& r, const V1& v1, std::ptrdiff_t count) {
-  detail::lshift_3_eval<R, V1>::lshift(r, v1, count);
-}
-
-template <typename R, typename V1>
-inline void bit_shift_right(R& r, const V1& v1, std::ptrdiff_t count) {
-  detail::rshift_3_eval<R, V1>::rshift(r, v1, count);
-}*/
+*/
 
 // returns result by value
 
@@ -291,12 +341,6 @@ template <typename Q, typename V1, typename V2>
 inline typename detail::resolve_binary<detail::ops::binary::rem, V1, V2>::return_type
 quotrem(Q& q, const V1& v1, const V2& v2) {
   return detail::function_rvv<detail::ops::binary::quotrem, Q, V1, V2>()(q, v1, v2);
-}
-
-template <typename Q, typename V1, typename V2>
-inline typename detail::resolve_binary<detail::ops::binary::rem_floor, V1, V2>::return_type
-quotrem_floor(Q& q, const V1& v1, const V2& v2) {
-  return detail::function_rvv<detail::ops::binary::quotrem_floor, Q, V1, V2>()(q, v1, v2);
 }
 
 template <typename Q, typename V1, typename V2>
@@ -336,18 +380,66 @@ div(const V1& v1, const V2& v2) {
 }
 
 template <typename V1, typename V2>
+inline typename detail::binary_result<detail::ops::binary::trunc_div, V1, V2>::type
+trunc_div(const V1& v1, const V2& v2) {
+  return detail::function_vv<detail::ops::binary::trunc_div, V1, V2>()(v1, v2);
+}
+
+template <typename V1, typename V2>
+inline typename detail::binary_result<detail::ops::binary::floor_div, V1, V2>::type
+floor_div(const V1& v1, const V2& v2) {
+  return detail::function_vv<detail::ops::binary::floor_div, V1, V2>()(v1, v2);
+}
+
+template <typename V1, typename V2>
+inline typename detail::binary_result<detail::ops::binary::ceil_div, V1, V2>::type
+ceil_div(const V1& v1, const V2& v2) {
+  return detail::function_vv<detail::ops::binary::ceil_div, V1, V2>()(v1, v2);
+}
+
+template <typename V1, typename V2>
 inline typename detail::binary_result<detail::ops::binary::rem, V1, V2>::type
 rem(const V1& v1, const V2& v2) {
   return detail::function_vv<detail::ops::binary::rem, V1, V2>()(v1, v2);
 }
 
+template <typename V1, typename V2>
+inline typename detail::binary_result<detail::ops::binary::trunc_rem, V1, V2>::type
+trunc_rem(const V1& v1, const V2& v2) {
+  return detail::function_vv<detail::ops::binary::trunc_rem, V1, V2>()(v1, v2);
+}
+
+template <typename V1, typename V2>
+inline typename detail::binary_result<detail::ops::binary::floor_rem, V1, V2>::type
+floor_rem(const V1& v1, const V2& v2) {
+  return detail::function_vv<detail::ops::binary::floor_rem, V1, V2>()(v1, v2);
+}
+
+template <typename V1, typename V2>
+inline typename detail::binary_result<detail::ops::binary::ceil_rem, V1, V2>::type
+ceil_rem(const V1& v1, const V2& v2) {
+  return detail::function_vv<detail::ops::binary::ceil_rem, V1, V2>()(v1, v2);
+}
+
+template <typename Q, typename V1, typename V2>
+inline typename detail::enable_if<detail::enabler_rvv<detail::ops::binary::div, Q, V1, V2>::enabled,
+                 typename detail::binary_result<detail::ops::binary::rem, V1, V2>::type>::type
+divrem(Q& q, const V1& v1, const V2& v2) {
+  return detail::function_divrem<Q,
+          typename detail::binary_result<detail::ops::binary::rem, V1, V2>::type,
+          V1, V2>()(q, v1, v2);
+}
+
+template <typename Q, typename V1, typename V2>
+inline typename detail::enable_if<detail::enabler_rvv<detail::ops::binary::floor_div, Q, V1, V2>::enabled,
+                 typename detail::binary_result<detail::ops::binary::floor_rem, V1, V2>::type>::type
+floor_divrem(Q& q, const V1& v1, const V2& v2) {
+  return detail::function_floor_divrem<Q,
+          typename detail::binary_result<detail::ops::binary::floor_rem, V1, V2>::type,
+          V1, V2>()(q, v1, v2);
+}
+
 /*
-BINARY_RESULT_RETURNER(div_floor, div_floor)
-BINARY_RESULT_RETURNER(div_ceil, div_ceil)
-BINARY_RESULT_RETURNER(div_trunc, div_trunc)
-BINARY_RESULT_RETURNER(rem_floor, rem_floor)
-BINARY_RESULT_RETURNER(rem_ceil, rem_ceil)
-BINARY_RESULT_RETURNER(rem_trunc, rem_trunc)
 BINARY_RESULT_RETURNER(bitwise_and, bit_and)
 BINARY_RESULT_RETURNER(bitwise_or, bit_or)
 BINARY_RESULT_RETURNER(bitwise_xor, bit_xor)

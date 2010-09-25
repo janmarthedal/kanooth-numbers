@@ -155,12 +155,13 @@ int main()
   std::cout << a << std::endl;*/
 
   int a=7, b=2;
-  natural_number c=17, d=3;
+  natural_number c="1234567", d=3u;
 
   //sub(c, 41u, c);
-  std::cout << sub(41, c) << std::endl;
+  unsigned u = divrem(c, c, 54321u);
 
-  //std::cout << sputsoft::numbers::detail::type_rank<natural_number>::value << std::endl;
+  std::cout << c << std::endl;
+  std::cout << u << std::endl;
 
   return 0;
 }

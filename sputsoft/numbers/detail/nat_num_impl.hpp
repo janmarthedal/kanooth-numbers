@@ -60,9 +60,8 @@ private:
 
   template <typename T>
   static T to_int_type(const Con& c) {
-    if (c.is_empty())
-      return (T) 0;
-    to_int_type_spec<T, sizeof(T) <= sizeof(digit_type)>::to_int_type(c);
+    if (c.is_empty()) return (T) 0;
+    return to_int_type_spec<T, sizeof(T) <= sizeof(digit_type)>::to_int_type(c);
   }
 
   /* Set to number */
@@ -761,6 +760,9 @@ public:
   template <typename T>
   static inline T rem(const numb& x, T y) { return rem_int(x.con, y); }
 
+  template <typename T>
+  inline T divrem(const numb& x, T y) { return quotrem_i(con, x.con, y); }
+
   inline int cmp(unsigned short v) const { return comp_int(con, v); }
   inline int cmp(unsigned v) const { return comp_int(con, v); }
   inline int cmp(unsigned long v) const { return comp_int(con, v); }
@@ -768,8 +770,6 @@ public:
   inline int cmp(unsigned long long v) const { return comp_int(con, v); }
 #endif
 
-  template <typename T>
-  inline T quotrem_int(const numb& x, T y) { return quotrem_i(con, x.con, y); }
   template <typename T>
   static inline T bitwise_and_int(const numb& x, T y) { return bit_and_int(x.con, y); }
   template <typename T>

@@ -20,9 +20,21 @@
 
 namespace sputsoft {
 namespace numbers {
+
+namespace detail {
+template <typename N> class numb;
+}
+
+template <typename N>
+struct is_number<detail::numb<N> > : public true_type {};
+
 namespace detail {
 
-template <typename N> class numb;
+template <typename N>
+struct enabler_rv<ops::unary::identity, numb<N>, std::string> : public enable_if<true, void> {};
+
+template <typename N>
+struct enabler_rv<ops::unary::identity, numb<N>, const char*> : public enable_if<true, void> {};
 
 // evaluator_rv
 
@@ -65,7 +77,7 @@ struct simple_eval_vv<ops::binary::sub, R, V1, V2, EVAL> {
 
 template <typename Op, typename R, typename V1, typename V2>
 struct to_simple_function_rt_vv
-  : static_eval_vv<Op, R, V1, V2,
+  : simple_eval_vv<Op, R, V1, V2,
            typename choose_type<type_rank<V1>::value >= type_rank<V2>::value, V1, V2>::type> {};
 
 }
@@ -153,6 +165,13 @@ template <typename Op, typename N, typename V1, typename V2>
 struct evaluator_rvv<Op, numb<N>, V1, V2>
   : public numb_evaluator_rvv<Op, numb<N>, typename binary_result<Op, V1, V2>::type, V1, V2> {};
 
+
+template <typename N, typename R, typename V1, typename V2>
+struct function_divrem<numb<N>, R, V1, V2> {
+  R operator()(numb<N>& q, const V1& v1, const V2& v2) const {
+    return q.divrem(v1, v2);
+  }
+};
 
 /*
 template <typename T, typename V1, typename V2>

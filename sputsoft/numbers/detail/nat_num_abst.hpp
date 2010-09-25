@@ -48,6 +48,7 @@ namespace detail {
 template <typename T>
 struct type_rank<numb<natnum<T> > > : public integral_constant<int, 20> {};
 
+#ifdef SPUTSOFT_NATURAL_NUMBER_WITH_INTS
 
 template <typename T>
 struct enabler_rv<ops::unary::identity, numb<natnum<T> >, int>
@@ -70,6 +71,7 @@ template <typename T>
 struct binary_result<ops::binary::rem, numb<natnum<T> >, int>
   : public binary_result<ops::binary::rem, numb<natnum<T> >, unsigned> {};
 
+#endif
 
 /*****************************************/
 
@@ -340,32 +342,11 @@ struct is_negative_r1_eval<numb<natnum<T> > > {
     return false;
   }
 };
-
-template <typename T>
-struct log2_floor_eval<numb<natnum<T> > > {
-  std::size_t operator()(const numb<natnum<T> >& n) const {
-    return n.log2_floor();
-  }
-};
-
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const numb<natnum<T> >& n)
-{
-  unsigned max_digits = n ? log2_floor(n) / 3 + 2 : 2;
-  char st[max_digits];
-  char* p = st + max_digits;
-  *--p = 0;
-  numb<natnum<T> > t = n;
-  do {
-    unsigned r = quotrem(t, t, 10u);
-    *--p = (char) r + '0';
-  } while (t);
-  return os << p;
-}
+*/
 
 template <typename T, typename Forw>
 struct set_4_eval<numb<natnum<T> >, Forw> {
-  static void set(numb<natnum<T> >& n, Forw first, const Forw last, unsigned base) {
+  void operator()(numb<natnum<T> >& n, Forw first, const Forw last, unsigned base) const {
     sputsoft::numbers::set(n, 0u);
     if (base >= 2 && base <= 36) {
       unsigned v;
@@ -381,7 +362,29 @@ struct set_4_eval<numb<natnum<T> >, Forw> {
     }
   }
 };
-*/
+
+template <typename T>
+struct floor_log2_eval<numb<natnum<T> > > {
+  inline std::size_t operator()(const numb<natnum<T> >& n) const {
+    return n.floor_log2();
+  }
+};
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const numb<natnum<T> >& n)
+{
+  unsigned max_digits = n ? floor_log2(n) / 3 + 2 : 2;
+  char st[max_digits];
+  char* p = st + max_digits;
+  *--p = 0;
+  numb<natnum<T> > t = n;
+  do {
+    unsigned r = divrem(t, t, 10u);
+    *--p = (char) r + '0';
+  } while (t);
+  return os << p;
+}
+
 } // namespace detail
 } // namespace numbers
 } // namespace sputsoft
