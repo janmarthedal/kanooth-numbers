@@ -44,8 +44,7 @@ namespace ops {
     struct bit_and_not {};
     struct bit_or {};
     struct bit_xor {};
-    struct lshift {};
-    struct rshift {};
+    struct shift_left {};
   }
   namespace unary {
     struct identity {};
@@ -82,7 +81,6 @@ template <typename T> struct is_positive_eval;
 template <typename T> struct is_negative_eval;
 template <typename T> struct floor_log2_eval;
 template <typename R, typename V> struct shift_left_eval;
-template <typename R, typename V> struct shift_right_eval;
 
 // General evaluators
 
@@ -299,14 +297,16 @@ bitwise_and_not(R& r, const V1& v1, const V2& v2) {
   detail::evaluator_rvv<detail::ops::binary::bit_and_not, R, V1, V2>()(r, v1, v2);
 }
 
-template <typename R, typename V1>
-inline void bit_shift_left(R& r, const V1& v1, std::ptrdiff_t count) {
-  detail::shift_left_eval<R, V1>()(r, v1, count);
+template <typename R, typename V>
+inline typename detail::enabler_rvv<detail::ops::binary::shift_left, R, V, std::ptrdiff_t>::type
+bit_shift_left(R& r, const V& v, std::ptrdiff_t count) {
+  detail::evaluator_rvv<detail::ops::binary::shift_left, R, V, std::ptrdiff_t>()(r, v, count);
 }
 
-template <typename R, typename V1>
-inline void bit_shift_right(R& r, const V1& v1, std::ptrdiff_t count) {
-  detail::shift_right_eval<R, V1>()(r, v1, count);
+template <typename R, typename V>
+inline typename detail::enabler_rvv<detail::ops::binary::shift_left, R, V, std::ptrdiff_t>::type
+bit_shift_right(R& r, const V& v, std::ptrdiff_t count) {
+  detail::evaluator_rvv<detail::ops::binary::shift_left, R, V, std::ptrdiff_t>()(r, v, -count);
 }
 
 /*
@@ -454,6 +454,18 @@ bitwise_and_not(const V1& v1, const V2& v2) {
   return detail::function_vv<detail::ops::binary::bit_and_not, V1, V2>()(v1, v2);
 }
 
+template <typename V>
+inline typename detail::binary_result<detail::ops::binary::shift_left, V, std::ptrdiff_t>::type
+bit_shift_left(const V& v, std::ptrdiff_t count) {
+  return detail::function_vv<detail::ops::binary::shift_left, V, std::ptrdiff_t>()(v, count);
+}
+
+template <typename V>
+inline typename detail::binary_result<detail::ops::binary::shift_left, V, std::ptrdiff_t>::type
+bit_shift_right(const V& v, std::ptrdiff_t count) {
+  return detail::function_vv<detail::ops::binary::shift_left, V, std::ptrdiff_t>()(v, -count);
+}
+
 template <typename Q, typename V1, typename V2>
 inline typename detail::type_if<detail::enabler_rvv<detail::ops::binary::div, Q, V1, V2>::enabled,
                  typename detail::binary_result<detail::ops::binary::rem, V1, V2>::type>::type
@@ -471,11 +483,6 @@ floor_divrem(Q& q, const V1& v1, const V2& v2) {
           typename detail::binary_result<detail::ops::binary::floor_rem, V1, V2>::type,
           V1, V2>()(q, v1, v2);
 }
-
-/*
-BINARY_RESULT_RETURNER(bit_shift_left, lshift)
-BINARY_RESULT_RETURNER(bit_shift_right, rshift)
-*/
 
 // other
 

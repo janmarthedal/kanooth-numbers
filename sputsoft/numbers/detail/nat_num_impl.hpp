@@ -651,7 +651,7 @@ private:
 
   // Binary shift left
 
-  /*static void left_shift_num0(Con& z, const Con& u, std::size_t count) {
+  static void left_shift_num0(Con& z, const Con& u, std::size_t count) {
     unsigned whole = count / digit_bits;
     count %= digit_bits;
     std::size_t zn = u.size() + whole;
@@ -660,7 +660,6 @@ private:
       if (s) z[zn++] = s;
     } else
       LowLevel::copy_backward(z.get() + whole, u.get(), u.size());
-      //std::copy_backward(u.get(), u.get() + u.size(), z.get() + zn);
     LowLevel::fill_zero(z.get(), whole);
     z.set_size(zn);
   }
@@ -709,7 +708,7 @@ private:
       } else
         right_shift_num0(z, u, count);
     }
-  }*/
+  }
 
 public:
   numb() {}
@@ -792,7 +791,7 @@ public:
   template <typename T>
   static inline T bitwise_and_not(T x, const numb& y) { return bit_and_not_int_num(x, y.con); }
 
-  inline void left_shift(const numb& x, std::ptrdiff_t count) {
+  inline void shift_left(const numb& x, std::ptrdiff_t count) {
     if (count >= 0)
       left_shift_num(con, x.con, count);
     else

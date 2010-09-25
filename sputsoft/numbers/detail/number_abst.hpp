@@ -178,6 +178,13 @@ struct numb_assign_vv<ops::binary::bit_and_not, N, V1, V2> {
   }
 };
 
+template <typename N, typename V>
+struct numb_assign_vv<ops::binary::shift_left, N, V, std::ptrdiff_t> {
+  inline void operator()(N& r, const V& v, std::ptrdiff_t count) const {
+    r.shift_left(v, count);
+  }
+};
+
 template <typename Op, typename N, typename R, typename V1, typename V2>
 struct numb_evaluator_rvv {
   inline void operator()(N& r, const V1& v1, const V2& v2) const {

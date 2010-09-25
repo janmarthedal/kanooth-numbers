@@ -288,6 +288,19 @@ struct function_rt_vv_default<ops::binary::bit_and_not, R, V1, V2> {
   }
 };
 
+// Bit shifting
+
+template <typename T>
+struct binary_result<ops::binary::shift_left, T, std::ptrdiff_t>
+  : public type_if<is_integral<T>::value, T> {};
+
+template <typename R, typename V>
+struct function_rt_vv_default<ops::binary::shift_left, R, V, std::ptrdiff_t> {
+  inline R operator()(const V& v, std::ptrdiff_t count) const {
+    return (count == 0) ? v : (count > 0) ? (v << count) : (v >> (-count));
+  }
+};
+
 // Comparisons
 
 template <typename V1, typename V2>
@@ -424,20 +437,6 @@ struct floor_log2_eval
                      sputsoft::number_bits<T>::value> {};
 
 /********************************************/
-
-/*template <typename R, typename V>
-struct lshift_3_eval {
-  static inline void lshift(R& r, const V& v, std::ptrdiff_t count) {
-    r = count == 0 ? v : count > 0 ? v << count : v >> (-count);
-  }
-};
-
-template <typename R, typename V>
-struct rshift_3_eval {
-  static inline void rshift(R& r, const V& v, std::ptrdiff_t count) {
-    r = count == 0 ? v : count > 0 ? v >> count : v << (-count);
-  }
-};*/
 
 } // namespace detail
 } // namespace numbers

@@ -27,23 +27,23 @@ NUM factorial(std::size_t n)
   return r;
 }
 
-/*template <typename NUM>
+template <typename NUM>
 NUM power(NUM n, std::size_t p)
 {
-  NUM y = 1, z = n;
+  NUM y = 1u, z = n;
   while (p) {
-    if (p & 1) {
-      y *= z;
+    if (bitwise_and(p, 1u)) {
+      mul(y, y, z);
       p--;
     } else {
-      z *= z;
+      mul(z, z, z);
       p /= 2;
     }
   }
   return y;
 }
 
-template <typename NUM>
+/*template <typename NUM>
 NUM sqrt_floor(NUM n)
 {
   if (n <= 1) return n;

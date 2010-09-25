@@ -34,13 +34,13 @@ void PE3()
 }
 
 // Add the (decimal) digits of 2^1000
-/*void PE16()
+void PE16()
 {
-  natural_number n = power(natural_number(2), 1000);
+  natural_number n = power(natural_number(2u), 1000);
   std::cout << "2^1000 = " << n << std::endl;
   std::cout << "Digit sum: " << sideways_sum(n, 10) << std::endl << std::endl;
   // Answer: 1366
-}*/
+}
 
 // Add the (decimal) digits of 100!
 void PE20()
@@ -77,7 +77,7 @@ void gcd_example()
   std::cout << "gcd(" << a << "," << b << ") = " << c << std::endl << std::endl;
 }
 
-/*void bits1()
+void bits1()
 {
   natural_number a, b, c, d;
   unsigned e;
@@ -99,7 +99,7 @@ void gcd_example()
   std::cout << c << std::endl;
 }
 
-void bits2()
+/*void bits2()
 {
   integer a = -2, b = 7, c;
 
@@ -111,8 +111,8 @@ void bits2()
   std::cout << c << std::endl;
   bitwise_and(c, -2, 7);
   std::cout << c << std::endl;
-}
-*/
+}*/
+
 
 void t(short v) {  std::cout << "short " << v << std::endl; }
 void t(unsigned short v) { std::cout << "unsigned short " << v << std::endl; }
@@ -143,11 +143,11 @@ typename retval<T>::type testfunc(T v) {
 int main()
 {
   PE3();
-  //PE16();
+  PE16();
   PE20();
   factorize_example();
   gcd_example();
-  //bits2();
+  bits1();
 
   /*integer a, b=2, c=3;
   sputsoft::numbers::add(a, b, sputsoft::numbers::add(b, c));
@@ -162,10 +162,10 @@ int main()
   std::cout << c << std::endl;
   std::cout << u << std::endl;
 
-  b = compare(-2, c);
-  std::cout << b << std::endl;
+  bit_shift_left(d, d, 10);
+  std::cout << d << std::endl;
 
-  std::cout << is_less(c, 2) << std::endl;
+  std::cout << bit_shift_left(192, -2) << std::endl;
   std::cout << is_negative(c) << std::endl;
   bitwise_or(d, d, 10u);
   t(bitwise_and(d, 23u));
