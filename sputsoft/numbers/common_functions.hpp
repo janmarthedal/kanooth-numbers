@@ -61,16 +61,16 @@ inline R sqrt_floor(const detail::expr<R, E>& ex)
 {
   return sqrt_floor((R) ex);
 }
+*/
 
 template <typename NUM>
 NUM sideways_sum(NUM n, unsigned base)
 {
   NUM res;
   while (n)
-    res += quotrem(n, n, base);
+    add(res, res, divrem(n, n, base));
   return res;
 }
-*/
 
 } // numbers
 } // sputsoft

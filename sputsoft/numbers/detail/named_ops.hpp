@@ -73,20 +73,16 @@ struct unary_result {};
 
 // evaluators
 
-/*
-template <typename V1, typename V2>                         struct equal_r2_eval;
-template <typename T>                                       struct is_zero_r1_eval;
-template <typename T>                                       struct is_positive_r1_eval;
-template <typename T>                                       struct is_negative_r1_eval;
-template <typename R, typename V>                           struct lshift_3_eval;
-template <typename R, typename V>                           struct rshift_3_eval;
-*/
-
 template <typename R, typename Forw> struct set_4_eval;
 template <typename Q, typename R, typename V1, typename V2> struct divrem_evaluator;
 template <typename V1, typename V2> struct compare_eval;
 template <typename Op, typename V1, typename V2> struct bool_compare_eval;
+template <typename T> struct is_zero_eval;
+template <typename T> struct is_positive_eval;
+template <typename T> struct is_negative_eval;
 template <typename T> struct floor_log2_eval;
+template <typename R, typename V> struct shift_left_eval;
+template <typename R, typename V> struct shift_right_eval;
 
 // General evaluators
 
@@ -96,18 +92,18 @@ template <typename Op, typename R, typename V> struct evaluator_rv;
 // Enablers
 
 template <bool C, typename T>
-struct enable_if {
+struct type_if {
   static const bool enabled = false;
 };
 
 template <typename T>
-struct enable_if<true, T> {
+struct type_if<true, T> {
   static const bool enabled = true;
   typedef T type;
 };
 
 template <typename Op, typename R, typename V>
-struct enabler_rv : public enable_if<false, void> {};
+struct enabler_rv;
 
 template <typename Op, typename R, typename V1, typename V2>
 struct enabler_rvv;
@@ -144,19 +140,19 @@ inline typename eval_type<T>::type eval(const T& v) {
 // Unary
 
 template <typename R, typename Forw>
-inline typename detail::enable_if<is_number<R>::value, void>::type
+inline typename detail::type_if<is_number<R>::value, void>::type
 set(R& r, Forw first, const Forw last, unsigned base=10) {
   detail::set_4_eval<R, Forw>()(r, first, last, base);
 }
 
 template <typename R>
-inline typename detail::enable_if<is_number<R>::value, void>::type
+inline typename detail::type_if<is_number<R>::value, void>::type
 set(R& r, const std::string& st, unsigned base) {
   set(r, st.begin(), st.end(), base);
 }
 
 template <typename R>
-inline typename detail::enable_if<is_number<R>::value, void>::type
+inline typename detail::type_if<is_number<R>::value, void>::type
 set(R& r, const char* st, unsigned base=10) {
   set(r, st, st + std::strlen(st), base);
 }
@@ -236,7 +232,7 @@ rem(R& r, const V1& v1, const V2& v2) {
 }
 
 template <typename Q, typename R, typename V1, typename V2>
-inline typename detail::enable_if<
+inline typename detail::type_if<
                   detail::enabler_rvv<detail::ops::binary::div, Q, V1, V2>::enabled &&
                   detail::enabler_rvv<detail::ops::binary::rem, R, V1, V2>::enabled, void>::type
 divrem(Q& q, R& r, const V1& v1, const V2& v2) {
@@ -303,16 +299,17 @@ bitwise_and_not(R& r, const V1& v1, const V2& v2) {
   detail::evaluator_rvv<detail::ops::binary::bit_and_not, R, V1, V2>()(r, v1, v2);
 }
 
-/*template <typename R, typename V1>
+template <typename R, typename V1>
 inline void bit_shift_left(R& r, const V1& v1, std::ptrdiff_t count) {
-  detail::lshift_3_eval<R, V1>::lshift(r, v1, count);
+  detail::shift_left_eval<R, V1>()(r, v1, count);
 }
 
 template <typename R, typename V1>
 inline void bit_shift_right(R& r, const V1& v1, std::ptrdiff_t count) {
-  detail::rshift_3_eval<R, V1>::rshift(r, v1, count);
+  detail::shift_right_eval<R, V1>()(r, v1, count);
 }
 
+/*
 template <typename Q, typename R, typename V1, typename V2>
 inline void quotrem(Q& q, R& r, const V1& v1, const V2& v2) {
   detail::evaluator_rrvv<detail::ops::binary::quotrem, Q, R, V1, V2>()(q, r, v1, v2);
@@ -336,25 +333,25 @@ inline void quotrem_trunc(Q& q, R& r, const V1& v1, const V2& v2) {
 
 // returns result by value
 
-/*
+template <typename T>
+inline typename detail::unary_result<detail::ops::unary::abs, T>::type
+abs(const T& v) {
+  return detail::function_v<detail::ops::unary::abs, T>()(v);
+}
+
 template <typename Op, typename T>
-inline typename detail::resolve_unary<detail::ops::unary::negate, T>::return_type
+inline typename detail::unary_result<detail::ops::unary::negate, T>::type
 negate(const T& v) {
   return detail::function_v<detail::ops::unary::negate, T>()(v);
 }
 
 template <typename T>
-inline typename detail::resolve_unary<detail::ops::unary::abs, T>::return_type
-abs(const T& v) {
-  return detail::function_v<detail::ops::unary::abs, T>()(v);
-}
-
-template <typename T>
-inline typename detail::resolve_unary<detail::ops::unary::bit_not, T>::return_type
+inline typename detail::unary_result<detail::ops::unary::bit_not, T>::type
 bitwise_not(const T& v) {
   return detail::function_v<detail::ops::unary::bit_not, T>()(v);
 }
 
+/*
 template <typename Q, typename V1, typename V2>
 inline typename detail::resolve_binary<detail::ops::binary::rem_ceil, V1, V2>::return_type
 quotrem_ceil(Q& q, const V1& v1, const V2& v2) {
@@ -458,7 +455,7 @@ bitwise_and_not(const V1& v1, const V2& v2) {
 }
 
 template <typename Q, typename V1, typename V2>
-inline typename detail::enable_if<detail::enabler_rvv<detail::ops::binary::div, Q, V1, V2>::enabled,
+inline typename detail::type_if<detail::enabler_rvv<detail::ops::binary::div, Q, V1, V2>::enabled,
                  typename detail::binary_result<detail::ops::binary::rem, V1, V2>::type>::type
 divrem(Q& q, const V1& v1, const V2& v2) {
   return detail::function_divrem<Q,
@@ -467,7 +464,7 @@ divrem(Q& q, const V1& v1, const V2& v2) {
 }
 
 template <typename Q, typename V1, typename V2>
-inline typename detail::enable_if<detail::enabler_rvv<detail::ops::binary::floor_div, Q, V1, V2>::enabled,
+inline typename detail::type_if<detail::enabler_rvv<detail::ops::binary::floor_div, Q, V1, V2>::enabled,
                  typename detail::binary_result<detail::ops::binary::floor_rem, V1, V2>::type>::type
 floor_divrem(Q& q, const V1& v1, const V2& v2) {
   return detail::function_floor_divrem<Q,
@@ -488,57 +485,58 @@ inline std::size_t floor_log2(T n) {
 }
 
 template <typename V1, typename V2>
-inline typename detail::enable_if<is_number<V1>::value && is_number<V1>::value, int>::type
+inline typename detail::type_if<is_number<V1>::value && is_number<V1>::value, int>::type
 compare(const V1& v1, const V2& v2) {
   return detail::compare_eval<V1, V2>()(v1, v2);
 }
 
 template <typename V1, typename V2>
-inline typename detail::enable_if<is_number<V1>::value && is_number<V1>::value, bool>::type
-equal(const V1& v1, const V2& v2) {
+inline typename detail::type_if<is_number<V1>::value && is_number<V1>::value, bool>::type
+is_equal(const V1& v1, const V2& v2) {
   return detail::bool_compare_eval<detail::ops::binary_compare::equal, V1, V2>()(v1, v2);
 }
 
 template <typename V1, typename V2>
-inline typename detail::enable_if<is_number<V1>::value && is_number<V1>::value, bool>::type
-less(const V1& v1, const V2& v2) {
+inline typename detail::type_if<is_number<V1>::value && is_number<V1>::value, bool>::type
+is_less(const V1& v1, const V2& v2) {
   return detail::bool_compare_eval<detail::ops::binary_compare::less, V1, V2>()(v1, v2);
 }
 
 template <typename V1, typename V2>
-inline typename detail::enable_if<is_number<V1>::value && is_number<V1>::value, bool>::type
-greater(const V1& v1, const V2& v2) {
+inline typename detail::type_if<is_number<V1>::value && is_number<V1>::value, bool>::type
+is_greater(const V1& v1, const V2& v2) {
   return detail::bool_compare_eval<detail::ops::binary_compare::greater, V1, V2>()(v1, v2);
 }
 
 template <typename V1, typename V2>
-inline typename detail::enable_if<is_number<V1>::value && is_number<V1>::value, bool>::type
-less_or_equal(const V1& v1, const V2& v2) {
+inline typename detail::type_if<is_number<V1>::value && is_number<V1>::value, bool>::type
+is_less_or_equal(const V1& v1, const V2& v2) {
   return detail::bool_compare_eval<detail::ops::binary_compare::less_or_equal, V1, V2>()(v1, v2);
 }
 
 template <typename V1, typename V2>
-inline typename detail::enable_if<is_number<V1>::value && is_number<V1>::value, bool>::type
-greater_or_equal(const V1& v1, const V2& v2) {
+inline typename detail::type_if<is_number<V1>::value && is_number<V1>::value, bool>::type
+is_greater_or_equal(const V1& v1, const V2& v2) {
   return detail::bool_compare_eval<detail::ops::binary_compare::greater_or_equal, V1, V2>()(v1, v2);
 }
 
-/*
 template <typename T>
-inline bool is_zero(const T& v) {
-  return detail::is_zero_r1_eval<T>::is_zero(v);
+inline typename detail::type_if<is_number<T>::value, bool>::type
+is_zero(const T& v) {
+  return detail::is_zero_eval<T>()(v);
 }
 
 template <typename T>
-inline bool is_positive(const T& v) {
-  return detail::is_positive_r1_eval<T>::is_positive(v);
+inline typename detail::type_if<is_number<T>::value, bool>::type
+is_positive(const T& v) {
+  return detail::is_positive_eval<T>()(v);
 }
 
 template <typename T>
-inline bool is_negative(const T& v) {
-  return detail::is_negative_r1_eval<T>::is_negative(v);
+inline typename detail::type_if<is_number<T>::value, bool>::type
+is_negative(const T& v) {
+  return detail::is_negative_eval<T>()(v);
 }
-*/
 
 } // namespace numbers
 } // namespace sputsoft

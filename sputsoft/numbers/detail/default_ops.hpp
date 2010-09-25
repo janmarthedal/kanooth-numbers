@@ -28,7 +28,7 @@ struct identity_enabler {};
 
 template <typename R, typename V>
 struct identity_enabler<true, R, V>
-  : public enable_if<(detail::type_rank<R>::value >= detail::type_rank<V>::value)
+  : public type_if<(detail::type_rank<R>::value >= detail::type_rank<V>::value)
                       && (is_signed<R>::value || !is_signed<V>::value), void> {};
 
 }
@@ -38,6 +38,10 @@ struct function_rt_vv_default;
 
 template <typename Op, typename R, typename V1, typename V2>
 struct function_rt_vv : public function_rt_vv_default<Op, R, V1, V2> {};
+
+template <typename Op, typename R, typename V>
+struct enabler_rv
+  : enabler_rv<ops::unary::identity, R, typename unary_result<Op, V>::type> {};
 
 template <typename R, typename V>
 struct enabler_rv<ops::unary::identity, R, V>
@@ -49,22 +53,12 @@ struct enabler_rvv
 
 /* Unary */
 
-/*template <typename Op, typename R, typename V>
+template <typename Op, typename R, typename V>
 struct evaluator_rv {
-  void operator()(R& r, const V& v) const {
-    sputsoft::numbers::set(r, function_v<Op, V>()(v));
+  inline void operator()(R& r, const V& v) const {
+    set(r, function_v<Op, V>()(v));
   }
 };
-
-template <typename Op, typename V>
-struct function_v {
-  typedef typename resolve_unary<Op, V>::return_type return_type;
-  return_type operator()(const V& v) const {
-    return_type r;
-    evaluator_rv<Op, return_type, V>()(r, v);
-    return r;
-  }
-};*/
 
 /* Unary identity */
 
@@ -84,45 +78,39 @@ struct function_v<ops::unary::identity, T> {
 
 /* Unary negate */
 
-/*template <typename T>
-struct resolve_unary<ops::unary::negate, T> {
-  typedef typename sputsoft::make_signed<T>::type return_type;
-};
+template <typename T>
+struct unary_result<ops::unary::negate, T> : public make_signed<T> {};
 
 template <typename V>
 struct function_v<ops::unary::negate, V> {
-  typedef typename resolve_unary<ops::unary::negate, V>::return_type return_type;
-  return_type operator()(const V& v) const { return -((return_type) v); }
-};*/
+  typedef typename unary_result<ops::unary::negate, V>::type return_type;
+  inline return_type operator()(const V& v) const { return -((return_type) v); }
+};
 
 /* Unary abs */
 
-/*template <typename T>
-struct resolve_unary<ops::unary::abs, T> {
-  typedef typename sputsoft::make_unsigned<T>::type return_type;
-};
+template <typename T>
+struct unary_result<ops::unary::abs, T> : public make_unsigned<T> {};
 
 template <typename V>
 struct function_v<ops::unary::abs, V> {
-  typedef typename resolve_unary<ops::unary::abs, V>::return_type return_type;
-  return_type operator()(const V& v) const { return v < 0 ? -v : v; }
-};*/
+  typedef typename unary_result<ops::unary::abs, V>::type return_type;
+  inline return_type operator()(const V& v) const { return v < 0 ? -v : v; }
+};
 
 /* Unary bit_not */
 
-/*template <typename T>
-struct resolve_unary<ops::unary::bit_not, T> {
-  typedef typename resolve_unary<ops::unary::negate, T>::return_type return_type;
-};
+template <typename T>
+struct unary_result<ops::unary::bit_not, T> : public unary_result<ops::unary::negate, T> {};
 
 template <typename V>
 struct function_v<ops::unary::bit_not, V> {
-  typedef typename resolve_unary<ops::unary::bit_not, V>::return_type return_type;
-  return_type operator()(const V& v) const { return ~v; }
-};*/
+  typedef typename unary_result<ops::unary::bit_not, V>::type return_type;
+  inline return_type operator()(const V& v) const { return ~v; }
+};
 
 template <typename T>
-struct unary_result<ops::unary::trunc, T> : public enable_if<sputsoft::is_integral<T>::value, T> {};
+struct unary_result<ops::unary::trunc, T> : public type_if<sputsoft::is_integral<T>::value, T> {};
 
 template <typename T>
 struct unary_result<ops::unary::floor, T> : public unary_result<ops::unary::trunc, T> {};
@@ -263,74 +251,44 @@ struct divrem_evaluator {
   }
 };
 
-/* Binary bit_and */
+/* Binary bitwise ops */
 
-/*template <typename V1, typename V2>
-struct function_vv<ops::binary::bit_and, V1, V2> {
-  typedef typename resolve_binary<ops::binary::bit_and, V1, V2>::return_type return_type;
-  return_type operator()(const V1& v1, const V2& v2) const {
+template <typename V1, typename V2>
+struct binary_result<ops::binary::bit_and, V1, V2>
+  : public type_if<is_integral<V1>::value && is_integral<V2>::value,
+             typename make_unsigned_if<!is_signed<V1>::value || !is_signed<V1>::value,
+               typename choose_type<type_rank<V1>::value <= type_rank<V2>::value, V1, V2>::type
+                                      >::type> {};
+
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::bit_and, R, V1, V2> {
+  inline R operator()(const V1& v1, const V2& v2) const {
     return v1 & v2;
   }
 };
 
-template <typename V1, typename V2>
-struct function_vv<ops::binary::bit_or, V1, V2> {
-  typedef typename resolve_binary<ops::binary::bit_or, V1, V2>::return_type return_type;
-  return_type operator()(const V1& v1, const V2& v2) const {
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::bit_or, R, V1, V2> {
+  inline R operator()(const V1& v1, const V2& v2) const {
     return v1 | v2;
   }
 };
 
-template <typename V1, typename V2>
-struct function_vv<ops::binary::bit_xor, V1, V2> {
-  typedef typename resolve_binary<ops::binary::bit_xor, V1, V2>::return_type return_type;
-  return_type operator()(const V1& v1, const V2& v2) const {
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::bit_xor, R, V1, V2> {
+  inline R operator()(const V1& v1, const V2& v2) const {
     return v1 ^ v2;
   }
 };
 
-template <typename V1, typename V2>
-struct function_vv<ops::binary::bit_and_not, V1, V2> {
-  typedef typename resolve_binary<ops::binary::bit_and_not, V1, V2>::return_type return_type;
-  return_type operator()(const V1& v1, const V2& v2) const {
-    return sputsoft::numbers::bitwise_and(v1, sputsoft::numbers::bitwise_not(v2));
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::bit_and_not, R, V1, V2> {
+  inline R operator()(const V1& v1, const V2& v2) const {
+    return v1 & ~v2;
   }
 };
 
-template <typename V1, typename V2>
-struct cmp_r2_eval {
-  static inline int cmp(const V1& v1, const V2& v2) {
-    return v1 < v2 ? -1 : v1 > v2 ? 1 : 0;
-  }
-};
-
-template <typename V1, typename V2>
-struct equal_r2_eval {
-  static inline bool equal(const V1& v1, const V2& v2) {
-    return sputsoft::numbers::compare(v1, v2) == 0;
-  }
-};
-
-template <typename T>
-struct is_zero_r1_eval {
-  static inline bool is_zero(const T& v) {
-    return !v;
-  }
-};
-
-template <typename T>
-struct is_positive_r1_eval {
-  static inline bool is_positive(const T& v) {
-    return v > 0;
-  }
-};
-
-template <typename T>
-struct is_negative_r1_eval {
-  static inline bool is_negative(const T& v) {
-    return v < 0;
-  }
-};*/
+// Comparisons
 
 template <typename V1, typename V2>
 struct compare_eval {
@@ -383,6 +341,27 @@ struct bool_compare_eval_default<ops::binary_compare::greater_or_equal, V1, V2> 
 
 template <typename Op, typename V1, typename V2>
 struct bool_compare_eval : public bool_compare_eval_default<Op, V1, V2> {};
+
+template <typename T>
+struct is_zero_eval {
+  inline bool operator()(const T& v) const {
+    return v != 0;
+  }
+};
+
+template <typename T>
+struct is_positive_eval {
+  inline bool operator()(const T& v) const {
+    return v > 0;
+  }
+};
+
+template <typename T>
+struct is_negative_eval {
+  inline bool operator()(const T& v) const {
+    return v < 0;
+  }
+};
 
 /**************** floor log2 ****************/
 

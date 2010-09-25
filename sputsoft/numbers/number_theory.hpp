@@ -27,7 +27,7 @@ void factorize(NUM n, Out out)
 {
   NUM q, r;
 
-  while (greater_or_equal(n, 2u)) {
+  while (is_greater_or_equal(n, 2u)) {
     divrem(q, r, n, 2u);
     if (!r) {
       *out++ = 2u;
@@ -37,7 +37,7 @@ void factorize(NUM n, Out out)
   }
 
   NUM d=3u;
-  while (greater_or_equal(n, d)) {
+  while (is_greater_or_equal(n, d)) {
     divrem(q, r, n, d);
     if (!r) {
       *out++ = d;
@@ -50,8 +50,8 @@ void factorize(NUM n, Out out)
 template <typename T1, typename T2>
 struct gcd_return_type
   : public common_type<
-             typename detail::unary_result<detail::ops::unary::abs, T1>::return_type,
-             typename detail::unary_result<detail::ops::unary::abs, T2>::return_type> {};
+             typename detail::unary_result<detail::ops::unary::abs, T1>::type,
+             typename detail::unary_result<detail::ops::unary::abs, T2>::type> {};
 
 template <typename R, typename T1, typename T2>
 void gcd(R& r, const T1& v1, const T2& v2)

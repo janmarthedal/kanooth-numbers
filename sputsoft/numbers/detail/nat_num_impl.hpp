@@ -461,7 +461,7 @@ private:
 
   /* Bitwise and number and integer */
 
-  /*template <typename T>
+  template <typename T>
   static T bit_and_int(const Con& x, const T y) {
     if (x.is_empty())
       return 0;
@@ -618,7 +618,7 @@ private:
       sputsoft::numbers::bitwise_and_not(r[0], r[0], (digit_type) y);
     } else
       bit_and_not_num(r, x, numb(y).con);
-  }*/
+  }
 
   // Compare two numbers
 
@@ -724,11 +724,6 @@ public:
   }
   inline bool is_zero() const { return con.is_empty(); }
   inline operator bool() const { return !is_zero(); }
-  std::size_t floor_log2() const {
-    std::size_t n = con.size();
-    if (!n) return (std::size_t) -1;
-    return sputsoft::numbers::floor_log2(con[n - 1]) + (n - 1)*digit_bits;
-  }
 
   inline void set(const numb& x) { set_num(con, x.con); }
   template <typename T>
@@ -769,24 +764,33 @@ public:
     return (is_signed<T>::value && v < 0) ? 1 : comp_int(con, to_unsigned<T>(v));
   }
 
-  static inline void divrem(numb& q, numb& r, const numb& x, const numb& y)
-    { quotrem_num(q.con, r.con, x.con, y.con); }
-
-  /*template <typename T>
-  static inline T bitwise_and_int(const numb& x, T y) { return bit_and_int(x.con, y); }
-  template <typename T>
-  inline void bitwise_or_int(const numb& x, T y) { bit_or_int(con, x.con, y); }
-  template <typename T>
-  inline void bitwise_xor_int(const numb& x, T y) { bit_or_int(con, x.con, y); }
-  template <typename T>
-  static inline T bitwise_and_not_in(T x, const numb& y) { return bit_and_not_int_num(x, y.con); }
-  template <typename T>
-  inline void bitwise_and_not_ni(const numb& x, T y) { bit_and_not_num_int(con, x.con, y); }
+  static inline void divrem(numb& q, numb& r, const numb& x, const numb& y) {
+    quotrem_num(q.con, r.con, x.con, y.con);
+  }
 
   inline void bitwise_and(const numb& x, const numb& y) { bit_and_num(con, x.con, y.con); }
+  template <typename T>
+  static inline T bitwise_and(const numb& x, T y) { return bit_and_int(x.con, y); }
+  template <typename T>
+  static inline T bitwise_and(T x, const numb& y) { return bit_and_int(y.con, x); }
+
   inline void bitwise_or(const numb& x, const numb& y) { bit_or_num(con, x.con, y.con); }
+  template <typename T>
+  inline void bitwise_or(const numb& x, T y) { bit_or_int(con, x.con, y); }
+  template <typename T>
+  inline void bitwise_or(T x, const numb& y) { bit_or_int(con, y.con, x); }
+
   inline void bitwise_xor(const numb& x, const numb& y) { bit_xor_num(con, x.con, y.con); }
+  template <typename T>
+  inline void bitwise_xor(const numb& x, T y) { bit_or_int(con, x.con, y); }
+  template <typename T>
+  inline void bitwise_xor(T x, const numb& y) { bit_or_int(con, y.con, x); }
+
   inline void bitwise_and_not(const numb& x, const numb& y) { bit_and_not_num(con, x.con, y.con); }
+  template <typename T>
+  inline void bitwise_and_not(const numb& x, T y) { bit_and_not_num_int(con, x.con, y); }
+  template <typename T>
+  static inline T bitwise_and_not(T x, const numb& y) { return bit_and_not_int_num(x, y.con); }
 
   inline void left_shift(const numb& x, std::ptrdiff_t count) {
     if (count >= 0)
@@ -794,7 +798,12 @@ public:
     else
       right_shift_num(con, x.con, -count);
   }
-  inline void right_shift(const numb& x, std::ptrdiff_t count) { left_shift(x, -count); }*/
+
+  std::size_t floor_log2() const {
+    std::size_t n = con.size();
+    if (!n) return (std::size_t) -1;
+    return sputsoft::numbers::floor_log2(con[n - 1]) + (n - 1)*digit_bits;
+  }
 
 };
 

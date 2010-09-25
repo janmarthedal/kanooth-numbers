@@ -30,12 +30,7 @@ struct is_number<detail::numb<N> > : public true_type {};
 
 namespace detail {
 
-template <typename N>
-struct enabler_rv<ops::unary::identity, numb<N>, std::string> : public enable_if<true, void> {};
-
-template <typename N>
-struct enabler_rv<ops::unary::identity, numb<N>, const char*> : public enable_if<true, void> {};
-
+  
 // evaluator_rv
 
 template <typename T, typename V>
@@ -72,6 +67,13 @@ template <typename R, typename V1, typename V2, typename EVAL>
 struct simple_eval_vv<ops::binary::sub, R, V1, V2, EVAL> {
   R operator()(const V1& v1, const V2& v2) const {
     return EVAL::sub(v1, v2);
+  }
+};
+
+template <typename R, typename V1, typename V2, typename EVAL>
+struct simple_eval_vv<ops::binary::bit_and, R, V1, V2, EVAL> {
+  R operator()(const V1& v1, const V2& v2) const {
+    return EVAL::bitwise_and(v1, v2);
   }
 };
 
@@ -115,42 +117,70 @@ struct numb_assign_vv;
 
 template <typename N, typename V1, typename V2>
 struct numb_assign_vv<ops::binary::add, N, V1, V2> {
-  void operator()(N& r, const V1& v1, const V2& v2) const {
+  inline void operator()(N& r, const V1& v1, const V2& v2) const {
     r.add(v1, v2);
   }
 };
 
 template <typename N, typename V1, typename V2>
 struct numb_assign_vv<ops::binary::sub, N, V1, V2> {
-  void operator()(N& r, const V1& v1, const V2& v2) const {
+  inline void operator()(N& r, const V1& v1, const V2& v2) const {
     r.sub(v1, v2);
   }
 };
 
 template <typename N, typename V1, typename V2>
 struct numb_assign_vv<ops::binary::mul, N, V1, V2> {
-  void operator()(N& r, const V1& v1, const V2& v2) const {
+  inline void operator()(N& r, const V1& v1, const V2& v2) const {
     r.mul(v1, v2);
   }
 };
 
 template <typename N, typename V1, typename V2>
 struct numb_assign_vv<ops::binary::div, N, V1, V2> {
-  void operator()(N& r, const V1& v1, const V2& v2) const {
+  inline void operator()(N& r, const V1& v1, const V2& v2) const {
     r.div(v1, v2);
   }
 };
 
 template <typename N, typename V1, typename V2>
 struct numb_assign_vv<ops::binary::rem, N, V1, V2> {
-  void operator()(N& r, const V1& v1, const V2& v2) const {
+  inline void operator()(N& r, const V1& v1, const V2& v2) const {
     r.rem(v1, v2);
+  }
+};
+
+template <typename N, typename V1, typename V2>
+struct numb_assign_vv<ops::binary::bit_and, N, V1, V2> {
+  inline void operator()(N& r, const V1& v1, const V2& v2) const {
+    r.bitwise_and(v1, v2);
+  }
+};
+
+template <typename N, typename V1, typename V2>
+struct numb_assign_vv<ops::binary::bit_or, N, V1, V2> {
+  inline void operator()(N& r, const V1& v1, const V2& v2) const {
+    r.bitwise_or(v1, v2);
+  }
+};
+
+template <typename N, typename V1, typename V2>
+struct numb_assign_vv<ops::binary::bit_xor, N, V1, V2> {
+  inline void operator()(N& r, const V1& v1, const V2& v2) const {
+    r.bitwise_xor(v1, v2);
+  }
+};
+
+template <typename N, typename V1, typename V2>
+struct numb_assign_vv<ops::binary::bit_and_not, N, V1, V2> {
+  inline void operator()(N& r, const V1& v1, const V2& v2) const {
+    r.bitwise_and_not(v1, v2);
   }
 };
 
 template <typename Op, typename N, typename R, typename V1, typename V2>
 struct numb_evaluator_rvv {
-  void operator()(N& r, const V1& v1, const V2& v2) const {
+  inline void operator()(N& r, const V1& v1, const V2& v2) const {
     sputsoft::numbers::set(r, function_vv<Op, V1, V2>()(v1, v2));
   }
 };
@@ -251,34 +281,6 @@ struct evaluator_rrvv<ops::binary::quotrem_trunc, numb<T>, R, V1, V2> {
   }
 };
 
-template <typename T1, typename T2>
-struct cmp_r2_eval<numb<T1>, numb<T2> > {
-  inline static int cmp(const numb<T1>& v1, const numb<T2>& v2) {
-    return v1.cmp(v2);
-  }
-};
-
-template <typename T1, typename T2>
-struct cmp_r2_eval<numb<T1>, T2 > {
-  inline static int cmp(const numb<T1>& v1, const T2& v2) {
-    return v1.cmp(v2);
-  }
-};
-
-template <typename T1, typename T2>
-struct cmp_r2_eval<T1, numb<T2> > {
-  inline static int cmp(const T1& v1, const numb<T2>& v2) {
-    return -v2.cmp(v1);
-  }
-};
-
-template <typename T>
-struct is_zero_r1_eval<numb<T> > {
-  static inline bool is_zero(const numb<T>& v) {
-    return v.is_zero();
-  }
-};
-
 template <typename T, typename V>
 struct lshift_3_eval<numb<T>, V> {
   static inline void lshift(numb<T>& r, const V& v, std::ptrdiff_t count) {
@@ -333,6 +335,27 @@ template <typename Op, typename V, typename N>
 struct bool_compare_eval<Op, V, numb<N> > {
   inline int operator()(const V& v1, const numb<N>& v2) const {
     return bool_compare_eval<Op, int, int>()(compare(v1, v2), 0);
+  }
+};
+
+template <typename T>
+struct is_zero_eval<numb<T> > {
+  inline bool operator()(const numb<T>& v) const {
+    return v.is_zero();
+  }
+};
+
+template <typename T>
+struct is_positive_eval<numb<T> > {
+  inline bool operator()(const numb<T>& v) const {
+    return v.is_positive();
+  }
+};
+
+template <typename T>
+struct is_negative_eval<numb<T> > {
+  inline bool operator()(const numb<T>& v) const {
+    return v.is_negative();
   }
 };
 

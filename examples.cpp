@@ -40,7 +40,7 @@ void PE3()
   std::cout << "2^1000 = " << n << std::endl;
   std::cout << "Digit sum: " << sideways_sum(n, 10) << std::endl << std::endl;
   // Answer: 1366
-}
+}*/
 
 // Add the (decimal) digits of 100!
 void PE20()
@@ -49,9 +49,9 @@ void PE20()
   std::cout << "100! = " << n << std::endl;
   std::cout << "Digit sum: " << sideways_sum(n, 10) << std::endl << std::endl;
   // Answer: 648
-}*/
+}
 
-/*void factorize_example()
+void factorize_example()
 {
   natural_number n = "123456789012345678901234567890";
   std::vector<natural_number> factors;
@@ -63,13 +63,13 @@ void PE20()
   for (std::vector<natural_number>::const_iterator p=factors.begin(); p != factors.end(); ++p)
     std::cout << " " << *p;
   std::cout << std::endl << std::endl;
-}*/
+}
 
-/*void gcd_example()
+void gcd_example()
 {
-  integer a = "123456789012345678901234567890";
-  //integer b = "-9876543210";
-  long b = -9876543210L;
+  natural_number a = "123456789012345678901234567890";
+  natural_number b = "9876543210";
+  //long b = -9876543210L;
   natural_number c;
   
   gcd(c, a, b);
@@ -77,7 +77,7 @@ void PE20()
   std::cout << "gcd(" << a << "," << b << ") = " << c << std::endl << std::endl;
 }
 
-void bits1()
+/*void bits1()
 {
   natural_number a, b, c, d;
   unsigned e;
@@ -112,6 +112,7 @@ void bits2()
   bitwise_and(c, -2, 7);
   std::cout << c << std::endl;
 }
+*/
 
 void t(short v) {  std::cout << "short " << v << std::endl; }
 void t(unsigned short v) { std::cout << "unsigned short " << v << std::endl; }
@@ -122,8 +123,8 @@ void t(unsigned long v) { std::cout << "unsigned long " << v << std::endl; }
 void t(long long v) {  std::cout << "long long " << v << std::endl; }
 void t(unsigned long long v) { std::cout << "unsigned long long " << v << std::endl; }
 void t(natural_number v) {  std::cout << "natural_number " << v << std::endl; }
-void t(integer v) { std::cout << "integer " << v << std::endl; }
-*/
+//void t(integer v) { std::cout << "integer " << v << std::endl; }
+
 
 template <typename T>
 struct retval {};
@@ -142,11 +143,11 @@ typename retval<T>::type testfunc(T v) {
 int main()
 {
   PE3();
-  /*PE16();
+  //PE16();
   PE20();
   factorize_example();
   gcd_example();
-  bits2();*/
+  //bits2();
 
   /*integer a, b=2, c=3;
   sputsoft::numbers::add(a, b, sputsoft::numbers::add(b, c));
@@ -164,7 +165,10 @@ int main()
   b = compare(-2, c);
   std::cout << b << std::endl;
 
-  std::cout << sputsoft::numbers::less(c, 2) << std::endl;
+  std::cout << is_less(c, 2) << std::endl;
+  std::cout << is_negative(c) << std::endl;
+  bitwise_or(d, d, 10u);
+  t(bitwise_and(d, 23u));
 
   std::cout << factorial<natural_number>(50) << std::endl;
 

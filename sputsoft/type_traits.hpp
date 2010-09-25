@@ -126,6 +126,13 @@ struct make_signed_if {
 template <typename T>
 struct make_signed_if<true, T> : public make_signed<T> {};
 
+template <bool C, typename T>
+struct make_unsigned_if {
+  typedef T type;
+};
+template <typename T>
+struct make_unsigned_if<true, T> : public make_unsigned<T> {};
+
 } // namespace sputsoft
 
 #endif // _SPUTSOFT_TYPE_TRAITS_HPP_

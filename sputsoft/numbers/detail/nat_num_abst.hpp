@@ -77,12 +77,12 @@ struct binary_result<ops::binary::rem, numb<natnum<T> >, int>
 
 /* Unary abs */
 
-/*template <typename T>
+template <typename T>
 struct function_v<ops::unary::abs, numb<natnum<T> > > {
-  numb<natnum<T> > operator()(const numb<natnum<T> >& v) const {
+  inline const numb<natnum<T> >& operator()(const numb<natnum<T> >& v) const {
     return v;
   }
-};*/
+};
 
 /* Binary sub */
 
@@ -329,20 +329,21 @@ struct function_rvv<ops::binary::quotrem, numb<natnum<T> >, numb<natnum<T> >, un
   }
 };
 
+*/
+
 template <typename T>
-struct is_positive_r1_eval<numb<natnum<T> > > {
-  static inline bool is_positive(const numb<natnum<T> >& v) {
-    return !sputsoft::numbers::is_zero(v);
+struct is_positive_eval<numb<natnum<T> > > {
+  inline bool operator()(const numb<natnum<T> >& v) const {
+    return !v.is_zero();
   }
 };
 
 template <typename T>
-struct is_negative_r1_eval<numb<natnum<T> > > {
-  static inline bool is_negative(const numb<natnum<T> >& v) {
+struct is_negative_eval<numb<natnum<T> > > {
+  inline bool operator()(const numb<natnum<T> >& v) const {
     return false;
   }
 };
-*/
 
 template <typename T, typename Forw>
 struct set_4_eval<numb<natnum<T> >, Forw> {
