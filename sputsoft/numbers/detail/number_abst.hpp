@@ -29,7 +29,6 @@ template <typename N>
 struct is_number<detail::numb<N> > : public true_type {};
 
 namespace detail {
-
   
 // evaluator_rv
 
@@ -182,6 +181,13 @@ template <typename N, typename V>
 struct numb_assign_vv<ops::binary::shift_left, N, V, std::ptrdiff_t> {
   inline void operator()(N& r, const V& v, std::ptrdiff_t count) const {
     r.shift_left(v, count);
+  }
+};
+
+template <typename N, typename V>
+struct numb_assign_vv<ops::binary::shift_right, N, V, std::ptrdiff_t> {
+  inline void operator()(N& r, const V& v, std::ptrdiff_t count) const {
+    r.shift_left(v, -count);
   }
 };
 

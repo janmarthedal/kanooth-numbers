@@ -32,7 +32,7 @@ NUM power(NUM n, std::size_t p)
 {
   NUM y = 1u, z = n;
   while (p) {
-    if (bitwise_and(p, 1u)) {
+    if (p & 1) {
       mul(y, y, z);
       p--;
     } else {

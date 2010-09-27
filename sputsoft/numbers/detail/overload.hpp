@@ -15,7 +15,6 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP
 #define _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP
 
-/*
 #include <sputsoft/type_traits.hpp>
 #include <sputsoft/numbers/detail/named_ops.hpp>
 
@@ -40,16 +39,6 @@ namespace {
     typedef const numb<T>& ref_type;
   };
 
-  template <typename T>
-  struct resolve_type {
-    typedef T type;
-  };
-
-  template <typename R, typename E>
-  struct resolve_type<expr<R, E> > {
-    typedef R type;
-  };
-
   template <typename T> struct is_numb_or_expr : public sputsoft::false_type {};
   template <typename N> struct is_numb_or_expr<numb<N> > : public sputsoft::true_type {};
   template <typename R, typename E> struct is_numb_or_expr<expr<R, E> >
@@ -60,9 +49,7 @@ namespace {
 
   template <typename Op, typename T1, typename T2>
   struct approve_binop_overload2<Op, T1, T2, true> {
-    typedef expr<typename resolve_binary<Op, typename resolve_type<T1>::type,
-                                         typename resolve_type<T2>::type>::return_type,
-                 binary<Op, T1, T2> > return_type;
+    typedef expr<typename binary_result<Op, T1, T2>::type, binary<Op, T1, T2> > return_type;
     return_type operator()(const T1& x, const T2& y) {
       return return_type(x, y);
     }
@@ -88,7 +75,7 @@ namespace {
 
   template <typename Op, typename T>
   struct approve_unop_overload2<Op, T, true> {
-    typedef expr<typename resolve_unary<Op, typename resolve_type<T>::type >::return_type,
+    typedef expr<typename unary_result<Op, typename eval_type<T>::type >::type,
                  unary<Op, T> > return_type;
     return_type operator()(const T& x) {
       return return_type(x);
@@ -99,76 +86,20 @@ namespace {
   struct approve_unop_overload
     : approve_unop_overload2<Op, T, is_numb_or_expr<T>::value> {};
 
-  struct cmp_equal {
-    template <typename T1, typename T2>
-    inline bool operator()(const T1& x, const T2& y) const {
-      return sputsoft::numbers::equal(x, y);
-    }
-  };
+  template <typename T1, typename T2>
+  struct approve_cmp_overload : public type_if<approve_binop_args<T1, T2>::value, bool> {};
 
-  struct cmp_not_equal {
-    template <typename T1, typename T2>
-    inline bool operator()(const T1& x, const T2& y) const {
-      return !sputsoft::numbers::equal(x, y);
-    }
-  };
-
-  struct cmp_less {
-    template <typename T1, typename T2>
-    inline bool operator()(const T1& x, const T2& y) const {
-      return sputsoft::numbers::compare(x, y) < 0;
-    }
-  };
-
-  struct cmp_less_or_equal {
-    template <typename T1, typename T2>
-    inline bool operator()(const T1& x, const T2& y) const {
-      return sputsoft::numbers::compare(x, y) <= 0;
-    }
-  };
-
-  struct cmp_greater {
-    template <typename T1, typename T2>
-    inline bool operator()(const T1& x, const T2& y) const {
-      return sputsoft::numbers::compare(x, y) > 0;
-    }
-  };
-
-  struct cmp_greater_or_equal {
-    template <typename T1, typename T2>
-    inline bool operator()(const T1& x, const T2& y) const {
-      return sputsoft::numbers::compare(x, y) >= 0;
-    }
-  };
-
-  template <typename Op, typename T1, typename T2, bool Ok>
-  struct approve_cmp_overload2 {};
-
-  template <typename Op, typename T1, typename T2>
-  struct approve_cmp_overload2<Op, T1, T2, true> {
-    typedef bool return_type;
-    inline bool operator()(const T1& x, const T2& y) const {
-      return Op()(sputsoft::numbers::eval(x), sputsoft::numbers::eval(y));
-    }
-  };
-
-  template <typename Op, typename T1, typename T2>
-  struct approve_cmp_overload
-    : public approve_cmp_overload2<Op, T1, T2, approve_binop_args<T1, T2>::value> {};
-*/
   /*
   template <typename R, typename R2, typename X, typename Y>
   struct expr<R, binary<ops::binary::add, X, expr<R2, unary<ops::unary::negate, Y> > > > {
     typename resolve_ref<X>::ref_type x;
     typename resolve_ref<Y>::ref_type y;
-    typedef typename resolve_type<X>::type x_type;
-    typedef typename resolve_type<Y>::type y_type;
     expr(const X& _x, const expr<R2, unary<ops::unary::negate, Y> >& _y) : x(_x), y(_y.x) {}
-    inline void assign(R& r) const { sputsoft::numbers::sub(r, (x_type) x, (y_type) y); }
-    inline operator R() const { return sputsoft::numbers::sub((x_type) x, (y_type) y); }
+    inline void assign(R& r) const { sputsoft::numbers::sub(r, x, y); }
+    inline operator R() const { return sputsoft::numbers::sub(x, y); }
   };
   */
-/*
+
   template <typename R, typename X, typename Y>
   struct expr<R, binary<ops::binary::add, X, Y> > {
     typename resolve_ref<X>::ref_type x;
@@ -182,89 +113,82 @@ namespace {
   class expr<R, binary<ops::binary::sub, X, Y> > {
     typename resolve_ref<X>::ref_type x;
     typename resolve_ref<Y>::ref_type y;
-    typedef typename resolve_type<X>::type x_type;
-    typedef typename resolve_type<Y>::type y_type;
   public:
     expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    inline void assign(R& r) const { sputsoft::numbers::sub(r, (x_type) x, (y_type) y); }
-    inline operator R() const { return sputsoft::numbers::sub((x_type) x, (y_type) y); }
+    inline void assign(R& r) const { sputsoft::numbers::sub(r, x, y); }
+    inline operator R() const { return sputsoft::numbers::sub(x, y); }
   };
 
   template <typename R, typename X, typename Y>
   class expr<R, binary<ops::binary::mul, X, Y> > {
     typename resolve_ref<X>::ref_type x;
     typename resolve_ref<Y>::ref_type y;
-    typedef typename resolve_type<X>::type x_type;
-    typedef typename resolve_type<Y>::type y_type;
   public:
     expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    inline void assign(R& r) const { sputsoft::numbers::mul(r, (x_type) x, (y_type) y); }
-    inline operator R() const { return sputsoft::numbers::mul((x_type) x, (y_type) y); }
+    inline void assign(R& r) const { sputsoft::numbers::mul(r, x, y); }
+    inline operator R() const { return sputsoft::numbers::mul(x, y); }
   };
 
   template <typename R, typename X, typename Y>
   class expr<R, binary<ops::binary::div, X, Y> > {
     typename resolve_ref<X>::ref_type x;
     typename resolve_ref<Y>::ref_type y;
-    typedef typename resolve_type<X>::type x_type;
-    typedef typename resolve_type<Y>::type y_type;
   public:
     expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    inline void assign(R& r) const { sputsoft::numbers::div(r, (x_type) x, (y_type) y); }
-    inline operator R() const { return sputsoft::numbers::div((x_type) x, (y_type) y); }
+    inline void assign(R& r) const { sputsoft::numbers::div(r, x, y); }
+    inline operator R() const { return sputsoft::numbers::div(x, y); }
   };
 
   template <typename R, typename X, typename Y>
   class expr<R, binary<ops::binary::rem, X, Y> > {
     typename resolve_ref<X>::ref_type x;
     typename resolve_ref<Y>::ref_type y;
-    typedef typename resolve_type<X>::type x_type;
-    typedef typename resolve_type<Y>::type y_type;
   public:
     expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    inline void assign(R& r) const { sputsoft::numbers::rem(r, (x_type) x, (y_type) y); }
-    inline operator R() const { return sputsoft::numbers::rem((x_type) x, (y_type) y); }
+    inline void assign(R& r) const { sputsoft::numbers::rem(r, x, y); }
+    inline operator R() const { return sputsoft::numbers::rem(x, y); }
   };
 
   template <typename R, typename X, typename Y>
-  class expr<R, binary<ops::binary::lshift, X, Y> > {
+  class expr<R, binary<ops::binary::shift_left, X, Y> > {
     typename resolve_ref<X>::ref_type x;
     typename resolve_ref<Y>::ref_type y;
-    typedef typename resolve_type<X>::type x_type;
-    typedef typename resolve_type<Y>::type y_type;
   public:
     expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    inline void assign(R& r) const { sputsoft::numbers::bit_shift_left(r, (x_type) x, (y_type) y); }
-    inline operator R() const { return sputsoft::numbers::bit_shift_left((x_type) x, (y_type) y); }
+    inline void assign(R& r) const { sputsoft::numbers::bit_shift_left(r, x, y); }
+    inline operator R() const { return sputsoft::numbers::bit_shift_left(x, y); }
   };
 
   template <typename R, typename X, typename Y>
-  class expr<R, binary<ops::binary::rshift, X, Y> > {
+  class expr<R, binary<ops::binary::shift_right, X, Y> > {
     typename resolve_ref<X>::ref_type x;
     typename resolve_ref<Y>::ref_type y;
-    typedef typename resolve_type<X>::type x_type;
-    typedef typename resolve_type<Y>::type y_type;
   public:
     expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    inline void assign(R& r) const { sputsoft::numbers::bit_shift_right(r, (x_type) x, (y_type) y); }
-    inline operator R() const { return sputsoft::numbers::bit_shift_right((x_type) x, (y_type) y); }
+    inline void assign(R& r) const { sputsoft::numbers::bit_shift_right(r, x, y); }
+    inline operator R() const { return sputsoft::numbers::bit_shift_right(x, y); }
   };
 
   template <typename R, typename X>
   struct expr<R, unary<ops::unary::negate, X> > {
     typename resolve_ref<X>::ref_type x;
-    typedef typename resolve_type<X>::type x_type;
     expr(const X& _x) : x(_x) {}
-    inline void assign(R& r) const { sputsoft::numbers::negate(r, (x_type) x); }
-    inline operator R() const { return sputsoft::numbers::negate((x_type) x); }
+    inline void assign(R& r) const { sputsoft::numbers::negate(r, x); }
+    inline operator R() const { return sputsoft::numbers::negate(x); }
   };
 
 } // local namespace
 
+template <typename R1, typename R2, typename E2>
+struct enabler_rv<ops::unary::identity, R1, expr<R2, E2> >
+  : public enabler_rv<ops::unary::identity, R1, R2> {};
+
 template <typename R, typename E>
-struct resolve_unary<ops::unary::identity, expr<R, E> > {
-  typedef R return_type;
-};
+struct unary_result<ops::unary::identity, expr<R, E> >
+  : public unary_result<ops::unary::identity, R> {};
+
+template <typename Op, typename R, typename E>
+struct unary_result<Op, expr<R, E> > : public unary_result<Op, R> {};
 
 template <typename R, typename E>
 struct function_v<ops::unary::identity, expr<R, E> > {
@@ -277,6 +201,19 @@ struct evaluator_rv<ops::unary::identity, numb<R1>, expr<R2, E2> > {
     v.assign(r);
   }
 };
+
+template <typename Op, typename R1, typename E1, typename R2, typename E2>
+struct binary_result<Op, expr<R1, E1>, expr<R2, E2> >
+  : public binary_result<Op, R1, R2> {};
+
+template <typename Op, typename R, typename E, typename V>
+struct binary_result<Op, expr<R, E>, V>
+  : public binary_result<Op, R, V> {};
+
+template <typename Op, typename V, typename R, typename E>
+struct binary_result<Op, V, expr<R, E> >
+  : public binary_result<Op, V, R> {};
+
 
 template <typename T1, typename T2>
 typename approve_binop_overload<ops::binary::add, T1, T2>::return_type
@@ -309,15 +246,15 @@ operator%(const T1& x, const T2& y) {
 }
 
 template <typename T1, typename T2>
-typename approve_shift_overload<ops::binary::lshift, T1, T2>::return_type
+typename approve_shift_overload<ops::binary::shift_left, T1, T2>::return_type
 operator<<(const T1& x, const T2& y) {
-  return approve_shift_overload<ops::binary::lshift, T1, T2>()(x, y);
+  return approve_shift_overload<ops::binary::shift_left, T1, T2>()(x, y);
 }
 
 template <typename T1, typename T2>
-typename approve_shift_overload<ops::binary::rshift, T1, T2>::return_type
+typename approve_shift_overload<ops::binary::shift_right, T1, T2>::return_type
 operator>>(const T1& x, const T2& y) {
-  return approve_shift_overload<ops::binary::rshift, T1, T2>()(x, y);
+  return approve_shift_overload<ops::binary::shift_right, T1, T2>()(x, y);
 }
 
 template <typename T>
@@ -326,41 +263,43 @@ operator-(const T& x) {
   return approve_unop_overload<ops::unary::negate, T>()(x);
 }
 
+
 template <typename T1, typename T2>
-inline typename approve_cmp_overload<cmp_equal, T1, T2>::return_type
+inline typename approve_cmp_overload<T1, T2>::type
 operator==(const T1& x, const T2& y) {
-  return approve_cmp_overload<cmp_equal, T1, T2>()(x, y);
+  return sputsoft::numbers::is_equal(sputsoft::numbers::eval(x), sputsoft::numbers::eval(y));
 }
 
 template <typename T1, typename T2>
-inline typename approve_cmp_overload<cmp_not_equal, T1, T2>::return_type
+inline typename approve_cmp_overload<T1, T2>::type
 operator!=(const T1& x, const T2& y) {
-  return approve_cmp_overload<cmp_not_equal, T1, T2>()(x, y);
+  return sputsoft::numbers::is_not_equal(sputsoft::numbers::eval(x), sputsoft::numbers::eval(y));
 }
 
 template <typename T1, typename T2>
-inline typename approve_cmp_overload<cmp_less, T1, T2>::return_type
+inline typename approve_cmp_overload<T1, T2>::type
 operator<(const T1& x, const T2& y) {
-  return approve_cmp_overload<cmp_less, T1, T2>()(x, y);
+  return sputsoft::numbers::is_less(sputsoft::numbers::eval(x), sputsoft::numbers::eval(y));
 }
 
 template <typename T1, typename T2>
-inline typename approve_cmp_overload<cmp_less_or_equal, T1, T2>::return_type
-operator<=(const T1& x, const T2& y) {
-  return approve_cmp_overload<cmp_less_or_equal, T1, T2>()(x, y);
-}
-
-template <typename T1, typename T2>
-inline typename approve_cmp_overload<cmp_greater, T1, T2>::return_type
+inline typename approve_cmp_overload<T1, T2>::type
 operator>(const T1& x, const T2& y) {
-  return approve_cmp_overload<cmp_greater, T1, T2>()(x, y);
+  return sputsoft::numbers::is_greater(sputsoft::numbers::eval(x), sputsoft::numbers::eval(y));
 }
 
 template <typename T1, typename T2>
-inline typename approve_cmp_overload<cmp_greater_or_equal, T1, T2>::return_type
-operator>=(const T1& x, const T2& y) {
-  return approve_cmp_overload<cmp_greater_or_equal, T1, T2>()(x, y);
+inline typename approve_cmp_overload<T1, T2>::type
+operator<=(const T1& x, const T2& y) {
+  return sputsoft::numbers::is_less_or_equal(sputsoft::numbers::eval(x), sputsoft::numbers::eval(y));
 }
+
+template <typename T1, typename T2>
+inline typename approve_cmp_overload<T1, T2>::type
+operator>=(const T1& x, const T2& y) {
+  return sputsoft::numbers::is_greater_or_equal(sputsoft::numbers::eval(x), sputsoft::numbers::eval(y));
+}
+
 
 template <typename N, typename T>
 inline numb<N>& operator+=(numb<N>& x, const T& y) {
@@ -405,5 +344,5 @@ std::ostream& operator<<(std::ostream& os, const expr<R, E>& e) {
 } // namespace detail
 } // namespace numbers
 } // namespace sputsoft
-*/
+
 #endif // _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP

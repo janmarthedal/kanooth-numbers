@@ -153,24 +153,11 @@ int main()
   sputsoft::numbers::add(a, b, sputsoft::numbers::add(b, c));
   std::cout << a << std::endl;*/
 
-  int a=7, b=2;
   natural_number c="1234567", d=3u;
 
-  //sub(c, 41u, c);
-  unsigned u = divrem(c, c, 54321u);
-
-  std::cout << c << std::endl;
-  std::cout << u << std::endl;
-
-  bit_shift_left(d, d, 10);
+  d = sputsoft::numbers::add(c, c + d);
+  
   std::cout << d << std::endl;
-
-  std::cout << bit_shift_left(192, -2) << std::endl;
-  std::cout << is_negative(c) << std::endl;
-  bitwise_or(d, d, 10u);
-  t(bitwise_and(d, 23u));
-
-  std::cout << factorial<natural_number>(50) << std::endl;
 
   return 0;
 }

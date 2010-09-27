@@ -45,7 +45,10 @@ struct enabler_rv
 
 template <typename R, typename V>
 struct enabler_rv<ops::unary::identity, R, V>
-  : identity_enabler<is_number<R>::value && is_number<V>::value, R, V> {};
+  : identity_enabler<is_number<R>::value
+      && is_number<V>::value, R, V> {};
+      /*&& is_number<typename unary_result<ops::unary::identity, V>::type>::value,
+      R, typename unary_result<ops::unary::identity, V>::type> {};*/
 
 template <typename Op, typename R, typename V1, typename V2>
 struct enabler_rvv
@@ -62,6 +65,9 @@ struct evaluator_rv {
 
 /* Unary identity */
 
+template <typename T>
+struct unary_result<ops::unary::identity, T> : type_if<is_number<T>::value, T> {};
+
 template <typename R, typename V>
 struct evaluator_rv<ops::unary::identity, R, V> {
   inline void operator()(R& r, const V& v) const {
@@ -71,10 +77,10 @@ struct evaluator_rv<ops::unary::identity, R, V> {
 
 /* Unary eval/identity */
 
-/*template <typename T>
+template <typename T>
 struct function_v<ops::unary::identity, T> {
   inline const T& operator()(const T& v) const { return v; }
-};*/
+};
 
 /* Unary negate */
 
@@ -297,7 +303,18 @@ struct binary_result<ops::binary::shift_left, T, std::ptrdiff_t>
 template <typename R, typename V>
 struct function_rt_vv_default<ops::binary::shift_left, R, V, std::ptrdiff_t> {
   inline R operator()(const V& v, std::ptrdiff_t count) const {
-    return (count == 0) ? v : (count > 0) ? (v << count) : (v >> (-count));
+    return v << count;
+  }
+};
+
+template <typename T>
+struct binary_result<ops::binary::shift_right, T, std::ptrdiff_t>
+  : public binary_result<ops::binary::shift_left, T, std::ptrdiff_t> {};
+
+template <typename R, typename V>
+struct function_rt_vv_default<ops::binary::shift_right, R, V, std::ptrdiff_t> {
+  inline R operator()(const V& v, std::ptrdiff_t count) const {
+    return v >> count;
   }
 };
 
@@ -319,6 +336,13 @@ template <typename V1, typename V2>
 struct bool_compare_eval_default<ops::binary_compare::equal, V1, V2> {
   inline bool operator()(const V1& v1, const V2& v2) const {
     return v1 == v2;
+  }
+};
+
+template <typename V1, typename V2>
+struct bool_compare_eval_default<ops::binary_compare::not_equal, V1, V2> {
+  inline bool operator()(const V1& v1, const V2& v2) const {
+    return v1 != v2;
   }
 };
 
@@ -358,7 +382,7 @@ struct bool_compare_eval : public bool_compare_eval_default<Op, V1, V2> {};
 template <typename T>
 struct is_zero_eval {
   inline bool operator()(const T& v) const {
-    return v != 0;
+    return v == 0;
   }
 };
 
