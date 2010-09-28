@@ -1,5 +1,5 @@
 /*
- * File:   sputsoft/numbers/common_type.hpp
+ * File:   sputsoft/numbers/number_traits.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-09-10 13:27Z
@@ -12,8 +12,8 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_COMMON_TYPE_HPP
-#define _SPUTSOFT_NUMBERS_COMMON_TYPE_HPP
+#ifndef _SPUTSOFT_NUMBERS_NUMBER_TRAITS_HPP
+#define _SPUTSOFT_NUMBERS_NUMBER_TRAITS_HPP
 
 #include <sputsoft/type_traits.hpp>
 
@@ -39,6 +39,19 @@ struct choose_type { typedef F type; };
 template <typename T, typename F>
 struct choose_type<true, T, F> { typedef T type; };
 
+} // namespace details
+
+// private helpers
+namespace {
+
+template <bool C, typename R, typename V>
+struct is_assignable2 : public false_type {};
+
+template <typename R, typename V>
+struct is_assignable2<true, R, V>
+  : public integral_constant<bool, (detail::type_rank<R>::value >= detail::type_rank<V>::value)
+                                && (is_signed<R>::value || !is_signed<V>::value)> {};
+
 }
 
 template <typename T1, typename T2>
@@ -49,8 +62,14 @@ struct common_type
                                              >::type
                        > {};
 
+template <typename T>
+struct is_number : public is_native_int<T> {};
+
+template <typename R, typename V>
+struct is_assignable
+  : public is_assignable2<is_number<R>::value && is_number<V>::value, R, V> {};
 
 } // numbers
 } // sputsoft
 
-#endif // _SPUTSOFT_NUMBERS_COMMON_TYPE_HPP
+#endif // _SPUTSOFT_NUMBERS_NUMBER_TRAITS_HPP

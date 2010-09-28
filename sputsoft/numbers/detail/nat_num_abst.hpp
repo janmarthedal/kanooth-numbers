@@ -15,7 +15,7 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_ABST_HPP
 #define _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_ABST_HPP
 
-#include <sputsoft/numbers/common_type.hpp>
+#include <sputsoft/numbers/number_traits.hpp>
 #include <sputsoft/numbers/detail/number_abst.hpp>
 #include <sputsoft/numbers/detail/default_ops.hpp>
 

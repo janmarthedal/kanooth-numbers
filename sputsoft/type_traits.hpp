@@ -33,6 +33,17 @@
 
 namespace sputsoft {
 
+  template <bool C, typename T>
+  struct type_if {
+    static const bool enabled = false;
+  };
+
+  template <typename T>
+  struct type_if<true, T> {
+    static const bool enabled = true;
+    typedef T type;
+  };
+
   template <typename T, T val>
   struct integral_constant {
     static const T value = val;

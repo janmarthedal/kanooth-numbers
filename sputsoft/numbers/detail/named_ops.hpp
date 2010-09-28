@@ -17,14 +17,10 @@
 
 #include <cstring>
 #include <sputsoft/type_traits.hpp>
-#include <sputsoft/numbers/common_type.hpp>
+#include <sputsoft/numbers/number_traits.hpp>
 
 namespace sputsoft {
 namespace numbers {
-
-template <typename T>
-struct is_number : public is_native_int<T> {};
-
 namespace detail {
 
 namespace ops {
@@ -91,17 +87,6 @@ template <typename Op, typename R, typename V> struct evaluator_rv;
 
 // Enablers
 
-template <bool C, typename T>
-struct type_if {
-  static const bool enabled = false;
-};
-
-template <typename T>
-struct type_if<true, T> {
-  static const bool enabled = true;
-  typedef T type;
-};
-
 template <typename Op, typename R, typename V>
 struct enabler_rv;
 
@@ -138,19 +123,19 @@ inline typename eval_type<T>::type eval(const T& v) {
 // Unary
 
 template <typename R, typename Forw>
-inline typename detail::type_if<is_number<R>::value, void>::type
+inline typename type_if<is_number<R>::value, void>::type
 set(R& r, Forw first, const Forw last, unsigned base=10) {
   detail::set_4_eval<R, Forw>()(r, first, last, base);
 }
 
 template <typename R>
-inline typename detail::type_if<is_number<R>::value, void>::type
+inline typename type_if<is_number<R>::value, void>::type
 set(R& r, const std::string& st, unsigned base) {
   set(r, st.begin(), st.end(), base);
 }
 
 template <typename R>
-inline typename detail::type_if<is_number<R>::value, void>::type
+inline typename type_if<is_number<R>::value, void>::type
 set(R& r, const char* st, unsigned base=10) {
   set(r, st, st + std::strlen(st), base);
 }
@@ -249,7 +234,7 @@ rem(R& r, const V1& v1, const V2& v2) {
 }
 
 template <typename Q, typename R, typename V1, typename V2>
-inline typename detail::type_if<
+inline typename type_if<
                   detail::enabler_rvv<detail::ops::binary::div, Q, V1, V2>::enabled &&
                   detail::enabler_rvv<detail::ops::binary::rem, R, V1, V2>::enabled, void>::type
 divrem(Q& q, R& r, const V1& v1, const V2& v2) {
@@ -471,7 +456,7 @@ bit_shift_right(const V& v, std::ptrdiff_t count) {
 }
 
 template <typename Q, typename V1, typename V2>
-inline typename detail::type_if<detail::enabler_rvv<detail::ops::binary::div, Q, V1, V2>::enabled,
+inline typename type_if<detail::enabler_rvv<detail::ops::binary::div, Q, V1, V2>::enabled,
                  typename detail::binary_result<detail::ops::binary::rem, V1, V2>::type>::type
 divrem(Q& q, const V1& v1, const V2& v2) {
   return detail::function_divrem<Q,
@@ -480,7 +465,7 @@ divrem(Q& q, const V1& v1, const V2& v2) {
 }
 
 template <typename Q, typename V1, typename V2>
-inline typename detail::type_if<detail::enabler_rvv<detail::ops::binary::floor_div, Q, V1, V2>::enabled,
+inline typename type_if<detail::enabler_rvv<detail::ops::binary::floor_div, Q, V1, V2>::enabled,
                  typename detail::binary_result<detail::ops::binary::floor_rem, V1, V2>::type>::type
 floor_divrem(Q& q, const V1& v1, const V2& v2) {
   return detail::function_floor_divrem<Q,
@@ -496,61 +481,61 @@ inline std::size_t floor_log2(T n) {
 }
 
 template <typename V1, typename V2>
-inline typename detail::type_if<is_number<V1>::value && is_number<V2>::value, int>::type
+inline typename type_if<is_number<V1>::value && is_number<V2>::value, int>::type
 compare(const V1& v1, const V2& v2) {
   return detail::compare_eval<V1, V2>()(v1, v2);
 }
 
 template <typename V1, typename V2>
-inline typename detail::type_if<is_number<V1>::value && is_number<V2>::value, bool>::type
+inline typename type_if<is_number<V1>::value && is_number<V2>::value, bool>::type
 is_equal(const V1& v1, const V2& v2) {
   return detail::bool_compare_eval<detail::ops::binary_compare::equal, V1, V2>()(v1, v2);
 }
 
 template <typename V1, typename V2>
-inline typename detail::type_if<is_number<V1>::value && is_number<V2>::value, bool>::type
+inline typename type_if<is_number<V1>::value && is_number<V2>::value, bool>::type
 is_not_equal(const V1& v1, const V2& v2) {
   return detail::bool_compare_eval<detail::ops::binary_compare::not_equal, V1, V2>()(v1, v2);
 }
 
 template <typename V1, typename V2>
-inline typename detail::type_if<is_number<V1>::value && is_number<V2>::value, bool>::type
+inline typename type_if<is_number<V1>::value && is_number<V2>::value, bool>::type
 is_less(const V1& v1, const V2& v2) {
   return detail::bool_compare_eval<detail::ops::binary_compare::less, V1, V2>()(v1, v2);
 }
 
 template <typename V1, typename V2>
-inline typename detail::type_if<is_number<V1>::value && is_number<V2>::value, bool>::type
+inline typename type_if<is_number<V1>::value && is_number<V2>::value, bool>::type
 is_greater(const V1& v1, const V2& v2) {
   return detail::bool_compare_eval<detail::ops::binary_compare::greater, V1, V2>()(v1, v2);
 }
 
 template <typename V1, typename V2>
-inline typename detail::type_if<is_number<V1>::value && is_number<V2>::value, bool>::type
+inline typename type_if<is_number<V1>::value && is_number<V2>::value, bool>::type
 is_less_or_equal(const V1& v1, const V2& v2) {
   return detail::bool_compare_eval<detail::ops::binary_compare::less_or_equal, V1, V2>()(v1, v2);
 }
 
 template <typename V1, typename V2>
-inline typename detail::type_if<is_number<V1>::value && is_number<V2>::value, bool>::type
+inline typename type_if<is_number<V1>::value && is_number<V2>::value, bool>::type
 is_greater_or_equal(const V1& v1, const V2& v2) {
   return detail::bool_compare_eval<detail::ops::binary_compare::greater_or_equal, V1, V2>()(v1, v2);
 }
 
 template <typename T>
-inline typename detail::type_if<is_number<T>::value, bool>::type
+inline typename type_if<is_number<T>::value, bool>::type
 is_zero(const T& v) {
   return detail::is_zero_eval<T>()(v);
 }
 
 template <typename T>
-inline typename detail::type_if<is_number<T>::value, bool>::type
+inline typename type_if<is_number<T>::value, bool>::type
 is_positive(const T& v) {
   return detail::is_positive_eval<T>()(v);
 }
 
 template <typename T>
-inline typename detail::type_if<is_number<T>::value, bool>::type
+inline typename type_if<is_number<T>::value, bool>::type
 is_negative(const T& v) {
   return detail::is_negative_eval<T>()(v);
 }

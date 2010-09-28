@@ -21,23 +21,12 @@ namespace sputsoft {
 namespace numbers {
 namespace detail {
 
-namespace {
-
-template <bool C, typename R, typename V>
-struct identity_enabler {};
-
-template <typename R, typename V>
-struct identity_enabler<true, R, V>
-  : public type_if<(detail::type_rank<R>::value >= detail::type_rank<V>::value)
-                      && (is_signed<R>::value || !is_signed<V>::value), void> {};
-
-}
-
 template <typename Op, typename R, typename V1, typename V2>
 struct function_rt_vv_default;
 
 template <typename Op, typename R, typename V1, typename V2>
-struct function_rt_vv : public function_rt_vv_default<Op, R, V1, V2> {};
+struct function_rt_vv
+  : public function_rt_vv_default<Op, R, V1, V2> {};
 
 template <typename Op, typename R, typename V>
 struct enabler_rv
@@ -45,10 +34,7 @@ struct enabler_rv
 
 template <typename R, typename V>
 struct enabler_rv<ops::unary::identity, R, V>
-  : identity_enabler<is_number<R>::value
-      && is_number<V>::value, R, V> {};
-      /*&& is_number<typename unary_result<ops::unary::identity, V>::type>::value,
-      R, typename unary_result<ops::unary::identity, V>::type> {};*/
+  : type_if<is_assignable<R, V>::value, void> {};
 
 template <typename Op, typename R, typename V1, typename V2>
 struct enabler_rvv

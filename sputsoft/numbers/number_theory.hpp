@@ -15,7 +15,7 @@
 #ifndef _SPUTSOFT_NUMBERS_NUMBER_THEORY_HPP
 #define _SPUTSOFT_NUMBERS_NUMBER_THEORY_HPP
 
-#include <sputsoft/numbers/common_type.hpp>
+#include <sputsoft/numbers/number_traits.hpp>
 
 namespace sputsoft {
 namespace numbers {
@@ -54,7 +54,8 @@ struct gcd_return_type
              typename detail::unary_result<detail::ops::unary::abs, T2>::type> {};
 
 template <typename R, typename T1, typename T2>
-void gcd(R& r, const T1& v1, const T2& v2)
+typename type_if<is_assignable<R, typename gcd_return_type<T1, T2>::type>::value, void>::type
+gcd(R& r, const T1& v1, const T2& v2)
 {
   typename gcd_return_type<T1, T2>::type a, b;
   abs(a, v1);
