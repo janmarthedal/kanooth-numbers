@@ -754,17 +754,16 @@ public:
   template <typename T>
   static inline T rem(const numb& x, T y) { return rem_int(x.con, y); }
 
+  static inline void divrem(numb& q, numb& r, const numb& x, const numb& y) {
+    quotrem_num(q.con, r.con, x.con, y.con);
+  }
   template <typename T>
   inline T divrem(const numb& x, T y) { return quotrem_i(con, x.con, y); }
 
   inline int cmp(const numb& v) const { return comp_num(con, v.con); }
   template <typename T>
   inline int cmp(T v) const {
-    return (is_signed<T>::value && v < 0) ? 1 : comp_int(con, to_unsigned<T>(v));
-  }
-
-  static inline void divrem(numb& q, numb& r, const numb& x, const numb& y) {
-    quotrem_num(q.con, r.con, x.con, y.con);
+    return (is_signed<T>::value && v < 0) ? 1 : comp_int(con, to_unsigned(v));
   }
 
   inline void bitwise_and(const numb& x, const numb& y) { bit_and_num(con, x.con, y.con); }

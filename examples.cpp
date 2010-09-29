@@ -110,7 +110,7 @@ void bits1()
   std::cout << c << std::endl;
 }
 
-/*void bits2()
+void bits2()
 {
   integer a = -2, b = 7, c;
 
@@ -122,7 +122,7 @@ void bits1()
   std::cout << c << std::endl;
   bitwise_and(c, -2, 7);
   std::cout << c << std::endl;
-}*/
+}
 
 
 void t(short v) {  std::cout << "short " << v << std::endl; }
@@ -157,18 +157,18 @@ int main()
   PE16();
   PE20();
   factorize_example();
-  gcd_example();
-  bits1();*/
+  gcd_example();*/
+  bits2();
 
-  integer a, b=-2;
-  sputsoft::numbers::mul(a, b, 3);
-  std::cout << a << std::endl;
+  /*integer i=77;
+  natural_number n=80u;
+  std::cout << compare(i, n) << std::endl;*/
 
   /*natural_number c="1234567", d=3u;
-  d = sputsoft::numbers::add(c, c + d);
-  std::cout << sputsoft::numbers::rem(d+2u, 10u) + d << std::endl;
+  sputsoft::numbers::div(c, c, d);
+  std::cout << c << std::endl;*/
 
-  sqrt_example();*/
+  //sqrt_example();
 
   return 0;
 }

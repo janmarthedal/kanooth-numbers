@@ -223,98 +223,28 @@ struct divrem_evaluator<numb<N>, R, V1, V2> {
   }
 };
 
-/*
-template <typename T, typename V1, typename V2>
-struct evaluator_rvv<ops::binary::div_floor, numb<T>, V1, V2> {
-  void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
-    r.div_floor(v1, v2);
-  }
-};
+namespace {
 
-template <typename T, typename V1, typename V2>
-struct evaluator_rvv<ops::binary::div_ceil, numb<T>, V1, V2> {
-  void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
-    r.div_ceil(v1, v2);
-  }
-};
+  template <typename N1, typename N2, bool AB>
+  struct compare_eval_AB {
+    inline int operator()(const N1& v1, const N2& v2) const {
+      return v1.cmp(v2);
+    }
+  };
 
-template <typename T, typename V1, typename V2>
-struct evaluator_rvv<ops::binary::div_trunc, numb<T>, V1, V2> {
-  void operator()(numb<T>& r, const V1& v1, const V2& v2) const {
-    r.div_trunc(v1, v2);
-  }
-};
+  template <typename N1, typename N2>
+  struct compare_eval_AB<N1, N2, false> {
+    inline int operator()(const N1& v1, const N2& v2) const {
+      return -v2.cmp(v1);
+    }
+  };
 
-template <typename R, typename T, typename V>
-struct evaluator_rvv<ops::binary::rem, R, numb<T>, V> {
-  void operator()(R& r, const numb<T>& v1, const V& v2) const {
-    numb<T>::rem(r, v1, v2);
-  }
-};
-
-template <typename R, typename T, typename V>
-struct evaluator_rvv<ops::binary::rem_floor, R, numb<T>, V> {
-  void operator()(R& r, const numb<T>& v1, const V& v2) const {
-    numb<T>::rem_floor(r, v1, v2);
-  }
-};
-
-template <typename R, typename T, typename V>
-struct evaluator_rvv<ops::binary::rem_ceil, R, numb<T>, V> {
-  void operator()(R& r, const numb<T>& v1, const V& v2) const {
-    numb<T>::rem_ceil(r, v1, v2);
-  }
-};
-
-template <typename R, typename T, typename V>
-struct evaluator_rvv<ops::binary::rem_trunc, R, numb<T>, V> {
-  void operator()(R& r, const numb<T>& v1, const V& v2) const {
-    numb<T>::rem_trunc(r, v1, v2);
-  }
-};
-
-template <typename T, typename R, typename V1, typename V2>
-struct evaluator_rrvv<ops::binary::quotrem_floor, numb<T>, R, V1, V2> {
-  void operator()(numb<T>& q, R& r, const V1& v1, const V2& v2) const {
-    numb<T>::quotrem_floor(q, r, v1, v2);
-  }
-};
-
-template <typename T, typename R, typename V1, typename V2>
-struct evaluator_rrvv<ops::binary::quotrem_ceil, numb<T>, R, V1, V2> {
-  void operator()(numb<T>& q, R& r, const V1& v1, const V2& v2) const {
-    numb<T>::quotrem_ceil(q, r, v1, v2);
-  }
-};
-
-template <typename T, typename R, typename V1, typename V2>
-struct evaluator_rrvv<ops::binary::quotrem_trunc, numb<T>, R, V1, V2> {
-  void operator()(numb<T>& q, R& r, const V1& v1, const V2& v2) const {
-    numb<T>::quotrem_trunc(q, r, v1, v2);
-  }
-};
-
-template <typename T, typename V>
-struct lshift_3_eval<numb<T>, V> {
-  static inline void lshift(numb<T>& r, const V& v, std::ptrdiff_t count) {
-    r.left_shift(v, count);
-  }
-};
-
-template <typename T, typename V>
-struct rshift_3_eval<numb<T>, V> {
-  static inline void rshift(numb<T>& r, const V& v, std::ptrdiff_t count) {
-    r.right_shift(v, count);
-  }
-};*/
+}
 
 template <typename N1, typename N2>
-struct compare_eval<numb<N1>, numb<N2> > {
-  inline int operator()(const numb<N1>& v1, const numb<N2>& v2) const {
-    return detail::type_rank<numb<N1> >::value >= detail::type_rank<numb<N2> >::value
-            ? v1.cmp(v2) : -v2.cmp(v1);
-  }
-};
+struct compare_eval<numb<N1>, numb<N2> >
+  : public compare_eval_AB<numb<N1>, numb<N2>,
+                 detail::type_rank<numb<N1> >::value >= detail::type_rank<numb<N2> >::value> {};
 
 template <typename N, typename V>
 struct compare_eval<numb<N>, V> {

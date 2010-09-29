@@ -169,8 +169,8 @@ struct is_negative_eval<numb<intnum<T> > > {
 
 template <typename NUM>
 inline std::ostream& operator<<(std::ostream& os, const numb<intnum<NUM> >& n) {
-  if (n.num && !n.positive) os << "-";
-  return os << n.num;
+  if (n.is_negative()) os << "-";
+  return os << n.get_abs();
 }
 
 template <typename NUM, typename Forw>
