@@ -27,10 +27,17 @@ NUM factorial(std::size_t n)
   return r;
 }
 
-template <typename NUM>
-NUM power(NUM n, std::size_t p)
+template <typename T1, typename T2>
+struct mul_power_result : detail::binary_result<detail::ops::binary::mul, T1, T2> {};
+
+// r = y * z^p
+template <typename T1, typename T2>
+typename mul_power_result<T1, T2>::type
+mul_power(const T1& y_, const T2& z_, std::size_t p)
 {
-  NUM y = 1u, z = n;
+  typename mul_power_result<T1, T2>::type y, z;
+  set(y, y_);
+  set(z, z_);
   while (p) {
     if (p & 1) {
       mul(y, y, z);
@@ -43,25 +50,62 @@ NUM power(NUM n, std::size_t p)
   return y;
 }
 
-/*template <typename NUM>
-NUM sqrt_floor(NUM n)
+template <typename T>
+T power(const T& x, std::size_t p)
 {
-  if (n <= 1) return n;
-  NUM a = n, b;
+  return mul_power(1u, x, p);
+}
+
+namespace {
+
+/*template <typename T>
+T floor_sqrt_help(const T& n)
+{
+  if (n <= 1u) return n;
+  std::size_t k = floor_log2(n);
+  T a = T(1u) << (k/2+1), b;
+  int it = 0;
   while (true) {
-    b = (a + n/a)/2;
-    if (b >= a) return a;
-    a = (b + n/b)/2;
-    if (a >= b) return b;
+    b = (a + n/a) >> 1;
+    it++;
+    //if (b >= a) return a;
+    if (b >= a) { std::cout << "Iterations: " << it << std::endl; return a; }
+    a = (b + n/b) >> 1;
+    it++;
+    //if (a >= b) return b;
+    if (a >= b) { std::cout << "Iterations: " << it << std::endl; return b; }
+  }
+}*/
+
+template <typename T>
+T floor_sqrt_help(const T& n)
+{
+  if (n <= 1u) return n;
+  std::size_t k = floor_log2(n);
+  T a = T(1u) << (k/2), b = a << 1, m;
+  int it = 0;
+  while (true) {
+    it++;
+    m = (a + b) >> 1;
+    if (a == m)
+      { std::cout << "Iterations: " << it << std::endl; return a; }
+    if (m*m > n)
+      b = m;
+    else
+      a = m;
   }
 }
 
-template <typename R, typename E>
-inline R sqrt_floor(const detail::expr<R, E>& ex)
-{
-  return sqrt_floor((R) ex);
 }
-*/
+
+template <typename T>
+struct floor_sqrt_result : type_if<is_integral<T>::value, typename eval_result<T>::type> {};
+
+template <typename T>
+typename floor_sqrt_result<T>::type floor_sqrt(const T& n)
+{
+  return floor_sqrt_help((typename floor_sqrt_result<T>::type) n);
+}
 
 template <typename NUM>
 NUM sideways_sum(NUM n, unsigned base)

@@ -13,10 +13,10 @@
  */
 
 #include <iostream>
-//#include <vector>
+#include <vector>
 
 #include <sputsoft/numbers/natural_number.hpp>
-//#include <sputsoft/numbers/integer.hpp>
+#include <sputsoft/numbers/integer.hpp>
 #include <sputsoft/numbers/common_functions.hpp>
 #include <sputsoft/numbers/number_theory.hpp>
 
@@ -72,9 +72,20 @@ void gcd_example()
   //long b = -9876543210L;
   natural_number c;
   
-  gcd(c, a, b);
+  c = gcd(a, b);
 
   std::cout << "gcd(" << a << "," << b << ") = " << c << std::endl << std::endl;
+}
+
+void sqrt_example()
+{
+  natural_number x = mul_power(natural_number(2u), 10u, 100);
+  natural_number y = floor_sqrt(x);
+
+  //int x = 20000;
+  //int y = floor_sqrt(x);
+
+  std::cout << "sqrt(" << x << ") = " << y << " " << (y*y) << " < " << ((y+1u)*(y+1u)) << std::endl;
 }
 
 void bits1()
@@ -122,7 +133,7 @@ void t(long v) {  std::cout << "long " << v << std::endl; }
 void t(unsigned long v) { std::cout << "unsigned long " << v << std::endl; }
 void t(long long v) {  std::cout << "long long " << v << std::endl; }
 void t(unsigned long long v) { std::cout << "unsigned long long " << v << std::endl; }
-void t(natural_number v) {  std::cout << "natural_number " << v << std::endl; }
+//void t(natural_number v) {  std::cout << "natural_number " << v << std::endl; }
 //void t(integer v) { std::cout << "integer " << v << std::endl; }
 
 
@@ -142,22 +153,22 @@ typename retval<T>::type testfunc(T v) {
 
 int main()
 {
-  PE3();
+  /*PE3();
   PE16();
   PE20();
   factorize_example();
   gcd_example();
-  bits1();
+  bits1();*/
 
-  /*integer a, b=2, c=3;
-  sputsoft::numbers::add(a, b, sputsoft::numbers::add(b, c));
-  std::cout << a << std::endl;*/
+  integer a, b=-2;
+  sputsoft::numbers::mul(a, b, 3);
+  std::cout << a << std::endl;
 
-  natural_number c="1234567", d=3u;
-
+  /*natural_number c="1234567", d=3u;
   d = sputsoft::numbers::add(c, c + d);
-  
-  std::cout << d << std::endl;
+  std::cout << sputsoft::numbers::rem(d+2u, 10u) + d << std::endl;
+
+  sqrt_example();*/
 
   return 0;
 }

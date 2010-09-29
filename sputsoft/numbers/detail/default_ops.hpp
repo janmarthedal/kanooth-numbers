@@ -19,6 +19,10 @@
 
 namespace sputsoft {
 namespace numbers {
+
+template <typename T>
+struct eval_result : type_if<is_number<T>::value, T> {};
+
 namespace detail {
 
 template <typename Op, typename R, typename V1, typename V2>
@@ -52,7 +56,7 @@ struct evaluator_rv {
 /* Unary identity */
 
 template <typename T>
-struct unary_result<ops::unary::identity, T> : type_if<is_number<T>::value, T> {};
+struct unary_result2<ops::unary::identity, T> : public type_if<true, T> {};
 
 template <typename R, typename V>
 struct evaluator_rv<ops::unary::identity, R, V> {
@@ -71,7 +75,7 @@ struct function_v<ops::unary::identity, T> {
 /* Unary negate */
 
 template <typename T>
-struct unary_result<ops::unary::negate, T> : public make_signed<T> {};
+struct unary_result2<ops::unary::negate, T> : public make_signed<T> {};
 
 template <typename V>
 struct function_v<ops::unary::negate, V> {
@@ -82,7 +86,7 @@ struct function_v<ops::unary::negate, V> {
 /* Unary abs */
 
 template <typename T>
-struct unary_result<ops::unary::abs, T> : public make_unsigned<T> {};
+struct unary_result2<ops::unary::abs, T> : public make_unsigned<T> {};
 
 template <typename V>
 struct function_v<ops::unary::abs, V> {
@@ -93,7 +97,7 @@ struct function_v<ops::unary::abs, V> {
 /* Unary bit_not */
 
 template <typename T>
-struct unary_result<ops::unary::bit_not, T> : public unary_result<ops::unary::negate, T> {};
+struct unary_result2<ops::unary::bit_not, T> : public unary_result<ops::unary::negate, T> {};
 
 template <typename V>
 struct function_v<ops::unary::bit_not, V> {
@@ -102,13 +106,13 @@ struct function_v<ops::unary::bit_not, V> {
 };
 
 template <typename T>
-struct unary_result<ops::unary::trunc, T> : public type_if<sputsoft::is_integral<T>::value, T> {};
+struct unary_result2<ops::unary::trunc, T> : public type_if<sputsoft::is_integral<T>::value, T> {};
 
 template <typename T>
-struct unary_result<ops::unary::floor, T> : public unary_result<ops::unary::trunc, T> {};
+struct unary_result2<ops::unary::floor, T> : public unary_result<ops::unary::trunc, T> {};
 
 template <typename T>
-struct unary_result<ops::unary::ceil, T> : public unary_result<ops::unary::trunc, T> {};
+struct unary_result2<ops::unary::ceil, T> : public unary_result<ops::unary::trunc, T> {};
 
 /* Binary */
 
@@ -131,7 +135,7 @@ struct function_rt_vv_default<ops::binary::add, R, V1, V2> {
 /* Binary sub */
 
 template <typename V1, typename V2>
-struct binary_result<ops::binary::sub, V1, V2>
+struct binary_result2<ops::binary::sub, V1, V2>
   : public choose_type<!sputsoft::is_signed<V1>::value && !sputsoft::is_signed<V2>::value,
                        V1, typename sputsoft::numbers::common_type<V1, V2>::type> {};
 
@@ -154,7 +158,7 @@ struct function_rt_vv_default<ops::binary::mul, R, V1, V2> {
 /* Binary (floor, ceil, trunc) div */
 
 template <typename V1, typename V2>
-struct binary_result<ops::binary::div, V1, V2>
+struct binary_result2<ops::binary::div, V1, V2>
   : public choose_type<sputsoft::is_integral<V1>::value && sputsoft::is_integral<V2>::value,
         typename sputsoft::make_signed_if<sputsoft::is_signed<V2>::value, V1>::type,
         typename sputsoft::numbers::common_type<V1, V2>::type> {};
@@ -167,7 +171,7 @@ struct function_rt_vv_default<ops::binary::div, R, V1, V2> {
 };
 
 template <typename V1, typename V2>
-struct binary_result<ops::binary::trunc_div, V1, V2>
+struct binary_result2<ops::binary::trunc_div, V1, V2>
   : public unary_result<ops::unary::trunc,
                         typename binary_result<ops::binary::div, V1, V2>::type> {};
 
@@ -179,7 +183,7 @@ struct function_rt_vv_default<ops::binary::trunc_div, R, V1, V2> {
 };
 
 template <typename V1, typename V2>
-struct binary_result<ops::binary::floor_div, V1, V2>
+struct binary_result2<ops::binary::floor_div, V1, V2>
   : public binary_result<ops::binary::trunc_div, V1, V2> {};
 
 template <typename R, typename V1, typename V2>
@@ -190,7 +194,7 @@ struct function_rt_vv_default<ops::binary::floor_div, R, V1, V2> {
 };
 
 template <typename V1, typename V2>
-struct binary_result<ops::binary::ceil_div, V1, V2>
+struct binary_result2<ops::binary::ceil_div, V1, V2>
   : public binary_result<ops::binary::trunc_div, V1, V2> {};
 
 template <typename R, typename V1, typename V2>
@@ -203,7 +207,7 @@ struct function_rt_vv_default<ops::binary::ceil_div, R, V1, V2> {
 /* Binary rem */
 
 template <typename V1, typename V2>
-struct binary_result<ops::binary::rem, V1, V2>
+struct binary_result2<ops::binary::rem, V1, V2>
   : public choose_type<sputsoft::is_integral<V1>::value && sputsoft::is_integral<V2>::value,
         typename sputsoft::make_signed_if<sputsoft::is_signed<V1>::value, V2>::type,
         typename sputsoft::numbers::common_type<V1, V2>::type> {};
@@ -246,7 +250,7 @@ struct divrem_evaluator {
 /* Binary bitwise ops */
 
 template <typename V1, typename V2>
-struct binary_result<ops::binary::bit_and, V1, V2>
+struct binary_result2<ops::binary::bit_and, V1, V2>
   : public type_if<is_integral<V1>::value && is_integral<V2>::value,
              typename make_unsigned_if<!is_signed<V1>::value || !is_signed<V1>::value,
                typename choose_type<type_rank<V1>::value <= type_rank<V2>::value, V1, V2>::type
@@ -282,9 +286,9 @@ struct function_rt_vv_default<ops::binary::bit_and_not, R, V1, V2> {
 
 // Bit shifting
 
-template <typename T>
-struct binary_result<ops::binary::shift_left, T, std::ptrdiff_t>
-  : public type_if<is_integral<T>::value, T> {};
+template <typename V1, typename V2>
+struct binary_result2<ops::binary::shift_left, V1, V2>
+  : public type_if<is_integral<V1>::value && is_native_int<V2>::value, V1> {};
 
 template <typename R, typename V>
 struct function_rt_vv_default<ops::binary::shift_left, R, V, std::ptrdiff_t> {
@@ -293,9 +297,9 @@ struct function_rt_vv_default<ops::binary::shift_left, R, V, std::ptrdiff_t> {
   }
 };
 
-template <typename T>
-struct binary_result<ops::binary::shift_right, T, std::ptrdiff_t>
-  : public binary_result<ops::binary::shift_left, T, std::ptrdiff_t> {};
+template <typename V1, typename V2>
+struct binary_result2<ops::binary::shift_right, V1, V2>
+  : public binary_result<ops::binary::shift_left, V1, V2> {};
 
 template <typename R, typename V>
 struct function_rt_vv_default<ops::binary::shift_right, R, V, std::ptrdiff_t> {
@@ -388,6 +392,8 @@ struct is_negative_eval {
 
 /**************** floor log2 ****************/
 
+namespace {
+
 short floor_log2_table[256] = {
  -1, 0, 1,1, 2,2,2,2, 3,3,3,3,3,3,3,3, 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
  5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
@@ -398,18 +404,18 @@ short floor_log2_table[256] = {
  7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
  7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7 };
 
-template <typename T, bool ok, unsigned bits>
-struct floor_log2_eval2;
+template <typename T, unsigned bits>
+struct floor_log2_eval3;
 
 template <typename T>
-struct floor_log2_eval2<T, true, 8> {
+struct floor_log2_eval3<T, 8> {
   std::size_t operator()(const T n) const {
     return floor_log2_table[n];
   }
 };
 
 template <typename T>
-struct floor_log2_eval2<T, true, 16> {
+struct floor_log2_eval3<T, 16> {
   std::size_t operator()(T n) const {
     static const T ones = -1;
     std::size_t r = 0;
@@ -419,7 +425,7 @@ struct floor_log2_eval2<T, true, 16> {
 };
 
 template <typename T>
-struct floor_log2_eval2<T, true, 32> {
+struct floor_log2_eval3<T, 32> {
   std::size_t operator()(T n) const {
     static const T ones = -1;
     std::size_t r = 0;
@@ -430,7 +436,7 @@ struct floor_log2_eval2<T, true, 32> {
 };
 
 template <typename T>
-struct floor_log2_eval2<T, true, 64> {
+struct floor_log2_eval3<T, 64> {
   std::size_t operator()(T n) const {
     static const T ones = -1;
     std::size_t r = 0;
@@ -441,10 +447,22 @@ struct floor_log2_eval2<T, true, 64> {
   }
 };
 
+template <typename T, bool Ok>
+struct floor_log2_eval2;
+
+template <typename T>
+struct floor_log2_eval2<T, true> {
+  inline std::size_t operator()(const T n) const {
+    typedef typename make_unsigned<T>::type S;
+    return floor_log2_eval3<S, sputsoft::number_bits<S>::value>()((S) n);
+  }
+};
+
+}
+
 template <typename T>
 struct floor_log2_eval
-  : floor_log2_eval2<T, sputsoft::is_native_int<T>::value && !sputsoft::is_signed<T>::value,
-                     sputsoft::number_bits<T>::value> {};
+  : public floor_log2_eval2<T, sputsoft::is_native_int<T>::value> {};
 
 /********************************************/
 
@@ -452,4 +470,4 @@ struct floor_log2_eval
 } // namespace numbers
 } // namespace sputsoft
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_NAMED_OPS_HPP
+#endif // _SPUTSOFT_NUMBERS_DETAIL_DEFAULT_OPS_HPP

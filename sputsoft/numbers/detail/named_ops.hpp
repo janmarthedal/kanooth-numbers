@@ -21,6 +21,10 @@
 
 namespace sputsoft {
 namespace numbers {
+
+template <typename T>
+struct eval_result;
+
 namespace detail {
 
 namespace ops {
@@ -62,11 +66,18 @@ namespace ops {
   }
 }
 
-template <typename Op, typename X, typename Y>
-struct binary_result : public sputsoft::numbers::common_type<X, Y> {};
+template <typename Op, typename T>
+struct unary_result2 {};
 
 template <typename Op, typename T>
-struct unary_result {};
+struct unary_result : public unary_result2<Op, typename eval_result<T>::type> {};
+
+template <typename Op, typename X, typename Y>
+struct binary_result2 : public sputsoft::numbers::common_type<X, Y> {};
+
+template <typename Op, typename X, typename Y>
+struct binary_result
+  : public binary_result2<Op, typename eval_result<X>::type, typename eval_result<Y>::type> {};
 
 // evaluators
 
@@ -111,12 +122,8 @@ struct function_floor_divrem;
 
 } // namespace detail
 
-// convenience method
 template <typename T>
-struct eval_type : public detail::unary_result<detail::ops::unary::identity, T> {};
-
-template <typename T>
-inline typename eval_type<T>::type eval(const T& v) {
+inline typename eval_result<T>::type eval(const T& v) {
   return detail::function_v<detail::ops::unary::identity, T>()(v);
 }
 
@@ -150,7 +157,7 @@ namespace {
   template <typename Op, typename R, typename V>
   struct evaluator_rv_help {
     inline void operator()(R& r, const V& v) const {
-      detail::evaluator_rv<Op, R, typename eval_type<V>::type>()(r, eval(v));
+      detail::evaluator_rv<Op, R, typename eval_result<V>::type>()(r, eval(v));
     }
   };
 }
@@ -198,7 +205,7 @@ namespace {
   struct evaluator_rvv_help {
     inline void operator()(R& r, const V1& v1, const V2& v2) const {
       detail::evaluator_rvv<Op, R,
-            typename eval_type<V1>::type, typename eval_type<V2>::type>()(r, eval(v1), eval(v2));
+            typename eval_result<V1>::type, typename eval_result<V2>::type>()(r, eval(v1), eval(v2));
     }
   };
 }
@@ -319,7 +326,7 @@ namespace {
   template <typename Op, typename V>
   struct function_v_help {
     inline typename detail::unary_result<Op, V>::type operator()(const V& v) const {
-      return detail::function_v<Op, typename eval_type<V>::type>()(eval(v));
+      return detail::function_v<Op, typename eval_result<V>::type>()(eval(v));
     }
   };
 }
@@ -347,7 +354,7 @@ namespace {
   struct function_vv_help {
     inline typename detail::binary_result<Op, V1, V2>::type
     operator()(const V1& v1, const V2& v2) const {
-      return detail::function_vv<Op, typename eval_type<V1>::type, typename eval_type<V2>::type>()
+      return detail::function_vv<Op, typename eval_result<V1>::type, typename eval_result<V2>::type>()
                 (eval(v1), eval(v2));
     }
   };

@@ -16,7 +16,7 @@
 #define	_SPUTSOFT_NUMBERS_DETAIL_INT_ABST_HPP
 
 #include <sputsoft/type_traits.hpp>
-#include <sputsoft/numbers/common_type.hpp>
+#include <sputsoft/numbers/number_traits.hpp>
 #include <sputsoft/numbers/detail/nat_num_abst.hpp>
 
 namespace sputsoft {
@@ -27,6 +27,12 @@ template <typename T> class intnum;
 
 } // namespace detail
 } // namespace numbers
+
+template <typename T>
+struct is_signed<numbers::detail::numb<numbers::detail::intnum<T> > > : public true_type {};
+
+template <typename T>
+struct is_integral<numbers::detail::numb<numbers::detail::intnum<T> > > : public true_type {};
 
 template <typename T>
 struct make_unsigned<numbers::detail::numb<numbers::detail::intnum<T> > > {
@@ -47,56 +53,7 @@ namespace numbers {
 namespace detail {
 
 template <typename T>
-struct type_rank<numb<intnum<T> > >
-{
-  static const int value = 21;
-};
-
-/* Return types */
-
-#define RESOLVE_INTNUM_REM(TYPE) \
-template <typename T> \
-struct binary_result<ops::binary::rem, numb<intnum<T> >, TYPE> { typedef TYPE return_type; }; \
-template <typename T> \
-struct binary_result<ops::binary::rem_floor, numb<intnum<T> >, TYPE> { typedef TYPE return_type; }; \
-template <typename T> \
-struct binary_result<ops::binary::rem_ceil, numb<intnum<T> >, TYPE> { typedef TYPE return_type; }; \
-template <typename T> \
-struct binary_result<ops::binary::rem_trunc, numb<intnum<T> >, TYPE> { typedef TYPE return_type; };
-
-RESOLVE_INTNUM_REM(unsigned short)
-RESOLVE_INTNUM_REM(signed short)
-RESOLVE_INTNUM_REM(unsigned)
-RESOLVE_INTNUM_REM(signed)
-RESOLVE_INTNUM_REM(unsigned long)
-RESOLVE_INTNUM_REM(signed long)
-#ifdef SPUTSOFT_HAS_LONG_LONG
-RESOLVE_INTNUM_REM(unsigned long long)
-RESOLVE_INTNUM_REM(signed long long)
-#endif
-
-/***************/
-
-template <typename T, typename V1, typename V2>
-struct evaluator_rvv<ops::binary::div, numb<intnum<T> >, V1, V2> {
-  void operator()(numb<intnum<T> >& r, const V1& v1, const V2& v2) const {
-    r.div_floor(v1, v2);
-  }
-};
-
-template <typename R, typename T, typename V>
-struct evaluator_rvv<ops::binary::rem, R, numb<intnum<T> >, V> {
-  void operator()(R& r, const numb<intnum<T> >& v1, const V& v2) const {
-    numb<intnum<T> >::rem_floor(r, v1, v2);
-  }
-};
-
-template <typename T, typename R, typename V1, typename V2>
-struct evaluator_rrvv<ops::binary::quotrem, numb<intnum<T> >, R, V1, V2> {
-  void operator()(numb<intnum<T> >& q, R& r, const V1& v1, const V2& v2) const {
-    numb<intnum<T> >::quotrem_floor(q, r, v1, v2);
-  }
-};
+struct type_rank<numb<intnum<T> > > : public integral_constant<int, 21> {};
 
 /* Unary negate */
 
@@ -117,11 +74,18 @@ struct evaluator_rv<ops::unary::negate, numb<intnum<N> >, N> {
 /* Unary abs */
 
 template <typename T>
+struct function_v<ops::unary::abs, numb<intnum<T> > > {
+  inline const T& operator()(const numb<intnum<T> >& v) const {
+    return v.get_abs();
+  }
+};
+
+/*template <typename T>
 struct evaluator_rv<ops::unary::abs, T, numb<intnum<T> > > {
   void operator()(T& r, const numb<intnum<T> >& v) const {
     v.set_abs(r);
   }
-};
+};*/
 
 /* bitwise_not */
 
@@ -190,15 +154,15 @@ struct evaluator_rvv<ops::binary::bit_or, numb<intnum<N> >, V1, V2> {
 
 
 template <typename T>
-struct is_positive_r1_eval<numb<intnum<T> > > {
-  static inline bool is_positive(const numb<intnum<T> >& v) {
+struct is_positive_eval<numb<intnum<T> > > {
+  inline bool operator()(const numb<intnum<T> >& v) {
     return v.is_positive();
   }
 };
 
 template <typename T>
-struct is_negative_r1_eval<numb<intnum<T> > > {
-  static inline bool is_negative(const numb<intnum<T> >& v) {
+struct is_negative_eval<numb<intnum<T> > > {
+  inline bool operator()(const numb<intnum<T> >& v) {
     return v.is_negative();
   }
 };

@@ -48,32 +48,23 @@ void factorize(NUM n, Out out)
 }
 
 template <typename T1, typename T2>
-struct gcd_return_type
-  : public common_type<
-             typename detail::unary_result<detail::ops::unary::abs, T1>::type,
-             typename detail::unary_result<detail::ops::unary::abs, T2>::type> {};
+struct gcd_result
+  : public common_type<typename detail::unary_result<detail::ops::unary::abs, T1>::type,
+                       typename detail::unary_result<detail::ops::unary::abs, T2>::type> {};
 
-template <typename R, typename T1, typename T2>
-typename type_if<is_assignable<R, typename gcd_return_type<T1, T2>::type>::value, void>::type
-gcd(R& r, const T1& v1, const T2& v2)
+template <typename T1, typename T2>
+typename gcd_result<T1, T2>::type
+gcd(const T1& v1, const T2& v2)
 {
-  typename gcd_return_type<T1, T2>::type a, b;
+  typename gcd_result<T1, T2>::type a, b;
   abs(a, v1);
   abs(b, v2);
   while (true) {
-    if (is_zero(b)) { set(r, a); break; }
+    if (is_zero(b)) return a;
     rem(a, a, b);
-    if (is_zero(a)) { set(r, b); break; }
+    if (is_zero(a)) return b;
     rem(b, b, a);
   }
-}
-
-template <typename T1, typename T2>
-typename gcd_return_type<T1, T2>::type gcd(const T1& a, const T2& b)
-{
-  typename gcd_return_type<T1, T2>::type r;
-  gcd(r, a, b);
-  return r;
 }
 
 } // numbers

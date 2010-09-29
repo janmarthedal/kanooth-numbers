@@ -23,15 +23,15 @@ namespace numbers {
 namespace detail {
 
 template <typename T> struct type_rank;
-template <> struct type_rank<unsigned short>     { static const int value = 1; };
-template <> struct type_rank<signed short>       { static const int value = 2; };
-template <> struct type_rank<unsigned int>       { static const int value = 3; };
-template <> struct type_rank<signed int>         { static const int value = 4; };
-template <> struct type_rank<unsigned long>      { static const int value = 5; };
-template <> struct type_rank<signed long>        { static const int value = 6; };
+template <> struct type_rank<unsigned short>     : integral_constant<int, 1> {};
+template <> struct type_rank<signed short>       : integral_constant<int, 2> {};
+template <> struct type_rank<unsigned int>       : integral_constant<int, 3> {};
+template <> struct type_rank<signed int>         : integral_constant<int, 4> {};
+template <> struct type_rank<unsigned long>      : integral_constant<int, 5> {};
+template <> struct type_rank<signed long>        : integral_constant<int, 6> {};
 #ifdef SPUTSOFT_HAS_LONG_LONG
-template <> struct type_rank<unsigned long long> { static const int value = 7; };
-template <> struct type_rank<signed long long>   { static const int value = 8; };
+template <> struct type_rank<unsigned long long> : integral_constant<int, 7> {};
+template <> struct type_rank<signed long long>   : integral_constant<int, 8> {};
 #endif
 
 template <bool C, typename T, typename F>

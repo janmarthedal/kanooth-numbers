@@ -75,8 +75,7 @@ namespace {
 
   template <typename Op, typename T>
   struct approve_unop_overload2<Op, T, true> {
-    typedef expr<typename unary_result<Op, typename eval_type<T>::type >::type,
-                 unary<Op, T> > return_type;
+    typedef expr<typename unary_result<Op, T>::type, unary<Op, T> > return_type;
     return_type operator()(const T& x) {
       return return_type(x);
     }
@@ -179,20 +178,27 @@ namespace {
 
 } // local namespace
 
-template <typename R1, typename R2, typename E2>
-struct enabler_rv<ops::unary::identity, R1, expr<R2, E2> >
-  : public enabler_rv<ops::unary::identity, R1, R2> {};
+} // namespace detail
 
 template <typename R, typename E>
-struct unary_result<ops::unary::identity, expr<R, E> >
-  : public unary_result<ops::unary::identity, R> {};
+struct eval_result<detail::expr<R, E> > : public eval_result<R> {};
 
-template <typename Op, typename R, typename E>
-struct unary_result<Op, expr<R, E> > : public unary_result<Op, R> {};
+template <typename R1, typename R2, typename E2>
+struct is_assignable<R1, detail::expr<R2, E2> > : public is_assignable<R1, R2> {};
+
+} // namespace numbers
+
+template <typename R, typename E>
+struct is_integral<numbers::detail::expr<R, E> > : public is_integral<R> {};
+
+namespace numbers {
+namespace detail {
 
 template <typename R, typename E>
 struct function_v<ops::unary::identity, expr<R, E> > {
-  R operator()(const expr<R, E>& e) const { return (R) e; }
+  R operator()(const expr<R, E>& e) const {
+    return (R) e;
+  }
 };
 
 template <typename R1, typename R2, typename E2>
@@ -201,19 +207,6 @@ struct evaluator_rv<ops::unary::identity, numb<R1>, expr<R2, E2> > {
     v.assign(r);
   }
 };
-
-template <typename Op, typename R1, typename E1, typename R2, typename E2>
-struct binary_result<Op, expr<R1, E1>, expr<R2, E2> >
-  : public binary_result<Op, R1, R2> {};
-
-template <typename Op, typename R, typename E, typename V>
-struct binary_result<Op, expr<R, E>, V>
-  : public binary_result<Op, R, V> {};
-
-template <typename Op, typename V, typename R, typename E>
-struct binary_result<Op, V, expr<R, E> >
-  : public binary_result<Op, V, R> {};
-
 
 template <typename T1, typename T2>
 typename approve_binop_overload<ops::binary::add, T1, T2>::return_type
