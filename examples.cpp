@@ -17,6 +17,7 @@
 
 #include <sputsoft/numbers/natural_number.hpp>
 #include <sputsoft/numbers/integer.hpp>
+#include <sputsoft/numbers/positive_float.hpp>
 #include <sputsoft/numbers/common_functions.hpp>
 #include <sputsoft/numbers/number_theory.hpp>
 
@@ -79,13 +80,13 @@ void gcd_example()
 
 void sqrt_example()
 {
-  natural_number x = mul_power(natural_number(2u), 10u, 100);
+  natural_number x = mul_power(natural_number(2u), 10u, 10);
   natural_number y = floor_sqrt(x);
 
   //int x = 20000;
   //int y = floor_sqrt(x);
 
-  std::cout << "sqrt(" << x << ") = " << y << " " << (y*y) << " < " << ((y+1u)*(y+1u)) << std::endl;
+  std::cout << "sqrt(" << x << ") = " << y << " " << mul(y, y) << " < " << mul(add(y, 1u), add(y, 1u)) << std::endl;
 }
 
 void bits1()
@@ -158,7 +159,7 @@ int main()
   PE20();
   factorize_example();
   gcd_example();*/
-  bits2();
+  //bits2();
 
   /*integer i=77;
   natural_number n=80u;
@@ -166,9 +167,13 @@ int main()
 
   /*natural_number c="1234567", d=3u;
   sputsoft::numbers::div(c, c, d);
-  std::cout << c << std::endl;*/
+  std::cout << c << std::endl;
 
-  //sqrt_example();
+  sqrt_example();*/
+    
+  positive_float n = 1u;
+    
+    
 
   return 0;
 }

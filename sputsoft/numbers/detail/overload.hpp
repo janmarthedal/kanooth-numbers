@@ -15,6 +15,8 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP
 #define _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP
 
+#error Dont use
+
 #include <sputsoft/type_traits.hpp>
 #include <sputsoft/numbers/detail/named_ops.hpp>
 

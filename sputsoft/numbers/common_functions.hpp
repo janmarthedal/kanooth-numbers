@@ -80,16 +80,20 @@ T floor_sqrt_help(const T& n)
 template <typename T>
 T floor_sqrt_help(const T& n)
 {
-  if (n <= 1u) return n;
+  if (is_less_or_equal(n, 1u)) return n;
   std::size_t k = floor_log2(n);
-  T a = T(1u) << (k/2), b = a << 1, m;
+  T a = bit_shift_left(T(1u), k/2);
+  T b = bit_shift_left(a, 1);
+  T m, s;
   int it = 0;
   while (true) {
     it++;
-    m = (a + b) >> 1;
-    if (a == m)
+    add(m, a, b);
+    bit_shift_right(m, m, 1);
+    if (is_equal(a, m))
       { std::cout << "Iterations: " << it << std::endl; return a; }
-    if (m*m > n)
+    mul(s, m, m);
+    if (is_greater(s, n))
       b = m;
     else
       a = m;
