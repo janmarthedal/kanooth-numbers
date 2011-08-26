@@ -15,7 +15,7 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP
 #define _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP
 
-#error Dont use
+#ifdef OVERLOAD_EXPRESSION_OPTIMIZE
 
 #include <sputsoft/type_traits.hpp>
 #include <sputsoft/numbers/detail/named_ops.hpp>
@@ -339,5 +339,7 @@ std::ostream& operator<<(std::ostream& os, const expr<R, E>& e) {
 } // namespace detail
 } // namespace numbers
 } // namespace sputsoft
+
+#endif // OVERLOAD_EXPRESSION_OPTIMIZE
 
 #endif // _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP

@@ -80,7 +80,6 @@ template <typename Op, typename R, typename V1, typename V2>
 struct to_simple_function_rt_vv
   : simple_eval_vv<Op, R, V1, V2,
            typename choose_type<type_rank<V1>::value >= type_rank<V2>::value, V1, V2>::type> {};
-
 }
 
 template <typename Op, typename N1, typename N2, typename N3>

@@ -40,12 +40,30 @@ struct make_unsigned<numbers::detail::numb<numbers::detail::posfloatnum<T, E> > 
 template <typename T, typename E>
 struct is_integral<numbers::detail::numb<numbers::detail::posfloatnum<T, E> > > : public false_type {};
 
-
 namespace numbers {
 namespace detail {
 
 template <typename T, typename E>
 struct type_rank<numb<posfloatnum<T, E> > > : public integral_constant<int, 23> {};
+
+template <typename T, typename E>
+struct unary_result2<ops::unary::trunc, numbers::detail::numb<numbers::detail::posfloatnum<T, E> > > {
+  typedef T type;
+};
+
+template <typename T, typename E>
+struct evaluator_rv<ops::unary::trunc, T, numb<posfloatnum<T, E> > > {
+  inline void operator()(T& r, const numb<posfloatnum<T, E> >& v) const {
+    numb<posfloatnum<T, E> >::trunc(r, v);
+  }
+};
+
+template <typename T, typename E>
+inline std::ostream& operator<<(std::ostream& os, const numb<posfloatnum<T, E> >& f) {
+  T n;
+  trunc(n, f);
+  return os << n;
+}
 
 } // namespace detail
 } // namespace numbers

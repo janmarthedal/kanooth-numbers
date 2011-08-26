@@ -27,10 +27,11 @@ class wrap2;
 
 template <typename Con, typename LowLevel>
 class numb<natnum<wrap2<Con, LowLevel> > > {
-private:
-  Con con;
+public:
   typedef typename Con::digit_type digit_type;
   static const unsigned digit_bits = sputsoft::number_bits<digit_type>::value;
+private:
+  Con con;
 
   static int division_by_zero() {
     int y = 0;  // hide warning

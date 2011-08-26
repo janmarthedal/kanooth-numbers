@@ -16,7 +16,7 @@
 #define _SPUTSOFT_NUMBERS_DETAIL_INT_IMPL_HPP
 
 #include <sputsoft/type_traits.hpp>
-#include <sputsoft/numbers/detail/int_abst.hpp>
+#include <sputsoft/numbers/detail/integer/abst.hpp>
 
 /*
  Integer division cases

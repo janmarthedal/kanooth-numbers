@@ -167,13 +167,22 @@ int main()
 
   /*natural_number c="1234567", d=3u;
   sputsoft::numbers::div(c, c, d);
-  std::cout << c << std::endl;
+  std::cout << c << std::endl;*/
 
-  sqrt_example();*/
-    
-  positive_float n = 1u;
-    
-    
+  //sqrt_example();
 
+  std::cout << "Digit bits " << natural_number::digit_bits << std::endl;
+  
+  positive_float f = 1234u, g;
+
+  mul(g, f, f);
+  
+  natural_number n;
+  
+  trunc(n, f);
+  std::cout << "trunc(f) = " << n << std::endl;
+  //trunc(n, g);
+  std::cout << "trunc(g) = " << g << std::endl;
+  
   return 0;
 }

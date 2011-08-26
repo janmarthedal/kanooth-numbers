@@ -18,7 +18,6 @@
 #include <sputsoft/numbers/natural_number.hpp>
 #include <sputsoft/numbers/detail/pos_float_impl.hpp>
 #include <sputsoft/numbers/detail/default_ops.hpp>
-//#include <sputsoft/numbers/detail/overload.hpp>
 
 namespace sputsoft {
 namespace numbers {

@@ -20,12 +20,12 @@
 //#include <sputsoft/numbers/detail/nat_num_shared.hpp>
 #include <sputsoft/numbers/detail/nat_num_impl.hpp>
 #include <sputsoft/numbers/detail/default_ops.hpp>
-//#include <sputsoft/numbers/detail/overload.hpp>
+#include <sputsoft/numbers/detail/overload.hpp>
 
 #ifdef SPUTSOFT_USE_GMP
-#include <sputsoft/numbers/detail/lowlevel_gmp.hpp>
+#include <sputsoft/numbers/detail/lowlevel/gmp.hpp>
 #else
-#include <sputsoft/numbers/detail/lowlevel_generic.hpp>
+#include <sputsoft/numbers/detail/lowlevel/generic.hpp>
 #endif
 
 namespace sputsoft {

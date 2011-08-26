@@ -105,11 +105,17 @@ struct function_v<ops::unary::bit_not, V> {
   inline return_type operator()(const V& v) const { return ~v; }
 };
 
+/* Unary trunc */
+
 template <typename T>
 struct unary_result2<ops::unary::trunc, T> : public type_if<sputsoft::is_integral<T>::value, T> {};
 
+/* Unary floor */
+
 template <typename T>
 struct unary_result2<ops::unary::floor, T> : public unary_result<ops::unary::trunc, T> {};
+
+/* Unary ceil */
 
 template <typename T>
 struct unary_result2<ops::unary::ceil, T> : public unary_result<ops::unary::trunc, T> {};
