@@ -1,5 +1,5 @@
 /*
- * File:   sputsoft/numbers/detail/lowlevel.hpp
+ * File:   sputsoft/numbers/detail/lowlevel/gmp.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z

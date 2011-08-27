@@ -1,5 +1,5 @@
 /* 
- * File:   sputsoft/numbers/detail/nat_num_impl.hpp
+ * File:   sputsoft/numbers/detail/natural_number/impl.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-04-30 15:18Z
@@ -12,11 +12,11 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_IMPL_HPP
-#define _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_IMPL_HPP
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_IMPL_HPP
+#define _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_IMPL_HPP
 
 #include <sputsoft/type_traits.hpp>
-#include <sputsoft/numbers/detail/nat_num_abst.hpp>
+#include <sputsoft/numbers/detail/natural_number/abst.hpp>
 
 namespace sputsoft {
 namespace numbers {
@@ -810,4 +810,4 @@ public:
 } // namespace sputsoft
 } // namespace numbers
 
-#endif	/* _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_IMPL_HPP */
+#endif	/* _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_IMPL_HPP */

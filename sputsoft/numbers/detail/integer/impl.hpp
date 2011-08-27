@@ -1,5 +1,5 @@
 /* 
- * File:   sputsoft/numbers/detail/int_impl.hpp
+ * File:   sputsoft/numbers/detail/integer/impl.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-05-04 20:12Z

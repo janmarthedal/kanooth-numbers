@@ -16,7 +16,7 @@
 #define _SPUTSOFT_NUMBERS_POSITIVE_FLOAT_HPP
 
 #include <sputsoft/numbers/natural_number.hpp>
-#include <sputsoft/numbers/detail/pos_float_impl.hpp>
+#include <sputsoft/numbers/detail/positive_float/impl.hpp>
 #include <sputsoft/numbers/detail/default_ops.hpp>
 
 namespace sputsoft {

@@ -1,5 +1,5 @@
 /* 
- * File:   sputsoft/numbers/detail/pos_float_abst.hpp
+ * File:   sputsoft/numbers/detail/positive_float/abst.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2011-08-24 08:57Z
@@ -12,8 +12,8 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_POS_FLOAT_ABST_HPP
-#define	_SPUTSOFT_NUMBERS_DETAIL_POS_FLOAT_ABST_HPP
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_POSITIVE_FLOAT_ABST_HPP
+#define	_SPUTSOFT_NUMBERS_DETAIL_POSITIVE_FLOAT_ABST_HPP
 
 #include <sputsoft/type_traits.hpp>
 #include <sputsoft/numbers/number_traits.hpp>
@@ -69,4 +69,4 @@ inline std::ostream& operator<<(std::ostream& os, const numb<posfloatnum<T, E> >
 } // namespace numbers
 } // namespace sputsoft
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_POS_FLOAT_ABST_HPP
+#endif // _SPUTSOFT_NUMBERS_DETAIL_POSITIVE_FLOAT_ABST_HPP

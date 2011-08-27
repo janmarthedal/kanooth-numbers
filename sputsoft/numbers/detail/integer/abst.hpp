@@ -1,5 +1,5 @@
 /* 
- * File:   sputsoft/numbers/detail/int_abst.hpp
+ * File:   sputsoft/numbers/detail/integer/abst.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-05-13 11:00Z
@@ -17,7 +17,7 @@
 
 #include <sputsoft/type_traits.hpp>
 #include <sputsoft/numbers/number_traits.hpp>
-#include <sputsoft/numbers/detail/nat_num_abst.hpp>
+#include <sputsoft/numbers/detail/natural_number/abst.hpp>
 
 namespace sputsoft {
 namespace numbers {

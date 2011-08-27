@@ -1,5 +1,5 @@
 /* 
- * File:   sputsoft/numbers/detail/pos_float_impl.hpp
+ * File:   sputsoft/numbers/detail/positive_float/impl.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2011-08-24 09:00Z
@@ -12,11 +12,11 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_POS_FLOAT_IMPL_HPP
-#define _SPUTSOFT_NUMBERS_DETAIL_POS_FLOAT_IMPL_HPP
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_POSITIVE_FLOAT_IMPL_HPP
+#define _SPUTSOFT_NUMBERS_DETAIL_POSITIVE_FLOAT_IMPL_HPP
 
 #include <sputsoft/type_traits.hpp>
-#include <sputsoft/numbers/detail/pos_float_abst.hpp>
+#include <sputsoft/numbers/detail/positive_float/abst.hpp>
 
 namespace sputsoft {
 namespace numbers {
@@ -85,6 +85,32 @@ public:
     exponent = x.exponent + y.exponent;
     normalize();
   }
+
+  void add(const numb& x, const numb& y) {
+    if (x.exponent >= y.exponent) {
+      sputsoft::numbers::bit_shift_left(num, x.num, x.exponent - y.exponent);
+      sputsoft::numbers::add(num, num, y.num);
+      exponent = y.exponent;
+    } else {
+      sputsoft::numbers::bit_shift_left(num, y.num, y.exponent - x.exponent);
+      sputsoft::numbers::add(num, num, x.num);
+      exponent = x.exponent;
+    }
+    normalize();
+  }
+  
+  void sub(const numb& x, const numb& y) {
+    if (x.exponent >= y.exponent) {
+      sputsoft::numbers::bit_shift_left(num, x.num, x.exponent - y.exponent);
+      sputsoft::numbers::sub(num, num, y.num);
+      exponent = y.exponent;
+    } else {
+      sputsoft::numbers::bit_shift_left(num, y.num, y.exponent - x.exponent);
+      sputsoft::numbers::sub(num, x.num, num);
+      exponent = x.exponent;
+    }
+    normalize();
+  }
   
 };
 
@@ -92,4 +118,4 @@ public:
 } // namespace sputsoft
 } // namespace numbers
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_POS_FLOAT_IMPL_HPP
+#endif // _SPUTSOFT_NUMBERS_DETAIL_POSITIVE_FLOAT_IMPL_HPP

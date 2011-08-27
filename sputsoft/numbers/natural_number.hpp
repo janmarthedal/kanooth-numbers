@@ -15,10 +15,10 @@
 #ifndef _SPUTSOFT_NUMBERS_NATURAL_NUMBER_HPP
 #define	_SPUTSOFT_NUMBERS_NATURAL_NUMBER_HPP
 
-#include <sputsoft/numbers/detail/digit_array.hpp>
-#include <sputsoft/numbers/detail/array_allocator.hpp>
-//#include <sputsoft/numbers/detail/nat_num_shared.hpp>
-#include <sputsoft/numbers/detail/nat_num_impl.hpp>
+#include <sputsoft/numbers/detail/memory/digit_array.hpp>
+#include <sputsoft/numbers/detail/memory/array_allocator.hpp>
+//#include <sputsoft/numbers/detail/natural_number/shared.hpp>
+#include <sputsoft/numbers/detail/natural_number/impl.hpp>
 #include <sputsoft/numbers/detail/default_ops.hpp>
 #include <sputsoft/numbers/detail/overload.hpp>
 

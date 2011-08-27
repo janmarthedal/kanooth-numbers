@@ -176,12 +176,16 @@ int main()
   positive_float f = 1234u, g;
 
   mul(g, f, f);
+  mul(g, g, g);
+  mul(g, g, g);
   
   natural_number n;
   
   trunc(n, f);
   std::cout << "trunc(f) = " << n << std::endl;
-  //trunc(n, g);
+  std::cout << "trunc(g) = " << g << std::endl;
+
+  add(g, g, f);
   std::cout << "trunc(g) = " << g << std::endl;
   
   return 0;

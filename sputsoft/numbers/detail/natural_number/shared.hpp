@@ -1,5 +1,5 @@
 /* 
- * File:   sputsoft/numbers/detail/nat_num_shared.hpp
+ * File:   sputsoft/numbers/detail/natural_number/shared.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-04-30 15:18Z
@@ -12,10 +12,10 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_SHARED_HPP
-#define	_SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_SHARED_HPP
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_SHARED_HPP
+#define	_SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_SHARED_HPP
 
-#include <sputsoft/numbers/detail/nat_num_impl.hpp>
+#include <sputsoft/numbers/detail/natural_number/impl.hpp>
 #include <sputsoft/shared_ptr.hpp>
 
 namespace sputsoft {
@@ -256,4 +256,4 @@ public:
 } // namespace sputsoft
 } // namespace numbers
 
-#endif	/* _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_SHARED_HPP */
+#endif	/* _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_SHARED_HPP */

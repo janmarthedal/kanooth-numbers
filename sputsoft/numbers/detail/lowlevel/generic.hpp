@@ -1,5 +1,5 @@
 /*
- * File:   sputsoft/numbers/detail/lowlevel_generic.hpp
+ * File:   sputsoft/numbers/detail/lowlevel/generic.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z
@@ -15,7 +15,7 @@
 #ifndef _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HPP_
 #define _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HPP_
 
-#include <sputsoft/numbers/detail/array_allocator.hpp>
+#include <sputsoft/numbers/detail/memory/array_allocator.hpp>
 #include <sputsoft/type_traits.hpp>
 
 namespace sputsoft {

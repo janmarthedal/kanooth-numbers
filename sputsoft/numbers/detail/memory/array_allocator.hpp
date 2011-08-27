@@ -1,5 +1,5 @@
 /*
- * File:   sputsoft/numbers/detail/array_allocator.hpp
+ * File:   sputsoft/numbers/detail/memory/array_allocator.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-24 09:00Z
@@ -12,8 +12,8 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_ARRAY_ALLOCATOR_HPP_
-#define _SPUTSOFT_NUMBERS_DETAIL_ARRAY_ALLOCATOR_HPP_
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_MEMORY_ARRAY_ALLOCATOR_HPP_
+#define _SPUTSOFT_NUMBERS_DETAIL_MEMORY_ARRAY_ALLOCATOR_HPP_
 
 #include <memory>
 #include <vector>
@@ -51,4 +51,4 @@ public:
 } // namespace numbers
 } // namespace sputsoft
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_ARRAY_ALLOCATOR_HPP_
+#endif // _SPUTSOFT_NUMBERS_DETAIL_MEMORY_ARRAY_ALLOCATOR_HPP_

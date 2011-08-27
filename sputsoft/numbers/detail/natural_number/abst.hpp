@@ -1,5 +1,5 @@
 /* 
- * File:   sputsoft/numbers/detail/nat_num_abst.hpp
+ * File:   sputsoft/numbers/detail/natural_number/abst.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-05-02 7:55Z
@@ -12,8 +12,8 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_ABST_HPP
-#define _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_ABST_HPP
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_ABST_HPP
+#define _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_ABST_HPP
 
 #include <sputsoft/numbers/number_traits.hpp>
 #include <sputsoft/numbers/detail/number_abst.hpp>
@@ -140,4 +140,4 @@ std::ostream& operator<<(std::ostream& os, const numb<natnum<T> >& n)
 } // namespace numbers
 } // namespace sputsoft
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_NAT_NUM_ABST_HPP
+#endif // _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_ABST_HPP

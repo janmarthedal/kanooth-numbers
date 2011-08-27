@@ -1,5 +1,5 @@
 /*
- * File:   sputsoft/numbers/detail/digit_array.hpp
+ * File:   sputsoft/numbers/detail/memory/digit_array.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z
@@ -12,11 +12,11 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_DIGIT_ARRAY_HPP_
-#define _SPUTSOFT_NUMBERS_DETAIL_DIGIT_ARRAY_HPP_
+#ifndef _SPUTSOFT_NUMBERS_DETAIL_MEMORY_DIGIT_ARRAY_HPP_
+#define _SPUTSOFT_NUMBERS_DETAIL_MEMORY_DIGIT_ARRAY_HPP_
 
 #include <memory>
-#include <sputsoft/numbers/detail/array_allocator.hpp>
+#include <sputsoft/numbers/detail/memory/array_allocator.hpp>
 
 namespace sputsoft {
 namespace numbers {
@@ -76,4 +76,4 @@ public:
 } // namespace numbers
 } // namespace sputsoft
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_DIGIT_ARRAY_HPP_
+#endif // _SPUTSOFT_NUMBERS_DETAIL_MEMORY_DIGIT_ARRAY_HPP_
