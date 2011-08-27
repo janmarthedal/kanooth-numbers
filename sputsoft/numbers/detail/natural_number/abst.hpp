@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   sputsoft/numbers/detail/natural_number/abst.hpp
  * Author: Jan Marthedal Rasmussen
  *
@@ -54,7 +54,7 @@ template <typename T>
 struct enabler_rv<ops::unary::identity, numb<natnum<T> >, int>
   : public enabler_rv<ops::unary::identity, numb<natnum<T> >, unsigned> {};
 
-  
+
 template <typename Op, typename T>
 struct binary_result<Op, numb<natnum<T> >, int>
   : public binary_result<Op, numb<natnum<T> >, unsigned> {};
@@ -119,6 +119,13 @@ template <typename T>
 struct floor_log2_eval<numb<natnum<T> > > {
   inline std::size_t operator()(const numb<natnum<T> >& n) const {
     return n.floor_log2();
+  }
+};
+
+template <typename T>
+struct test_bit_eval<numb<natnum<T> > > {
+  inline bool operator()(const numb<natnum<T> >& n, std::size_t pos) const {
+    return n.test_bit(pos);
   }
 };
 

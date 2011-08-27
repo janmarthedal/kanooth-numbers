@@ -72,7 +72,7 @@ void gcd_example()
   natural_number b = "9876543210";
   //long b = -9876543210L;
   natural_number c;
-  
+
   c = gcd(a, b);
 
   std::cout << "gcd(" << a << "," << b << ") = " << c << std::endl << std::endl;
@@ -172,21 +172,11 @@ int main()
   //sqrt_example();
 
   std::cout << "Digit bits " << natural_number::digit_bits << std::endl;
-  
-  positive_float f = 1234u, g;
 
-  mul(g, f, f);
-  mul(g, g, g);
-  mul(g, g, g);
-  
-  natural_number n;
-  
-  trunc(n, f);
-  std::cout << "trunc(f) = " << n << std::endl;
-  std::cout << "trunc(g) = " << g << std::endl;
+  positive_float f = 123u, g=10u;
 
-  add(g, g, f);
-  std::cout << "trunc(g) = " << g << std::endl;
-  
+  div(f, f, g);
+  std::cout << "f = " << f << std::endl;
+
   return 0;
 }

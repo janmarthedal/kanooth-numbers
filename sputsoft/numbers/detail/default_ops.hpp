@@ -470,6 +470,26 @@ template <typename T>
 struct floor_log2_eval
   : public floor_log2_eval2<T, sputsoft::is_native_int<T>::value> {};
 
+/**************** test_bit ****************/
+
+namespace {
+    
+  template <typename T, bool Ok>
+  struct test_bit_eval2;
+
+  template <typename T>
+  struct test_bit_eval2<T, true> {
+    inline bool operator()(const T n, std::size_t pos) const {
+      return n & (T(1) << pos);
+    }
+  };
+
+}
+  
+template <typename T>
+struct test_bit_eval
+  : public test_bit_eval2<T, sputsoft::is_native_int<T>::value> {};
+
 /********************************************/
 
 } // namespace detail

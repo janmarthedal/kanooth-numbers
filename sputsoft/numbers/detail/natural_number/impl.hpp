@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   sputsoft/numbers/detail/natural_number/impl.hpp
  * Author: Jan Marthedal Rasmussen
  *
@@ -796,6 +796,11 @@ public:
       left_shift_num(con, x.con, count);
     else
       right_shift_num(con, x.con, -count);
+  }
+
+  bool test_bit(std::size_t pos) const {
+    std::size_t total_bits = con.size() * digit_bits;
+    return pos < total_bits && sputsoft::numbers::test_bit(con[pos / digit_bits], pos % digit_bits);
   }
 
   std::size_t floor_log2() const {

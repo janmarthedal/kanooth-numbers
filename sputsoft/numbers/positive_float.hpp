@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   sputsoft/numbers/positive_float.hpp
  * Author: Jan Marthedal Rasmussen
  *
@@ -22,7 +22,7 @@
 namespace sputsoft {
 namespace numbers {
 
-typedef detail::numb<detail::posfloatnum<natural_number, long> > positive_float;
+typedef detail::numb<detail::posfloatnum<natural_number, long, 128> > positive_float;
 
 } // namespace sputsoft
 } // namespace numbers

@@ -89,6 +89,7 @@ template <typename T> struct is_zero_eval;
 template <typename T> struct is_positive_eval;
 template <typename T> struct is_negative_eval;
 template <typename T> struct floor_log2_eval;
+template <typename T> struct test_bit_eval;
 template <typename R, typename V> struct shift_left_eval;
 
 // General evaluators
@@ -485,6 +486,11 @@ floor_divrem(Q& q, const V1& v1, const V2& v2) {
 template <typename T>
 inline std::size_t floor_log2(T n) {
   return detail::floor_log2_eval<T>()(n);
+}
+
+template <typename T>
+inline bool test_bit(T n, std::size_t pos) {
+  return detail::test_bit_eval<T>()(n, pos);
 }
 
 template <typename V1, typename V2>
