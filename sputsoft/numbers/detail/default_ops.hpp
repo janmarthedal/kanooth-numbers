@@ -87,6 +87,8 @@ struct function_v<ops::unary::negate, V> {
 
 template <typename T>
 struct unary_result2<ops::unary::abs, T> : public make_unsigned<T> {};
+/*template <typename T>
+struct unary_result2<ops::unary::abs, T> : public type_if<true, T> {};*/
 
 template <typename V>
 struct function_v<ops::unary::abs, V> {
@@ -119,6 +121,11 @@ struct unary_result2<ops::unary::floor, T> : public unary_result<ops::unary::tru
 
 template <typename T>
 struct unary_result2<ops::unary::ceil, T> : public unary_result<ops::unary::trunc, T> {};
+
+/* Unary round */
+
+template <typename T>
+struct unary_result2<ops::unary::round, T> : public unary_result<ops::unary::trunc, T> {};
 
 /* Binary */
 
@@ -469,6 +476,80 @@ struct floor_log2_eval2<T, true> {
 template <typename T>
 struct floor_log2_eval
   : public floor_log2_eval2<T, sputsoft::is_native_int<T>::value> {};
+
+/**************** right-most bit ****************/
+
+namespace {
+
+short ruler_table[256] = {
+ -1, 0, 1,0, 2,0,1,0, 3,0,1,0,2,0,1,0, 4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,
+ 5,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,
+ 6,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,
+ 5,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,
+ 7,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,
+ 5,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,
+ 6,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,
+ 5,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0 };
+
+template <typename T, unsigned bits>
+struct ruler_eval3;
+
+template <typename T>
+struct ruler_eval3<T, 8> {
+  std::size_t operator()(const T n) const {
+    return ruler_table[n & 0xff];
+  }
+};
+
+template <typename T>
+struct ruler_eval3<T, 16> {
+  std::size_t operator()(T n) const {
+    static const T ones = -1;
+    std::size_t r = 0;
+    if (!(n & ~(ones << 8))) { n >>= 8; r += 8; }
+    return r + ruler_table[n & 0xff];
+  }
+};
+
+template <typename T>
+struct ruler_eval3<T, 32> {
+  std::size_t operator()(T n) const {
+    static const T ones = -1;
+    std::size_t r = 0;
+    if (!(n & ~(ones << 16))) { n >>= 16; r += 16; }
+    if (!(n & ~(ones <<  8))) { n >>=  8; r +=  8; }
+    return r + ruler_table[n & 0xff];
+  }
+};
+
+template <typename T>
+struct ruler_eval3<T, 64> {
+  std::size_t operator()(T n) const {
+    static const T ones = -1;
+    std::size_t r = 0;
+    if (!(n & ~(ones << 32))) { n >>= 32; r += 32; }
+    if (!(n & ~(ones << 16))) { n >>= 16; r += 16; }
+    if (!(n & ~(ones <<  8))) { n >>=  8; r +=  8; }
+    return r + ruler_table[n & 0xff];
+  }
+};
+
+template <typename T, bool Ok>
+struct ruler_eval2;
+
+template <typename T>
+struct ruler_eval2<T, true> {
+  inline std::size_t operator()(const T& n) const {
+    typedef typename make_unsigned<T>::type S;
+    return ruler_eval3<S, sputsoft::number_bits<S>::value>()((S) n);
+  }
+};
+
+}
+
+template <typename T>
+struct ruler_eval
+  : public ruler_eval2<T, sputsoft::is_native_int<T>::value> {};
 
 /**************** test_bit ****************/
 

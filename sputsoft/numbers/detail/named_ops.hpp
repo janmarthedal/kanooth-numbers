@@ -54,6 +54,7 @@ namespace ops {
     struct floor {};
     struct ceil {};
     struct trunc {};
+    struct round {};
     struct bit_not {};
   }
   namespace binary_compare {
@@ -89,6 +90,7 @@ template <typename T> struct is_zero_eval;
 template <typename T> struct is_positive_eval;
 template <typename T> struct is_negative_eval;
 template <typename T> struct floor_log2_eval;
+template <typename T> struct ruler_eval;
 template <typename T> struct test_bit_eval;
 template <typename R, typename V> struct shift_left_eval;
 
@@ -191,6 +193,12 @@ template <typename R, typename V>
 inline typename detail::enabler_rv<detail::ops::unary::ceil, R, V>::type
 ceil(R& r, const V& v) {
   evaluator_rv_help<detail::ops::unary::ceil, R, V>()(r, v);
+}
+
+template <typename R, typename V>
+inline typename detail::enabler_rv<detail::ops::unary::round, R, V>::type
+round(R& r, const V& v) {
+  evaluator_rv_help<detail::ops::unary::round, R, V>()(r, v);
 }
 
 template <typename R, typename V>
@@ -484,12 +492,17 @@ floor_divrem(Q& q, const V1& v1, const V2& v2) {
 // other
 
 template <typename T>
-inline std::size_t floor_log2(T n) {
+inline std::size_t floor_log2(const T& n) {
   return detail::floor_log2_eval<T>()(n);
 }
 
 template <typename T>
-inline bool test_bit(T n, std::size_t pos) {
+inline std::size_t ruler(const T& n) {
+  return detail::ruler_eval<T>()(n);
+}
+
+template <typename T>
+inline bool test_bit(const T& n, std::size_t pos) {
   return detail::test_bit_eval<T>()(n, pos);
 }
 

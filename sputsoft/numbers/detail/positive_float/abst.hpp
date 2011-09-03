@@ -52,18 +52,32 @@ struct unary_result2<ops::unary::trunc, numbers::detail::numb<numbers::detail::p
 };
 
 template <typename T, typename E, std::size_t P>
-struct evaluator_rv<ops::unary::trunc, T, numb<posfloatnum<T, E, P> > > {
+struct evaluator_rv<ops::unary::floor, T, numb<posfloatnum<T, E, P> > > {
   inline void operator()(T& r, const numb<posfloatnum<T, E, P> >& v) const {
-    numb<posfloatnum<T, E, P> >::trunc(r, v);
+    numb<posfloatnum<T, E, P> >::floor(r, v);
   }
 };
 
 template <typename T, typename E, std::size_t P>
-inline std::ostream& operator<<(std::ostream& os, const numb<posfloatnum<T, E, P> >& f) {
+struct evaluator_rv<ops::unary::round, T, numb<posfloatnum<T, E, P> > > {
+  inline void operator()(T& r, const numb<posfloatnum<T, E, P> >& v) const {
+    numb<posfloatnum<T, E, P> >::round(r, v);
+  }
+};
+
+template <typename T, typename E, std::size_t P>
+inline std::ostream& operator<<(std::ostream& os, numb<posfloatnum<T, E, P> > f) {
   T n;
-  trunc(n, f);
-  return os << n;
-  //return os << f.get_num() << "(" << f.get_exponent() << ")";
+  floor(n, f);
+  os << n << ".";
+  for (int k=10; k > 0; k--) {
+    sputsoft::numbers::sub(f, f, n);
+    sputsoft::numbers::mul(f, f, 10u);
+    floor(n, f);
+    os << n;
+  }
+  return os;
+  //return f.show_internal(os);
 }
 
 } // namespace detail

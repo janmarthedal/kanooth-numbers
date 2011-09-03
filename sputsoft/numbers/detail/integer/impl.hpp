@@ -171,8 +171,13 @@ public:
   inline bool is_positive() const { return num && positive; }
   inline bool is_negative() const { return num && !positive; }
   inline operator bool() const { return !is_zero(); }
-  //inline void set_abs(NUM& n) const { sputsoft::numbers::set(n, num); }
-  inline const NUM& get_abs() const { return num; }
+  static inline void abs(NUM& r, const numb& v) {
+    sputsoft::numbers::set(r, v.num);
+  }
+  inline void abs(const numb& v) {
+    sputsoft::numbers::set(num, v.num);
+    positive = false;
+  }
 
   inline void set(const numb& v) { set_num(v.num, v.positive); }
   inline void set(const NUM& n) { set_num(n, true); }

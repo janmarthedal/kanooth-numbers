@@ -123,6 +123,13 @@ struct floor_log2_eval<numb<natnum<T> > > {
 };
 
 template <typename T>
+struct ruler_eval<numb<natnum<T> > > {
+  inline std::size_t operator()(const numb<natnum<T> >& n) const {
+    return n.ruler();
+  }
+};
+
+template <typename T>
 struct test_bit_eval<numb<natnum<T> > > {
   inline bool operator()(const numb<natnum<T> >& n, std::size_t pos) const {
     return n.test_bit(pos);

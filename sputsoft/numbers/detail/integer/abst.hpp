@@ -73,17 +73,24 @@ struct evaluator_rv<ops::unary::negate, numb<intnum<N> >, N> {
 
 /* Unary abs */
 
-template <typename T>
-struct function_v<ops::unary::abs, numb<intnum<T> > > {
-  inline const T& operator()(const numb<intnum<T> >& v) const {
-    return v.get_abs();
+template <typename N>
+struct evaluator_rv<ops::unary::abs, numb<intnum<N> >, numb<intnum<N> > > {
+  void operator()(numb<intnum<N> >& r, const numb<intnum<N> >& v) const{
+    r.abs(v);
+  }
+};
+
+template <typename N>
+struct evaluator_rv<ops::unary::abs, N, numb<intnum<N> > > {
+  void operator()(N& r, const numb<intnum<N> >& v) const{
+    numb<intnum<N> >::abs(r, v);
   }
 };
 
 /*template <typename T>
-struct evaluator_rv<ops::unary::abs, T, numb<intnum<T> > > {
-  void operator()(T& r, const numb<intnum<T> >& v) const {
-    v.set_abs(r);
+struct function_v<ops::unary::abs, numb<intnum<T> > > {
+  inline const T& operator()(const numb<intnum<T> >& v) const {
+    return v.get_abs();
   }
 };*/
 
@@ -168,9 +175,9 @@ struct is_negative_eval<numb<intnum<T> > > {
 };
 
 template <typename NUM>
-inline std::ostream& operator<<(std::ostream& os, const numb<intnum<NUM> >& n) {
-  if (n.is_negative()) os << "-";
-  return os << n.get_abs();
+inline std::ostream& operator<<(std::ostream& os, const numb<intnum<NUM> >& i) {
+  if (i.is_negative()) os << "-";
+  return os << abs(i);
 }
 
 template <typename NUM, typename Forw>

@@ -173,10 +173,16 @@ int main()
 
   std::cout << "Digit bits " << natural_number::digit_bits << std::endl;
 
-  positive_float f = 123u, g=10u;
+  positive_float f=2u, g=3u;
 
   div(f, f, g);
   std::cout << "f = " << f << std::endl;
+  
+  std::cout << "f = " << mul_power(f, 10u, 20) << std::endl;
+
+  natural_number n;
+  set(n, "1234567890123456");
+  std::cout << ruler(n) << std::endl;
 
   return 0;
 }

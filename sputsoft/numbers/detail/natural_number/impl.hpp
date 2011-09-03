@@ -419,10 +419,9 @@ private:
   static T quotrem_i(Con& q, const Con& u, const T v) {
     if (!v)
       division_by_zero();
-    else if (u.is_empty()) {
+    else if (u.is_empty())
       q.set_size(0);
-      return 0;
-    } else if (sizeof(T) <= sizeof(digit_type)) {
+    else if (sizeof(T) <= sizeof(digit_type)) {
       // q.get() == u.get() is ok, because q is then never resized
       ensure_size(q, u.size());
       return quotrem_int0(q, u, v);
@@ -431,6 +430,7 @@ private:
       quotrem_num(q, r, u, numb(v).con);
       return to_int_type<T>(r);
     }
+    return 0;
   }
 
   /* Bitwise and two numbers */
@@ -807,6 +807,13 @@ public:
     std::size_t n = con.size();
     if (!n) return (std::size_t) -1;
     return sputsoft::numbers::floor_log2(con[n - 1]) + (n - 1)*digit_bits;
+  }
+
+  std::size_t ruler() const {
+    if (is_zero()) return (std::size_t) -1;
+    std::size_t k=0;
+    while (!con[k]) k++;
+    return sputsoft::numbers::ruler(con[k]) + k*digit_bits;
   }
 
 };

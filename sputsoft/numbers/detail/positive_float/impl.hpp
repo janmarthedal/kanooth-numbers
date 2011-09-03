@@ -20,6 +20,7 @@
 
 namespace sputsoft {
 namespace numbers {
+
 namespace detail {
 
 std::size_t ceil_multiple(std::size_t x, unsigned a)
@@ -29,22 +30,48 @@ std::size_t ceil_multiple(std::size_t x, unsigned a)
 
 template <typename NUM, typename EXP, std::size_t DEFPREC>
 class numb<posfloatnum<NUM, EXP, DEFPREC> > {
+public:
+  enum round_mode {
+    FLOOR, CEIL, ROUND
+  };
 private:
   NUM num;
   EXP exponent;
   std::size_t precision;
+  round_mode rounding;
 
-  void normalize() {
-    if (sputsoft::numbers::is_zero(num)) return;
-    std::size_t bits_used = floor_log2(num) + 1;
-    std::size_t to_use = ceil_multiple(bits_used, NUM::digit_bits);
-    std::ptrdiff_t shift = to_use - bits_used;
-    bit_shift_left(num, num, shift);
-    exponent -= shift;
+  std::size_t significand_bit_width() const {
+    return floor_log2(num) + 1;
   }
 
-  void round_and_normalize() {
-
+  /* Post normalize:
+   *   If significand is zero, exponent must be zero
+   *   If significand is non-zero, high-order digit has its top bit set
+   */
+  void normalize() {
+    if (sputsoft::numbers::is_zero(num))
+      exponent = 0;
+    else {
+      std::size_t cur_width = significand_bit_width();
+      if (cur_width > precision) {
+        std::size_t new_width = ceil_multiple(precision, NUM::digit_bits);
+        std::ptrdiff_t shift = new_width - cur_width;
+        bool increment = false;
+        if (rounding == ROUND) {
+          if (sputsoft::numbers::test_bit(num, cur_width - precision - 1))
+            increment = true;
+        }
+        sputsoft::numbers::bit_shift_left(num, num, shift);
+        if (increment)
+          sputsoft::numbers::add(num, num, 1u);
+        exponent -= shift;       
+      } else {
+        std::size_t new_width = ceil_multiple(cur_width, NUM::digit_bits);
+        std::ptrdiff_t shift = new_width - cur_width;
+        sputsoft::numbers::bit_shift_left(num, num, shift);
+        exponent -= shift;
+      }
+    }
   }
 
   inline void set_num(const NUM& n, EXP e) {
@@ -60,14 +87,53 @@ private:
     normalize();
   }
 
+  template <typename T1, typename T2>
+  void add2(const T1& xval, EXP xexp, const T2& yval, EXP yexp) {
+    NUM tmp;
+    if (xexp >= yexp) {
+      sputsoft::numbers::bit_shift_left(tmp, xval, xexp - yexp);
+      sputsoft::numbers::add(num, tmp, yval);
+      exponent = yexp;
+    } else {
+      sputsoft::numbers::bit_shift_left(tmp, yval, yexp - xexp);
+      sputsoft::numbers::add(num, xval, tmp);
+      exponent = xexp;
+    }
+    normalize();
+  }
+
+  template <typename T1, typename T2>
+  void sub2(const T1& xval, EXP xexp, const T2& yval, EXP yexp) {
+    NUM tmp;
+    if (xexp >= yexp) {
+      sputsoft::numbers::bit_shift_left(tmp, xval, xexp - yexp);
+      sputsoft::numbers::sub(num, tmp, yval);
+      exponent = yexp;
+    } else {
+      sputsoft::numbers::bit_shift_left(tmp, yval, yexp - xexp);
+      sputsoft::numbers::sub(num, xval, tmp);
+      exponent = xexp;
+    }
+    normalize();
+  }
+
+  template <typename T1, typename T2>
+  void mul2(const T1& xval, EXP xexp, const T2& yval, EXP yexp) {
+    sputsoft::numbers::mul(num, xval, yval);
+    exponent = xexp + yexp;
+    normalize();
+  }
+
 public:
   numb() {
     set_precision(DEFPREC);
+    set_rounding_mode(ROUND);
   }
   template <typename V>
   numb(const V& v) {
     sputsoft::numbers::set(*this, v);
     set_precision(DEFPREC);
+    set_rounding_mode(ROUND);
   }
   //numb(const NUM& n) : precision(DEFPREC) { set_num(n, 0); }
   template <typename V>
@@ -85,45 +151,64 @@ public:
   inline void set(T v) { set_int(v); }
 
   void set_precision(std::size_t prec) {
-    precision = ceil_multiple(prec, NUM::digit_bits);
+    precision = prec;  // ceil_multiple(prec, NUM::digit_bits);
   }
 
-  static void trunc(NUM& x, const numb& v) {
+  void set_rounding_mode(round_mode mode) {
+    rounding = mode;
+  }
+  
+  static void floor(NUM& x, const numb& v) {
     sputsoft::numbers::bit_shift_left(x, v.num, v.exponent);
   }
 
-  void add(const numb& x, const numb& y) {
-    NUM tmp;
-    if (x.exponent >= y.exponent) {
-      sputsoft::numbers::bit_shift_left(tmp, x.num, x.exponent - y.exponent);
-      sputsoft::numbers::add(num, tmp, y.num);
-      exponent = y.exponent;
-    } else {
-      sputsoft::numbers::bit_shift_left(tmp, y.num, y.exponent - x.exponent);
-      sputsoft::numbers::add(num, x.num, tmp);
-      exponent = x.exponent;
-    }
-    normalize();
+  static void round(NUM& x, const numb& v) {
+    bool increment = v.exponent < 0 && sputsoft::numbers::test_bit(v.num, -v.exponent-1);
+    sputsoft::numbers::bit_shift_left(x, v.num, v.exponent);
+    if (increment)
+      sputsoft::numbers::add(x, x, 1u);
   }
 
-  void sub(const numb& x, const numb& y) {
-    NUM tmp;
-    if (x.exponent >= y.exponent) {
-      sputsoft::numbers::bit_shift_left(tmp, x.num, x.exponent - y.exponent);
-      sputsoft::numbers::sub(num, tmp, y.num);
-      exponent = y.exponent;
-    } else {
-      sputsoft::numbers::bit_shift_left(tmp, y.num, y.exponent - x.exponent);
-      sputsoft::numbers::sub(num, x.num, tmp);
-      exponent = x.exponent;
-    }
-    normalize();
+  inline void add(const numb& x, const numb& y) {
+    add2(x.num, x.exponent, y.num, y.exponent);
   }
 
-  void mul(const numb& x, const numb& y) {
-    sputsoft::numbers::mul(num, x.num, y.num);
-    exponent = x.exponent + y.exponent;
-    normalize();
+  template <typename T>
+  inline void add(const numb& x, const T& y) {
+    add2(x.num, x.exponent, y, 0);
+  }
+
+  template <typename T>
+  inline void add(const T& x, const numb& y) {
+    add2(x, 0, y.num, y.exponent);
+  }
+
+  inline void sub(const numb& x, const numb& y) {
+    sub2(x.num, x.exponent, y.num, y.exponent);
+  }
+
+  template <typename T>
+  inline void sub(const numb& x, const T& y) {
+    sub2(x.num, x.exponent, y, 0);
+  }
+
+  template <typename T>
+  inline void sub(const T& x, const numb& y) {
+    sub2(x, 0, y.num, y.exponent);
+  }
+
+  inline void mul(const numb& x, const numb& y) {
+    mul2(x.num, x.exponent, y.num, y.exponent);
+  }
+
+  template <typename T>
+  inline void mul(const numb& x, const T& y) {
+    mul2(x.num, x.exponent, y, 0);
+  }
+
+  template <typename T>
+  inline void mul(const T& x, const numb& y) {
+    mul2(x, 0, y.num, y.exponent);
   }
 
   void div(const numb& x, const numb& y) {
@@ -132,8 +217,8 @@ public:
     else if (sputsoft::numbers::is_zero(y.num))
       sputsoft::numbers::set(num, 0u);  // TODO: What action to take?
     else {
-      std::size_t xbits = sputsoft::numbers::floor_log2(x.num) + 1;
-      std::size_t ybits = sputsoft::numbers::floor_log2(y.num) + 1;
+      std::size_t xbits = x.significand_bit_width();
+      std::size_t ybits = y.significand_bit_width();
       std::size_t destbits = precision;
       if (!destbits)
         destbits = std::max(xbits, ybits);
@@ -144,17 +229,16 @@ public:
       sputsoft::numbers::bit_shift_left(tmp, x.num, numeratorshift);
       sputsoft::numbers::div(num, tmp, y.num);
       exponent = x.exponent - numeratorshift - y.exponent;
-      round_and_normalize();
+      normalize();
     }
   }
 
-  EXP get_exponent() const {
-    return exponent;
+  std::ostream& show_internal(std::ostream& os) const {
+    NUM n;
+    floor(n, *this);
+    return os << num << "(" << exponent << "," << significand_bit_width() << ") ~ " << n;
   }
 
-  NUM get_num() const {
-    return num;
-  }
 
 };
 
