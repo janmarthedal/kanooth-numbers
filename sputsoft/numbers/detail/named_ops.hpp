@@ -346,10 +346,16 @@ abs(const T& v) {
   return function_v_help<detail::ops::unary::abs, T>()(v);
 }
 
-template <typename Op, typename T>
+template <typename T>
 inline typename detail::unary_result<detail::ops::unary::negate, T>::type
 negate(const T& v) {
   return function_v_help<detail::ops::unary::negate, T>()(v);
+}
+
+template <typename T>
+inline typename detail::unary_result<detail::ops::unary::trunc, T>::type
+trunc(const T& v) {
+  return function_v_help<detail::ops::unary::trunc, T>()(v);
 }
 
 template <typename T>

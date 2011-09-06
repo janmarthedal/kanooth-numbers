@@ -87,8 +87,6 @@ struct function_v<ops::unary::negate, V> {
 
 template <typename T>
 struct unary_result2<ops::unary::abs, T> : public make_unsigned<T> {};
-/*template <typename T>
-struct unary_result2<ops::unary::abs, T> : public type_if<true, T> {};*/
 
 template <typename V>
 struct function_v<ops::unary::abs, V> {
@@ -111,6 +109,12 @@ struct function_v<ops::unary::bit_not, V> {
 
 template <typename T>
 struct unary_result2<ops::unary::trunc, T> : public type_if<sputsoft::is_integral<T>::value, T> {};
+
+template <typename V>
+struct function_v<ops::unary::trunc, V> {
+  typedef typename unary_result<ops::unary::trunc, V>::type return_type;
+  inline return_type operator()(const V& v) const { return (return_type) v; }
+};
 
 /* Unary floor */
 

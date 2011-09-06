@@ -38,7 +38,8 @@ struct make_unsigned<numbers::detail::numb<numbers::detail::posfloatnum<T, E, P>
 };
 
 template <typename T, typename E, std::size_t P>
-struct is_integral<numbers::detail::numb<numbers::detail::posfloatnum<T, E, P> > > : public false_type {};
+struct is_integral<numbers::detail::numb<numbers::detail::posfloatnum<T, E, P> > >
+        : public false_type {};
 
 namespace numbers {
 namespace detail {
@@ -47,9 +48,13 @@ template <typename T, typename E, std::size_t P>
 struct type_rank<numb<posfloatnum<T, E, P> > > : public integral_constant<int, 23> {};
 
 template <typename T, typename E, std::size_t P>
-struct unary_result2<ops::unary::trunc, numbers::detail::numb<numbers::detail::posfloatnum<T, E, P> > > {
+struct unary_result2<ops::unary::trunc, numb<posfloatnum<T, E, P> > > {
   typedef T type;
 };
+
+template <typename T, typename E, std::size_t P>
+struct function_v<ops::unary::trunc, numb<posfloatnum<T, E, P> > >
+        : public function_v_fallback<ops::unary::trunc, numb<posfloatnum<T, E, P> > > {};
 
 template <typename T, typename E, std::size_t P>
 struct evaluator_rv<ops::unary::floor, T, numb<posfloatnum<T, E, P> > > {
@@ -57,6 +62,10 @@ struct evaluator_rv<ops::unary::floor, T, numb<posfloatnum<T, E, P> > > {
     numb<posfloatnum<T, E, P> >::floor(r, v);
   }
 };
+
+template <typename T, typename E, std::size_t P>
+struct evaluator_rv<ops::unary::trunc, T, numb<posfloatnum<T, E, P> > >
+        : public evaluator_rv<ops::unary::floor, T, numb<posfloatnum<T, E, P> > > {};
 
 template <typename T, typename E, std::size_t P>
 struct evaluator_rv<ops::unary::round, T, numb<posfloatnum<T, E, P> > > {

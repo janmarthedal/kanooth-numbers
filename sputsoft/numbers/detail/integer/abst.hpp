@@ -87,12 +87,20 @@ struct evaluator_rv<ops::unary::abs, N, numb<intnum<N> > > {
   }
 };
 
-/*template <typename T>
-struct function_v<ops::unary::abs, numb<intnum<T> > > {
-  inline const T& operator()(const numb<intnum<T> >& v) const {
-    return v.get_abs();
+template <typename Op, typename T>
+struct function_v_fallback {
+  typedef typename unary_result<Op, T>::type return_type;
+  inline const return_type operator()(const T& v) const {
+    return_type r;
+    evaluator_rv<Op, return_type, T>()(r, v);
+    return r;
   }
-};*/
+};
+
+
+template <typename T>
+struct function_v<ops::unary::abs, numb<intnum<T> > >
+        : public function_v_fallback<ops::unary::abs, numb<intnum<T> > > {};
 
 /* bitwise_not */
 
@@ -105,22 +113,12 @@ struct evaluator_rv<ops::unary::bit_not, numb<intnum<T> >, V> {
 };
 
 template <typename T>
-struct function_v<ops::unary::bit_not, numb<intnum<T> > > {
-  numb<intnum<T> > operator()(const numb<intnum<T> >& v) {
-    numb<intnum<T> > r;
-    evaluator_rv<ops::unary::bit_not, numb<intnum<T> >, numb<intnum<T> > >()(r, v);
-    return r;
-  }
-};
+struct function_v<ops::unary::bit_not, numb<intnum<T> > >
+        : public function_v_fallback<ops::unary::bit_not, numb<intnum<T> > > {};
 
 template <typename T>
-struct function_v<ops::unary::bit_not, numb<natnum<T> > > {
-  numb<intnum<numb<natnum<T> > > > operator()(const numb<natnum<T> >& v) {
-    numb<intnum<numb<natnum<T> > > > r;
-    evaluator_rv<ops::unary::bit_not, numb<intnum<numb<natnum<T> > > >, numb<natnum<T> > >()(r, v);
-    return r;
-  }
-};
+struct function_v<ops::unary::bit_not, numb<natnum<T> > >
+        : public function_v_fallback<ops::unary::bit_not, numb<natnum<T> > > {};
 
 /* bitwise_and */
 

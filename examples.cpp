@@ -178,9 +178,13 @@ int main()
   div(f, f, g);
   std::cout << "f = " << f << std::endl;
   
-  std::cout << "f = " << mul_power(f, 10u, 20) << std::endl;
+  //std::cout << "f = " << trunc(mul_power(f, 10u, 20)) << std::endl;
+  std::cout << "f = " << trunc(f) << std::endl;
 
   natural_number n;
+  
+  //trunc(n, mul_power(f, 10u, 20));
+  
   set(n, "1234567890123456");
   std::cout << ruler(n) << std::endl;
 
