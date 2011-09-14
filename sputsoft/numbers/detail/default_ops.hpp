@@ -555,6 +555,71 @@ template <typename T>
 struct ruler_eval
   : public ruler_eval2<T, sputsoft::is_native_int<T>::value> {};
 
+/**************** show_binary ****************/
+
+namespace {
+
+const char* toBinSt[16] = {
+  "0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111",
+  "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"
+};
+
+template <typename T, unsigned bits>
+struct show_binary_eval3;
+
+template <typename T>
+struct show_binary_eval3<T, 8> {
+  std::ostream& operator()(std::ostream& os, const T n) const {
+    os << toBinSt[n >> 4];
+    os << toBinSt[n & 0xf];
+    return os;
+  }
+};
+
+template <typename T>
+struct show_binary_eval3<T, 16> {
+  std::ostream& operator()(std::ostream& os, const T n) const {
+    show_binary_eval3<T, 8>()(os, n >> 8);
+    show_binary_eval3<T, 8>()(os, n & 0xff);
+    return os;
+  }
+};
+
+template <typename T>
+struct show_binary_eval3<T, 32> {
+  std::ostream& operator()(std::ostream& os, const T n) const {
+    show_binary_eval3<T, 16>()(os, n >> 16);
+    show_binary_eval3<T, 16>()(os, n & 0xffffu);
+    return os;
+  }
+};
+
+template <typename T>
+struct show_binary_eval3<T, 64> {
+  std::ostream& operator()(std::ostream& os, const T n) const {
+    show_binary_eval3<T, 32>()(os, n >> 32);
+    show_binary_eval3<T, 32>()(os, n & 0xffffffffu);
+    return os;
+  }
+};
+
+template <typename T, bool Ok>
+struct show_binary_eval2;
+
+template <typename T>
+struct show_binary_eval2<T, true> {
+  std::ostream& operator()(std::ostream& os, const T n) const {
+    typedef typename sputsoft::make_unsigned<T>::type S;
+    return show_binary_eval3<S, sputsoft::number_bits<S>::value>()(os, (S) n);
+  }
+};
+
+}
+
+template <typename T>
+struct show_binary_eval
+  : public show_binary_eval2<T, sputsoft::is_native_int<T>::value> {};
+
 /**************** test_bit ****************/
 
 namespace {

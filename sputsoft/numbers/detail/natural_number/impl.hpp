@@ -816,6 +816,14 @@ public:
     return sputsoft::numbers::ruler(con[k]) + k*digit_bits;
   }
 
+  std::ostream& show_binary(std::ostream& os) const {
+    for (int k=con.size()-1; k >= 0; --k) {
+      sputsoft::numbers::show_binary(os, con[k]);
+      if (k != 0) os << " ";
+    }
+    return os;
+  }
+
 };
 
 } // namespace detail

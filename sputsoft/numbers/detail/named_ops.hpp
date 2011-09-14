@@ -91,6 +91,7 @@ template <typename T> struct is_positive_eval;
 template <typename T> struct is_negative_eval;
 template <typename T> struct floor_log2_eval;
 template <typename T> struct ruler_eval;
+template <typename T> struct show_binary_eval;
 template <typename T> struct test_bit_eval;
 template <typename R, typename V> struct shift_left_eval;
 
@@ -510,6 +511,11 @@ inline std::size_t ruler(const T& n) {
 template <typename T>
 inline bool test_bit(const T& n, std::size_t pos) {
   return detail::test_bit_eval<T>()(n, pos);
+}
+
+template <typename T>
+std::ostream& show_binary(std::ostream& os, const T& n) {
+  return detail::show_binary_eval<T>()(os, n);
 }
 
 template <typename V1, typename V2>

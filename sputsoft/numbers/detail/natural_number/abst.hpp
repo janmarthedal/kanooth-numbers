@@ -130,6 +130,13 @@ struct ruler_eval<numb<natnum<T> > > {
 };
 
 template <typename T>
+struct show_binary_eval<numb<natnum<T> > > {
+  inline std::ostream& operator()(std::ostream& os, const numb<natnum<T> >& n) const {
+    return n.show_binary(os);
+  }
+};
+
+template <typename T>
 struct test_bit_eval<numb<natnum<T> > > {
   inline bool operator()(const numb<natnum<T> >& n, std::size_t pos) const {
     return n.test_bit(pos);

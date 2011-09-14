@@ -126,14 +126,14 @@ private:
 
 public:
   numb() {
-    set_precision(DEFPREC);
-    set_rounding_mode(ROUND);
+    precision = DEFPREC;
+    rounding = ROUND;
   }
   template <typename V>
   numb(const V& v) {
+    precision = DEFPREC;
+    rounding = ROUND;
     sputsoft::numbers::set(*this, v);
-    set_precision(DEFPREC);
-    set_rounding_mode(ROUND);
   }
   //numb(const NUM& n) : precision(DEFPREC) { set_num(n, 0); }
   template <typename V>
@@ -152,6 +152,7 @@ public:
 
   void set_precision(std::size_t prec) {
     precision = prec;  // ceil_multiple(prec, NUM::digit_bits);
+    normalize();
   }
 
   void set_rounding_mode(round_mode mode) {
@@ -233,12 +234,12 @@ public:
     }
   }
 
-  std::ostream& show_internal(std::ostream& os) const {
+  std::ostream& show_binary(std::ostream& os) const {
     NUM n;
     floor(n, *this);
-    return os << num << "(" << exponent << "," << significand_bit_width() << ") ~ " << n;
+    sputsoft::numbers::show_binary(os, num);
+    return os << " (" << exponent << "," << significand_bit_width() << ") ~ " << n;
   }
-
 
 };
 

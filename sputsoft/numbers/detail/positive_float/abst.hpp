@@ -75,6 +75,13 @@ struct evaluator_rv<ops::unary::round, T, numb<posfloatnum<T, E, P> > > {
 };
 
 template <typename T, typename E, std::size_t P>
+struct show_binary_eval<numb<posfloatnum<T, E, P> > > {
+  inline std::ostream& operator()(std::ostream& os, const numb<posfloatnum<T, E, P> >& n) const {
+    return n.show_binary(os);
+  }
+};
+
+template <typename T, typename E, std::size_t P>
 inline std::ostream& operator<<(std::ostream& os, numb<posfloatnum<T, E, P> > f) {
   T n;
   floor(n, f);

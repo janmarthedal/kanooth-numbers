@@ -152,8 +152,31 @@ typename retval<T>::type testfunc(T v) {
 }
 
 
+void check_rounding(natural_number n)
+{
+  positive_float f;
+
+  f.set_precision(64);
+  div(f, n, 8u);
+  show_binary(std::cout, f);
+  std::cout << std::endl;
+  
+  f.set_precision(32);  
+  show_binary(std::cout, f);
+  std::cout << std::endl;  
+}
+
 int main()
 {
+  //  natural_number n = "123456789012345";
+  natural_number b, n;
+  
+  b = mul_power(natural_number(1u), 2u, 34);
+  for (unsigned k=1; k < 8; ++k) {
+    add(n, b, k);
+    check_rounding(n);
+  }
+  
   /*PE3();
   PE16();
   PE20();
@@ -171,7 +194,7 @@ int main()
 
   //sqrt_example();
 
-  std::cout << "Digit bits " << natural_number::digit_bits << std::endl;
+  /*std::cout << "Digit bits " << natural_number::digit_bits << std::endl;
 
   positive_float f=2u, g=3u;
 
@@ -186,7 +209,7 @@ int main()
   //trunc(n, mul_power(f, 10u, 20));
   
   set(n, "1234567890123456");
-  std::cout << ruler(n) << std::endl;
+  std::cout << ruler(n) << std::endl;*/
 
   return 0;
 }
