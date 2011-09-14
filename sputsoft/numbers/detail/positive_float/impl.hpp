@@ -58,13 +58,17 @@ private:
         std::ptrdiff_t shift = new_width - cur_width;
         bool increment = false;
         if (rounding == ROUND) {
-          if (sputsoft::numbers::test_bit(num, cur_width - precision - 1))
-            increment = true;
+          std::size_t testpos = cur_width - precision - 1;
+          if (sputsoft::numbers::test_bit(num, testpos)) {
+            std::size_t rightmost = sputsoft::numbers::ruler(num);
+            increment = rightmost != testpos ||
+                          sputsoft::numbers::test_bit(num, testpos+1);
+          }
         }
         sputsoft::numbers::bit_shift_left(num, num, shift);
         if (increment)
           sputsoft::numbers::add(num, num, 1u);
-        exponent -= shift;       
+        exponent -= shift;
       } else {
         std::size_t new_width = ceil_multiple(cur_width, NUM::digit_bits);
         std::ptrdiff_t shift = new_width - cur_width;
@@ -124,6 +128,28 @@ private:
     normalize();
   }
 
+  template <typename T1, typename T2>
+  void div2(const T1& xval, std::size_t xbits, EXP xexp,
+            const T2& yval, std::size_t ybits, EXP yexp) {
+    if (sputsoft::numbers::is_zero(xval))
+      sputsoft::numbers::set(num, 0u);
+    else if (sputsoft::numbers::is_zero(yval))
+      sputsoft::numbers::set(num, 0u);  // TODO: What action to take?
+    else {
+      std::size_t destbits = precision;
+      if (!destbits)
+        destbits = std::max(xbits, ybits);
+      destbits += NUM::digit_bits - 1;  // guard digits
+      std::size_t numeratorbits = ybits + destbits;
+      std::ptrdiff_t numeratorshift = numeratorbits - xbits;
+      NUM tmp;
+      sputsoft::numbers::bit_shift_left(tmp, xval, numeratorshift);
+      sputsoft::numbers::div(num, tmp, yval);
+      exponent = xexp - numeratorshift - yexp;
+    }
+    normalize();
+  }
+
 public:
   numb() {
     precision = DEFPREC;
@@ -158,7 +184,7 @@ public:
   void set_rounding_mode(round_mode mode) {
     rounding = mode;
   }
-  
+
   static void floor(NUM& x, const numb& v) {
     sputsoft::numbers::bit_shift_left(x, v.num, v.exponent);
   }
@@ -212,26 +238,27 @@ public:
     mul2(x, 0, y.num, y.exponent);
   }
 
-  void div(const numb& x, const numb& y) {
-    if (sputsoft::numbers::is_zero(x.num))
-      sputsoft::numbers::set(num, 0u);
-    else if (sputsoft::numbers::is_zero(y.num))
-      sputsoft::numbers::set(num, 0u);  // TODO: What action to take?
-    else {
-      std::size_t xbits = x.significand_bit_width();
-      std::size_t ybits = y.significand_bit_width();
-      std::size_t destbits = precision;
-      if (!destbits)
-        destbits = std::max(xbits, ybits);
-      destbits += NUM::digit_bits - 1;  // guard digits
-      std::size_t numeratorbits = ybits + destbits;
-      std::ptrdiff_t numeratorshift = numeratorbits - xbits;
-      NUM tmp;
-      sputsoft::numbers::bit_shift_left(tmp, x.num, numeratorshift);
-      sputsoft::numbers::div(num, tmp, y.num);
-      exponent = x.exponent - numeratorshift - y.exponent;
-      normalize();
-    }
+  inline void div(const numb& x, const numb& y) {
+    div2(x.num, x.significand_bit_width(), x.exponent,
+         y.num, y.significand_bit_width(), y.exponent);
+  }
+
+  template <typename T>
+  inline void div(const numb& x, const T& y) {
+    div2(x.num, x.significand_bit_width(), x.exponent,
+         y, sputsoft::numbers::floor_log2(y) + 1, 0);
+  }
+
+  template <typename T>
+  inline void div(const T& x, const numb& y) {
+    div2(x, sputsoft::numbers::floor_log2(x) + 1, 0,
+         y.num, x.significand_bit_width(), y.exponent);
+  }
+
+  template <typename T1, typename T2>
+  inline void div(const T1& x, const T2& y) {
+    div2(x, sputsoft::numbers::floor_log2(x) + 1, 0,
+         y, sputsoft::numbers::floor_log2(y) + 1, 0);
   }
 
   std::ostream& show_binary(std::ostream& os) const {
