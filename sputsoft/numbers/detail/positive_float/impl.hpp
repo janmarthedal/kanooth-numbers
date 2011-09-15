@@ -29,7 +29,46 @@ std::size_t ceil_multiple(std::size_t x, unsigned a)
 }
 
 template <typename NUM, typename EXP, std::size_t DEFPREC>
+class numb<posfloatnum<NUM, EXP, DEFPREC> >;
+
+namespace {
+  template <typename T>
+  struct bit_width_eval {
+    std::size_t operator()(const T& n) {
+      return floor_log2(n) + 1;
+    }
+  };
+  template <typename N, typename E, std::size_t D>
+  struct bit_width_eval<numb<posfloatnum<N, E, D> > > {
+    std::size_t operator()(const numb<posfloatnum<N, E, D> >& n) {
+      return n.significand_bit_width();
+    }    
+  };
+  template <typename T>
+  std::size_t bit_width(const T& n) {
+    return bit_width_eval<T>()(n);
+  }
+  template <typename T>
+  struct exponent_eval {
+    std::size_t operator()(const T& n) {
+      return 0;
+    }
+  };
+  template <typename N, typename E, std::size_t D>
+  struct exponent_eval<numb<posfloatnum<N, E, D> > > {
+    std::size_t operator()(const numb<posfloatnum<N, E, D> >& n) {
+      return n.exponent;
+    }    
+  };
+  template <typename T>
+  std::size_t get_exponent(const T& n) {
+    return exponent_eval<T>()(n);
+  }
+}
+
+template <typename NUM, typename EXP, std::size_t DEFPREC>
 class numb<posfloatnum<NUM, EXP, DEFPREC> > {
+  friend struct exponent_eval<numb<posfloatnum<NUM, EXP, DEFPREC> > >;
 public:
   enum round_mode {
     FLOOR, CEIL, ROUND
@@ -39,10 +78,6 @@ private:
   EXP exponent;
   std::size_t precision;
   round_mode rounding;
-
-  std::size_t significand_bit_width() const {
-    return floor_log2(num) + 1;
-  }
 
   /* Post normalize:
    *   If significand is zero, exponent must be zero
@@ -60,9 +95,15 @@ private:
         if (rounding == ROUND) {
           std::size_t testpos = cur_width - precision - 1;
           if (sputsoft::numbers::test_bit(num, testpos)) {
+            /*  |<- precision ->|
+             *  |??...??????????|1??????
+             *                   ^
+             *                 testpos
+             */
             std::size_t rightmost = sputsoft::numbers::ruler(num);
-            increment = rightmost != testpos ||
-                          sputsoft::numbers::test_bit(num, testpos+1);
+            // we always have rightmost <= testpos
+            if (rightmost != testpos || sputsoft::numbers::test_bit(num, testpos+1))
+              increment = true;
           }
         }
         sputsoft::numbers::bit_shift_left(num, num, shift);
@@ -150,6 +191,25 @@ private:
     normalize();
   }
 
+  template <typename T1, typename T2>
+  static int cmp3(const T1& xval, EXP xexp, const T2& yval, EXP yexp) {
+    NUM tmp;
+    if (xexp >= yexp) {
+      sputsoft::numbers::bit_shift_left(tmp, xval, xexp - yexp);
+      return sputsoft::numbers::compare(tmp, yval);
+    } else {
+      sputsoft::numbers::bit_shift_left(tmp, yval, yexp - xexp);
+      return sputsoft::numbers::compare(xval, tmp);
+    }
+  }
+
+  template <typename T1, typename T2>
+  static int cmp2(const T1& xval, std::size_t xbits, EXP xexp,
+            const T2& yval, std::size_t ybits, EXP yexp) {
+    int c = sputsoft::numbers::compare(xexp + xbits, yexp + ybits);
+    return c ? c : cmp3(xval, xexp, yval, yexp);
+  }
+    
 public:
   numb() {
     precision = DEFPREC;
@@ -183,6 +243,10 @@ public:
 
   void set_rounding_mode(round_mode mode) {
     rounding = mode;
+  }
+
+  std::size_t significand_bit_width() const {
+    return floor_log2(num) + 1;
   }
 
   static void floor(NUM& x, const numb& v) {
@@ -259,6 +323,17 @@ public:
   inline void div(const T1& x, const T2& y) {
     div2(x, sputsoft::numbers::floor_log2(x) + 1, 0,
          y, sputsoft::numbers::floor_log2(y) + 1, 0);
+  }
+
+  inline int cmp(const numb& y) const {
+    return cmp2(num, bit_width(*this), get_exponent(*this),
+                y.num, bit_width(y), get_exponent(y));
+  }
+
+  template <typename T>
+  inline int cmp(const T& y) const {
+    return cmp2(num, bit_width(*this), get_exponent(*this),
+                y, bit_width(y), get_exponent(y));
   }
 
   std::ostream& show_binary(std::ostream& os) const {

@@ -152,7 +152,7 @@ typename retval<T>::type testfunc(T v) {
 }
 
 
-void check_rounding(natural_number n)
+void check_rounding2(natural_number n)
 {
   positive_float f;
 
@@ -166,17 +166,26 @@ void check_rounding(natural_number n)
   std::cout << std::endl;
 }
 
-int main()
+void check_rounding()
 {
-  //  natural_number n = "123456789012345";
   natural_number b, n;
 
   b = mul_power(natural_number(1u), 2u, 34);
   for (unsigned k=1; k < 16; ++k) {
     add(n, b, k);
-    check_rounding(n);
+    check_rounding2(n);
   }
+}
 
+int main()
+{
+  positive_float f = 12u;
+  positive_float g;
+  
+  sub(g, f, 1u);
+
+  std::cout << compare(f, g) << std::endl;
+  
   /*PE3();
   PE16();
   PE20();

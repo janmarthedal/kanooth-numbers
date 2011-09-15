@@ -22,7 +22,7 @@
 namespace sputsoft {
 namespace numbers {
 
-typedef detail::numb<detail::posfloatnum<natural_number, long, 64> > positive_float;
+typedef detail::numb<detail::posfloatnum<natural_number, std::ptrdiff_t, 64> > positive_float;
 
 } // namespace sputsoft
 } // namespace numbers

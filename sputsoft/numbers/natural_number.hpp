@@ -43,7 +43,7 @@ typedef lowlevel_generic<array_allocator<void> > lowlevel;
 typedef detail::numb<
           detail::natnum<
             //sputsoft::shared_ptr<
-              detail::wrap2<detail::digit_array<unsigned int>, detail::lowlevel>
+              detail::wrap2<detail::digit_array<unsigned long>, detail::lowlevel>
             //>
           >
         > natural_number;
