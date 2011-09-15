@@ -29,46 +29,7 @@ std::size_t ceil_multiple(std::size_t x, unsigned a)
 }
 
 template <typename NUM, typename EXP, std::size_t DEFPREC>
-class numb<posfloatnum<NUM, EXP, DEFPREC> >;
-
-namespace {
-  template <typename T>
-  struct bit_width_eval {
-    std::size_t operator()(const T& n) {
-      return floor_log2(n) + 1;
-    }
-  };
-  template <typename N, typename E, std::size_t D>
-  struct bit_width_eval<numb<posfloatnum<N, E, D> > > {
-    std::size_t operator()(const numb<posfloatnum<N, E, D> >& n) {
-      return n.significand_bit_width();
-    }    
-  };
-  template <typename T>
-  std::size_t bit_width(const T& n) {
-    return bit_width_eval<T>()(n);
-  }
-  template <typename T>
-  struct exponent_eval {
-    std::size_t operator()(const T& n) {
-      return 0;
-    }
-  };
-  template <typename N, typename E, std::size_t D>
-  struct exponent_eval<numb<posfloatnum<N, E, D> > > {
-    std::size_t operator()(const numb<posfloatnum<N, E, D> >& n) {
-      return n.exponent;
-    }    
-  };
-  template <typename T>
-  std::size_t get_exponent(const T& n) {
-    return exponent_eval<T>()(n);
-  }
-}
-
-template <typename NUM, typename EXP, std::size_t DEFPREC>
 class numb<posfloatnum<NUM, EXP, DEFPREC> > {
-  friend struct exponent_eval<numb<posfloatnum<NUM, EXP, DEFPREC> > >;
 public:
   enum round_mode {
     FLOOR, CEIL, ROUND
@@ -79,6 +40,33 @@ private:
   std::size_t precision;
   round_mode rounding;
 
+  static inline EXP bottom_exponent(const numb& n) {
+    return n.exponent;
+  }
+
+  template <typename T>
+  static inline EXP bottom_exponent(const T& n) {
+    return 0;
+  }
+
+  static inline EXP top_exponent(const numb& n) {
+    return n.exponent + floor_log2(n.num) + 1;
+  }
+
+  template <typename T>
+  static inline EXP top_exponent(const T& n) {
+    return floor_log2(n) + 1;
+  }
+
+  static inline const NUM& get_num(const numb& n) {
+    return n.num;
+  }
+
+  template <typename T>
+  static inline const T& get_num(const T& n) {
+    return n;
+  }
+
   /* Post normalize:
    *   If significand is zero, exponent must be zero
    *   If significand is non-zero, high-order digit has its top bit set
@@ -87,7 +75,7 @@ private:
     if (sputsoft::numbers::is_zero(num))
       exponent = 0;
     else {
-      std::size_t cur_width = significand_bit_width();
+      std::size_t cur_width = top_exponent(*this) - bottom_exponent(*this);
       if (cur_width > precision) {
         std::size_t new_width = ceil_multiple(precision, NUM::digit_bits);
         std::ptrdiff_t shift = new_width - cur_width;
@@ -133,83 +121,26 @@ private:
   }
 
   template <typename T1, typename T2>
-  void add2(const T1& xval, EXP xexp, const T2& yval, EXP yexp) {
-    NUM tmp;
-    if (xexp >= yexp) {
-      sputsoft::numbers::bit_shift_left(tmp, xval, xexp - yexp);
-      sputsoft::numbers::add(num, tmp, yval);
-      exponent = yexp;
-    } else {
-      sputsoft::numbers::bit_shift_left(tmp, yval, yexp - xexp);
-      sputsoft::numbers::add(num, xval, tmp);
-      exponent = xexp;
-    }
-    normalize();
-  }
-
-  template <typename T1, typename T2>
-  void sub2(const T1& xval, EXP xexp, const T2& yval, EXP yexp) {
-    NUM tmp;
-    if (xexp >= yexp) {
-      sputsoft::numbers::bit_shift_left(tmp, xval, xexp - yexp);
-      sputsoft::numbers::sub(num, tmp, yval);
-      exponent = yexp;
-    } else {
-      sputsoft::numbers::bit_shift_left(tmp, yval, yexp - xexp);
-      sputsoft::numbers::sub(num, xval, tmp);
-      exponent = xexp;
-    }
-    normalize();
-  }
-
-  template <typename T1, typename T2>
-  void mul2(const T1& xval, EXP xexp, const T2& yval, EXP yexp) {
-    sputsoft::numbers::mul(num, xval, yval);
-    exponent = xexp + yexp;
-    normalize();
-  }
-
-  template <typename T1, typename T2>
-  void div2(const T1& xval, std::size_t xbits, EXP xexp,
-            const T2& yval, std::size_t ybits, EXP yexp) {
+  static int cmp2(const T1& xval, const T2& yval) {
     if (sputsoft::numbers::is_zero(xval))
-      sputsoft::numbers::set(num, 0u);
-    else if (sputsoft::numbers::is_zero(yval))
-      sputsoft::numbers::set(num, 0u);  // TODO: What action to take?
-    else {
-      std::size_t destbits = precision;
-      if (!destbits)
-        destbits = std::max(xbits, ybits);
-      destbits += NUM::digit_bits - 1;  // guard digits
-      std::size_t numeratorbits = ybits + destbits;
-      std::ptrdiff_t numeratorshift = numeratorbits - xbits;
-      NUM tmp;
-      sputsoft::numbers::bit_shift_left(tmp, xval, numeratorshift);
-      sputsoft::numbers::div(num, tmp, yval);
-      exponent = xexp - numeratorshift - yexp;
-    }
-    normalize();
-  }
-
-  template <typename T1, typename T2>
-  static int cmp3(const T1& xval, EXP xexp, const T2& yval, EXP yexp) {
+      return sputsoft::numbers::is_zero(yval) ? 0 : -1;
+    if (sputsoft::numbers::is_zero(yval))
+      return 1;
+    int c = sputsoft::numbers::compare(top_exponent(xval), top_exponent(yval));
+    if (c) return c;
+    EXP shift = bottom_exponent(xval) - bottom_exponent(yval);
+    if (shift == 0)
+      return sputsoft::numbers::compare(get_num(xval), get_num(yval));
     NUM tmp;
-    if (xexp >= yexp) {
-      sputsoft::numbers::bit_shift_left(tmp, xval, xexp - yexp);
-      return sputsoft::numbers::compare(tmp, yval);
+    if (shift > 0) {
+      sputsoft::numbers::bit_shift_left(tmp, get_num(xval), shift);
+      return sputsoft::numbers::compare(tmp, get_num(yval));
     } else {
-      sputsoft::numbers::bit_shift_left(tmp, yval, yexp - xexp);
-      return sputsoft::numbers::compare(xval, tmp);
+      sputsoft::numbers::bit_shift_left(tmp, get_num(yval), -shift);
+      return sputsoft::numbers::compare(get_num(xval), tmp);
     }
   }
 
-  template <typename T1, typename T2>
-  static int cmp2(const T1& xval, std::size_t xbits, EXP xexp,
-            const T2& yval, std::size_t ybits, EXP yexp) {
-    int c = sputsoft::numbers::compare(xexp + xbits, yexp + ybits);
-    return c ? c : cmp3(xval, xexp, yval, yexp);
-  }
-    
 public:
   numb() {
     precision = DEFPREC;
@@ -245,10 +176,6 @@ public:
     rounding = mode;
   }
 
-  std::size_t significand_bit_width() const {
-    return floor_log2(num) + 1;
-  }
-
   static void floor(NUM& x, const numb& v) {
     sputsoft::numbers::bit_shift_left(x, v.num, v.exponent);
   }
@@ -260,87 +187,108 @@ public:
       sputsoft::numbers::add(x, x, 1u);
   }
 
-  inline void add(const numb& x, const numb& y) {
-    add2(x.num, x.exponent, y.num, y.exponent);
-  }
-
-  template <typename T>
-  inline void add(const numb& x, const T& y) {
-    add2(x.num, x.exponent, y, 0);
-  }
-
-  template <typename T>
-  inline void add(const T& x, const numb& y) {
-    add2(x, 0, y.num, y.exponent);
-  }
-
-  inline void sub(const numb& x, const numb& y) {
-    sub2(x.num, x.exponent, y.num, y.exponent);
-  }
-
-  template <typename T>
-  inline void sub(const numb& x, const T& y) {
-    sub2(x.num, x.exponent, y, 0);
-  }
-
-  template <typename T>
-  inline void sub(const T& x, const numb& y) {
-    sub2(x, 0, y.num, y.exponent);
-  }
-
-  inline void mul(const numb& x, const numb& y) {
-    mul2(x.num, x.exponent, y.num, y.exponent);
-  }
-
-  template <typename T>
-  inline void mul(const numb& x, const T& y) {
-    mul2(x.num, x.exponent, y, 0);
-  }
-
-  template <typename T>
-  inline void mul(const T& x, const numb& y) {
-    mul2(x, 0, y.num, y.exponent);
-  }
-
-  inline void div(const numb& x, const numb& y) {
-    div2(x.num, x.significand_bit_width(), x.exponent,
-         y.num, y.significand_bit_width(), y.exponent);
-  }
-
-  template <typename T>
-  inline void div(const numb& x, const T& y) {
-    div2(x.num, x.significand_bit_width(), x.exponent,
-         y, sputsoft::numbers::floor_log2(y) + 1, 0);
-  }
-
-  template <typename T>
-  inline void div(const T& x, const numb& y) {
-    div2(x, sputsoft::numbers::floor_log2(x) + 1, 0,
-         y.num, x.significand_bit_width(), y.exponent);
+  template <typename T1, typename T2>
+  inline void add(const T1& xval, const T2& yval) {
+    if (sputsoft::numbers::is_zero(xval))
+      sputsoft::numbers::set(*this, yval);
+    else if (sputsoft::numbers::is_zero(yval))
+      sputsoft::numbers::set(*this, xval);
+    else {
+      EXP xexp = bottom_exponent(xval);
+      EXP yexp = bottom_exponent(yval);
+      EXP shift = xexp - yexp;
+      if (shift == 0) {
+        sputsoft::numbers::add(num, get_num(xval), get_num(yval));
+        exponent = xexp;
+      } else {
+        NUM tmp;
+        if (shift > 0) {
+          sputsoft::numbers::bit_shift_left(tmp, get_num(xval), shift);
+          sputsoft::numbers::add(num, tmp, get_num(yval));
+          exponent = yexp;
+        } else {
+          sputsoft::numbers::bit_shift_left(tmp, get_num(yval), -shift);
+          sputsoft::numbers::add(num, get_num(xval), tmp);
+          exponent = xexp;
+        }
+      }
+    }
+    normalize();
   }
 
   template <typename T1, typename T2>
-  inline void div(const T1& x, const T2& y) {
-    div2(x, sputsoft::numbers::floor_log2(x) + 1, 0,
-         y, sputsoft::numbers::floor_log2(y) + 1, 0);
+  inline void sub(const T1& xval, const T2& yval) {
+    if (sputsoft::numbers::is_zero(xval))
+      sputsoft::numbers::set(*this, yval);
+    else if (sputsoft::numbers::is_zero(yval))
+      sputsoft::numbers::set(*this, xval);
+    else {
+      EXP xexp = bottom_exponent(xval);
+      EXP yexp = bottom_exponent(yval);
+      EXP shift = xexp - yexp;
+      if (shift == 0) {
+        sputsoft::numbers::sub(num, get_num(xval), get_num(yval));
+        exponent = xexp;
+      } else {
+        NUM tmp;
+        if (shift > 0) {
+          sputsoft::numbers::bit_shift_left(tmp, get_num(xval), shift);
+          sputsoft::numbers::sub(num, tmp, get_num(yval));
+          exponent = yexp;
+        } else {
+          sputsoft::numbers::bit_shift_left(tmp, get_num(yval), -shift);
+          sputsoft::numbers::sub(num, get_num(xval), tmp);
+          exponent = xexp;
+        }
+      }
+    }
+    normalize();
   }
 
-  inline int cmp(const numb& y) const {
-    return cmp2(num, bit_width(*this), get_exponent(*this),
-                y.num, bit_width(y), get_exponent(y));
+  template <typename T1, typename T2>
+  inline void mul(const T1& x, const T2& y) {
+    EXP xexp = bottom_exponent(x);
+    EXP yexp = bottom_exponent(y);
+    sputsoft::numbers::mul(num, get_num(x), get_num(y));
+    exponent = xexp + yexp;
+    normalize();
+  }
+
+  template <typename T1, typename T2>
+  inline void div(const T1& xval, const T2& yval) {
+    if (sputsoft::numbers::is_zero(xval))
+      sputsoft::numbers::set(num, 0u);
+    else if (sputsoft::numbers::is_zero(yval))
+      sputsoft::numbers::set(num, 0u);  // TODO: What action to take?
+    else {
+      EXP xexp = bottom_exponent(xval);
+      EXP yexp = bottom_exponent(yval);
+      std::size_t xbits = top_exponent(xval) - xexp;
+      std::size_t ybits = top_exponent(yval) - yexp;
+      std::size_t destbits = precision;
+      if (!destbits)
+        destbits = std::max(xbits, ybits);
+      destbits += NUM::digit_bits - 1;  // guard digits
+      std::size_t numeratorbits = ybits + destbits;
+      std::ptrdiff_t numeratorshift = numeratorbits - xbits;
+      NUM tmp;
+      sputsoft::numbers::bit_shift_left(tmp, xval, numeratorshift);
+      sputsoft::numbers::div(num, tmp, yval);
+      exponent = xexp - numeratorshift - yexp;
+    }
+    normalize();
   }
 
   template <typename T>
-  inline int cmp(const T& y) const {
-    return cmp2(num, bit_width(*this), get_exponent(*this),
-                y, bit_width(y), get_exponent(y));
+  inline int cmp(const T& rhs) const {
+    return cmp2(*this, rhs);
   }
 
   std::ostream& show_binary(std::ostream& os) const {
     NUM n;
     floor(n, *this);
     sputsoft::numbers::show_binary(os, num);
-    return os << " (" << exponent << "," << significand_bit_width() << ") ~ " << n;
+    return os << " (" << exponent << "," << (top_exponent(*this) - bottom_exponent(*this)) << ") ~ " << n;
   }
 
 };

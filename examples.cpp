@@ -181,11 +181,11 @@ int main()
 {
   positive_float f = 12u;
   positive_float g;
-  
-  sub(g, f, 1u);
 
-  std::cout << compare(f, g) << std::endl;
-  
+  mul(g, f, 2u);
+
+  std::cout << compare(f, 11u) << std::endl;
+
   /*PE3();
   PE16();
   PE20();
