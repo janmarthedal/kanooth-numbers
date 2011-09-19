@@ -1,10 +1,10 @@
 /*
- * File:   sputsoft/numbers/natural_number.hpp
+ * File:   kanooth/numbers/natural_number.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-05-03 20:12Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,27 +12,27 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_NATURAL_NUMBER_HPP
-#define	_SPUTSOFT_NUMBERS_NATURAL_NUMBER_HPP
+#ifndef _KANOOTH_NUMBERS_NATURAL_NUMBER_HPP
+#define	_KANOOTH_NUMBERS_NATURAL_NUMBER_HPP
 
-#include <sputsoft/numbers/detail/memory/digit_array.hpp>
-#include <sputsoft/numbers/detail/memory/array_allocator.hpp>
-//#include <sputsoft/numbers/detail/natural_number/shared.hpp>
-#include <sputsoft/numbers/detail/natural_number/impl.hpp>
-#include <sputsoft/numbers/detail/default_ops.hpp>
-#include <sputsoft/numbers/detail/overload.hpp>
+#include <kanooth/numbers/detail/memory/digit_array.hpp>
+#include <kanooth/numbers/detail/memory/array_allocator.hpp>
+//#include <kanooth/numbers/detail/natural_number/nat_num_shared.hpp>
+#include <kanooth/numbers/detail/natural_number/nat_num_impl.hpp>
+#include <kanooth/numbers/detail/default_ops.hpp>
+#include <kanooth/numbers/detail/overload.hpp>
 
-#ifdef SPUTSOFT_USE_GMP
-#include <sputsoft/numbers/detail/lowlevel/gmp.hpp>
+#ifdef KANOOTH_USE_GMP
+#include <kanooth/numbers/detail/lowlevel/gmp.hpp>
 #else
-#include <sputsoft/numbers/detail/lowlevel/generic.hpp>
+#include <kanooth/numbers/detail/lowlevel/generic.hpp>
 #endif
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 namespace detail {
 
-#ifdef SPUTSOFT_USE_GMP
+#ifdef KANOOTH_USE_GMP
 typedef lowlevel_gmp lowlevel;
 #else
 typedef lowlevel_generic<array_allocator<void> > lowlevel;
@@ -42,13 +42,13 @@ typedef lowlevel_generic<array_allocator<void> > lowlevel;
 
 typedef detail::numb<
           detail::natnum<
-            //sputsoft::shared_ptr<
+            //kanooth::shared_ptr<
               detail::wrap2<detail::digit_array<unsigned long>, detail::lowlevel>
             //>
           >
         > natural_number;
 
-} // namespace sputsoft
+} // namespace kanooth
 } // namespace numbers
 
-#endif // _SPUTSOFT_NUMBERS_NATURAL_NUMBER_HPP
+#endif // _KANOOTH_NUMBERS_NATURAL_NUMBER_HPP

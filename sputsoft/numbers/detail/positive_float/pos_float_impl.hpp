@@ -1,10 +1,10 @@
 /*
- * File:   sputsoft/numbers/detail/positive_float/impl.hpp
+ * File:   kanooth/numbers/detail/positive_float/pos_float_impl.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2011-08-24 09:00Z
  *
- * (C) Copyright SputSoft 2011
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,13 +12,13 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_POSITIVE_FLOAT_IMPL_HPP
-#define _SPUTSOFT_NUMBERS_DETAIL_POSITIVE_FLOAT_IMPL_HPP
+#ifndef _KANOOTH_NUMBERS_DETAIL_POSITIVE_FLOAT_IMPL_HPP
+#define _KANOOTH_NUMBERS_DETAIL_POSITIVE_FLOAT_IMPL_HPP
 
-#include <sputsoft/type_traits.hpp>
-#include <sputsoft/numbers/detail/positive_float/abst.hpp>
+#include <kanooth/type_traits.hpp>
+#include <kanooth/numbers/detail/positive_float/pos_float_abst.hpp>
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 
 namespace detail {
@@ -72,7 +72,7 @@ private:
    *   If significand is non-zero, high-order digit has its top bit set
    */
   void normalize() {
-    if (sputsoft::numbers::is_zero(num))
+    if (kanooth::numbers::is_zero(num))
       exponent = 0;
     else {
       std::size_t cur_width = top_exponent(*this) - bottom_exponent(*this);
@@ -82,62 +82,62 @@ private:
         bool increment = false;
         if (rounding == ROUND) {
           std::size_t testpos = cur_width - precision - 1;
-          if (sputsoft::numbers::test_bit(num, testpos)) {
+          if (kanooth::numbers::test_bit(num, testpos)) {
             /*  |<- precision ->|
              *  |??...??????????|1??????
              *                   ^
              *                 testpos
              */
-            std::size_t rightmost = sputsoft::numbers::ruler(num);
+            std::size_t rightmost = kanooth::numbers::ruler(num);
             // we always have rightmost <= testpos
-            if (rightmost != testpos || sputsoft::numbers::test_bit(num, testpos+1))
+            if (rightmost != testpos || kanooth::numbers::test_bit(num, testpos+1))
               increment = true;
           }
         }
-        sputsoft::numbers::bit_shift_left(num, num, shift);
+        kanooth::numbers::bit_shift_left(num, num, shift);
         if (increment)
-          sputsoft::numbers::add(num, num, 1u);
+          kanooth::numbers::add(num, num, 1u);
         exponent -= shift;
       } else {
         std::size_t new_width = ceil_multiple(cur_width, NUM::digit_bits);
         std::ptrdiff_t shift = new_width - cur_width;
-        sputsoft::numbers::bit_shift_left(num, num, shift);
+        kanooth::numbers::bit_shift_left(num, num, shift);
         exponent -= shift;
       }
     }
   }
 
   inline void set_num(const NUM& n, EXP e) {
-    sputsoft::numbers::set(num, n);
+    kanooth::numbers::set(num, n);
     exponent = e;
     normalize();
   }
 
   template <typename T>
   void set_int(T v) {
-    sputsoft::numbers::set(num, v);
+    kanooth::numbers::set(num, v);
     exponent = 0;
     normalize();
   }
 
   template <typename T1, typename T2>
   static int cmp2(const T1& xval, const T2& yval) {
-    if (sputsoft::numbers::is_zero(xval))
-      return sputsoft::numbers::is_zero(yval) ? 0 : -1;
-    if (sputsoft::numbers::is_zero(yval))
+    if (kanooth::numbers::is_zero(xval))
+      return kanooth::numbers::is_zero(yval) ? 0 : -1;
+    if (kanooth::numbers::is_zero(yval))
       return 1;
-    int c = sputsoft::numbers::compare(top_exponent(xval), top_exponent(yval));
+    int c = kanooth::numbers::compare(top_exponent(xval), top_exponent(yval));
     if (c) return c;
     EXP shift = bottom_exponent(xval) - bottom_exponent(yval);
     if (shift == 0)
-      return sputsoft::numbers::compare(get_num(xval), get_num(yval));
+      return kanooth::numbers::compare(get_num(xval), get_num(yval));
     NUM tmp;
     if (shift > 0) {
-      sputsoft::numbers::bit_shift_left(tmp, get_num(xval), shift);
-      return sputsoft::numbers::compare(tmp, get_num(yval));
+      kanooth::numbers::bit_shift_left(tmp, get_num(xval), shift);
+      return kanooth::numbers::compare(tmp, get_num(yval));
     } else {
-      sputsoft::numbers::bit_shift_left(tmp, get_num(yval), -shift);
-      return sputsoft::numbers::compare(get_num(xval), tmp);
+      kanooth::numbers::bit_shift_left(tmp, get_num(yval), -shift);
+      return kanooth::numbers::compare(get_num(xval), tmp);
     }
   }
 
@@ -150,12 +150,12 @@ public:
   numb(const V& v) {
     precision = DEFPREC;
     rounding = ROUND;
-    sputsoft::numbers::set(*this, v);
+    kanooth::numbers::set(*this, v);
   }
   //numb(const NUM& n) : precision(DEFPREC) { set_num(n, 0); }
   template <typename V>
   numb& operator=(const V& v) {
-    sputsoft::numbers::set(*this, v);
+    kanooth::numbers::set(*this, v);
     return *this;
   }
   inline bool is_zero() const { return !num; }
@@ -177,38 +177,38 @@ public:
   }
 
   static void floor(NUM& x, const numb& v) {
-    sputsoft::numbers::bit_shift_left(x, v.num, v.exponent);
+    kanooth::numbers::bit_shift_left(x, v.num, v.exponent);
   }
 
   static void round(NUM& x, const numb& v) {
-    bool increment = v.exponent < 0 && sputsoft::numbers::test_bit(v.num, -v.exponent-1);
-    sputsoft::numbers::bit_shift_left(x, v.num, v.exponent);
+    bool increment = v.exponent < 0 && kanooth::numbers::test_bit(v.num, -v.exponent-1);
+    kanooth::numbers::bit_shift_left(x, v.num, v.exponent);
     if (increment)
-      sputsoft::numbers::add(x, x, 1u);
+      kanooth::numbers::add(x, x, 1u);
   }
 
   template <typename T1, typename T2>
   inline void add(const T1& xval, const T2& yval) {
-    if (sputsoft::numbers::is_zero(xval))
-      sputsoft::numbers::set(*this, yval);
-    else if (sputsoft::numbers::is_zero(yval))
-      sputsoft::numbers::set(*this, xval);
+    if (kanooth::numbers::is_zero(xval))
+      kanooth::numbers::set(*this, yval);
+    else if (kanooth::numbers::is_zero(yval))
+      kanooth::numbers::set(*this, xval);
     else {
       EXP xexp = bottom_exponent(xval);
       EXP yexp = bottom_exponent(yval);
       EXP shift = xexp - yexp;
       if (shift == 0) {
-        sputsoft::numbers::add(num, get_num(xval), get_num(yval));
+        kanooth::numbers::add(num, get_num(xval), get_num(yval));
         exponent = xexp;
       } else {
         NUM tmp;
         if (shift > 0) {
-          sputsoft::numbers::bit_shift_left(tmp, get_num(xval), shift);
-          sputsoft::numbers::add(num, tmp, get_num(yval));
+          kanooth::numbers::bit_shift_left(tmp, get_num(xval), shift);
+          kanooth::numbers::add(num, tmp, get_num(yval));
           exponent = yexp;
         } else {
-          sputsoft::numbers::bit_shift_left(tmp, get_num(yval), -shift);
-          sputsoft::numbers::add(num, get_num(xval), tmp);
+          kanooth::numbers::bit_shift_left(tmp, get_num(yval), -shift);
+          kanooth::numbers::add(num, get_num(xval), tmp);
           exponent = xexp;
         }
       }
@@ -218,26 +218,26 @@ public:
 
   template <typename T1, typename T2>
   inline void sub(const T1& xval, const T2& yval) {
-    if (sputsoft::numbers::is_zero(xval))
-      sputsoft::numbers::set(*this, yval);
-    else if (sputsoft::numbers::is_zero(yval))
-      sputsoft::numbers::set(*this, xval);
+    if (kanooth::numbers::is_zero(xval))
+      kanooth::numbers::set(*this, yval);
+    else if (kanooth::numbers::is_zero(yval))
+      kanooth::numbers::set(*this, xval);
     else {
       EXP xexp = bottom_exponent(xval);
       EXP yexp = bottom_exponent(yval);
       EXP shift = xexp - yexp;
       if (shift == 0) {
-        sputsoft::numbers::sub(num, get_num(xval), get_num(yval));
+        kanooth::numbers::sub(num, get_num(xval), get_num(yval));
         exponent = xexp;
       } else {
         NUM tmp;
         if (shift > 0) {
-          sputsoft::numbers::bit_shift_left(tmp, get_num(xval), shift);
-          sputsoft::numbers::sub(num, tmp, get_num(yval));
+          kanooth::numbers::bit_shift_left(tmp, get_num(xval), shift);
+          kanooth::numbers::sub(num, tmp, get_num(yval));
           exponent = yexp;
         } else {
-          sputsoft::numbers::bit_shift_left(tmp, get_num(yval), -shift);
-          sputsoft::numbers::sub(num, get_num(xval), tmp);
+          kanooth::numbers::bit_shift_left(tmp, get_num(yval), -shift);
+          kanooth::numbers::sub(num, get_num(xval), tmp);
           exponent = xexp;
         }
       }
@@ -249,17 +249,17 @@ public:
   inline void mul(const T1& x, const T2& y) {
     EXP xexp = bottom_exponent(x);
     EXP yexp = bottom_exponent(y);
-    sputsoft::numbers::mul(num, get_num(x), get_num(y));
+    kanooth::numbers::mul(num, get_num(x), get_num(y));
     exponent = xexp + yexp;
     normalize();
   }
 
   template <typename T1, typename T2>
   inline void div(const T1& xval, const T2& yval) {
-    if (sputsoft::numbers::is_zero(xval))
-      sputsoft::numbers::set(num, 0u);
-    else if (sputsoft::numbers::is_zero(yval))
-      sputsoft::numbers::set(num, 0u);  // TODO: What action to take?
+    if (kanooth::numbers::is_zero(xval))
+      kanooth::numbers::set(num, 0u);
+    else if (kanooth::numbers::is_zero(yval))
+      kanooth::numbers::set(num, 0u);  // TODO: What action to take?
     else {
       EXP xexp = bottom_exponent(xval);
       EXP yexp = bottom_exponent(yval);
@@ -272,8 +272,8 @@ public:
       std::size_t numeratorbits = ybits + destbits;
       std::ptrdiff_t numeratorshift = numeratorbits - xbits;
       NUM tmp;
-      sputsoft::numbers::bit_shift_left(tmp, xval, numeratorshift);
-      sputsoft::numbers::div(num, tmp, yval);
+      kanooth::numbers::bit_shift_left(tmp, xval, numeratorshift);
+      kanooth::numbers::div(num, tmp, yval);
       exponent = xexp - numeratorshift - yexp;
     }
     normalize();
@@ -287,14 +287,14 @@ public:
   std::ostream& show_binary(std::ostream& os) const {
     NUM n;
     floor(n, *this);
-    sputsoft::numbers::show_binary(os, num);
+    kanooth::numbers::show_binary(os, num);
     return os << " (" << exponent << "," << (top_exponent(*this) - bottom_exponent(*this)) << ") ~ " << n;
   }
 
 };
 
 } // namespace detail
-} // namespace sputsoft
+} // namespace kanooth
 } // namespace numbers
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_POSITIVE_FLOAT_IMPL_HPP
+#endif // _KANOOTH_NUMBERS_DETAIL_POSITIVE_FLOAT_IMPL_HPP

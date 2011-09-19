@@ -1,10 +1,10 @@
 /* 
- * File:   sputsoft/numbers/detail/integer/abst.hpp
+ * File:   kanooth/numbers/detail/integer/int_abst.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-05-13 11:00Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,14 +12,14 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_INT_ABST_HPP
-#define	_SPUTSOFT_NUMBERS_DETAIL_INT_ABST_HPP
+#ifndef _KANOOTH_NUMBERS_DETAIL_INT_ABST_HPP
+#define	_KANOOTH_NUMBERS_DETAIL_INT_ABST_HPP
 
-#include <sputsoft/type_traits.hpp>
-#include <sputsoft/numbers/number_traits.hpp>
-#include <sputsoft/numbers/detail/natural_number/abst.hpp>
+#include <kanooth/type_traits.hpp>
+#include <kanooth/numbers/number_traits.hpp>
+#include <kanooth/numbers/detail/natural_number/nat_num_abst.hpp>
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 namespace detail {
 
@@ -107,8 +107,8 @@ struct function_v<ops::unary::abs, numb<intnum<T> > >
 template <typename T, typename V>
 struct evaluator_rv<ops::unary::bit_not, numb<intnum<T> >, V> {
   void operator()(numb<intnum<T> >& r, const V& v) const {
-    sputsoft::numbers::negate(r, v);
-    sputsoft::numbers::sub(r, r, 1);
+    kanooth::numbers::negate(r, v);
+    kanooth::numbers::sub(r, r, 1);
   }
 };
 
@@ -125,14 +125,14 @@ struct function_v<ops::unary::bit_not, numb<natnum<T> > >
 template <typename N, typename V1, typename V2>
 struct evaluator_rvv<ops::binary::bit_and, numb<intnum<N> >, V1, V2> {
   inline void operator()(numb<intnum<N> >& r, const V1& v1, const V2& v2) const {
-    if (sputsoft::numbers::is_negative(v1)) {
-      if (sputsoft::numbers::is_negative(v2)) {
-        r.bitwise_or_pos(sputsoft::numbers::bitwise_not(v1), sputsoft::numbers::bitwise_not(v2));
-        sputsoft::numbers::bitwise_not(r, r);
+    if (kanooth::numbers::is_negative(v1)) {
+      if (kanooth::numbers::is_negative(v2)) {
+        r.bitwise_or_pos(kanooth::numbers::bitwise_not(v1), kanooth::numbers::bitwise_not(v2));
+        kanooth::numbers::bitwise_not(r, r);
       } else
-        r.bitwise_and_not_pos(v2, sputsoft::numbers::bitwise_not(v1));
-    } else if (sputsoft::numbers::is_negative(v2))
-      r.bitwise_and_not_pos(v1, sputsoft::numbers::bitwise_not(v2));
+        r.bitwise_and_not_pos(v2, kanooth::numbers::bitwise_not(v1));
+    } else if (kanooth::numbers::is_negative(v2))
+      r.bitwise_and_not_pos(v1, kanooth::numbers::bitwise_not(v2));
     else
       r.bitwise_and_pos(v1, v2);
   }
@@ -143,15 +143,15 @@ struct evaluator_rvv<ops::binary::bit_and, numb<intnum<N> >, V1, V2> {
 template <typename N, typename V1, typename V2>
 struct evaluator_rvv<ops::binary::bit_or, numb<intnum<N> >, V1, V2> {
   inline void operator()(numb<intnum<N> >& r, const V1& v1, const V2& v2) const {
-    if (sputsoft::numbers::is_negative(v1)) {
-      if (sputsoft::numbers::is_negative(v2)) {
-        r.bitwise_and_pos(sputsoft::numbers::bitwise_not(v1), sputsoft::numbers::bitwise_not(v2));
+    if (kanooth::numbers::is_negative(v1)) {
+      if (kanooth::numbers::is_negative(v2)) {
+        r.bitwise_and_pos(kanooth::numbers::bitwise_not(v1), kanooth::numbers::bitwise_not(v2));
       } else
-        r.bitwise_and_not_pos(sputsoft::numbers::bitwise_not(v1), v2);
-      sputsoft::numbers::bitwise_not(r, r);
-    } else if (sputsoft::numbers::is_negative(v2)) {
-      r.bitwise_and_not_pos(sputsoft::numbers::bitwise_not(v2), v1);
-      sputsoft::numbers::bitwise_not(r, r);
+        r.bitwise_and_not_pos(kanooth::numbers::bitwise_not(v1), v2);
+      kanooth::numbers::bitwise_not(r, r);
+    } else if (kanooth::numbers::is_negative(v2)) {
+      r.bitwise_and_not_pos(kanooth::numbers::bitwise_not(v2), v1);
+      kanooth::numbers::bitwise_not(r, r);
     } else
       r.bitwise_and_pos(v1, v2);
   }
@@ -189,13 +189,13 @@ struct set_4_eval<numb<intnum<NUM> >, Forw> {
       ++first;
     }
     NUM t;
-    sputsoft::numbers::set(t, first, last, base);
+    kanooth::numbers::set(t, first, last, base);
     n = numb<intnum<NUM> >(t, pos);
   }
 };
 
 } // namespace detail
 } // namespace numbers
-} // namespace sputsoft
+} // namespace kanooth
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_INT_ABST_HPP
+#endif // _KANOOTH_NUMBERS_DETAIL_INT_ABST_HPP

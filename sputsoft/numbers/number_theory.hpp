@@ -1,10 +1,10 @@
 /*
- * File:   sputsoft/numbers/number_theory.hpp
+ * File:   kanooth/numbers/number_theory.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-06-01 16:17Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,12 +12,12 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_NUMBER_THEORY_HPP
-#define _SPUTSOFT_NUMBERS_NUMBER_THEORY_HPP
+#ifndef _KANOOTH_NUMBERS_NUMBER_THEORY_HPP
+#define _KANOOTH_NUMBERS_NUMBER_THEORY_HPP
 
-#include <sputsoft/numbers/number_traits.hpp>
+#include <kanooth/numbers/number_traits.hpp>
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 
 // TODO: Optimize this. Use d = 2, 3, 6k-1, 6k+1 for k=1, 2, ...
@@ -68,6 +68,6 @@ gcd(const T1& v1, const T2& v2)
 }
 
 } // numbers
-} // sputsoft
+} // kanooth
 
-#endif // _SPUTSOFT_NUMBERS_NUMBER_THEORY_HPP
+#endif // _KANOOTH_NUMBERS_NUMBER_THEORY_HPP

@@ -1,10 +1,10 @@
 /*
- * File:   sputsoft/numbers/detail/lowlevel/generic.hpp
+ * File:   kanooth/numbers/detail/lowlevel/generic.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,13 +12,13 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HPP_
-#define _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HPP_
+#ifndef _KANOOTH_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HPP_
+#define _KANOOTH_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HPP_
 
-#include <sputsoft/numbers/detail/memory/array_allocator.hpp>
-#include <sputsoft/type_traits.hpp>
+#include <kanooth/numbers/detail/memory/array_allocator.hpp>
+#include <kanooth/type_traits.hpp>
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 namespace detail {
 
@@ -101,7 +101,7 @@ private:
   template <typename T>
   static inline void double_mult_add_add(const T u, const T v, const T a1, const T a2, T& low, T& high)
   {
-    const unsigned int halfbits = sputsoft::number_bits<T>::value / 2;
+    const unsigned int halfbits = kanooth::number_bits<T>::value / 2;
     const T lowmask = (((T) 1) << halfbits) - 1;
     T u1 = u >> halfbits, u0 = u & lowmask;
     T v1 = v >> halfbits, v0 = v & lowmask;
@@ -154,7 +154,7 @@ private:
   template <typename T>
   static unsigned nlz(T v)
   {
-    const unsigned int digitbits = sputsoft::number_bits<T>::value;
+    const unsigned int digitbits = kanooth::number_bits<T>::value;
     const T mask = ((T) 1) << (digitbits - 1);
     unsigned s = 0;
     while (!(v & mask)) {
@@ -168,7 +168,7 @@ private:
   template <typename T>
   static void double_div_normalized(T uhigh, T ulow, T v, T& quot, T& rem)
   {
-    const unsigned int digitbits = sputsoft::number_bits<T>::value;
+    const unsigned int digitbits = kanooth::number_bits<T>::value;
     const unsigned int halfbits = digitbits / 2;
     const T lowmask = (((T) 1) << halfbits) - 1;
     const T highmask = lowmask << halfbits;
@@ -407,7 +407,7 @@ public:
   // n > 0, z1 >= x1, 1 <= count < digit_bits
   template <typename T>
   static T lshift(T* z1, const T* x1, std::size_t n, unsigned count) {
-    const unsigned int rcount = sputsoft::number_bits<T>::value - count;
+    const unsigned int rcount = kanooth::number_bits<T>::value - count;
     T* z2 = z1 + n;
     const T* x2 = x1 + n;
     T xl = *--x2, xh;
@@ -424,7 +424,7 @@ public:
   // n > 0, z1 <= x1, 1 <= count < digit_bits
   template <typename T>
   static T rshift(T* z1, const T* x1, std::size_t n, unsigned count) {
-    const unsigned int rcount = sputsoft::number_bits<T>::value - count;
+    const unsigned int rcount = kanooth::number_bits<T>::value - count;
     const T* x2 = x1 + n;
     T xl, xh = *x1++;
     T r = xh << rcount;
@@ -479,6 +479,6 @@ public:
 
 } // namespace detail
 } // namespace numbers
-} // namespace sputsoft
+} // namespace kanooth
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_HPP_
+#endif // _KANOOTH_NUMBERS_DETAIL_LOWLEVEL_HPP_

@@ -1,10 +1,10 @@
 /*
- * File:   sputsoft/type_traits.hpp
+ * File:   kanooth/type_traits.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-19 09:18Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,26 +12,26 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_TYPE_TRAITS_HPP_
-#define _SPUTSOFT_TYPE_TRAITS_HPP_
+#ifndef _KANOOTH_TYPE_TRAITS_HPP_
+#define _KANOOTH_TYPE_TRAITS_HPP_
 
-#ifdef SPUTSOFT_USE_BOOST
+#ifdef KANOOTH_USE_BOOST
 #include <boost/type_traits/make_signed.hpp>
 #include <boost/type_traits/make_unsigned.hpp>
 #include <boost/type_traits/is_signed.hpp>
 #include <boost/type_traits/is_integral.hpp>
 #include <boost/integer_traits.hpp>
 #ifdef BOOST_HAS_LONG_LONG
-#define SPUTSOFT_HAS_LONG_LONG
+#define KANOOTH_HAS_LONG_LONG
 #endif
 #else
 #include <limits>
 #ifdef __GNUC__
-#define SPUTSOFT_HAS_LONG_LONG
+#define KANOOTH_HAS_LONG_LONG
 #endif
 #endif
 
-namespace sputsoft {
+namespace kanooth {
 
   template <bool C, typename T>
   struct type_if {
@@ -49,7 +49,7 @@ namespace sputsoft {
     static const T value = val;
   };
 
-#ifdef SPUTSOFT_USE_BOOST
+#ifdef KANOOTH_USE_BOOST
 
   template <typename T>
   struct number_bits {
@@ -76,7 +76,7 @@ namespace sputsoft {
   template <> struct make_signed<signed int> { typedef signed int type; };
   template <> struct make_signed<unsigned long> { typedef signed long type; };
   template <> struct make_signed<signed long> { typedef signed long type; };
-#ifdef SPUTSOFT_HAS_LONG_LONG
+#ifdef KANOOTH_HAS_LONG_LONG
   template <> struct make_signed<unsigned long long> { typedef signed long long type; };
   template <> struct make_signed<signed long long> { typedef signed long long type; };
 #endif
@@ -88,7 +88,7 @@ namespace sputsoft {
   template <> struct make_unsigned<signed int> { typedef unsigned int type; };
   template <> struct make_unsigned<unsigned long> { typedef unsigned long type; };
   template <> struct make_unsigned<signed long> { typedef unsigned long type; };
-#ifdef SPUTSOFT_HAS_LONG_LONG
+#ifdef KANOOTH_HAS_LONG_LONG
   template <> struct make_unsigned<unsigned long long> { typedef unsigned long long type; };
   template <> struct make_unsigned<signed long long> { typedef unsigned long long type; };
 #endif
@@ -106,7 +106,7 @@ namespace sputsoft {
   template <> struct is_integral<signed int> : public true_type {};
   template <> struct is_integral<unsigned long> : public true_type {};
   template <> struct is_integral<signed long> : public true_type {};
-#ifdef SPUTSOFT_HAS_LONG_LONG
+#ifdef KANOOTH_HAS_LONG_LONG
   template <> struct is_integral<unsigned long long> : public true_type {};
   template <> struct is_integral<signed long long> : public true_type {};
 #endif
@@ -125,7 +125,7 @@ namespace sputsoft {
   template <> struct is_native_int<signed int>     : public true_type {};
   template <> struct is_native_int<unsigned long>  : public true_type {};
   template <> struct is_native_int<signed long>    : public true_type {};
-#ifdef SPUTSOFT_HAS_LONG_LONG
+#ifdef KANOOTH_HAS_LONG_LONG
   template <> struct is_native_int<unsigned long long> : public true_type {};
   template <> struct is_native_int<signed long long>   : public true_type {};
 #endif
@@ -144,6 +144,6 @@ struct make_unsigned_if {
 template <typename T>
 struct make_unsigned_if<true, T> : public make_unsigned<T> {};
 
-} // namespace sputsoft
+} // namespace kanooth
 
-#endif // _SPUTSOFT_TYPE_TRAITS_HPP_
+#endif // _KANOOTH_TYPE_TRAITS_HPP_

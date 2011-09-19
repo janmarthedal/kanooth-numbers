@@ -1,10 +1,10 @@
 /* 
- * File:   sputsoft/numbers/detail/overload.hpp
+ * File:   kanooth/numbers/detail/overload.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-04-30 15:21Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,15 +12,15 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP
-#define _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP
+#ifndef _KANOOTH_NUMBERS_DETAIL_OVERLOAD_HPP
+#define _KANOOTH_NUMBERS_DETAIL_OVERLOAD_HPP
 
 #ifdef OVERLOAD_EXPRESSION_OPTIMIZE
 
-#include <sputsoft/type_traits.hpp>
-#include <sputsoft/numbers/detail/named_ops.hpp>
+#include <kanooth/type_traits.hpp>
+#include <kanooth/numbers/detail/named_ops.hpp>
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 namespace detail {
 
@@ -41,10 +41,10 @@ namespace {
     typedef const numb<T>& ref_type;
   };
 
-  template <typename T> struct is_numb_or_expr : public sputsoft::false_type {};
-  template <typename N> struct is_numb_or_expr<numb<N> > : public sputsoft::true_type {};
+  template <typename T> struct is_numb_or_expr : public kanooth::false_type {};
+  template <typename N> struct is_numb_or_expr<numb<N> > : public kanooth::true_type {};
   template <typename R, typename E> struct is_numb_or_expr<expr<R, E> >
-    : public sputsoft::true_type {};
+    : public kanooth::true_type {};
 
   template <typename Op, typename T1, typename T2, bool Ok>
   struct approve_binop_overload2 {};
@@ -96,8 +96,8 @@ namespace {
     typename resolve_ref<X>::ref_type x;
     typename resolve_ref<Y>::ref_type y;
     expr(const X& _x, const expr<R2, unary<ops::unary::negate, Y> >& _y) : x(_x), y(_y.x) {}
-    inline void assign(R& r) const { sputsoft::numbers::sub(r, x, y); }
-    inline operator R() const { return sputsoft::numbers::sub(x, y); }
+    inline void assign(R& r) const { kanooth::numbers::sub(r, x, y); }
+    inline operator R() const { return kanooth::numbers::sub(x, y); }
   };
   */
 
@@ -106,8 +106,8 @@ namespace {
     typename resolve_ref<X>::ref_type x;
     typename resolve_ref<Y>::ref_type y;
     expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    inline void assign(R& r) const { sputsoft::numbers::add(r, x, y); }
-    inline operator R() const { return sputsoft::numbers::add(x, y); }
+    inline void assign(R& r) const { kanooth::numbers::add(r, x, y); }
+    inline operator R() const { return kanooth::numbers::add(x, y); }
   };
 
   template <typename R, typename X, typename Y>
@@ -116,8 +116,8 @@ namespace {
     typename resolve_ref<Y>::ref_type y;
   public:
     expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    inline void assign(R& r) const { sputsoft::numbers::sub(r, x, y); }
-    inline operator R() const { return sputsoft::numbers::sub(x, y); }
+    inline void assign(R& r) const { kanooth::numbers::sub(r, x, y); }
+    inline operator R() const { return kanooth::numbers::sub(x, y); }
   };
 
   template <typename R, typename X, typename Y>
@@ -126,8 +126,8 @@ namespace {
     typename resolve_ref<Y>::ref_type y;
   public:
     expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    inline void assign(R& r) const { sputsoft::numbers::mul(r, x, y); }
-    inline operator R() const { return sputsoft::numbers::mul(x, y); }
+    inline void assign(R& r) const { kanooth::numbers::mul(r, x, y); }
+    inline operator R() const { return kanooth::numbers::mul(x, y); }
   };
 
   template <typename R, typename X, typename Y>
@@ -136,8 +136,8 @@ namespace {
     typename resolve_ref<Y>::ref_type y;
   public:
     expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    inline void assign(R& r) const { sputsoft::numbers::div(r, x, y); }
-    inline operator R() const { return sputsoft::numbers::div(x, y); }
+    inline void assign(R& r) const { kanooth::numbers::div(r, x, y); }
+    inline operator R() const { return kanooth::numbers::div(x, y); }
   };
 
   template <typename R, typename X, typename Y>
@@ -146,8 +146,8 @@ namespace {
     typename resolve_ref<Y>::ref_type y;
   public:
     expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    inline void assign(R& r) const { sputsoft::numbers::rem(r, x, y); }
-    inline operator R() const { return sputsoft::numbers::rem(x, y); }
+    inline void assign(R& r) const { kanooth::numbers::rem(r, x, y); }
+    inline operator R() const { return kanooth::numbers::rem(x, y); }
   };
 
   template <typename R, typename X, typename Y>
@@ -156,8 +156,8 @@ namespace {
     typename resolve_ref<Y>::ref_type y;
   public:
     expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    inline void assign(R& r) const { sputsoft::numbers::bit_shift_left(r, x, y); }
-    inline operator R() const { return sputsoft::numbers::bit_shift_left(x, y); }
+    inline void assign(R& r) const { kanooth::numbers::bit_shift_left(r, x, y); }
+    inline operator R() const { return kanooth::numbers::bit_shift_left(x, y); }
   };
 
   template <typename R, typename X, typename Y>
@@ -166,16 +166,16 @@ namespace {
     typename resolve_ref<Y>::ref_type y;
   public:
     expr(const X& _x, const Y& _y) : x(_x), y(_y) {}
-    inline void assign(R& r) const { sputsoft::numbers::bit_shift_right(r, x, y); }
-    inline operator R() const { return sputsoft::numbers::bit_shift_right(x, y); }
+    inline void assign(R& r) const { kanooth::numbers::bit_shift_right(r, x, y); }
+    inline operator R() const { return kanooth::numbers::bit_shift_right(x, y); }
   };
 
   template <typename R, typename X>
   struct expr<R, unary<ops::unary::negate, X> > {
     typename resolve_ref<X>::ref_type x;
     expr(const X& _x) : x(_x) {}
-    inline void assign(R& r) const { sputsoft::numbers::negate(r, x); }
-    inline operator R() const { return sputsoft::numbers::negate(x); }
+    inline void assign(R& r) const { kanooth::numbers::negate(r, x); }
+    inline operator R() const { return kanooth::numbers::negate(x); }
   };
 
 } // local namespace
@@ -262,37 +262,37 @@ operator-(const T& x) {
 template <typename T1, typename T2>
 inline typename approve_cmp_overload<T1, T2>::type
 operator==(const T1& x, const T2& y) {
-  return sputsoft::numbers::is_equal(sputsoft::numbers::eval(x), sputsoft::numbers::eval(y));
+  return kanooth::numbers::is_equal(kanooth::numbers::eval(x), kanooth::numbers::eval(y));
 }
 
 template <typename T1, typename T2>
 inline typename approve_cmp_overload<T1, T2>::type
 operator!=(const T1& x, const T2& y) {
-  return sputsoft::numbers::is_not_equal(sputsoft::numbers::eval(x), sputsoft::numbers::eval(y));
+  return kanooth::numbers::is_not_equal(kanooth::numbers::eval(x), kanooth::numbers::eval(y));
 }
 
 template <typename T1, typename T2>
 inline typename approve_cmp_overload<T1, T2>::type
 operator<(const T1& x, const T2& y) {
-  return sputsoft::numbers::is_less(sputsoft::numbers::eval(x), sputsoft::numbers::eval(y));
+  return kanooth::numbers::is_less(kanooth::numbers::eval(x), kanooth::numbers::eval(y));
 }
 
 template <typename T1, typename T2>
 inline typename approve_cmp_overload<T1, T2>::type
 operator>(const T1& x, const T2& y) {
-  return sputsoft::numbers::is_greater(sputsoft::numbers::eval(x), sputsoft::numbers::eval(y));
+  return kanooth::numbers::is_greater(kanooth::numbers::eval(x), kanooth::numbers::eval(y));
 }
 
 template <typename T1, typename T2>
 inline typename approve_cmp_overload<T1, T2>::type
 operator<=(const T1& x, const T2& y) {
-  return sputsoft::numbers::is_less_or_equal(sputsoft::numbers::eval(x), sputsoft::numbers::eval(y));
+  return kanooth::numbers::is_less_or_equal(kanooth::numbers::eval(x), kanooth::numbers::eval(y));
 }
 
 template <typename T1, typename T2>
 inline typename approve_cmp_overload<T1, T2>::type
 operator>=(const T1& x, const T2& y) {
-  return sputsoft::numbers::is_greater_or_equal(sputsoft::numbers::eval(x), sputsoft::numbers::eval(y));
+  return kanooth::numbers::is_greater_or_equal(kanooth::numbers::eval(x), kanooth::numbers::eval(y));
 }
 
 
@@ -338,8 +338,8 @@ std::ostream& operator<<(std::ostream& os, const expr<R, E>& e) {
 
 } // namespace detail
 } // namespace numbers
-} // namespace sputsoft
+} // namespace kanooth
 
 #endif // OVERLOAD_EXPRESSION_OPTIMIZE
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_OVERLOAD_HPP
+#endif // _KANOOTH_NUMBERS_DETAIL_OVERLOAD_HPP

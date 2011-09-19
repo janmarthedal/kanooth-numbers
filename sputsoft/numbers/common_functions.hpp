@@ -1,10 +1,10 @@
 /*
- * File:   sputsoft/numbers/common_functions.hpp
+ * File:   kanooth/numbers/common_functions.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-05-27 11:43Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,10 +12,10 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_COMMON_FUNCTIONS_HPP
-#define _SPUTSOFT_NUMBERS_COMMON_FUNCTIONS_HPP
+#ifndef _KANOOTH_NUMBERS_COMMON_FUNCTIONS_HPP
+#define _KANOOTH_NUMBERS_COMMON_FUNCTIONS_HPP
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 
 template <typename NUM>
@@ -121,6 +121,6 @@ NUM sideways_sum(NUM n, unsigned base)
 }
 
 } // numbers
-} // sputsoft
+} // kanooth
 
-#endif // _SPUTSOFT_NUMBERS_COMMON_FUNCTIONS_HPP
+#endif // _KANOOTH_NUMBERS_COMMON_FUNCTIONS_HPP

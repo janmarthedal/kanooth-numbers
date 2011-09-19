@@ -1,10 +1,10 @@
 /* 
- * File:   sputsoft/numbers/detail/default_ops.hpp
+ * File:   kanooth/numbers/detail/default_ops.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-06-01 15:05Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,12 +12,12 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_DEFAULT_OPS_HPP
-#define	_SPUTSOFT_NUMBERS_DETAIL_DEFAULT_OPS_HPP
+#ifndef _KANOOTH_NUMBERS_DETAIL_DEFAULT_OPS_HPP
+#define	_KANOOTH_NUMBERS_DETAIL_DEFAULT_OPS_HPP
 
-#include <sputsoft/numbers/detail/named_ops.hpp>
+#include <kanooth/numbers/detail/named_ops.hpp>
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 
 template <typename T>
@@ -108,7 +108,7 @@ struct function_v<ops::unary::bit_not, V> {
 /* Unary trunc */
 
 template <typename T>
-struct unary_result2<ops::unary::trunc, T> : public type_if<sputsoft::is_integral<T>::value, T> {};
+struct unary_result2<ops::unary::trunc, T> : public type_if<kanooth::is_integral<T>::value, T> {};
 
 template <typename V>
 struct function_v<ops::unary::trunc, V> {
@@ -136,7 +136,7 @@ struct unary_result2<ops::unary::round, T> : public unary_result<ops::unary::tru
 template <typename Op, typename R, typename V1, typename V2>
 struct evaluator_rvv {
   void operator()(R& r, const V1& v1, const V2& v2) const {
-    sputsoft::numbers::set(r, function_vv<Op, V1, V2>()(v1, v2));
+    kanooth::numbers::set(r, function_vv<Op, V1, V2>()(v1, v2));
   }
 };
 
@@ -153,8 +153,8 @@ struct function_rt_vv_default<ops::binary::add, R, V1, V2> {
 
 template <typename V1, typename V2>
 struct binary_result2<ops::binary::sub, V1, V2>
-  : public choose_type<!sputsoft::is_signed<V1>::value && !sputsoft::is_signed<V2>::value,
-                       V1, typename sputsoft::numbers::common_type<V1, V2>::type> {};
+  : public choose_type<!kanooth::is_signed<V1>::value && !kanooth::is_signed<V2>::value,
+                       V1, typename kanooth::numbers::common_type<V1, V2>::type> {};
 
 template <typename R, typename V1, typename V2>
 struct function_rt_vv_default<ops::binary::sub, R, V1, V2> {
@@ -176,9 +176,9 @@ struct function_rt_vv_default<ops::binary::mul, R, V1, V2> {
 
 template <typename V1, typename V2>
 struct binary_result2<ops::binary::div, V1, V2>
-  : public choose_type<sputsoft::is_integral<V1>::value && sputsoft::is_integral<V2>::value,
-        typename sputsoft::make_signed_if<sputsoft::is_signed<V2>::value, V1>::type,
-        typename sputsoft::numbers::common_type<V1, V2>::type> {};
+  : public choose_type<kanooth::is_integral<V1>::value && kanooth::is_integral<V2>::value,
+        typename kanooth::make_signed_if<kanooth::is_signed<V2>::value, V1>::type,
+        typename kanooth::numbers::common_type<V1, V2>::type> {};
 
 template <typename R, typename V1, typename V2>
 struct function_rt_vv_default<ops::binary::div, R, V1, V2> {
@@ -195,7 +195,7 @@ struct binary_result2<ops::binary::trunc_div, V1, V2>
 template <typename R, typename V1, typename V2>
 struct function_rt_vv_default<ops::binary::trunc_div, R, V1, V2> {
   inline R operator()(const V1& v1, const V2& v2) const {
-    return sputsoft::numbers::trunc(sputsoft::numbers::div(v1, v2));
+    return kanooth::numbers::trunc(kanooth::numbers::div(v1, v2));
   }
 };
 
@@ -206,7 +206,7 @@ struct binary_result2<ops::binary::floor_div, V1, V2>
 template <typename R, typename V1, typename V2>
 struct function_rt_vv_default<ops::binary::floor_div, R, V1, V2> {
   inline R operator()(const V1& v1, const V2& v2) const {
-    return sputsoft::numbers::floor(sputsoft::numbers::div(v1, v2));
+    return kanooth::numbers::floor(kanooth::numbers::div(v1, v2));
   }
 };
 
@@ -217,7 +217,7 @@ struct binary_result2<ops::binary::ceil_div, V1, V2>
 template <typename R, typename V1, typename V2>
 struct function_rt_vv_default<ops::binary::ceil_div, R, V1, V2> {
   inline R operator()(const V1& v1, const V2& v2) const {
-    return sputsoft::numbers::ceil(sputsoft::numbers::div(v1, v2));
+    return kanooth::numbers::ceil(kanooth::numbers::div(v1, v2));
   }
 };
 
@@ -225,9 +225,9 @@ struct function_rt_vv_default<ops::binary::ceil_div, R, V1, V2> {
 
 template <typename V1, typename V2>
 struct binary_result2<ops::binary::rem, V1, V2>
-  : public choose_type<sputsoft::is_integral<V1>::value && sputsoft::is_integral<V2>::value,
-        typename sputsoft::make_signed_if<sputsoft::is_signed<V1>::value, V2>::type,
-        typename sputsoft::numbers::common_type<V1, V2>::type> {};
+  : public choose_type<kanooth::is_integral<V1>::value && kanooth::is_integral<V2>::value,
+        typename kanooth::make_signed_if<kanooth::is_signed<V1>::value, V2>::type,
+        typename kanooth::numbers::common_type<V1, V2>::type> {};
 
 template <typename R, typename V1, typename V2>
 struct function_rt_vv_default<ops::binary::rem, R, V1, V2> {
@@ -241,8 +241,8 @@ struct function_rt_vv_default<ops::binary::rem, R, V1, V2> {
 template <typename Q, typename R, typename V1, typename V2>
 struct function_divrem {
   R operator()(Q& q, const V1& v1, const V2& v2) const {
-    R r = sputsoft::numbers::rem(v1, v2);
-    sputsoft::numbers::div(q, v1, v2);    // may change v1 if q==v1
+    R r = kanooth::numbers::rem(v1, v2);
+    kanooth::numbers::div(q, v1, v2);    // may change v1 if q==v1
     return r;
   }
 };
@@ -250,8 +250,8 @@ struct function_divrem {
 template <typename Q, typename R, typename V1, typename V2>
 struct function_floor_divrem {
   R operator()(Q& q, const V1& v1, const V2& v2) const {
-    R r = sputsoft::numbers::floor_rem(v1, v2);
-    sputsoft::numbers::floor_div(q, v1, v2);    // may change v1 if q==v1
+    R r = kanooth::numbers::floor_rem(v1, v2);
+    kanooth::numbers::floor_div(q, v1, v2);    // may change v1 if q==v1
     return r;
   }
 };
@@ -259,8 +259,8 @@ struct function_floor_divrem {
 template <typename Q, typename R, typename V1, typename V2>
 struct divrem_evaluator {
   void operator()(Q& q, R& r, const V1& v1, const V2& v2) const {
-    sputsoft::numbers::div(q, v1, v2);
-    sputsoft::numbers::rem(r, v1, v2);
+    kanooth::numbers::div(q, v1, v2);
+    kanooth::numbers::rem(r, v1, v2);
   }
 };
 
@@ -471,7 +471,7 @@ template <typename T>
 struct floor_log2_eval2<T, true> {
   inline std::size_t operator()(const T n) const {
     typedef typename make_unsigned<T>::type S;
-    return floor_log2_eval3<S, sputsoft::number_bits<S>::value>()((S) n);
+    return floor_log2_eval3<S, kanooth::number_bits<S>::value>()((S) n);
   }
 };
 
@@ -479,7 +479,7 @@ struct floor_log2_eval2<T, true> {
 
 template <typename T>
 struct floor_log2_eval
-  : public floor_log2_eval2<T, sputsoft::is_native_int<T>::value> {};
+  : public floor_log2_eval2<T, kanooth::is_native_int<T>::value> {};
 
 /**************** right-most bit ****************/
 
@@ -545,7 +545,7 @@ template <typename T>
 struct ruler_eval2<T, true> {
   inline std::size_t operator()(const T& n) const {
     typedef typename make_unsigned<T>::type S;
-    return ruler_eval3<S, sputsoft::number_bits<S>::value>()((S) n);
+    return ruler_eval3<S, kanooth::number_bits<S>::value>()((S) n);
   }
 };
 
@@ -553,7 +553,7 @@ struct ruler_eval2<T, true> {
 
 template <typename T>
 struct ruler_eval
-  : public ruler_eval2<T, sputsoft::is_native_int<T>::value> {};
+  : public ruler_eval2<T, kanooth::is_native_int<T>::value> {};
 
 /**************** show_binary ****************/
 
@@ -609,8 +609,8 @@ struct show_binary_eval2;
 template <typename T>
 struct show_binary_eval2<T, true> {
   std::ostream& operator()(std::ostream& os, const T n) const {
-    typedef typename sputsoft::make_unsigned<T>::type S;
-    return show_binary_eval3<S, sputsoft::number_bits<S>::value>()(os, (S) n);
+    typedef typename kanooth::make_unsigned<T>::type S;
+    return show_binary_eval3<S, kanooth::number_bits<S>::value>()(os, (S) n);
   }
 };
 
@@ -618,7 +618,7 @@ struct show_binary_eval2<T, true> {
 
 template <typename T>
 struct show_binary_eval
-  : public show_binary_eval2<T, sputsoft::is_native_int<T>::value> {};
+  : public show_binary_eval2<T, kanooth::is_native_int<T>::value> {};
 
 /**************** test_bit ****************/
 
@@ -638,12 +638,12 @@ namespace {
   
 template <typename T>
 struct test_bit_eval
-  : public test_bit_eval2<T, sputsoft::is_native_int<T>::value> {};
+  : public test_bit_eval2<T, kanooth::is_native_int<T>::value> {};
 
 /********************************************/
 
 } // namespace detail
 } // namespace numbers
-} // namespace sputsoft
+} // namespace kanooth
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_DEFAULT_OPS_HPP
+#endif // _KANOOTH_NUMBERS_DETAIL_DEFAULT_OPS_HPP

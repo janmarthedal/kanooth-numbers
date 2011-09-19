@@ -1,10 +1,10 @@
 /*
- * File:   sputsoft/shared_ptr.hpp
+ * File:   kanooth/shared_ptr.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-09-10 08:44Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,16 +12,16 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_SHARED_PTR_HPP_
-#define _SPUTSOFT_SHARED_PTR_HPP_
+#ifndef _KANOOTH_SHARED_PTR_HPP_
+#define _KANOOTH_SHARED_PTR_HPP_
 
-#ifdef SPUTSOFT_USE_BOOST
+#ifdef KANOOTH_USE_BOOST
 #include <boost/shared_ptr.hpp>
 #endif
 
-namespace sputsoft {
+namespace kanooth {
 
-#ifdef SPUTSOFT_USE_BOOST
+#ifdef KANOOTH_USE_BOOST
 
 using boost::shared_ptr;
 
@@ -73,6 +73,6 @@ public:
 
 #endif
 
-} // namespace sputsoft
+} // namespace kanooth
 
-#endif // _SPUTSOFT_SHARED_PTR_HPP_
+#endif // _KANOOTH_SHARED_PTR_HPP_

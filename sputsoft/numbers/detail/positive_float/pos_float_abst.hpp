@@ -1,10 +1,10 @@
 /*
- * File:   sputsoft/numbers/detail/positive_float/abst.hpp
+ * File:   kanooth/numbers/detail/positive_float/pos_float_abst.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2011-08-24 08:57Z
  *
- * (C) Copyright SputSoft 2011
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,13 +12,13 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_POSITIVE_FLOAT_ABST_HPP
-#define	_SPUTSOFT_NUMBERS_DETAIL_POSITIVE_FLOAT_ABST_HPP
+#ifndef _KANOOTH_NUMBERS_DETAIL_POSITIVE_FLOAT_ABST_HPP
+#define	_KANOOTH_NUMBERS_DETAIL_POSITIVE_FLOAT_ABST_HPP
 
-#include <sputsoft/type_traits.hpp>
-#include <sputsoft/numbers/number_traits.hpp>
+#include <kanooth/type_traits.hpp>
+#include <kanooth/numbers/number_traits.hpp>
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 namespace detail {
 
@@ -87,8 +87,8 @@ inline std::ostream& operator<<(std::ostream& os, numb<posfloatnum<T, E, P> > f)
   floor(n, f);
   os << n << ".";
   for (int k=10; k > 0; k--) {
-    sputsoft::numbers::sub(f, f, n);
-    sputsoft::numbers::mul(f, f, 10u);
+    kanooth::numbers::sub(f, f, n);
+    kanooth::numbers::mul(f, f, 10u);
     floor(n, f);
     os << n;
   }
@@ -98,6 +98,6 @@ inline std::ostream& operator<<(std::ostream& os, numb<posfloatnum<T, E, P> > f)
 
 } // namespace detail
 } // namespace numbers
-} // namespace sputsoft
+} // namespace kanooth
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_POSITIVE_FLOAT_ABST_HPP
+#endif // _KANOOTH_NUMBERS_DETAIL_POSITIVE_FLOAT_ABST_HPP

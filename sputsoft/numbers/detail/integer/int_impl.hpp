@@ -1,10 +1,10 @@
 /* 
- * File:   sputsoft/numbers/detail/integer/impl.hpp
+ * File:   kanooth/numbers/detail/integer/int_impl.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-05-04 20:12Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,11 +12,11 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_INT_IMPL_HPP
-#define _SPUTSOFT_NUMBERS_DETAIL_INT_IMPL_HPP
+#ifndef _KANOOTH_NUMBERS_DETAIL_INT_IMPL_HPP
+#define _KANOOTH_NUMBERS_DETAIL_INT_IMPL_HPP
 
-#include <sputsoft/type_traits.hpp>
-#include <sputsoft/numbers/detail/integer/abst.hpp>
+#include <kanooth/type_traits.hpp>
+#include <kanooth/numbers/detail/integer/int_abst.hpp>
 
 /*
  Integer division cases
@@ -27,7 +27,7 @@
 -7 -3   2,-1   2,-1   3, 2
 */
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 namespace detail {
 
@@ -38,43 +38,43 @@ private:
   bool positive;
 
   inline void set_num(const NUM& n, bool p) {
-    sputsoft::numbers::set(num, n);
+    kanooth::numbers::set(num, n);
     positive = p;
   }
 
   template <typename T>
   void set_int(T v) {
     positive = v >= 0;
-    sputsoft::numbers::set(num, sputsoft::to_unsigned(positive ? v : -v));
+    kanooth::numbers::set(num, kanooth::to_unsigned(positive ? v : -v));
   }
 
   template <typename T1, typename T2>
   void _add(const T1& n1, bool p1, const T2& n2, bool p2) {
     if (p1 == p2) {
-      sputsoft::numbers::add(num, n1, n2);
+      kanooth::numbers::add(num, n1, n2);
       positive = p1;
-    } else if (sputsoft::numbers::is_greater_or_equal(n1, n2)) {
-      sputsoft::numbers::sub(num, n1, n2);
+    } else if (kanooth::numbers::is_greater_or_equal(n1, n2)) {
+      kanooth::numbers::sub(num, n1, n2);
       positive = p1;
     } else {
-      sputsoft::numbers::sub(num, n2, n1);
+      kanooth::numbers::sub(num, n2, n1);
       positive = p2;
     }
   }
 
   template <typename T1, typename T2>
   inline void _mul(const T1& n1, bool p1, const T2& n2, bool p2) {
-    sputsoft::numbers::mul(num, n1, n2);
+    kanooth::numbers::mul(num, n1, n2);
     positive = p1 == p2;
   }
 
   /* quotrem, div, rem floor */
 
   static void quotrem_floor_num(numb& q, numb& r, const NUM& v1, bool p1, const NUM& v2, bool p2) {
-    sputsoft::numbers::divrem(q.num, r.num, v1, v2);
+    kanooth::numbers::divrem(q.num, r.num, v1, v2);
     if (p1 != p2 && r.num) {
-      sputsoft::numbers::add(q.num, q.num, 1u);
-      sputsoft::numbers::sub(r.num, v2, r.num);
+      kanooth::numbers::add(q.num, q.num, 1u);
+      kanooth::numbers::sub(r.num, v2, r.num);
     }
     q.positive = p1 == p2;
     r.positive = p2;
@@ -84,29 +84,29 @@ private:
     positive = p1 == p2;
     if (!positive) {
       NUM rnum;
-      sputsoft::numbers::divrem(num, rnum, v1, v2);
+      kanooth::numbers::divrem(num, rnum, v1, v2);
       if (rnum)
-        sputsoft::numbers::add(num, num, 1u);
+        kanooth::numbers::add(num, num, 1u);
     } else
-      sputsoft::numbers::div(num, v1, v2);
+      kanooth::numbers::div(num, v1, v2);
   }
 
   void rem_floor_num(const NUM& v1, bool p1, const NUM& v2, bool p2) {
-    sputsoft::numbers::rem(num, v1, v2);
+    kanooth::numbers::rem(num, v1, v2);
     positive = p2;
     if (p1 != p2 && num)
-      sputsoft::numbers::sub(num, v2, num);
+      kanooth::numbers::sub(num, v2, num);
   }
 
   template <typename T>
   T quotrem_floor_int(const NUM& v1, bool p1, T v2) {
-    typedef typename sputsoft::make_unsigned<T>::type unsigned_type;
+    typedef typename kanooth::make_unsigned<T>::type unsigned_type;
     bool p2 = v2 >= 0;
     unsigned_type v2u = p2 ? v2 : -v2;
-    unsigned_type ru = sputsoft::numbers::divrem(num, v1, v2u);
+    unsigned_type ru = kanooth::numbers::divrem(num, v1, v2u);
     positive = p1 == p2;
     if (!positive && ru) {
-      sputsoft::numbers::add(num, num, 1u);
+      kanooth::numbers::add(num, num, 1u);
       ru = v2u - ru;
     }
     return (T) (p2 ? ru : -ru);
@@ -114,24 +114,24 @@ private:
 
   template <typename T>
   void div_floor_int(const NUM& v1, bool p1, T v2) {
-    typedef typename sputsoft::make_unsigned<T>::type unsigned_type;
+    typedef typename kanooth::make_unsigned<T>::type unsigned_type;
     bool p2 = v2 >= 0;
     unsigned_type v2u = p2 ? v2 : -v2;
     positive = p1 == p2;
     if (!positive) {
-      unsigned_type ru = sputsoft::numbers::divrem(num, v1, v2u);
+      unsigned_type ru = kanooth::numbers::divrem(num, v1, v2u);
       if (ru)
-        sputsoft::numbers::add(num, num, 1u);
+        kanooth::numbers::add(num, num, 1u);
     } else
-      sputsoft::numbers::div(num, v1, v2u);
+      kanooth::numbers::div(num, v1, v2u);
   }
 
   template <typename T>
   static T rem_floor_int(const NUM& v1, bool p1, T v2) {
-    typedef typename sputsoft::make_unsigned<T>::type unsigned_type;
+    typedef typename kanooth::make_unsigned<T>::type unsigned_type;
     bool p2 = v2 >= 0;
     unsigned_type v2u = p2 ? v2 : -v2;
-    unsigned_type ru = sputsoft::numbers::rem(v1, v2u);
+    unsigned_type ru = kanooth::numbers::rem(v1, v2u);
     if (p1 != p2 && ru) ru = v2u - ru;
     return (T) (p2 ? ru : -ru);
   }
@@ -144,25 +144,25 @@ private:
       return !v2 ? 0 : p2 ? -1 : 1;
     if (!v2 || p1 != p2)
       return p1 ? 1 : -1;
-    int c = sputsoft::numbers::compare(v1, v2);
+    int c = kanooth::numbers::compare(v1, v2);
     return p1 ? c : -c;
   }
 
   template <typename T>
   static int cmp_int(const NUM& v1, bool p1, const T& v2) {
     bool p2 = v2 >= 0;
-    return _cmp(v1, p1, sputsoft::to_unsigned(p2 ? v2 : -v2), p2);
+    return _cmp(v1, p1, kanooth::to_unsigned(p2 ? v2 : -v2), p2);
   }
 
 public:
   numb() {}
   template <typename V>
   numb(const V& v) {
-    sputsoft::numbers::set(*this, v);
+    kanooth::numbers::set(*this, v);
   }
   template <typename V>
   numb& operator=(const V& v) {
-    sputsoft::numbers::set(*this, v);
+    kanooth::numbers::set(*this, v);
     return *this;
   }
   numb(const NUM& n, bool pos=true) : num(n), positive(pos) {}
@@ -172,10 +172,10 @@ public:
   inline bool is_negative() const { return num && !positive; }
   inline operator bool() const { return !is_zero(); }
   static inline void abs(NUM& r, const numb& v) {
-    sputsoft::numbers::set(r, v.num);
+    kanooth::numbers::set(r, v.num);
   }
   inline void abs(const numb& v) {
-    sputsoft::numbers::set(num, v.num);
+    kanooth::numbers::set(num, v.num);
     positive = false;
   }
 
@@ -186,20 +186,20 @@ public:
 
   template <typename V1, typename V2>
   inline void add(const V1& v1, const V2& v2) {
-    _add(sputsoft::numbers::abs(v1), !sputsoft::numbers::is_negative(v1),
-         sputsoft::numbers::abs(v2), !sputsoft::numbers::is_negative(v2));
+    _add(kanooth::numbers::abs(v1), !kanooth::numbers::is_negative(v1),
+         kanooth::numbers::abs(v2), !kanooth::numbers::is_negative(v2));
   }
 
   template <typename V1, typename V2>
   inline void sub(const V1& v1, const V2& v2) {
-    _add(sputsoft::numbers::abs(v1), !sputsoft::numbers::is_negative(v1),
-         sputsoft::numbers::abs(v2), sputsoft::numbers::is_negative(v2));
+    _add(kanooth::numbers::abs(v1), !kanooth::numbers::is_negative(v1),
+         kanooth::numbers::abs(v2), kanooth::numbers::is_negative(v2));
   }
 
   template <typename V1, typename V2>
   inline void mul(const V1& v1, const V2& v2) {
-    _mul(sputsoft::numbers::abs(v1), !sputsoft::numbers::is_negative(v1),
-         sputsoft::numbers::abs(v2), !sputsoft::numbers::is_negative(v2));
+    _mul(kanooth::numbers::abs(v1), !kanooth::numbers::is_negative(v1),
+         kanooth::numbers::abs(v2), !kanooth::numbers::is_negative(v2));
   }
 
   inline void div(const numb& u, const numb& v) {
@@ -228,33 +228,33 @@ public:
 
   template <typename T>
   inline signed cmp(const T& v) const {
-    return _cmp(num, positive, sputsoft::numbers::abs(v), !sputsoft::numbers::is_negative(v));
+    return _cmp(num, positive, kanooth::numbers::abs(v), !kanooth::numbers::is_negative(v));
   }
 
   template <typename V1, typename V2>
   inline void bitwise_and_pos(const V1& v1, const V2& v2) {
-    sputsoft::numbers::bitwise_and(num, sputsoft::numbers::abs(v1), sputsoft::numbers::abs(v2));
+    kanooth::numbers::bitwise_and(num, kanooth::numbers::abs(v1), kanooth::numbers::abs(v2));
     positive = true;
   }
   template <typename V1, typename V2>
   inline void bitwise_or_pos(const V1& v1, const V2& v2) {
-    sputsoft::numbers::bitwise_or(num, sputsoft::numbers::abs(v1), sputsoft::numbers::abs(v2));
+    kanooth::numbers::bitwise_or(num, kanooth::numbers::abs(v1), kanooth::numbers::abs(v2));
     positive = true;
   }
   template <typename V1, typename V2>
   inline void bitwise_xor_pos(const V1& v1, const V2& v2) {
-    sputsoft::numbers::bitwise_xor(num, sputsoft::numbers::abs(v1), sputsoft::numbers::abs(v2));
+    kanooth::numbers::bitwise_xor(num, kanooth::numbers::abs(v1), kanooth::numbers::abs(v2));
     positive = true;
   }
   template <typename V1, typename V2>
   inline void bitwise_and_not_pos(const V1& v1, const V2& v2) {
-    sputsoft::numbers::bitwise_and_not(num, sputsoft::numbers::abs(v1), sputsoft::numbers::abs(v2));
+    kanooth::numbers::bitwise_and_not(num, kanooth::numbers::abs(v1), kanooth::numbers::abs(v2));
     positive = true;
   }
 };
 
 } // namespace detail
-} // namespace sputsoft
+} // namespace kanooth
 } // namespace numbers
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_INT_IMPL_HPP
+#endif // _KANOOTH_NUMBERS_DETAIL_INT_IMPL_HPP

@@ -1,10 +1,10 @@
 /*
- * File:   sputsoft/numbers/detail/natural_number/abst.hpp
+ * File:   kanooth/numbers/detail/natural_number/nat_num_abst.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-05-02 7:55Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,14 +12,14 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_ABST_HPP
-#define _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_ABST_HPP
+#ifndef _KANOOTH_NUMBERS_DETAIL_NATURAL_NUMBER_ABST_HPP
+#define _KANOOTH_NUMBERS_DETAIL_NATURAL_NUMBER_ABST_HPP
 
-#include <sputsoft/numbers/number_traits.hpp>
-#include <sputsoft/numbers/detail/number_abst.hpp>
-#include <sputsoft/numbers/detail/default_ops.hpp>
+#include <kanooth/numbers/number_traits.hpp>
+#include <kanooth/numbers/detail/number_abst.hpp>
+#include <kanooth/numbers/detail/default_ops.hpp>
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 namespace detail {
 
@@ -48,7 +48,7 @@ namespace detail {
 template <typename T>
 struct type_rank<numb<natnum<T> > > : public integral_constant<int, 20> {};
 
-#ifdef SPUTSOFT_NATURAL_NUMBER_WITH_INTS
+#ifdef KANOOTH_NATURAL_NUMBER_WITH_INTS
 
 template <typename T>
 struct enabler_rv<ops::unary::identity, numb<natnum<T> >, int>
@@ -99,7 +99,7 @@ struct is_negative_eval<numb<natnum<T> > > {
 template <typename T, typename Forw>
 struct set_4_eval<numb<natnum<T> >, Forw> {
   void operator()(numb<natnum<T> >& n, Forw first, const Forw last, unsigned base) const {
-    sputsoft::numbers::set(n, 0u);
+    kanooth::numbers::set(n, 0u);
     if (base >= 2 && base <= 36) {
       unsigned v;
       while (first != last) {
@@ -108,8 +108,8 @@ struct set_4_eval<numb<natnum<T> >, Forw> {
         else if (c >= 'a' && c <= 'z') v = c - 'a' + 10;
         else if (c >= 'A' && c <= 'Z') v = c - 'A' + 10;
         else break;
-        sputsoft::numbers::mul(n, n, base);
-        sputsoft::numbers::add(n, n, v);
+        kanooth::numbers::mul(n, n, base);
+        kanooth::numbers::add(n, n, v);
       }
     }
   }
@@ -159,6 +159,6 @@ std::ostream& operator<<(std::ostream& os, const numb<natnum<T> >& n)
 
 } // namespace detail
 } // namespace numbers
-} // namespace sputsoft
+} // namespace kanooth
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_ABST_HPP
+#endif // _KANOOTH_NUMBERS_DETAIL_NATURAL_NUMBER_ABST_HPP

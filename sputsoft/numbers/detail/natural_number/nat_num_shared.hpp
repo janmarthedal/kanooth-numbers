@@ -1,10 +1,10 @@
 /* 
- * File:   sputsoft/numbers/detail/natural_number/shared.hpp
+ * File:   kanooth/numbers/detail/natural_number/nat_num_shared.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-04-30 15:18Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,21 +12,21 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_SHARED_HPP
-#define	_SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_SHARED_HPP
+#ifndef _KANOOTH_NUMBERS_DETAIL_NATURAL_NUMBER_SHARED_HPP
+#define	_KANOOTH_NUMBERS_DETAIL_NATURAL_NUMBER_SHARED_HPP
 
-#include <sputsoft/numbers/detail/natural_number/impl.hpp>
-#include <sputsoft/shared_ptr.hpp>
+#include <kanooth/numbers/detail/natural_number/nat_num_impl.hpp>
+#include <kanooth/shared_ptr.hpp>
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 namespace detail {
 
 template <typename Con, typename LowLevel>
-class numb<natnum<sputsoft::shared_ptr<wrap2<Con, LowLevel> > > > {
+class numb<natnum<kanooth::shared_ptr<wrap2<Con, LowLevel> > > > {
 private:
   typedef numb<natnum<wrap2<Con, LowLevel> > > number_type;
-  sputsoft::shared_ptr<number_type> num;
+  kanooth::shared_ptr<number_type> num;
 
   template <typename T>
   void _set(T v) {
@@ -110,11 +110,11 @@ public:
   numb() : num(new number_type) {}
   template <typename V>
   numb(const V& v) : num(new number_type) {
-    sputsoft::numbers::set(*this, v);
+    kanooth::numbers::set(*this, v);
   }
   template <typename V>
   numb& operator=(const V& v) {
-    sputsoft::numbers::set(*this, v);
+    kanooth::numbers::set(*this, v);
     return *this;
   }
   inline bool is_zero() const { return num->is_zero(); }
@@ -172,7 +172,7 @@ public:
     { quotrem_int(q, r, *x.num, y); }
   inline int cmp(unsigned long v) const { return num->cmp(v); }
 
-#ifdef SPUTSOFT_HAS_LONG_LONG
+#ifdef KANOOTH_HAS_LONG_LONG
   inline void set(unsigned long long v) { _set(v); }
   inline void add(const numb& x, unsigned long long y) { _add(*x.num, y); }
   inline void add(unsigned long long x, const numb& y) { _add(*y.num, x); }
@@ -253,7 +253,7 @@ public:
 };
 
 } // namespace detail
-} // namespace sputsoft
+} // namespace kanooth
 } // namespace numbers
 
-#endif	/* _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_SHARED_HPP */
+#endif	/* _KANOOTH_NUMBERS_DETAIL_NATURAL_NUMBER_SHARED_HPP */

@@ -1,10 +1,10 @@
 /*
- * File:   sputsoft/numbers/detail/natural_number/impl.hpp
+ * File:   kanooth/numbers/detail/natural_number/nat_num_impl.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-04-30 15:18Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,13 +12,13 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_IMPL_HPP
-#define _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_IMPL_HPP
+#ifndef _KANOOTH_NUMBERS_DETAIL_NATURAL_NUMBER_IMPL_HPP
+#define _KANOOTH_NUMBERS_DETAIL_NATURAL_NUMBER_IMPL_HPP
 
-#include <sputsoft/type_traits.hpp>
-#include <sputsoft/numbers/detail/natural_number/abst.hpp>
+#include <kanooth/type_traits.hpp>
+#include <kanooth/numbers/detail/natural_number/nat_num_abst.hpp>
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 namespace detail {
 
@@ -29,7 +29,7 @@ template <typename Con, typename LowLevel>
 class numb<natnum<wrap2<Con, LowLevel> > > {
 public:
   typedef typename Con::digit_type digit_type;
-  static const unsigned digit_bits = sputsoft::number_bits<digit_type>::value;
+  static const unsigned digit_bits = kanooth::number_bits<digit_type>::value;
 private:
   Con con;
 
@@ -226,7 +226,7 @@ private:
 
   template <typename T>
   static T sub_int_num(const T x, const Con& y) {
-    return sputsoft::numbers::sub(x, to_int_type<T>(y));
+    return kanooth::numbers::sub(x, to_int_type<T>(y));
   }
 
   /* Multiply two numbers */
@@ -467,7 +467,7 @@ private:
     if (x.is_empty())
       return 0;
     else if (sizeof(T) <= sizeof(digit_type))
-      return sputsoft::numbers::bitwise_and((T) x[0], y);
+      return kanooth::numbers::bitwise_and((T) x[0], y);
     else {
       Con r(sizeof(T) / sizeof(digit_type));
       bit_and_num(r, x, numb(y).con);
@@ -512,7 +512,7 @@ private:
       set_int(r, y);
     else if (sizeof(T) <= sizeof(digit_type)) {
       set_num(r, x);
-      sputsoft::numbers::bitwise_or(r[0], r[0], y);
+      kanooth::numbers::bitwise_or(r[0], r[0], y);
     } else
       bit_or_num(r, x, numb(y).con);
   }
@@ -557,7 +557,7 @@ private:
       set_int(r, y);
     else if (sizeof(T) <= sizeof(digit_type)) {
       set_num(r, x);
-      sputsoft::numbers::bitwise_xor(r[0], r[0], y);
+      kanooth::numbers::bitwise_xor(r[0], r[0], y);
     } else
       bit_xor_num(r, x, numb(y).con);
   }
@@ -600,7 +600,7 @@ private:
     else if (y.is_empty())
       return x;
     else if (sizeof(T) <= sizeof(digit_type))
-      return sputsoft::numbers::bitwise_and_not(x, (T) y[0]);
+      return kanooth::numbers::bitwise_and_not(x, (T) y[0]);
     else {
       Con r(sizeof(T) / sizeof(digit_type));
       bit_and_not_num(r, numb(x).con, y);
@@ -616,7 +616,7 @@ private:
       set_num(r, x);
     else if (sizeof(T) <= sizeof(digit_type)) {
       set_num(r, x);
-      sputsoft::numbers::bitwise_and_not(r[0], r[0], (digit_type) y);
+      kanooth::numbers::bitwise_and_not(r[0], r[0], (digit_type) y);
     } else
       bit_and_not_num(r, x, numb(y).con);
   }
@@ -715,11 +715,11 @@ public:
   numb() {}
   template <typename V>
   numb(const V& v) {
-    sputsoft::numbers::set(*this, v);
+    kanooth::numbers::set(*this, v);
   }
   template <typename V>
   numb& operator=(const V& v) {
-    sputsoft::numbers::set(*this, v);
+    kanooth::numbers::set(*this, v);
     return *this;
   }
   inline bool is_zero() const { return con.is_empty(); }
@@ -800,25 +800,25 @@ public:
 
   bool test_bit(std::size_t pos) const {
     std::size_t total_bits = con.size() * digit_bits;
-    return pos < total_bits && sputsoft::numbers::test_bit(con[pos / digit_bits], pos % digit_bits);
+    return pos < total_bits && kanooth::numbers::test_bit(con[pos / digit_bits], pos % digit_bits);
   }
 
   std::size_t floor_log2() const {
     std::size_t n = con.size();
     if (!n) return (std::size_t) -1;
-    return sputsoft::numbers::floor_log2(con[n - 1]) + (n - 1)*digit_bits;
+    return kanooth::numbers::floor_log2(con[n - 1]) + (n - 1)*digit_bits;
   }
 
   std::size_t ruler() const {
     if (is_zero()) return (std::size_t) -1;
     std::size_t k=0;
     while (!con[k]) k++;
-    return sputsoft::numbers::ruler(con[k]) + k*digit_bits;
+    return kanooth::numbers::ruler(con[k]) + k*digit_bits;
   }
 
   std::ostream& show_binary(std::ostream& os) const {
     for (int k=con.size()-1; k >= 0; --k) {
-      sputsoft::numbers::show_binary(os, con[k]);
+      kanooth::numbers::show_binary(os, con[k]);
       if (k != 0) os << " ";
     }
     return os;
@@ -827,7 +827,7 @@ public:
 };
 
 } // namespace detail
-} // namespace sputsoft
+} // namespace kanooth
 } // namespace numbers
 
-#endif	/* _SPUTSOFT_NUMBERS_DETAIL_NATURAL_NUMBER_IMPL_HPP */
+#endif	/* _KANOOTH_NUMBERS_DETAIL_NATURAL_NUMBER_IMPL_HPP */

@@ -1,10 +1,10 @@
 /*
- * File:   sputsoft/numbers/detail/lowlevel/gmp.hpp
+ * File:   kanooth/numbers/detail/lowlevel/gmp.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,12 +12,12 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_GMP_HPP_
-#define _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_GMP_HPP_
+#ifndef _KANOOTH_NUMBERS_DETAIL_LOWLEVEL_GMP_HPP_
+#define _KANOOTH_NUMBERS_DETAIL_LOWLEVEL_GMP_HPP_
 
 #include <gmp.h>
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 namespace detail {
 
@@ -178,6 +178,6 @@ struct lowlevel_gmp {
 
 } // namespace detail
 } // namespace numbers
-} // namespace sputsoft
+} // namespace kanooth
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_LOWLEVEL_GMP_HPP_
+#endif // _KANOOTH_NUMBERS_DETAIL_LOWLEVEL_GMP_HPP_

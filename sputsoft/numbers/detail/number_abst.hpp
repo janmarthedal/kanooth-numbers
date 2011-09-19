@@ -1,10 +1,10 @@
 /* 
- * File:   sputsoft/numbers/detail/number_abst.hpp
+ * File:   kanooth/numbers/detail/number_abst.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-05-19 15:10Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,13 +12,13 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_NUMBER_ABST_HPP
-#define _SPUTSOFT_NUMBERS_DETAIL_NUMBER_ABST_HPP
+#ifndef _KANOOTH_NUMBERS_DETAIL_NUMBER_ABST_HPP
+#define _KANOOTH_NUMBERS_DETAIL_NUMBER_ABST_HPP
 
-#include <sputsoft/type_traits.hpp>
-#include <sputsoft/numbers/detail/named_ops.hpp>
+#include <kanooth/type_traits.hpp>
+#include <kanooth/numbers/detail/named_ops.hpp>
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 
 namespace detail {
@@ -193,7 +193,7 @@ struct numb_assign_vv<ops::binary::shift_right, N, V, std::ptrdiff_t> {
 template <typename Op, typename N, typename R, typename V1, typename V2>
 struct numb_evaluator_rvv {
   inline void operator()(N& r, const V1& v1, const V2& v2) const {
-    sputsoft::numbers::set(r, function_vv<Op, V1, V2>()(v1, v2));
+    kanooth::numbers::set(r, function_vv<Op, V1, V2>()(v1, v2));
   }
 };
 
@@ -303,6 +303,6 @@ struct is_negative_eval<numb<T> > {
 
 } // namespace detail
 } // namespace numbers
-} // namespace sputsoft
+} // namespace kanooth
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_NUMBER_ABST_HPP
+#endif // _KANOOTH_NUMBERS_DETAIL_NUMBER_ABST_HPP

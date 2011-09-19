@@ -1,10 +1,10 @@
 /* 
- * File:   sputsoft/numbers/detail/named_ops.hpp
+ * File:   kanooth/numbers/detail/named_ops.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2010-04-30 15:04Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,14 +12,14 @@
  * $Id$
  */
 
-#ifndef _SPUTSOFT_NUMBERS_DETAIL_NAMED_OPS_HPP
-#define	_SPUTSOFT_NUMBERS_DETAIL_NAMED_OPS_HPP
+#ifndef _KANOOTH_NUMBERS_DETAIL_NAMED_OPS_HPP
+#define	_KANOOTH_NUMBERS_DETAIL_NAMED_OPS_HPP
 
 #include <cstring>
-#include <sputsoft/type_traits.hpp>
-#include <sputsoft/numbers/number_traits.hpp>
+#include <kanooth/type_traits.hpp>
+#include <kanooth/numbers/number_traits.hpp>
 
-namespace sputsoft {
+namespace kanooth {
 namespace numbers {
 
 template <typename T>
@@ -74,7 +74,7 @@ template <typename Op, typename T>
 struct unary_result : public unary_result2<Op, typename eval_result<T>::type> {};
 
 template <typename Op, typename X, typename Y>
-struct binary_result2 : public sputsoft::numbers::common_type<X, Y> {};
+struct binary_result2 : public kanooth::numbers::common_type<X, Y> {};
 
 template <typename Op, typename X, typename Y>
 struct binary_result
@@ -579,6 +579,6 @@ is_negative(const T& v) {
 }
 
 } // namespace numbers
-} // namespace sputsoft
+} // namespace kanooth
 
-#endif // _SPUTSOFT_NUMBERS_DETAIL_NAMED_OPS_HPP
+#endif // _KANOOTH_NUMBERS_DETAIL_NAMED_OPS_HPP
