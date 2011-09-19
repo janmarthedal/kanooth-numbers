@@ -15,13 +15,13 @@
 #include <iostream>
 #include <vector>
 
-#include <sputsoft/numbers/natural_number.hpp>
-#include <sputsoft/numbers/integer.hpp>
-#include <sputsoft/numbers/positive_float.hpp>
-#include <sputsoft/numbers/common_functions.hpp>
-#include <sputsoft/numbers/number_theory.hpp>
+#include <kanooth/numbers/natural_number.hpp>
+#include <kanooth/numbers/integer.hpp>
+#include <kanooth/numbers/positive_float.hpp>
+#include <kanooth/numbers/common_functions.hpp>
+#include <kanooth/numbers/number_theory.hpp>
 
-using namespace sputsoft::numbers;
+using namespace kanooth::numbers;
 
 // Find largest prime factor of 600851475143
 void PE3()
@@ -198,7 +198,7 @@ int main()
   std::cout << compare(i, n) << std::endl;*/
 
   /*natural_number c="1234567", d=3u;
-  sputsoft::numbers::div(c, c, d);
+  kanooth::numbers::div(c, c, d);
   std::cout << c << std::endl;*/
 
   //sqrt_example();
