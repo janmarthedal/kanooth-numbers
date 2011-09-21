@@ -130,6 +130,11 @@ namespace kanooth {
   template <> struct is_native_int<signed long long>   : public true_type {};
 #endif
 
+  template <typename T> struct is_native_float : public false_type {};
+  template <> struct is_native_float<float>       : public true_type {};
+  template <> struct is_native_float<double>      : public true_type {};
+  template <> struct is_native_float<long double> : public true_type {};
+  
 template <bool C, typename T>
 struct make_signed_if {
   typedef T type;

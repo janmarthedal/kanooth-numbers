@@ -80,13 +80,31 @@ void gcd_example()
 
 void sqrt_example()
 {
-  natural_number x = mul_power(natural_number(2u), 10u, 10);
-  natural_number y = floor_sqrt(x);
-
-  //int x = 20000;
-  //int y = floor_sqrt(x);
+  natural_number x = mul_power(natural_number(2u), 10u, 80);
+  natural_number y = integer_sqrt(x);
 
   std::cout << "sqrt(" << x << ") = " << y << " " << mul(y, y) << " < " << mul(add(y, 1u), add(y, 1u)) << std::endl;
+}
+
+void sqrt_example2()
+{
+  positive_float f = 2u, g;
+  
+  g = sqrt(f);
+  std::cout << "sqrt: " << g << std::endl;
+
+  double d = sqrt(2.0d);
+  std::cout << "sqrt: " << d << std::endl;  
+  
+  /*int a, b;
+  a = 7; b = 3;
+  std::cout << a/b << ", " << a%b << std::endl;
+  a = -7; b = 3;
+  std::cout << a/b << ", " << a%b << std::endl;
+  a = 7; b = -3;
+  std::cout << a/b << ", " << a%b << std::endl;
+  a = -7; b = -3;
+  std::cout << a/b << ", " << a%b << std::endl;*/
 }
 
 void bits1()
@@ -179,12 +197,13 @@ void check_rounding()
 
 int main()
 {
-  positive_float f = 12u;
+  /*positive_float f = 12u;
   positive_float g;
+  natural_number n = 4u;
 
-  mul(g, f, 2u);
+  mul(g, n, 2u);
 
-  std::cout << compare(f, 11u) << std::endl;
+  std::cout << compare(f, 11u) << std::endl;*/
 
   /*PE3();
   PE16();
@@ -201,7 +220,7 @@ int main()
   kanooth::numbers::div(c, c, d);
   std::cout << c << std::endl;*/
 
-  //sqrt_example();
+  sqrt_example2();
 
   /*std::cout << "Digit bits " << natural_number::digit_bits << std::endl;
 

@@ -58,27 +58,32 @@ T power(const T& x, std::size_t p)
 
 namespace {
 
-/*template <typename T>
-T floor_sqrt_help(const T& n)
+template <typename T>
+T integer_sqrt_help(const T& n)
 {
-  if (n <= 1u) return n;
+  if (is_less(n, 1u)) return n;
   std::size_t k = floor_log2(n);
-  T a = T(1u) << (k/2+1), b;
+  T a = 1u, b;
+  bit_shift_left(a, a, k/2+1);
   int it = 0;
   while (true) {
-    b = (a + n/a) >> 1;
+    div(b, n, a);
+    add(b, b, a);
+    bit_shift_right(b, b, 1u);
     it++;
     //if (b >= a) return a;
-    if (b >= a) { std::cout << "Iterations: " << it << std::endl; return a; }
-    a = (b + n/b) >> 1;
+    if (is_greater_or_equal(b, a)) { std::cout << "Iterations: " << it << std::endl; return a; }
+    div(a, n, b);
+    add(a, a, b);
+    bit_shift_right(a, a, 1u);
     it++;
     //if (a >= b) return b;
-    if (a >= b) { std::cout << "Iterations: " << it << std::endl; return b; }
+    if (is_greater_or_equal(a, b)) { std::cout << "Iterations: " << it << std::endl; return b; }
   }
-}*/
+}
 
-template <typename T>
-T floor_sqrt_help(const T& n)
+/*template <typename T>
+T integer_sqrt_help(const T& n)
 {
   if (is_less_or_equal(n, 1u)) return n;
   std::size_t k = floor_log2(n);
@@ -98,17 +103,17 @@ T floor_sqrt_help(const T& n)
     else
       a = m;
   }
-}
+}*/
 
 }
 
 template <typename T>
-struct floor_sqrt_result : type_if<is_integral<T>::value, typename eval_result<T>::type> {};
+struct integer_sqrt_result : type_if<is_integral<T>::value, typename eval_result<T>::type> {};
 
 template <typename T>
-typename floor_sqrt_result<T>::type floor_sqrt(const T& n)
+typename integer_sqrt_result<T>::type integer_sqrt(const T& n)
 {
-  return floor_sqrt_help((typename floor_sqrt_result<T>::type) n);
+  return integer_sqrt_help((typename integer_sqrt_result<T>::type) n);
 }
 
 template <typename NUM>

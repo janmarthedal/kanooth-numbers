@@ -75,6 +75,22 @@ struct evaluator_rv<ops::unary::round, T, numb<posfloatnum<T, E, P> > > {
 };
 
 template <typename T, typename E, std::size_t P>
+struct unary_result2<ops::unary::sqrt, numb<posfloatnum<T, E, P> > >
+        : public type_if<true, numb<posfloatnum<T, E, P> > > {};
+
+template <typename T, typename E, std::size_t P>
+struct function_v<ops::unary::sqrt, numb<posfloatnum<T, E, P> > > {
+  typedef typename unary_result<ops::unary::sqrt, numb<posfloatnum<T, E, P> > >::type return_type;
+  inline return_type operator()(const numb<posfloatnum<T, E, P> >& v) const {
+    return_type t;
+    t.sqrt(v);
+    return t;
+  }
+};
+
+
+
+template <typename T, typename E, std::size_t P>
 struct show_binary_eval<numb<posfloatnum<T, E, P> > > {
   inline std::ostream& operator()(std::ostream& os, const numb<posfloatnum<T, E, P> >& n) const {
     return n.show_binary(os);

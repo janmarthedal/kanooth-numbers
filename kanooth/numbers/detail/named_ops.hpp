@@ -56,6 +56,7 @@ namespace ops {
     struct trunc {};
     struct round {};
     struct bit_not {};
+    struct sqrt {};
   }
   namespace binary_compare {
     struct equal {};
@@ -363,6 +364,12 @@ template <typename T>
 inline typename detail::unary_result<detail::ops::unary::bit_not, T>::type
 bitwise_not(const T& v) {
   return function_v_help<detail::ops::unary::bit_not, T>()(v);
+}
+
+template <typename T>
+inline typename detail::unary_result<detail::ops::unary::sqrt, T>::type
+sqrt(const T& v) {
+  return function_v_help<detail::ops::unary::sqrt, T>()(v);
 }
 
 namespace {

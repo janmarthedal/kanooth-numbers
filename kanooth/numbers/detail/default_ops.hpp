@@ -16,6 +16,7 @@
 #define	_KANOOTH_NUMBERS_DETAIL_DEFAULT_OPS_HPP
 
 #include <kanooth/numbers/detail/named_ops.hpp>
+#include <cmath>
 
 namespace kanooth {
 namespace numbers {
@@ -130,6 +131,18 @@ struct unary_result2<ops::unary::ceil, T> : public unary_result<ops::unary::trun
 
 template <typename T>
 struct unary_result2<ops::unary::round, T> : public unary_result<ops::unary::trunc, T> {};
+
+/* sqrt */
+
+template <typename T>
+struct unary_result2<ops::unary::sqrt, T>
+        : public type_if<kanooth::is_native_float<T>::value, T> {};
+
+template <typename V>
+struct function_v<ops::unary::sqrt, V> {
+  typedef typename unary_result<ops::unary::sqrt, V>::type return_type;
+  inline return_type operator()(const V& v) const { return std::sqrt(v); }
+};
 
 /* Binary */
 

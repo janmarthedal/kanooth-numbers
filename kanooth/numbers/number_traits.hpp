@@ -62,8 +62,10 @@ struct common_type
                                              >::type
                        > {};
 
+/*template <typename T>
+struct is_number : public is_native_int<T> {};*/
 template <typename T>
-struct is_number : public is_native_int<T> {};
+struct is_number : public integral_constant<bool, is_native_int<T>::value || is_native_float<T>::value> {};
 
 template <typename R, typename V>
 struct is_assignable

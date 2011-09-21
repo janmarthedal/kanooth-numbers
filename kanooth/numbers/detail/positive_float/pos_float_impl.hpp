@@ -16,6 +16,7 @@
 #define _KANOOTH_NUMBERS_DETAIL_POSITIVE_FLOAT_IMPL_HPP
 
 #include <kanooth/type_traits.hpp>
+#include <kanooth/numbers/common_functions.hpp>
 #include <kanooth/numbers/detail/positive_float/pos_float_abst.hpp>
 
 namespace kanooth {
@@ -265,10 +266,8 @@ public:
       EXP yexp = bottom_exponent(yval);
       std::size_t xbits = top_exponent(xval) - xexp;
       std::size_t ybits = top_exponent(yval) - yexp;
-      std::size_t destbits = precision;
-      if (!destbits)
-        destbits = std::max(xbits, ybits);
-      destbits += NUM::digit_bits - 1;  // guard digits
+      std::size_t destbits = ceil_multiple(precision ? precision
+              : std::max(xbits, ybits), NUM::digit_bits) + NUM::digit_bits;
       std::size_t numeratorbits = ybits + destbits;
       std::ptrdiff_t numeratorshift = numeratorbits - xbits;
       NUM tmp;
@@ -284,11 +283,27 @@ public:
     return cmp2(*this, rhs);
   }
 
+  template <typename T>
+  void sqrt(const T& rhs) {
+    EXP exp = bottom_exponent(rhs);
+    std::size_t rhs_bits = top_exponent(rhs) - exp;
+    std::size_t dst_bits = ceil_multiple(precision ? precision
+            : rhs_bits/2, NUM::digit_bits) + NUM::digit_bits;
+    std::size_t src_bits = 2*dst_bits;
+    EXP shift = src_bits > rhs_bits ? src_bits - rhs_bits : 0;
+    if ((exp - shift) % 2 != 0) shift--;
+    NUM tmp;
+    kanooth::numbers::bit_shift_left(tmp, get_num(rhs), shift);
+    kanooth::numbers::set(num, kanooth::numbers::integer_sqrt(tmp));
+    exponent = (exp - shift)/2;
+  }
+  
   std::ostream& show_binary(std::ostream& os) const {
     NUM n;
     floor(n, *this);
     kanooth::numbers::show_binary(os, num);
-    return os << " (" << exponent << "," << (top_exponent(*this) - bottom_exponent(*this)) << ") ~ " << n;
+    return os << " (" << exponent << ","
+              << (top_exponent(*this) - bottom_exponent(*this)) << ") ~ " << n;
   }
 
 };
