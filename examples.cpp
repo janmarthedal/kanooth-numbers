@@ -95,16 +95,6 @@ void sqrt_example2()
 
   double d = sqrt(2.0d);
   std::cout << "sqrt: " << d << std::endl;  
-  
-  /*int a, b;
-  a = 7; b = 3;
-  std::cout << a/b << ", " << a%b << std::endl;
-  a = -7; b = 3;
-  std::cout << a/b << ", " << a%b << std::endl;
-  a = 7; b = -3;
-  std::cout << a/b << ", " << a%b << std::endl;
-  a = -7; b = -3;
-  std::cout << a/b << ", " << a%b << std::endl;*/
 }
 
 void bits1()
