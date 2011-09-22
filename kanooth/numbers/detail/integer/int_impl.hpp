@@ -20,7 +20,7 @@
 
 /*
  Integer division cases
- (trunc default for C++ signed integers)
+ (trunc is default for C++ signed integers)
  a  b  trunc  floor   ceil
  7  3   2, 1   2, 1   3,-2
 -7  3  -2,-1  -3, 2  -2,-1

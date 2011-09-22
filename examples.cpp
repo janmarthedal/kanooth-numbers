@@ -97,15 +97,17 @@ void sqrt_example2()
   std::cout << "sqrt: " << d << std::endl;  
 }
 
+void div_example_help(int a, int b)
+{
+  std::cout << floor_div(a, b) << std::endl;  
+  double c=a, d=b;
+  kanooth::make_signed<double>::type e;
+  std::cout << floor(div(c, d)) << std::endl;  
+}
+
 void div_example()
 {
-  int a, b;
-  a = 7;  b = 3;
-  std::cout << trunc_div(a, b) << std::endl;
-  
-  double c, d;
-  c = 7;  d = 3;
-  std::cout << trunc_div(c, d) << std::endl;  
+  div_example_help(7, 3);
 }
 
 void bits1()

@@ -80,6 +80,9 @@ namespace kanooth {
   template <> struct make_signed<unsigned long long> { typedef signed long long type; };
   template <> struct make_signed<signed long long> { typedef signed long long type; };
 #endif
+  template <> struct make_signed<float> { typedef float type; };
+  template <> struct make_signed<double> { typedef double type; };
+  template <> struct make_signed<long double> { typedef long double type; };
 
   template <typename T> struct make_unsigned {};
   template <> struct make_unsigned<unsigned short> { typedef unsigned short type; };

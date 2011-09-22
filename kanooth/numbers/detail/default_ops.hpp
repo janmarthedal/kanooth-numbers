@@ -123,17 +123,17 @@ struct function_v<ops::unary::trunc, V> {
 /* Unary floor */
 
 template <typename T>
-struct unary_result2<ops::unary::floor, T> : public unary_result<ops::unary::trunc, T> {};
+struct unary_result2<ops::unary::floor, T> : public unary_result2<ops::unary::trunc, T> {};
 
 /* Unary ceil */
 
 template <typename T>
-struct unary_result2<ops::unary::ceil, T> : public unary_result<ops::unary::trunc, T> {};
+struct unary_result2<ops::unary::ceil, T> : public unary_result2<ops::unary::trunc, T> {};
 
 /* Unary round */
 
 template <typename T>
-struct unary_result2<ops::unary::round, T> : public unary_result<ops::unary::trunc, T> {};
+struct unary_result2<ops::unary::round, T> : public unary_result2<ops::unary::trunc, T> {};
 
 /* sqrt */
 
@@ -192,16 +192,16 @@ struct function_rt_vv_default<ops::binary::mul, R, V1, V2> {
 
 namespace {
 template <typename V1, typename V2, bool IsIntegral>
-struct binary_result_div
+struct _binary_result_div
         : public kanooth::numbers::common_type<V1, V2> {};
 template <typename V1, typename V2>
-struct binary_result_div<V1, V2, true>
+struct _binary_result_div<V1, V2, true>
         : public kanooth::make_signed_if<kanooth::is_signed<V2>::value, V1> {};
 }
 
 template <typename V1, typename V2>
 struct binary_result2<ops::binary::div, V1, V2>
-        : public binary_result_div<V1, V2, kanooth::is_integral<V1>::value && kanooth::is_integral<V2>::value> {};
+        : public _binary_result_div<V1, V2, kanooth::is_integral<V1>::value && kanooth::is_integral<V2>::value> {};
 
 template <typename R, typename V1, typename V2>
 struct function_rt_vv_default<ops::binary::div, R, V1, V2> {
@@ -217,23 +217,25 @@ struct binary_result2<ops::binary::trunc_div, V1, V2>
   : public unary_result<ops::unary::trunc,
                         typename binary_result<ops::binary::div, V1, V2>::type> {};
 
+namespace {
 template <typename R, typename V1, typename V2, bool IsNativeInt>
-struct function_rt_vv_default_trunc_div {
+struct _function_rt_vv_default_trunc_div {
   inline R operator()(const V1& v1, const V2& v2) const {
     return kanooth::numbers::trunc(kanooth::numbers::div(v1, v2));
   }
 };
 
 template <typename R, typename V1, typename V2>
-struct function_rt_vv_default_trunc_div<R, V1, V2, true> {
+struct _function_rt_vv_default_trunc_div<R, V1, V2, true> {
   inline R operator()(const V1& v1, const V2& v2) const {
     return v1 / v2;
   }
 };
+}
 
 template <typename R, typename V1, typename V2>
 struct function_rt_vv_default<ops::binary::trunc_div, R, V1, V2>
-        : public function_rt_vv_default_trunc_div<R, V1, V2,
+        : public _function_rt_vv_default_trunc_div<R, V1, V2,
                 kanooth::is_native_int<V1>::value && kanooth::is_native_int<V2>::value> {};
 
 /* Binary floor div */
@@ -242,12 +244,37 @@ template <typename V1, typename V2>
 struct binary_result2<ops::binary::floor_div, V1, V2>
   : public binary_result<ops::binary::trunc_div, V1, V2> {};
 
-template <typename R, typename V1, typename V2>
-struct function_rt_vv_default<ops::binary::floor_div, R, V1, V2> {
+namespace {
+template <typename R, typename V1, typename V2, bool IsNativeInt>
+struct _function_rt_vv_default_floor_div {
   inline R operator()(const V1& v1, const V2& v2) const {
     return kanooth::numbers::floor(kanooth::numbers::div(v1, v2));
   }
 };
+
+template <typename R, typename V1, typename V2>
+struct _function_rt_vv_default_floor_div<R, V1, V2, true> {
+  inline R operator()(const V1& v1, const V2& v2) const {
+    return v1/v2;
+    /*if (v1 >= 0) {
+      if (v2 >= 0)
+        return v1 / v2;
+      else
+        return -((v1 + (-v2) - 1) / (-v2));
+    } else {
+      if (v2 >= 0)
+        return -(((-v1) + v2 - 1) / (v2));
+      else
+        return v1 / v2;
+    }*/
+  }
+};
+}
+
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::floor_div, R, V1, V2>
+        : public _function_rt_vv_default_floor_div<R, V1, V2,
+                kanooth::is_native_int<V1>::value && kanooth::is_native_int<V2>::value> {};
 
 /* Binary ceil div */
 
