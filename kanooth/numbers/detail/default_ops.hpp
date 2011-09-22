@@ -16,7 +16,7 @@
 #define	_KANOOTH_NUMBERS_DETAIL_DEFAULT_OPS_HPP
 
 #include <kanooth/numbers/detail/named_ops.hpp>
-#include <cmath>
+#include <cmath>          // for sqrt
 
 namespace kanooth {
 namespace numbers {
@@ -111,6 +111,9 @@ struct function_v<ops::unary::bit_not, V> {
 template <typename T>
 struct unary_result2<ops::unary::trunc, T> : public type_if<kanooth::is_integral<T>::value, T> {};
 
+template <>
+struct unary_result2<ops::unary::trunc, double> : public type_if<true, long> {};
+
 template <typename V>
 struct function_v<ops::unary::trunc, V> {
   typedef typename unary_result<ops::unary::trunc, V>::type return_type;
@@ -185,13 +188,20 @@ struct function_rt_vv_default<ops::binary::mul, R, V1, V2> {
   }
 };
 
-/* Binary (floor, ceil, trunc) div */
+/* Binary div */
+
+namespace {
+template <typename V1, typename V2, bool IsIntegral>
+struct binary_result_div
+        : public kanooth::numbers::common_type<V1, V2> {};
+template <typename V1, typename V2>
+struct binary_result_div<V1, V2, true>
+        : public kanooth::make_signed_if<kanooth::is_signed<V2>::value, V1> {};
+}
 
 template <typename V1, typename V2>
 struct binary_result2<ops::binary::div, V1, V2>
-  : public choose_type<kanooth::is_integral<V1>::value && kanooth::is_integral<V2>::value,
-        typename kanooth::make_signed_if<kanooth::is_signed<V2>::value, V1>::type,
-        typename kanooth::numbers::common_type<V1, V2>::type> {};
+        : public binary_result_div<V1, V2, kanooth::is_integral<V1>::value && kanooth::is_integral<V2>::value> {};
 
 template <typename R, typename V1, typename V2>
 struct function_rt_vv_default<ops::binary::div, R, V1, V2> {
@@ -200,17 +210,33 @@ struct function_rt_vv_default<ops::binary::div, R, V1, V2> {
   }
 };
 
+/* Binary trunc div */
+
 template <typename V1, typename V2>
 struct binary_result2<ops::binary::trunc_div, V1, V2>
   : public unary_result<ops::unary::trunc,
                         typename binary_result<ops::binary::div, V1, V2>::type> {};
 
-template <typename R, typename V1, typename V2>
-struct function_rt_vv_default<ops::binary::trunc_div, R, V1, V2> {
+template <typename R, typename V1, typename V2, bool IsNativeInt>
+struct function_rt_vv_default_trunc_div {
   inline R operator()(const V1& v1, const V2& v2) const {
     return kanooth::numbers::trunc(kanooth::numbers::div(v1, v2));
   }
 };
+
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default_trunc_div<R, V1, V2, true> {
+  inline R operator()(const V1& v1, const V2& v2) const {
+    return v1 / v2;
+  }
+};
+
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::trunc_div, R, V1, V2>
+        : public function_rt_vv_default_trunc_div<R, V1, V2,
+                kanooth::is_native_int<V1>::value && kanooth::is_native_int<V2>::value> {};
+
+/* Binary floor div */
 
 template <typename V1, typename V2>
 struct binary_result2<ops::binary::floor_div, V1, V2>
@@ -222,6 +248,8 @@ struct function_rt_vv_default<ops::binary::floor_div, R, V1, V2> {
     return kanooth::numbers::floor(kanooth::numbers::div(v1, v2));
   }
 };
+
+/* Binary ceil div */
 
 template <typename V1, typename V2>
 struct binary_result2<ops::binary::ceil_div, V1, V2>

@@ -97,6 +97,17 @@ void sqrt_example2()
   std::cout << "sqrt: " << d << std::endl;  
 }
 
+void div_example()
+{
+  int a, b;
+  a = 7;  b = 3;
+  std::cout << trunc_div(a, b) << std::endl;
+  
+  double c, d;
+  c = 7;  d = 3;
+  std::cout << trunc_div(c, d) << std::endl;  
+}
+
 void bits1()
 {
   natural_number a, b, c, d;
@@ -210,7 +221,8 @@ int main()
   kanooth::numbers::div(c, c, d);
   std::cout << c << std::endl;*/
 
-  sqrt_example2();
+  //sqrt_example2();
+  div_example();
 
   /*std::cout << "Digit bits " << natural_number::digit_bits << std::endl;
 

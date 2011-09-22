@@ -33,6 +33,9 @@ template <> struct type_rank<signed long>        : integral_constant<int, 6> {};
 template <> struct type_rank<unsigned long long> : integral_constant<int, 7> {};
 template <> struct type_rank<signed long long>   : integral_constant<int, 8> {};
 #endif
+template <> struct type_rank<float>              : integral_constant<int, 9> {};
+template <> struct type_rank<double>             : integral_constant<int, 10> {};
+template <> struct type_rank<long double>        : integral_constant<int, 11> {};
 
 template <bool C, typename T, typename F>
 struct choose_type { typedef F type; };
@@ -62,8 +65,6 @@ struct common_type
                                              >::type
                        > {};
 
-/*template <typename T>
-struct is_number : public is_native_int<T> {};*/
 template <typename T>
 struct is_number : public integral_constant<bool, is_native_int<T>::value || is_native_float<T>::value> {};
 
