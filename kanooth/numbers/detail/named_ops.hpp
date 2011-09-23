@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   kanooth/numbers/detail/named_ops.hpp
  * Author: Jan Marthedal Rasmussen
  *
@@ -8,8 +8,6 @@
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
- *
- * $Id$
  */
 
 #ifndef _KANOOTH_NUMBERS_DETAIL_NAMED_OPS_HPP
@@ -358,6 +356,24 @@ template <typename T>
 inline typename detail::unary_result<detail::ops::unary::trunc, T>::type
 trunc(const T& v) {
   return function_v_help<detail::ops::unary::trunc, T>()(v);
+}
+
+template <typename T>
+inline typename detail::unary_result<detail::ops::unary::floor, T>::type
+floor(const T& v) {
+  return function_v_help<detail::ops::unary::floor, T>()(v);
+}
+
+template <typename T>
+inline typename detail::unary_result<detail::ops::unary::ceil, T>::type
+ceil(const T& v) {
+  return function_v_help<detail::ops::unary::ceil, T>()(v);
+}
+
+template <typename T>
+inline typename detail::unary_result<detail::ops::unary::round, T>::type
+round(const T& v) {
+  return function_v_help<detail::ops::unary::round, T>()(v);
 }
 
 template <typename T>

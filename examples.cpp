@@ -8,8 +8,6 @@
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
- *
- * $Id$
  */
 
 #include <iostream>
@@ -89,25 +87,31 @@ void sqrt_example()
 void sqrt_example2()
 {
   positive_float f = 2u, g;
-  
+
   g = sqrt(f);
   std::cout << "sqrt: " << g << std::endl;
 
   double d = sqrt(2.0d);
-  std::cout << "sqrt: " << d << std::endl;  
+  std::cout << "sqrt: " << d << std::endl;
 }
 
 void div_example_help(int a, int b)
 {
-  std::cout << floor_div(a, b) << std::endl;  
+  std::cout << floor_div(a, b) << std::endl;
   double c=a, d=b;
-  kanooth::make_signed<double>::type e;
-  std::cout << floor(div(c, d)) << std::endl;  
+  std::cout << floor_div(c, d) << std::endl;
 }
 
 void div_example()
 {
   div_example_help(7, 3);
+  div_example_help(-7, 3);
+  div_example_help(7, -3);
+  div_example_help(-7, -3);
+  div_example_help(6, 3);
+  div_example_help(-6, 3);
+  div_example_help(6, -3);
+  div_example_help(-6, -3);
 }
 
 void bits1()

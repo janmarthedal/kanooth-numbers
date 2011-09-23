@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   kanooth/numbers/detail/default_ops.hpp
  * Author: Jan Marthedal Rasmussen
  *
@@ -8,15 +8,13 @@
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
- *
- * $Id$
  */
 
 #ifndef _KANOOTH_NUMBERS_DETAIL_DEFAULT_OPS_HPP
 #define	_KANOOTH_NUMBERS_DETAIL_DEFAULT_OPS_HPP
 
 #include <kanooth/numbers/detail/named_ops.hpp>
-#include <cmath>          // for sqrt
+#include <cmath>          // for sqrt, floor, ceil
 
 namespace kanooth {
 namespace numbers {
@@ -124,16 +122,54 @@ struct function_v<ops::unary::trunc, V> {
 
 template <typename T>
 struct unary_result2<ops::unary::floor, T> : public unary_result2<ops::unary::trunc, T> {};
+template <>
+struct unary_result2<ops::unary::floor, double> : public unary_result2<ops::unary::trunc, double> {};
+
+template <typename V>
+struct function_v<ops::unary::floor, V> {
+  typedef typename unary_result<ops::unary::floor, V>::type return_type;
+  inline return_type operator()(const V& v) const { return (return_type) v; }
+};
+
+template <>
+struct function_v<ops::unary::floor, double> {
+  typedef typename unary_result<ops::unary::floor, double>::type return_type;
+  inline return_type operator()(const double& v) const { return (return_type) std::floor(v); }
+};
 
 /* Unary ceil */
 
 template <typename T>
 struct unary_result2<ops::unary::ceil, T> : public unary_result2<ops::unary::trunc, T> {};
 
+template <typename V>
+struct function_v<ops::unary::ceil, V> {
+  typedef typename unary_result<ops::unary::ceil, V>::type return_type;
+  inline return_type operator()(const V& v) const { return (return_type) v; }
+};
+
+template <>
+struct function_v<ops::unary::ceil, double> {
+  typedef typename unary_result<ops::unary::ceil, double>::type return_type;
+  inline return_type operator()(const double& v) const { return (return_type) std::ceil(v); }
+};
+
 /* Unary round */
 
 template <typename T>
 struct unary_result2<ops::unary::round, T> : public unary_result2<ops::unary::trunc, T> {};
+
+template <typename V>
+struct function_v<ops::unary::round, V> {
+  typedef typename unary_result<ops::unary::round, V>::type return_type;
+  inline return_type operator()(const V& v) const { return (return_type) v; }
+};
+
+template <>
+struct function_v<ops::unary::round, double> {
+  typedef typename unary_result<ops::unary::round, double>::type return_type;
+  inline return_type operator()(const double& v) const { return (return_type) (v + 0.5d); }
+};
 
 /* sqrt */
 
@@ -255,18 +291,12 @@ struct _function_rt_vv_default_floor_div {
 template <typename R, typename V1, typename V2>
 struct _function_rt_vv_default_floor_div<R, V1, V2, true> {
   inline R operator()(const V1& v1, const V2& v2) const {
-    return v1/v2;
-    /*if (v1 >= 0) {
-      if (v2 >= 0)
-        return v1 / v2;
-      else
-        return -((v1 + (-v2) - 1) / (-v2));
-    } else {
-      if (v2 >= 0)
-        return -(((-v1) + v2 - 1) / (v2));
-      else
-        return v1 / v2;
-    }*/
+    if (v1 >= 0) {
+      if (v2 < 0)
+        return (v1 - v2 - 1) / v2;
+    } else if (v2 >= 0)
+      return (v1 - v2 + 1) / v2;
+    return v1 / v2;
   }
 };
 }
@@ -691,7 +721,7 @@ struct show_binary_eval
 /**************** test_bit ****************/
 
 namespace {
-    
+
   template <typename T, bool Ok>
   struct test_bit_eval2;
 
@@ -703,7 +733,7 @@ namespace {
   };
 
 }
-  
+
 template <typename T>
 struct test_bit_eval
   : public test_bit_eval2<T, kanooth::is_native_int<T>::value> {};
