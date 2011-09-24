@@ -95,7 +95,7 @@ namespace kanooth {
   template <> struct make_unsigned<unsigned long long> { typedef unsigned long long type; };
   template <> struct make_unsigned<signed long long> { typedef unsigned long long type; };
 #endif
-  
+
   template <typename T>
   struct number_bits : public integral_constant<unsigned, std::numeric_limits<T>::digits> {};
 
@@ -116,28 +116,32 @@ namespace kanooth {
 
 #endif
 
-  template <typename T>
-  inline typename make_unsigned<T>::type to_unsigned(const T& v) {
-    return (typename make_unsigned<T>::type) v;
-  }
+template <typename T>
+inline typename make_unsigned<T>::type to_unsigned(const T& v) {
+  return (typename make_unsigned<T>::type) v;
+}
 
-  template <typename T> struct is_native_int : public false_type {};
-  template <> struct is_native_int<unsigned short> : public true_type {};
-  template <> struct is_native_int<signed short>   : public true_type {};
-  template <> struct is_native_int<unsigned int>   : public true_type {};
-  template <> struct is_native_int<signed int>     : public true_type {};
-  template <> struct is_native_int<unsigned long>  : public true_type {};
-  template <> struct is_native_int<signed long>    : public true_type {};
+template <typename T> struct is_native_int : public false_type {};
+template <> struct is_native_int<unsigned short> : public true_type {};
+template <> struct is_native_int<signed short>   : public true_type {};
+template <> struct is_native_int<unsigned int>   : public true_type {};
+template <> struct is_native_int<signed int>     : public true_type {};
+template <> struct is_native_int<unsigned long>  : public true_type {};
+template <> struct is_native_int<signed long>    : public true_type {};
 #ifdef KANOOTH_HAS_LONG_LONG
   template <> struct is_native_int<unsigned long long> : public true_type {};
   template <> struct is_native_int<signed long long>   : public true_type {};
 #endif
 
-  template <typename T> struct is_native_float : public false_type {};
-  template <> struct is_native_float<float>       : public true_type {};
-  template <> struct is_native_float<double>      : public true_type {};
-  template <> struct is_native_float<long double> : public true_type {};
-  
+template <typename T> struct is_native_float : public false_type {};
+template <> struct is_native_float<float>       : public true_type {};
+template <> struct is_native_float<double>      : public true_type {};
+template <> struct is_native_float<long double> : public true_type {};
+
+template <typename T>
+struct is_native_number
+  : public integral_constant<bool, is_native_int<T>::value || is_native_float<T>::value> {};
+
 template <bool C, typename T>
 struct make_signed_if {
   typedef T type;

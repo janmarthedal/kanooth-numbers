@@ -107,69 +107,89 @@ struct function_v<ops::unary::bit_not, V> {
 /* Unary trunc */
 
 template <typename T>
-struct unary_result2<ops::unary::trunc, T> : public type_if<kanooth::is_integral<T>::value, T> {};
+struct unary_result2<ops::unary::trunc, T>
+  : public type_if<kanooth::is_native_number<T>::value, T> {};
 
-template <>
-struct unary_result2<ops::unary::trunc, double> : public type_if<true, long> {};
+namespace {
+  template <typename T, bool IsNativeInt>
+  struct _function_v_trunc {
+    typedef typename unary_result<ops::unary::trunc, T>::type return_type;
+    inline return_type operator()(const T& v) const {
+      return v < 0 ? kanooth::numbers::ceil(v) : kanooth::numbers::floor(v);
+    }
+  };
+  template <typename T>
+  struct _function_v_trunc<T, true> {
+    typedef typename unary_result<ops::unary::trunc, T>::type return_type;
+    inline return_type operator()(const T& v) const { return (return_type) v; }
+  };
+}
 
 template <typename V>
-struct function_v<ops::unary::trunc, V> {
-  typedef typename unary_result<ops::unary::trunc, V>::type return_type;
-  inline return_type operator()(const V& v) const { return (return_type) v; }
-};
+struct function_v<ops::unary::trunc, V>
+  : _function_v_trunc<V, kanooth::is_native_int<V>::value> {};
 
 /* Unary floor */
 
 template <typename T>
 struct unary_result2<ops::unary::floor, T> : public unary_result2<ops::unary::trunc, T> {};
-template <>
-struct unary_result2<ops::unary::floor, double> : public unary_result2<ops::unary::trunc, double> {};
+
+namespace {
+  template <typename T, bool IsNativeInt>
+  struct _function_v_floor {
+    typedef typename unary_result<ops::unary::floor, T>::type return_type;
+    inline return_type operator()(const T& v) const { return (return_type) std::floor(v); }
+  };
+  template <typename T>
+  struct _function_v_floor<T, true>
+    : public function_v<ops::unary::trunc, T> {};
+}
 
 template <typename V>
-struct function_v<ops::unary::floor, V> {
-  typedef typename unary_result<ops::unary::floor, V>::type return_type;
-  inline return_type operator()(const V& v) const { return (return_type) v; }
-};
-
-template <>
-struct function_v<ops::unary::floor, double> {
-  typedef typename unary_result<ops::unary::floor, double>::type return_type;
-  inline return_type operator()(const double& v) const { return (return_type) std::floor(v); }
-};
+struct function_v<ops::unary::floor, V>
+  : _function_v_floor<V, kanooth::is_native_int<V>::value> {};
 
 /* Unary ceil */
 
 template <typename T>
 struct unary_result2<ops::unary::ceil, T> : public unary_result2<ops::unary::trunc, T> {};
 
-template <typename V>
-struct function_v<ops::unary::ceil, V> {
-  typedef typename unary_result<ops::unary::ceil, V>::type return_type;
-  inline return_type operator()(const V& v) const { return (return_type) v; }
-};
+namespace {
+  template <typename T, bool IsNativeInt>
+  struct _function_v_ceil {
+    typedef typename unary_result<ops::unary::ceil, T>::type return_type;
+    inline return_type operator()(const T& v) const { return (return_type) std::ceil(v); }
+  };
+  template <typename T>
+  struct _function_v_ceil<T, true>
+    : public function_v<ops::unary::trunc, T> {};
+}
 
-template <>
-struct function_v<ops::unary::ceil, double> {
-  typedef typename unary_result<ops::unary::ceil, double>::type return_type;
-  inline return_type operator()(const double& v) const { return (return_type) std::ceil(v); }
-};
+template <typename V>
+struct function_v<ops::unary::ceil, V>
+  : _function_v_ceil<V, kanooth::is_native_int<V>::value> {};
 
 /* Unary round */
 
 template <typename T>
 struct unary_result2<ops::unary::round, T> : public unary_result2<ops::unary::trunc, T> {};
 
-template <typename V>
-struct function_v<ops::unary::round, V> {
-  typedef typename unary_result<ops::unary::round, V>::type return_type;
-  inline return_type operator()(const V& v) const { return (return_type) v; }
-};
+namespace {
+  template <typename T, bool IsNativeInt>
+  struct _function_v_round {
+    typedef typename unary_result<ops::unary::round, T>::type return_type;
+    inline return_type operator()(const T& v) const {
+      return kanooth::numbers::floor(v + 0.5);
+    }
+  };
+  template <typename T>
+  struct _function_v_round<T, true>
+    : public function_v<ops::unary::trunc, T> {};
+}
 
-template <>
-struct function_v<ops::unary::round, double> {
-  typedef typename unary_result<ops::unary::round, double>::type return_type;
-  inline return_type operator()(const double& v) const { return (return_type) (v + 0.5d); }
-};
+template <typename V>
+struct function_v<ops::unary::round, V>
+  : _function_v_round<V, kanooth::is_native_int<V>::value> {};
 
 /* sqrt */
 
@@ -281,24 +301,24 @@ struct binary_result2<ops::binary::floor_div, V1, V2>
   : public binary_result<ops::binary::trunc_div, V1, V2> {};
 
 namespace {
-template <typename R, typename V1, typename V2, bool IsNativeInt>
-struct _function_rt_vv_default_floor_div {
-  inline R operator()(const V1& v1, const V2& v2) const {
-    return kanooth::numbers::floor(kanooth::numbers::div(v1, v2));
-  }
-};
+  template <typename R, typename V1, typename V2, bool IsNativeInt>
+  struct _function_rt_vv_default_floor_div {
+    inline R operator()(const V1& v1, const V2& v2) const {
+      return kanooth::numbers::floor(kanooth::numbers::div(v1, v2));
+    }
+  };
 
-template <typename R, typename V1, typename V2>
-struct _function_rt_vv_default_floor_div<R, V1, V2, true> {
-  inline R operator()(const V1& v1, const V2& v2) const {
-    if (v1 >= 0) {
-      if (v2 < 0)
-        return (v1 - v2 - 1) / v2;
-    } else if (v2 >= 0)
-      return (v1 - v2 + 1) / v2;
-    return v1 / v2;
-  }
-};
+  template <typename R, typename V1, typename V2>
+  struct _function_rt_vv_default_floor_div<R, V1, V2, true> {
+    inline R operator()(const V1& v1, const V2& v2) const {
+      if (v1 >= 0) {
+        if (v2 < 0)
+          return (v1 - v2 - 1) / v2;
+      } else if (v2 >= 0)
+        return (v1 - v2 + 1) / v2;
+      return v1 / v2;
+    }
+  };
 }
 
 template <typename R, typename V1, typename V2>
@@ -312,12 +332,31 @@ template <typename V1, typename V2>
 struct binary_result2<ops::binary::ceil_div, V1, V2>
   : public binary_result<ops::binary::trunc_div, V1, V2> {};
 
+namespace {
+  template <typename R, typename V1, typename V2, bool IsNativeInt>
+  struct _function_rt_vv_default_ceil_div {
+    inline R operator()(const V1& v1, const V2& v2) const {
+      return kanooth::numbers::ceil(kanooth::numbers::div(v1, v2));
+    }
+  };
+
+  template <typename R, typename V1, typename V2>
+  struct _function_rt_vv_default_ceil_div<R, V1, V2, true> {
+    inline R operator()(const V1& v1, const V2& v2) const {
+      if (v1 >= 0) {
+        if (v2 >= 0)
+          return (v1 + v2 - 1) / v2;
+      } else if (v2 < 0)
+        return (v1 + v2 + 1) / v2;
+      return v1 / v2;
+    }
+  };
+}
+
 template <typename R, typename V1, typename V2>
-struct function_rt_vv_default<ops::binary::ceil_div, R, V1, V2> {
-  inline R operator()(const V1& v1, const V2& v2) const {
-    return kanooth::numbers::ceil(kanooth::numbers::div(v1, v2));
-  }
-};
+struct function_rt_vv_default<ops::binary::ceil_div, R, V1, V2>
+        : public _function_rt_vv_default_ceil_div<R, V1, V2,
+                kanooth::is_native_int<V1>::value && kanooth::is_native_int<V2>::value> {};
 
 /* Binary rem */
 

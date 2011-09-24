@@ -46,15 +46,13 @@ struct choose_type<true, T, F> { typedef T type; };
 
 // private helpers
 namespace {
+  template <bool C, typename R, typename V>
+  struct is_assignable2 : public false_type {};
 
-template <bool C, typename R, typename V>
-struct is_assignable2 : public false_type {};
-
-template <typename R, typename V>
-struct is_assignable2<true, R, V>
-  : public integral_constant<bool, (detail::type_rank<R>::value >= detail::type_rank<V>::value)
-                                && (is_signed<R>::value || !is_signed<V>::value)> {};
-
+  template <typename R, typename V>
+  struct is_assignable2<true, R, V>
+    : public integral_constant<bool, (detail::type_rank<R>::value >= detail::type_rank<V>::value)
+                                  && (is_signed<R>::value || !is_signed<V>::value)> {};
 }
 
 template <typename T1, typename T2>
@@ -66,7 +64,7 @@ struct common_type
                        > {};
 
 template <typename T>
-struct is_number : public integral_constant<bool, is_native_int<T>::value || is_native_float<T>::value> {};
+struct is_number : public is_native_number<T> {};
 
 template <typename R, typename V>
 struct is_assignable

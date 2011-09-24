@@ -95,11 +95,14 @@ void sqrt_example2()
   std::cout << "sqrt: " << d << std::endl;
 }
 
+void show_number(int x) { std::cout << "int " << x << std::endl; }
+void show_number(double x) { std::cout << "double " << x << std::endl; }
+
 void div_example_help(int a, int b)
 {
-  std::cout << floor_div(a, b) << std::endl;
+  show_number(ceil_div(a, b));
   double c=a, d=b;
-  std::cout << floor_div(c, d) << std::endl;
+  show_number(ceil_div(c, d));
 }
 
 void div_example()
