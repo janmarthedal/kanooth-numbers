@@ -117,6 +117,25 @@ void div_example()
   div_example_help(-6, -3);
 }
 
+void rem_example_help(int a, int b)
+{
+  show_number(ceil_rem(a, b));
+  double c=a, d=b;
+  show_number(ceil_rem(c, d));
+}
+
+void rem_example()
+{
+  rem_example_help(7, 3);
+  rem_example_help(-7, 3);
+  rem_example_help(7, -3);
+  rem_example_help(-7, -3);
+  rem_example_help(6, 3);
+  rem_example_help(-6, 3);
+  rem_example_help(6, -3);
+  rem_example_help(-6, -3);
+}
+
 void bits1()
 {
   natural_number a, b, c, d;
@@ -231,7 +250,7 @@ int main()
   std::cout << c << std::endl;*/
 
   //sqrt_example2();
-  div_example();
+  rem_example();
 
   /*std::cout << "Digit bits " << natural_number::digit_bits << std::endl;
 

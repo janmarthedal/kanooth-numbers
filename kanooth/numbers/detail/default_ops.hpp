@@ -362,16 +362,107 @@ struct function_rt_vv_default<ops::binary::ceil_div, R, V1, V2>
 
 template <typename V1, typename V2>
 struct binary_result2<ops::binary::rem, V1, V2>
-  : public choose_type<kanooth::is_integral<V1>::value && kanooth::is_integral<V2>::value,
-        typename kanooth::make_signed_if<kanooth::is_signed<V1>::value, V2>::type,
-        typename kanooth::numbers::common_type<V1, V2>::type> {};
+  : public binary_result2<ops::binary::trunc_rem, V1, V2> {};
 
 template <typename R, typename V1, typename V2>
-struct function_rt_vv_default<ops::binary::rem, R, V1, V2> {
-  inline R operator()(const V1& v1, const V2& v2) const {
-    return v1 % v2;
-  }
-};
+struct function_rt_vv_default<ops::binary::rem, R, V1, V2>
+        : public function_rt_vv_default<ops::binary::trunc_rem, R, V1, V2> {};
+
+/* Binary trunc rem */
+
+namespace {
+template <typename V1, typename V2, bool IsIntegral>
+struct _binary_result_trunc_rem
+        : public kanooth::numbers::common_type<V1, V2> {};
+template <typename V1, typename V2>
+struct _binary_result_trunc_rem<V1, V2, true>
+        : public kanooth::make_signed_if<kanooth::is_signed<V1>::value, V2> {};
+}
+
+template <typename V1, typename V2>
+struct binary_result2<ops::binary::trunc_rem, V1, V2>
+        : public _binary_result_trunc_rem<V1, V2, kanooth::is_integral<V1>::value && kanooth::is_integral<V2>::value> {};
+
+namespace {
+  template <typename R, typename V1, typename V2, bool IsNativeInt>
+  struct _function_rt_vv_default_trunc_rem {
+    inline R operator()(const V1& v1, const V2& v2) const {
+      return kanooth::numbers::sub(v1, kanooth::numbers::mul(kanooth::numbers::trunc_div(v1, v2), v2));
+    }
+  };
+
+  template <typename R, typename V1, typename V2>
+  struct _function_rt_vv_default_trunc_rem<R, V1, V2, true> {
+    inline R operator()(const V1& v1, const V2& v2) const {
+      return v1 % v2;
+    }
+  };
+}
+
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::trunc_rem, R, V1, V2>
+        : public _function_rt_vv_default_trunc_rem<R, V1, V2,
+                kanooth::is_native_int<V1>::value && kanooth::is_native_int<V2>::value> {};
+
+/* Binary floor rem */
+
+template <typename V1, typename V2>
+struct binary_result2<ops::binary::floor_rem, V1, V2>
+  : public binary_result<ops::binary::trunc_rem, V1, V2> {};
+
+namespace {
+  template <typename R, typename V1, typename V2, bool IsNativeInt>
+  struct _function_rt_vv_default_floor_rem {
+    inline R operator()(const V1& v1, const V2& v2) const {
+      return kanooth::numbers::sub(v1, kanooth::numbers::mul(kanooth::numbers::floor_div(v1, v2), v2));
+    }
+  };
+
+  template <typename R, typename V1, typename V2>
+  struct _function_rt_vv_default_floor_rem<R, V1, V2, true> {
+    inline R operator()(const V1& v1, const V2& v2) const {
+      R r = v1 % v2;
+      if (r && ((v1 >= 0) != (v2 >= 0)))
+        r += v2;
+      return r;
+    }
+  };
+}
+
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::floor_rem, R, V1, V2>
+        : public _function_rt_vv_default_floor_rem<R, V1, V2,
+                kanooth::is_native_int<V1>::value && kanooth::is_native_int<V2>::value> {};
+
+/* Binary ceil rem */
+
+template <typename V1, typename V2>
+struct binary_result2<ops::binary::ceil_rem, V1, V2>
+  : public binary_result<ops::binary::trunc_rem, V1, V2> {};
+
+namespace {
+  template <typename R, typename V1, typename V2, bool IsNativeInt>
+  struct _function_rt_vv_default_ceil_rem {
+    inline R operator()(const V1& v1, const V2& v2) const {
+      return kanooth::numbers::sub(v1, kanooth::numbers::mul(kanooth::numbers::ceil_div(v1, v2), v2));
+    }
+  };
+
+  template <typename R, typename V1, typename V2>
+  struct _function_rt_vv_default_ceil_rem<R, V1, V2, true> {
+    inline R operator()(const V1& v1, const V2& v2) const {
+      R r = v1 % v2;
+      if (r && ((v1 >= 0) == (v2 >= 0)))
+        r -= v2;
+      return r;
+    }
+  };
+}
+
+template <typename R, typename V1, typename V2>
+struct function_rt_vv_default<ops::binary::ceil_rem, R, V1, V2>
+        : public _function_rt_vv_default_ceil_rem<R, V1, V2,
+                kanooth::is_native_int<V1>::value && kanooth::is_native_int<V2>::value> {};
 
 /* Quotient and remainder */
 
