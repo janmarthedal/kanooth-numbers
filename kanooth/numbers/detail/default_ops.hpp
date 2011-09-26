@@ -301,15 +301,8 @@ struct binary_result2<ops::binary::floor_div, V1, V2>
   : public binary_result<ops::binary::trunc_div, V1, V2> {};
 
 namespace {
-  template <typename R, typename V1, typename V2, bool IsNativeInt>
-  struct _function_rt_vv_default_floor_div {
-    inline R operator()(const V1& v1, const V2& v2) const {
-      return kanooth::numbers::floor(kanooth::numbers::div(v1, v2));
-    }
-  };
-
-  template <typename R, typename V1, typename V2>
-  struct _function_rt_vv_default_floor_div<R, V1, V2, true> {
+  template <typename R, typename V1, typename V2, bool IsNativePosInt>
+  struct _function_rt_vv_default_floor_div2 {
     inline R operator()(const V1& v1, const V2& v2) const {
       if (v1 >= 0) {
         if (v2 < 0)
@@ -319,6 +312,25 @@ namespace {
       return v1 / v2;
     }
   };
+
+  template <typename R, typename V1, typename V2>
+  struct _function_rt_vv_default_floor_div2<R, V1, V2, true> {
+    inline R operator()(const V1& v1, const V2& v2) const {
+      return v1 / v2;
+    }
+  };
+
+  template <typename R, typename V1, typename V2, bool IsNativeInt>
+  struct _function_rt_vv_default_floor_div {
+    inline R operator()(const V1& v1, const V2& v2) const {
+      return kanooth::numbers::floor(kanooth::numbers::div(v1, v2));
+    }
+  };
+
+  template <typename R, typename V1, typename V2>
+  struct _function_rt_vv_default_floor_div<R, V1, V2, true>
+        : public _function_rt_vv_default_floor_div2<R, V1, V2,
+                !kanooth::is_signed<V1>::value && !kanooth::is_signed<V2>::value> {};          
 }
 
 template <typename R, typename V1, typename V2>
@@ -333,15 +345,8 @@ struct binary_result2<ops::binary::ceil_div, V1, V2>
   : public binary_result<ops::binary::trunc_div, V1, V2> {};
 
 namespace {
-  template <typename R, typename V1, typename V2, bool IsNativeInt>
-  struct _function_rt_vv_default_ceil_div {
-    inline R operator()(const V1& v1, const V2& v2) const {
-      return kanooth::numbers::ceil(kanooth::numbers::div(v1, v2));
-    }
-  };
-
-  template <typename R, typename V1, typename V2>
-  struct _function_rt_vv_default_ceil_div<R, V1, V2, true> {
+  template <typename R, typename V1, typename V2, bool IsNativePosInt>
+  struct _function_rt_vv_default_ceil_div2 {
     inline R operator()(const V1& v1, const V2& v2) const {
       if (v1 >= 0) {
         if (v2 >= 0)
@@ -351,6 +356,25 @@ namespace {
       return v1 / v2;
     }
   };
+
+  template <typename R, typename V1, typename V2>
+  struct _function_rt_vv_default_ceil_div2<R, V1, V2, true> {
+    inline R operator()(const V1& v1, const V2& v2) const {
+      return (v1 + v2 - 1) / v2;
+    }
+  };
+
+  template <typename R, typename V1, typename V2, bool IsNativeInt>
+  struct _function_rt_vv_default_ceil_div {
+    inline R operator()(const V1& v1, const V2& v2) const {
+      return kanooth::numbers::ceil(kanooth::numbers::div(v1, v2));
+    }
+  };
+
+  template <typename R, typename V1, typename V2>
+  struct _function_rt_vv_default_ceil_div<R, V1, V2, true>
+        : public _function_rt_vv_default_ceil_div2<R, V1, V2,
+                !kanooth::is_signed<V1>::value && !kanooth::is_signed<V2>::value> {};          
 }
 
 template <typename R, typename V1, typename V2>

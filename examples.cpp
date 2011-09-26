@@ -96,6 +96,7 @@ void sqrt_example2()
 }
 
 void show_number(int x) { std::cout << "int " << x << std::endl; }
+void show_number(unsigned x) { std::cout << "uint " << x << std::endl; }
 void show_number(double x) { std::cout << "double " << x << std::endl; }
 
 void div_example_help(int a, int b)
@@ -115,6 +116,8 @@ void div_example()
   div_example_help(-6, 3);
   div_example_help(6, -3);
   div_example_help(-6, -3);
+  show_number(ceil_div(13u, 4u));
+  show_number(ceil_div(13, 4));
 }
 
 void rem_example_help(int a, int b)
@@ -250,7 +253,7 @@ int main()
   std::cout << c << std::endl;*/
 
   //sqrt_example2();
-  rem_example();
+  div_example();
 
   /*std::cout << "Digit bits " << natural_number::digit_bits << std::endl;
 
