@@ -252,8 +252,9 @@ int main()
   kanooth::numbers::div(c, c, d);
   std::cout << c << std::endl;*/
 
-  //sqrt_example2();
-  div_example();
+  sqrt_example2();
+  //div_example();
+  //check_rounding();
 
   /*std::cout << "Digit bits " << natural_number::digit_bits << std::endl;
 

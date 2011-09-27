@@ -26,7 +26,7 @@ namespace detail {
 
 std::size_t ceil_multiple(std::size_t x, unsigned a)
 {
-  return ((x + a - 1)/a)*a;
+  return kanooth::numbers::ceil_div(x, a) * a;
 }
 
 template <typename NUM, typename EXP, std::size_t DEFPREC>
@@ -260,7 +260,7 @@ public:
     if (kanooth::numbers::is_zero(xval))
       kanooth::numbers::set(num, 0u);
     else if (kanooth::numbers::is_zero(yval))
-      kanooth::numbers::set(num, 0u);  // TODO: What action to take?
+      kanooth::numbers::set(num, 0u);  // TODO: Set NaN, +inf, -inf
     else {
       EXP xexp = bottom_exponent(xval);
       EXP yexp = bottom_exponent(yval);

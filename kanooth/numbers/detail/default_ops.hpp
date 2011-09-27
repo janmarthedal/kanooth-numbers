@@ -246,14 +246,14 @@ struct function_rt_vv_default<ops::binary::mul, R, V1, V2> {
 
 /* Binary div */
 
-namespace {
-template <typename V1, typename V2, bool IsIntegral>
-struct _binary_result_div
-        : public kanooth::numbers::common_type<V1, V2> {};
-template <typename V1, typename V2>
-struct _binary_result_div<V1, V2, true>
-        : public kanooth::make_signed_if<kanooth::is_signed<V2>::value, V1> {};
-}
+//namespace {
+  template <typename V1, typename V2, bool IsIntegral>
+  struct _binary_result_div
+          : public kanooth::numbers::common_type<V1, V2> {};
+  template <typename V1, typename V2>
+  struct _binary_result_div<V1, V2, true>
+          : public kanooth::make_signed_if<kanooth::is_signed<V2>::value, V1> {};
+//}
 
 template <typename V1, typename V2>
 struct binary_result2<ops::binary::div, V1, V2>
@@ -344,7 +344,7 @@ template <typename V1, typename V2>
 struct binary_result2<ops::binary::ceil_div, V1, V2>
   : public binary_result<ops::binary::trunc_div, V1, V2> {};
 
-namespace {
+//namespace {
   template <typename R, typename V1, typename V2, bool IsNativePosInt>
   struct _function_rt_vv_default_ceil_div2 {
     inline R operator()(const V1& v1, const V2& v2) const {
@@ -375,7 +375,7 @@ namespace {
   struct _function_rt_vv_default_ceil_div<R, V1, V2, true>
         : public _function_rt_vv_default_ceil_div2<R, V1, V2,
                 !kanooth::is_signed<V1>::value && !kanooth::is_signed<V2>::value> {};          
-}
+//}
 
 template <typename R, typename V1, typename V2>
 struct function_rt_vv_default<ops::binary::ceil_div, R, V1, V2>

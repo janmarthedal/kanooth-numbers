@@ -4,19 +4,18 @@
  *
  * Created 2010-07-04 16:50Z
  *
- * (C) Copyright SputSoft 2010
+ * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
- *
- * $Id$
  */
 
 #include <iostream>
 
-#include <sputsoft/numbers/natural_number.hpp>
+#include <kanooth/numbers/type_traits.hpp>
+#include <kanooth/numbers/natural_number.hpp>
 
-using namespace sputsoft::numbers;
+using namespace kanooth::numbers;
 
 template <typename EXP, typename ACT> struct type_matcher;
 
@@ -36,7 +35,7 @@ template <typename I>
 void check_with_int()
 {
   natural_number n1 = 3, n2;
-  typedef typename sputsoft::number_traits<I>::unsigned_type unsigned_int;
+  typedef typename kanooth::numbers::make_unsigned<I>::type unsigned_int;
   I i = 5;
   unsigned_int k;
   add(n2, n1, i);              std::cout << n2 << std::endl;
