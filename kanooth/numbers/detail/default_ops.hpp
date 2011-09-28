@@ -55,7 +55,7 @@ struct evaluator_rv {
 /* Unary identity */
 
 template <typename T>
-struct unary_result2<ops::unary::identity, T> : public type_if<true, T> {};
+struct unary_result2<ops::unary::identity, T> : public set_type<T> {};
 
 template <typename R, typename V>
 struct evaluator_rv<ops::unary::identity, R, V> {
@@ -330,7 +330,7 @@ namespace {
   template <typename R, typename V1, typename V2>
   struct _function_rt_vv_default_floor_div<R, V1, V2, true>
         : public _function_rt_vv_default_floor_div2<R, V1, V2,
-                !kanooth::is_signed<V1>::value && !kanooth::is_signed<V2>::value> {};          
+                !kanooth::is_signed<V1>::value && !kanooth::is_signed<V2>::value> {};
 }
 
 template <typename R, typename V1, typename V2>
@@ -374,7 +374,7 @@ struct binary_result2<ops::binary::ceil_div, V1, V2>
   template <typename R, typename V1, typename V2>
   struct _function_rt_vv_default_ceil_div<R, V1, V2, true>
         : public _function_rt_vv_default_ceil_div2<R, V1, V2,
-                !kanooth::is_signed<V1>::value && !kanooth::is_signed<V2>::value> {};          
+                !kanooth::is_signed<V1>::value && !kanooth::is_signed<V2>::value> {};
 //}
 
 template <typename R, typename V1, typename V2>

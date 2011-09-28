@@ -33,16 +33,21 @@
 
 namespace kanooth {
 
-  template <bool C, typename T>
-  struct type_if {
+  struct no_type {
     static const bool enabled = false;
   };
 
   template <typename T>
-  struct type_if<true, T> {
+  struct set_type {
     static const bool enabled = true;
     typedef T type;
   };
+
+  template <bool C, typename T>
+  struct type_if : public no_type {};
+
+  template <typename T>
+  struct type_if<true, T> : public set_type<T> {};
 
   template <typename T, T val>
   struct integral_constant {
@@ -69,31 +74,31 @@ namespace kanooth {
   typedef integral_constant<bool, true>  true_type;
   typedef integral_constant<bool, false> false_type;
 
-  template <typename T> struct make_signed {};
-  template <> struct make_signed<unsigned short> { typedef signed short type; };
-  template <> struct make_signed<signed short> { typedef signed short type; };
-  template <> struct make_signed<unsigned int> { typedef signed int type; };
-  template <> struct make_signed<signed int> { typedef signed int type; };
-  template <> struct make_signed<unsigned long> { typedef signed long type; };
-  template <> struct make_signed<signed long> { typedef signed long type; };
+  template <typename T> struct make_signed : public no_type {};
+  template <> struct make_signed<unsigned short> : public set_type<signed short> {};
+  template <> struct make_signed<signed short> : public set_type<signed short> {};
+  template <> struct make_signed<unsigned int> : public set_type<signed int> {};
+  template <> struct make_signed<signed int> : public set_type<signed int> {};
+  template <> struct make_signed<unsigned long> : public set_type<signed long> {};
+  template <> struct make_signed<signed long> : public set_type<signed long> {};
 #ifdef KANOOTH_HAS_LONG_LONG
-  template <> struct make_signed<unsigned long long> { typedef signed long long type; };
-  template <> struct make_signed<signed long long> { typedef signed long long type; };
+  template <> struct make_signed<unsigned long long> : public set_type<signed long long> {};
+  template <> struct make_signed<signed long long> : public set_type<signed long long> {};
 #endif
-  template <> struct make_signed<float> { typedef float type; };
-  template <> struct make_signed<double> { typedef double type; };
-  template <> struct make_signed<long double> { typedef long double type; };
+  template <> struct make_signed<float> : public set_type<float> {};
+  template <> struct make_signed<double> : public set_type<double> {};
+  template <> struct make_signed<long double> : public set_type<long double> {};
 
   template <typename T> struct make_unsigned {};
-  template <> struct make_unsigned<unsigned short> { typedef unsigned short type; };
-  template <> struct make_unsigned<signed short> { typedef unsigned short type; };
-  template <> struct make_unsigned<unsigned int> { typedef unsigned int type; };
-  template <> struct make_unsigned<signed int> { typedef unsigned int type; };
-  template <> struct make_unsigned<unsigned long> { typedef unsigned long type; };
-  template <> struct make_unsigned<signed long> { typedef unsigned long type; };
+  template <> struct make_unsigned<unsigned short> : public set_type<unsigned short> {};
+  template <> struct make_unsigned<signed short> : public set_type<unsigned short> {};
+  template <> struct make_unsigned<unsigned int> : public set_type<unsigned int> {};
+  template <> struct make_unsigned<signed int> : public set_type<unsigned int> {};
+  template <> struct make_unsigned<unsigned long> : public set_type<unsigned long> {};
+  template <> struct make_unsigned<signed long> : public set_type<unsigned long> {};
 #ifdef KANOOTH_HAS_LONG_LONG
-  template <> struct make_unsigned<unsigned long long> { typedef unsigned long long type; };
-  template <> struct make_unsigned<signed long long> { typedef unsigned long long type; };
+  template <> struct make_unsigned<unsigned long long> : public set_type<unsigned long long> {};
+  template <> struct make_unsigned<signed long long> : public set_type<unsigned long long> {};
 #endif
 
   template <typename T>
@@ -143,16 +148,12 @@ struct is_native_number
   : public integral_constant<bool, is_native_int<T>::value || is_native_float<T>::value> {};
 
 template <bool C, typename T>
-struct make_signed_if {
-  typedef T type;
-};
+struct make_signed_if : public set_type<T> {};
 template <typename T>
 struct make_signed_if<true, T> : public make_signed<T> {};
 
 template <bool C, typename T>
-struct make_unsigned_if {
-  typedef T type;
-};
+struct make_unsigned_if : public set_type<T> {};
 template <typename T>
 struct make_unsigned_if<true, T> : public make_unsigned<T> {};
 

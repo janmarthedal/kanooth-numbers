@@ -76,7 +76,7 @@ struct evaluator_rv<ops::unary::round, T, numb<posfloatnum<T, E, P> > > {
 
 template <typename T, typename E, std::size_t P>
 struct unary_result2<ops::unary::sqrt, numb<posfloatnum<T, E, P> > >
-        : public type_if<true, numb<posfloatnum<T, E, P> > > {};
+        : public set_type<numb<posfloatnum<T, E, P> > > {};
 
 template <typename T, typename E, std::size_t P>
 struct function_v<ops::unary::sqrt, numb<posfloatnum<T, E, P> > > {
