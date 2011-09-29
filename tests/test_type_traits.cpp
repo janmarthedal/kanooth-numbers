@@ -13,6 +13,7 @@
 #include <iostream>
 
 #include <kanooth/type_traits.hpp>
+#include <kanooth/numbers/number_traits.hpp>
 #include <kanooth/numbers/natural_number.hpp>
 #include <kanooth/numbers/integer.hpp>
 #include <kanooth/numbers/positive_float.hpp>
@@ -24,6 +25,8 @@ using kanooth::make_unsigned;
 using kanooth::is_native_int;
 using kanooth::is_native_float;
 using kanooth::is_native_number;
+using kanooth::number_bits;
+using kanooth::numbers::is_number;
 using kanooth::numbers::natural_number;
 using kanooth::numbers::integer;
 using kanooth::numbers::positive_float;
@@ -34,138 +37,177 @@ template <> struct static_assert<true> {};
 template <typename, typename> struct static_assert_type;
 template <typename T> struct static_assert_type<T, T> {};
 
+#define KANOOTH_STATIC_ASSERT(P) static_assert<P>()
+#define KANOOTH_STATIC_ASSERT_TYPE(S, T) static_assert_type<S, T>()
+
 void test_is_signed()
 {
-  static_assert<is_signed<short>::value>();
-  static_assert<!is_signed<unsigned short>::value>();
-  static_assert<is_signed<int>::value>();
-  static_assert<!is_signed<unsigned int>::value>();
-  static_assert<is_signed<long>::value>();
-  static_assert<!is_signed<unsigned long>::value>();
+  KANOOTH_STATIC_ASSERT(is_signed<short>::value);
+  KANOOTH_STATIC_ASSERT(!is_signed<unsigned short>::value);
+  KANOOTH_STATIC_ASSERT(is_signed<int>::value);
+  KANOOTH_STATIC_ASSERT(!is_signed<unsigned int>::value);
+  KANOOTH_STATIC_ASSERT(is_signed<long>::value);
+  KANOOTH_STATIC_ASSERT(!is_signed<unsigned long>::value);
 #ifdef KANOOTH_HAS_LONG_LONG
-  static_assert<is_signed<long long>::value>();
-  static_assert<!is_signed<unsigned long long>::value>();
+  KANOOTH_STATIC_ASSERT(is_signed<long long>::value);
+  KANOOTH_STATIC_ASSERT(!is_signed<unsigned long long>::value);
 #endif
-  static_assert<is_signed<float>::value>();
-  static_assert<is_signed<double>::value>();
-  static_assert<is_signed<long double>::value>();
-  static_assert<!is_signed<natural_number>::value>();
-  static_assert<is_signed<integer>::value>();
-  static_assert<!is_signed<positive_float>::value>();
+  KANOOTH_STATIC_ASSERT(is_signed<float>::value);
+  KANOOTH_STATIC_ASSERT(is_signed<double>::value);
+  KANOOTH_STATIC_ASSERT(is_signed<long double>::value);
+  KANOOTH_STATIC_ASSERT(!is_signed<natural_number>::value);
+  KANOOTH_STATIC_ASSERT(is_signed<integer>::value);
+  KANOOTH_STATIC_ASSERT(!is_signed<positive_float>::value);
 }
 
 void test_is_integral()
 {
-  static_assert<is_integral<short>::value>();
-  static_assert<is_integral<unsigned short>::value>();
-  static_assert<is_integral<int>::value>();
-  static_assert<is_integral<unsigned int>::value>();
-  static_assert<is_integral<long>::value>();
-  static_assert<is_integral<unsigned long>::value>();
+  KANOOTH_STATIC_ASSERT(is_integral<short>::value);
+  KANOOTH_STATIC_ASSERT(is_integral<unsigned short>::value);
+  KANOOTH_STATIC_ASSERT(is_integral<int>::value);
+  KANOOTH_STATIC_ASSERT(is_integral<unsigned int>::value);
+  KANOOTH_STATIC_ASSERT(is_integral<long>::value);
+  KANOOTH_STATIC_ASSERT(is_integral<unsigned long>::value);
 #ifdef KANOOTH_HAS_LONG_LONG
-  static_assert<is_integral<long long>::value>();
-  static_assert<is_integral<unsigned long long>::value>();
+  KANOOTH_STATIC_ASSERT(is_integral<long long>::value);
+  KANOOTH_STATIC_ASSERT(is_integral<unsigned long long>::value);
 #endif
-  static_assert<!is_integral<float>::value>();
-  static_assert<!is_integral<double>::value>();
-  static_assert<!is_integral<long double>::value>();
-  static_assert<is_integral<natural_number>::value>();
-  static_assert<is_integral<integer>::value>();
-  static_assert<!is_integral<positive_float>::value>();
+  KANOOTH_STATIC_ASSERT(!is_integral<float>::value);
+  KANOOTH_STATIC_ASSERT(!is_integral<double>::value);
+  KANOOTH_STATIC_ASSERT(!is_integral<long double>::value);
+  KANOOTH_STATIC_ASSERT(is_integral<natural_number>::value);
+  KANOOTH_STATIC_ASSERT(is_integral<integer>::value);
+  KANOOTH_STATIC_ASSERT(!is_integral<positive_float>::value);
 }
 
 void test_make_signed()
 {
-  static_assert_type<make_signed<short>::type,              short>();
-  static_assert_type<make_signed<unsigned short>::type,     short>();
-  static_assert_type<make_signed<int>::type,                int>();
-  static_assert_type<make_signed<unsigned int>::type,       int>();
-  static_assert_type<make_signed<long>::type,               long>();
-  static_assert_type<make_signed<unsigned long>::type,      long>();
+  KANOOTH_STATIC_ASSERT_TYPE(make_signed<short>::type,              short);
+  KANOOTH_STATIC_ASSERT_TYPE(make_signed<unsigned short>::type,     short);
+  KANOOTH_STATIC_ASSERT_TYPE(make_signed<int>::type,                int);
+  KANOOTH_STATIC_ASSERT_TYPE(make_signed<unsigned int>::type,       int);
+  KANOOTH_STATIC_ASSERT_TYPE(make_signed<long>::type,               long);
+  KANOOTH_STATIC_ASSERT_TYPE(make_signed<unsigned long>::type,      long);
 #ifdef KANOOTH_HAS_LONG_LONG
-  static_assert_type<make_signed<long long>::type,          long long>();
-  static_assert_type<make_signed<unsigned long long>::type, long long>();
+  KANOOTH_STATIC_ASSERT_TYPE(make_signed<long long>::type,          long long);
+  KANOOTH_STATIC_ASSERT_TYPE(make_signed<unsigned long long>::type, long long);
 #endif
-  static_assert_type<make_signed<natural_number>::type,     integer>();
-  static_assert_type<make_signed<integer>::type,            integer>();
-  static_assert<!make_signed<positive_float>::enabled>();
+  KANOOTH_STATIC_ASSERT_TYPE(make_signed<natural_number>::type,     integer);
+  KANOOTH_STATIC_ASSERT_TYPE(make_signed<integer>::type,            integer);
+  KANOOTH_STATIC_ASSERT(!make_signed<positive_float>::enabled);
 }
 
 void test_make_unsigned()
 {
-  static_assert_type<make_unsigned<short>::type,              unsigned short>();
-  static_assert_type<make_unsigned<unsigned short>::type,     unsigned short>();
-  static_assert_type<make_unsigned<int>::type,                unsigned int>();
-  static_assert_type<make_unsigned<unsigned int>::type,       unsigned int>();
-  static_assert_type<make_unsigned<long>::type,               unsigned long>();
-  static_assert_type<make_unsigned<unsigned long>::type,      unsigned long>();
+  KANOOTH_STATIC_ASSERT_TYPE(make_unsigned<short>::type,              unsigned short);
+  KANOOTH_STATIC_ASSERT_TYPE(make_unsigned<unsigned short>::type,     unsigned short);
+  KANOOTH_STATIC_ASSERT_TYPE(make_unsigned<int>::type,                unsigned int);
+  KANOOTH_STATIC_ASSERT_TYPE(make_unsigned<unsigned int>::type,       unsigned int);
+  KANOOTH_STATIC_ASSERT_TYPE(make_unsigned<long>::type,               unsigned long);
+  KANOOTH_STATIC_ASSERT_TYPE(make_unsigned<unsigned long>::type,      unsigned long);
 #ifdef KANOOTH_HAS_LONG_LONG
-  static_assert_type<make_unsigned<long long>::type,          unsigned long long>();
-  static_assert_type<make_unsigned<unsigned long long>::type, unsigned long long>();
+  KANOOTH_STATIC_ASSERT_TYPE(make_unsigned<long long>::type,          unsigned long long);
+  KANOOTH_STATIC_ASSERT_TYPE(make_unsigned<unsigned long long>::type, unsigned long long);
 #endif
-  static_assert_type<make_unsigned<natural_number>::type,     natural_number>();
-  static_assert_type<make_unsigned<integer>::type,            natural_number>();
-  static_assert_type<make_unsigned<positive_float>::type,     positive_float>();
+  KANOOTH_STATIC_ASSERT_TYPE(make_unsigned<natural_number>::type,     natural_number);
+  KANOOTH_STATIC_ASSERT_TYPE(make_unsigned<integer>::type,            natural_number);
+  KANOOTH_STATIC_ASSERT_TYPE(make_unsigned<positive_float>::type,     positive_float);
 }
 
 void test_is_native_int()
 {
-  static_assert<is_native_int<short>::value>();
-  static_assert<is_native_int<unsigned short>::value>();
-  static_assert<is_native_int<int>::value>();
-  static_assert<is_native_int<unsigned int>::value>();
-  static_assert<is_native_int<long>::value>();
-  static_assert<is_native_int<unsigned long>::value>();
+  KANOOTH_STATIC_ASSERT(is_native_int<short>::value);
+  KANOOTH_STATIC_ASSERT(is_native_int<unsigned short>::value);
+  KANOOTH_STATIC_ASSERT(is_native_int<int>::value);
+  KANOOTH_STATIC_ASSERT(is_native_int<unsigned int>::value);
+  KANOOTH_STATIC_ASSERT(is_native_int<long>::value);
+  KANOOTH_STATIC_ASSERT(is_native_int<unsigned long>::value);
 #ifdef KANOOTH_HAS_LONG_LONG
-  static_assert<is_native_int<long long>::value>();
-  static_assert<is_native_int<unsigned long long>::value>();
+  KANOOTH_STATIC_ASSERT(is_native_int<long long>::value);
+  KANOOTH_STATIC_ASSERT(is_native_int<unsigned long long>::value);
 #endif
-  static_assert<!is_native_int<float>::value>();
-  static_assert<!is_native_int<double>::value>();
-  static_assert<!is_native_int<long double>::value>();
-  static_assert<!is_native_int<natural_number>::value>();
-  static_assert<!is_native_int<integer>::value>();
-  static_assert<!is_native_int<positive_float>::value>();
+  KANOOTH_STATIC_ASSERT(!is_native_int<float>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_int<double>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_int<long double>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_int<natural_number>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_int<integer>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_int<positive_float>::value);
 }
 
 void test_is_native_float()
 {
-  static_assert<!is_native_float<short>::value>();
-  static_assert<!is_native_float<unsigned short>::value>();
-  static_assert<!is_native_float<int>::value>();
-  static_assert<!is_native_float<unsigned int>::value>();
-  static_assert<!is_native_float<long>::value>();
-  static_assert<!is_native_float<unsigned long>::value>();
+  KANOOTH_STATIC_ASSERT(!is_native_float<short>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_float<unsigned short>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_float<int>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_float<unsigned int>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_float<long>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_float<unsigned long>::value);
 #ifdef KANOOTH_HAS_LONG_LONG
-  static_assert<!is_native_float<long long>::value>();
-  static_assert<!is_native_float<unsigned long long>::value>();
+  KANOOTH_STATIC_ASSERT(!is_native_float<long long>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_float<unsigned long long>::value);
 #endif
-  static_assert<is_native_float<float>::value>();
-  static_assert<is_native_float<double>::value>();
-  static_assert<is_native_float<long double>::value>();
-  static_assert<!is_native_float<natural_number>::value>();
-  static_assert<!is_native_float<integer>::value>();
-  static_assert<!is_native_float<positive_float>::value>();
+  KANOOTH_STATIC_ASSERT(is_native_float<float>::value);
+  KANOOTH_STATIC_ASSERT(is_native_float<double>::value);
+  KANOOTH_STATIC_ASSERT(is_native_float<long double>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_float<natural_number>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_float<integer>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_float<positive_float>::value);
 }
 
 void test_is_native_number()
 {
-  static_assert<is_native_number<short>::value>();
-  static_assert<is_native_number<unsigned short>::value>();
-  static_assert<is_native_number<int>::value>();
-  static_assert<is_native_number<unsigned int>::value>();
-  static_assert<is_native_number<long>::value>();
-  static_assert<is_native_number<unsigned long>::value>();
+  KANOOTH_STATIC_ASSERT(is_native_number<short>::value);
+  KANOOTH_STATIC_ASSERT(is_native_number<unsigned short>::value);
+  KANOOTH_STATIC_ASSERT(is_native_number<int>::value);
+  KANOOTH_STATIC_ASSERT(is_native_number<unsigned int>::value);
+  KANOOTH_STATIC_ASSERT(is_native_number<long>::value);
+  KANOOTH_STATIC_ASSERT(is_native_number<unsigned long>::value);
 #ifdef KANOOTH_HAS_LONG_LONG
-  static_assert<is_native_number<long long>::value>();
-  static_assert<is_native_number<unsigned long long>::value>();
+  KANOOTH_STATIC_ASSERT(is_native_number<long long>::value);
+  KANOOTH_STATIC_ASSERT(is_native_number<unsigned long long>::value);
 #endif
-  static_assert<is_native_number<float>::value>();
-  static_assert<is_native_number<double>::value>();
-  static_assert<is_native_number<long double>::value>();
-  static_assert<!is_native_number<natural_number>::value>();
-  static_assert<!is_native_number<integer>::value>();
-  static_assert<!is_native_number<positive_float>::value>();
+  KANOOTH_STATIC_ASSERT(is_native_number<float>::value);
+  KANOOTH_STATIC_ASSERT(is_native_number<double>::value);
+  KANOOTH_STATIC_ASSERT(is_native_number<long double>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_number<natural_number>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_number<integer>::value);
+  KANOOTH_STATIC_ASSERT(!is_native_number<positive_float>::value);
+}
+
+void test_number_bits()
+{
+  KANOOTH_STATIC_ASSERT(number_bits<short>::value + 1 == number_bits<unsigned short>::value);
+  KANOOTH_STATIC_ASSERT(number_bits<short>::value <= number_bits<int>::value);
+  KANOOTH_STATIC_ASSERT(number_bits<int>::value + 1 == number_bits<unsigned int>::value);
+  KANOOTH_STATIC_ASSERT(number_bits<int>::value <= number_bits<long>::value);
+  KANOOTH_STATIC_ASSERT(number_bits<long>::value + 1 == number_bits<unsigned long>::value);
+#ifdef KANOOTH_HAS_LONG_LONG
+  KANOOTH_STATIC_ASSERT(number_bits<long>::value <= number_bits<long long>::value);
+  KANOOTH_STATIC_ASSERT(number_bits<long long>::value + 1 == number_bits<unsigned long long>::value);
+#endif
+}
+
+void test_is_number()
+{
+  KANOOTH_STATIC_ASSERT(!is_number<char>::value);
+  KANOOTH_STATIC_ASSERT(!is_number<int*>::value);
+  
+  KANOOTH_STATIC_ASSERT(is_number<short>::value);
+  KANOOTH_STATIC_ASSERT(is_number<unsigned short>::value);
+  KANOOTH_STATIC_ASSERT(is_number<int>::value);
+  KANOOTH_STATIC_ASSERT(is_number<unsigned int>::value);
+  KANOOTH_STATIC_ASSERT(is_number<long>::value);
+  KANOOTH_STATIC_ASSERT(is_number<unsigned long>::value);
+#ifdef KANOOTH_HAS_LONG_LONG
+  KANOOTH_STATIC_ASSERT(is_number<long long>::value);
+  KANOOTH_STATIC_ASSERT(is_number<unsigned long long>::value);
+#endif
+  KANOOTH_STATIC_ASSERT(is_number<float>::value);
+  KANOOTH_STATIC_ASSERT(is_number<double>::value);
+  KANOOTH_STATIC_ASSERT(is_number<long double>::value);
+  KANOOTH_STATIC_ASSERT(is_number<natural_number>::value);
+  KANOOTH_STATIC_ASSERT(is_number<integer>::value);
+  KANOOTH_STATIC_ASSERT(is_number<positive_float>::value);
 }
 
 int main()
@@ -176,6 +218,7 @@ int main()
   test_make_unsigned();
   test_is_native_int();
   test_is_native_float();
+  test_number_bits();
   test_is_native_number();
 
   return 0;
