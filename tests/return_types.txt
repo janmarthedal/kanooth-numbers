@@ -1,0 +1,17 @@
+*     add, sub, mul, div  
+unsigned short, unsigned short -> unsigned short
+short,          unsigned short -> short
+unsigned short, short          -> short
+short,          short          -> short
+unsigned,       unsigned short -> unsigned
+unsigned,       short          -> int
+unsigned short, unsigned       -> unsigned
+short,          unsigned       -> int
+unsigned,       unsigned       -> unsigned
+int,            unsigned short -> int
+int,            short          -> int
+int,            unsigned       -> int
+unsigned short, int            -> int
+short,          int            -> int
+unsigned,       int            -> int
+int,            int            -> int
