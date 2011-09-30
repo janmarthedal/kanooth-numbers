@@ -26,14 +26,17 @@ DEPS= \
   ${BASE}/kanooth/numbers/detail/natural_number/nat_num_shared.hpp \
   ${BASE}/kanooth/numbers/detail/overload.hpp \
 
-all: test_type_traits examples
+all: test_type_traits test_return_types examples
 
 test_type_traits: test_type_traits.cpp ${DEPS}
+	${GCC} $< -o $@ ${CFLAGS}
+
+test_return_types: test_return_types.cpp ${DEPS}
 	${GCC} $< -o $@ ${CFLAGS}
 
 examples: dev/examples.cpp ${DEPS}
 	${GCC} $< -o $@ -g ${CFLAGS}
 
 clean:
-	rm -f test_type_traits examples
+	rm -f examples test_type_traits test_return_types
 

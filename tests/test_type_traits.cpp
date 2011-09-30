@@ -12,6 +12,7 @@
 
 #include <iostream>
 
+#include "test_common.hpp"
 #include <kanooth/type_traits.hpp>
 #include <kanooth/numbers/number_traits.hpp>
 #include <kanooth/numbers/natural_number.hpp>
@@ -30,15 +31,6 @@ using kanooth::numbers::is_number;
 using kanooth::numbers::natural_number;
 using kanooth::numbers::integer;
 using kanooth::numbers::positive_float;
-
-template <bool> struct static_assert;
-template <> struct static_assert<true> {};
-
-template <typename, typename> struct static_assert_type;
-template <typename T> struct static_assert_type<T, T> {};
-
-#define KANOOTH_STATIC_ASSERT(P) static_assert<P>()
-#define KANOOTH_STATIC_ASSERT_TYPE(S, T) static_assert_type<S, T>()
 
 void test_is_signed()
 {
@@ -221,5 +213,7 @@ int main()
   test_number_bits();
   test_is_native_number();
 
+  std::cout << "Nothing to see here - if it compiled, the test was successful" << std::endl;
+  
   return 0;
 }

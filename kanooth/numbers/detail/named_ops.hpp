@@ -64,7 +64,7 @@ namespace ops {
     struct less_or_equal {};
     struct greater_or_equal {};
   }
-}
+} // namespace ops
 
 template <typename Op, typename T>
 struct unary_result2 {};
@@ -400,7 +400,10 @@ namespace {
 }
 
 template <typename V1, typename V2>
-inline typename detail::binary_result<detail::ops::binary::add, V1, V2>::type
+struct add_result : public detail::binary_result<detail::ops::binary::add, V1, V2> {};
+
+template <typename V1, typename V2>
+inline typename add_result<V1, V2>::type
 add(const V1& v1, const V2& v2) {
   return function_vv_help<detail::ops::binary::add, V1, V2>()(v1, v2);
 }
