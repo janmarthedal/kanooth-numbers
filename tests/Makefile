@@ -33,6 +33,9 @@ test_type_traits: test_type_traits.cpp ${DEPS}
 
 test_return_types: test_return_types.cpp ${DEPS}
 	${GCC} $< -o $@ ${CFLAGS}
+	
+test_return_types.cpp: return_types.txt
+	perl make_return_type_test.pl $< > $@
 
 examples: dev/examples.cpp ${DEPS}
 	${GCC} $< -o $@ -g ${CFLAGS}

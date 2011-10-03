@@ -409,7 +409,10 @@ add(const V1& v1, const V2& v2) {
 }
 
 template <typename V1, typename V2>
-inline typename detail::binary_result<detail::ops::binary::sub, V1, V2>::type
+struct sub_result : public detail::binary_result<detail::ops::binary::sub, V1, V2> {};
+
+template <typename V1, typename V2>
+inline typename sub_result<V1, V2>::type
 sub(const V1& v1, const V2& v2) {
   return function_vv_help<detail::ops::binary::sub, V1, V2>()(v1, v2);
 }
