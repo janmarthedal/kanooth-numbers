@@ -418,13 +418,19 @@ sub(const V1& v1, const V2& v2) {
 }
 
 template <typename V1, typename V2>
-inline typename detail::binary_result<detail::ops::binary::mul, V1, V2>::type
+struct mul_result : public detail::binary_result<detail::ops::binary::mul, V1, V2> {};
+
+template <typename V1, typename V2>
+inline typename mul_result<V1, V2>::type
 mul(const V1& v1, const V2& v2) {
   return function_vv_help<detail::ops::binary::mul, V1, V2>()(v1, v2);
 }
 
 template <typename V1, typename V2>
-inline typename detail::binary_result<detail::ops::binary::div, V1, V2>::type
+struct div_result : public detail::binary_result<detail::ops::binary::div, V1, V2> {};
+
+template <typename V1, typename V2>
+inline typename div_result<V1, V2>::type
 div(const V1& v1, const V2& v2) {
   return function_vv_help<detail::ops::binary::div, V1, V2>()(v1, v2);
 }

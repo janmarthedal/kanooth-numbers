@@ -25,11 +25,15 @@ int main() {
 EOF
 
 while (<>) {
-    if (/^\s*\*\s*(.*?)\s*$/) {
+    if (/^\s*#/) {
+        # ignore
+    } elsif (/^\s*\*\s*(.*?)\s*$/) {
         @ops = split(/\s*,\s*/, $1);
-    } elsif (/^\s*(.*?)\s*,\s*(.*?)\s*->\s*(.*?)\s*$/) {
+    } elsif (/^\s*(.*?)\s*,\s*(.*?)\s*$/) {
+        
+    } elsif (/^\s*(.*?)\s*<-\s*(.*?)\s*,\s*(.*?)\s*$/) {
         foreach (@ops) {
-            print "  static_assert_type<typename kanooth::numbers::${_}_result<$1, $2>::type, $3>();\n";
+            print "  static_assert_type<typename kanooth::numbers::${_}_result<$2, $3>::type, $1>();\n";
         }
     }
 }

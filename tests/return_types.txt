@@ -1,23 +1,30 @@
-* add, sub
-unsigned short, unsigned short -> unsigned short
-unsigned short, short          -> short
-unsigned short, int            -> int
-short,          unsigned short -> short
-int,            unsigned short -> int
-short,          short          -> short
-short,          unsigned       -> int
-short,          int            -> int
-unsigned,       unsigned       -> unsigned
-unsigned,       unsigned short -> unsigned
-unsigned,       short          -> int
-int,            short          -> int
-unsigned,       int            -> int
-int,            unsigned       -> int
-int,            int            -> int
+#* set
+unsigned short, unsigned short
+short         , unsigned short
+unsigned      , unsigned short
+int           , unsigned short
 
-* add
-unsigned short, unsigned       -> unsigned
+
+* add, sub, mul
+unsigned short <- unsigned short, unsigned short
+short          <- unsigned short, short
+int            <- unsigned short, int
+short          <- short,          unsigned short
+int            <- int,            unsigned short
+short          <- short,          short
+int            <- short,          unsigned
+int            <- short,          int
+unsigned       <- unsigned,       unsigned
+unsigned       <- unsigned,       unsigned short
+int            <- unsigned,       short
+int            <- int,            short
+int            <- unsigned,       int
+int            <- int,            unsigned
+int            <- int,            int
+
+* add, mul
+unsigned       <- unsigned short, unsigned
 
 * sub
-unsigned short, unsigned       -> unsigned short
+unsigned short <- unsigned short, unsigned
 
