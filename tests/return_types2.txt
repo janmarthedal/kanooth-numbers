@@ -1,0 +1,31 @@
+A: unsigned short
+B: short
+C: unsigned
+D: int
+E: unsigned long
+F: long
+G: unsigned long long
+H: long long
+I: float
+J: double
+K: long double
+L: natural_number
+M: integer
+N: positive_float
+
+* set
+# ABCDEFGHIJKLMN
+A:+-------------
+B:-+------------
+C:+++-----------
+D:-+-+----------
+E:+++++---------
+F:-+-+-+--------
+G:+++++++-------
+H:-+-+-+-+------
+I:+++++++++-----
+J:++++++++++----
+K:+++++++++++---
+L:+-+-+-+----+--
+M:+++++++++++++-
+N:+-+-+-+----+-+
