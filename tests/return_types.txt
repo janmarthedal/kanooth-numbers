@@ -1,23 +1,30 @@
-#* set
+* set
 unsigned short, unsigned short
 short         , unsigned short
 unsigned      , unsigned short
 int           , unsigned short
-
+unsigned long , unsigned short
+long          , unsigned short
+natural_number, unsigned short
+integer       , unsigned short
+positive_float, unsigned short
+short         , short
+unsigned      , short
 
 * add, sub, mul
 unsigned short <- unsigned short, unsigned short
 short          <- unsigned short, short
+# ...          <- unsigned short, unsigned
 int            <- unsigned short, int
 short          <- short,          unsigned short
 int            <- int,            unsigned short
 short          <- short,          short
 int            <- short,          unsigned
 int            <- short,          int
-unsigned       <- unsigned,       unsigned
-unsigned       <- unsigned,       unsigned short
 int            <- unsigned,       short
 int            <- int,            short
+unsigned       <- unsigned,       unsigned
+unsigned       <- unsigned,       unsigned short
 int            <- unsigned,       int
 int            <- int,            unsigned
 int            <- int,            int

@@ -151,7 +151,10 @@ set(R& r, const char* st, unsigned base=10) {
 }
 
 template <typename R, typename V>
-inline typename detail::enabler_rv<detail::ops::unary::identity, R, V>::type
+struct set_enabled : public detail::enabler_rv<detail::ops::unary::identity, R, V> {};
+
+template <typename R, typename V>
+inline typename set_enabled<R, V>::type
 set(R& r, const V& v) {
   detail::evaluator_rv<detail::ops::unary::identity, R, V>()(r, v);
 }
@@ -220,19 +223,28 @@ namespace {
 }
 
 template <typename R, typename V1, typename V2>
-inline typename detail::enabler_rvv<detail::ops::binary::add, R, V1, V2>::type
+struct add_enabled : public detail::enabler_rvv<detail::ops::binary::add, R, V1, V2> {};
+
+template <typename R, typename V1, typename V2>
+inline typename add_enabled<R, V1, V2>::type
 add(R& r, const V1& v1, const V2& v2) {
   evaluator_rvv_help<detail::ops::binary::add, R, V1, V2>()(r, v1, v2);
 }
 
 template <typename R, typename V1, typename V2>
-inline typename detail::enabler_rvv<detail::ops::binary::sub, R, V1, V2>::type
+struct sub_enabled : public detail::enabler_rvv<detail::ops::binary::sub, R, V1, V2> {};
+
+template <typename R, typename V1, typename V2>
+inline typename sub_enabled<R, V1, V2>::type
 sub(R& r, const V1& v1, const V2& v2) {
   evaluator_rvv_help<detail::ops::binary::sub, R, V1, V2>()(r, v1, v2);
 }
 
 template <typename R, typename V1, typename V2>
-inline typename detail::enabler_rvv<detail::ops::binary::mul, R, V1, V2>::type
+struct mul_enabled : public detail::enabler_rvv<detail::ops::binary::mul, R, V1, V2> {};
+
+template <typename R, typename V1, typename V2>
+inline typename mul_enabled<R, V1, V2>::type
 mul(R& r, const V1& v1, const V2& v2) {
   evaluator_rvv_help<detail::ops::binary::mul, R, V1, V2>()(r, v1, v2);
 }
