@@ -15,6 +15,7 @@
 
 #include <kanooth/numbers/natural_number.hpp>
 #include <kanooth/numbers/integer.hpp>
+#include <kanooth/numbers/rational_number.hpp>
 #include <kanooth/numbers/positive_float.hpp>
 #include <kanooth/numbers/common_functions.hpp>
 #include <kanooth/numbers/number_theory.hpp>
@@ -229,49 +230,11 @@ void check_rounding()
 
 int main()
 {
-  /*positive_float f = 12u;
-  positive_float g;
-  natural_number n = 4u;
-
-  mul(g, n, 2u);
-
-  std::cout << compare(f, 11u) << std::endl;*/
-
-  /*PE3();
-  PE16();
-  PE20();
-  factorize_example();
-  gcd_example();*/
-  //bits2();
-
-  /*integer i=77;
-  natural_number n=80u;
-  std::cout << compare(i, n) << std::endl;*/
-
-  /*natural_number c="1234567", d=3u;
-  kanooth::numbers::div(c, c, d);
-  std::cout << c << std::endl;*/
-
-  sqrt_example2();
-  //div_example();
-  //check_rounding();
-
-  /*std::cout << "Digit bits " << natural_number::digit_bits << std::endl;
-
-  positive_float f=2u, g=3u;
-
-  div(f, f, g);
-  std::cout << "f = " << f << std::endl;
-
-  //std::cout << "f = " << trunc(mul_power(f, 10u, 20)) << std::endl;
-  std::cout << "f = " << trunc(f) << std::endl;
-
-  natural_number n;
-
-  //trunc(n, mul_power(f, 10u, 20));
-
-  set(n, "1234567890123456");
-  std::cout << ruler(n) << std::endl;*/
+  rational_number r = 2, s = -4, t;
+  std::cout << r << std::endl;
+  std::cout << s << std::endl;
+  div(t, r, s);
+  std::cout << t << std::endl;
 
   return 0;
 }

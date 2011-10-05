@@ -177,8 +177,8 @@ public:
     rounding = mode;
   }
 
-  static void floor(NUM& x, const numb& v) {
-    kanooth::numbers::bit_shift_left(x, v.num, v.exponent);
+  void floor_to(NUM& x) const {
+    kanooth::numbers::bit_shift_left(x, num, exponent);
   }
 
   static void round(NUM& x, const numb& v) {
@@ -297,7 +297,7 @@ public:
     kanooth::numbers::set(num, kanooth::numbers::integer_sqrt(tmp));
     exponent = (exp - shift)/2;
   }
-  
+
   std::ostream& show_binary(std::ostream& os) const {
     NUM n;
     floor(n, *this);

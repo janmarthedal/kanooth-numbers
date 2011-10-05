@@ -31,14 +31,14 @@ template <> struct type_rank<signed long>        : integral_constant<int, 6> {};
 template <> struct type_rank<unsigned long long> : integral_constant<int, 7> {};
 template <> struct type_rank<signed long long>   : integral_constant<int, 8> {};
 #endif
-template <> struct type_rank<float>              : integral_constant<int, 9> {};
-template <> struct type_rank<double>             : integral_constant<int, 10> {};
-template <> struct type_rank<long double>        : integral_constant<int, 11> {};
+template <> struct type_rank<float>              : integral_constant<int, 12> {};
+template <> struct type_rank<double>             : integral_constant<int, 13> {};
+template <> struct type_rank<long double>        : integral_constant<int, 14> {};
 
 template <bool C, typename T, typename F>
-struct choose_type { typedef F type; };
+struct choose_type : public set_type<F> {};
 template <typename T, typename F>
-struct choose_type<true, T, F> { typedef T type; };
+struct choose_type<true, T, F> : public set_type<T> {};
 
 } // namespace details
 

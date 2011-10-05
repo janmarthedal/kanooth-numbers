@@ -125,6 +125,18 @@ private:
       kanooth::numbers::div(num, v1, v2u);
   }
 
+  template <typename T1, typename T2>
+  void _div_floor(const T1& v1, bool p1, const T2& v2, bool p2) {
+    positive = p1 == p2;
+    if (!positive) {
+      T1 r;
+      kanooth::numbers::divrem(num, r, v1, v2);
+      if (!kanooth::numbers::is_zero(r))
+        kanooth::numbers::add(num, num, 1u);
+    } else
+      kanooth::numbers::div(num, v1, v2);
+  }
+
   template <typename T>
   static T rem_floor_int(const NUM& v1, bool p1, T v2) {
     typedef typename kanooth::make_unsigned<T>::type unsigned_type;
@@ -201,13 +213,19 @@ public:
          kanooth::numbers::abs(v2), !kanooth::numbers::is_negative(v2));
   }
 
-  inline void div(const numb& u, const numb& v) {
+  template <typename V1, typename V2>
+  inline void div(const V1& v1, const V2& v2) {
+    _div_floor(kanooth::numbers::abs(v1), !kanooth::numbers::is_negative(v1),
+               kanooth::numbers::abs(v2), !kanooth::numbers::is_negative(v2));
+  }
+
+  /*inline void div(const numb& u, const numb& v) {
     div_floor_num(u.num, u.positive, v.num, v.positive);
   }
   template <typename V>
   inline void div(const numb& u, V v) {
     div_floor_int(u.num, u.positive, v);
-  }
+  }*/
 
   inline void rem(const numb& u, const numb& v) {
     rem_floor_num(u.num, u.positive, v.num, v.positive);

@@ -19,6 +19,8 @@ DEPS= \
   ${BASE}/kanooth/numbers/detail/number_abst.hpp \
   ${BASE}/kanooth/numbers/detail/positive_float/pos_float_impl.hpp \
   ${BASE}/kanooth/numbers/detail/positive_float/pos_float_abst.hpp \
+  ${BASE}/kanooth/numbers/detail/rational_number/rat_num_impl.hpp \
+  ${BASE}/kanooth/numbers/detail/rational_number/rat_num_abst.hpp \
   ${BASE}/kanooth/numbers/detail/memory/array_allocator.hpp \
   ${BASE}/kanooth/numbers/detail/memory/digit_array.hpp \
   ${BASE}/kanooth/numbers/detail/natural_number/nat_num_impl.hpp \
@@ -33,7 +35,7 @@ test_type_traits: test_type_traits.cpp ${DEPS}
 
 test_return_types: test_return_types.cpp ${DEPS}
 	${GCC} $< -o $@ ${CFLAGS}
-	
+
 test_return_types.cpp: return_types.txt make_return_type_test.pl
 	perl make_return_type_test.pl $< > $@
 
@@ -41,5 +43,5 @@ examples: dev/examples.cpp ${DEPS}
 	${GCC} $< -o $@ -g ${CFLAGS}
 
 clean:
-	rm -f examples test_type_traits test_return_types
+	rm -f examples test_type_traits test_return_types test_return_types.cpp
 
