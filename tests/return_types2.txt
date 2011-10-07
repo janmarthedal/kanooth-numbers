@@ -6,26 +6,69 @@ E: unsigned long
 F: long
 G: unsigned long long
 H: long long
-I: float
-J: double
-K: long double
-L: natural_number
-M: integer
-N: positive_float
+I: natural_number
+J: integer
+K: rational_number
+L: float
+M: double
+N: long double
+O: positive_float
+P: floating_point
 
 * set
-# ABCDEFGHIJKLMN
-A:+-------------
-B:-+------------
-C:+++-----------
-D:-+-+----------
-E:+++++---------
-F:-+-+-+--------
-G:+++++++-------
-H:-+-+-+-+------
-I:+++++++++-----
-J:++++++++++----
-K:+++++++++++---
-L:+-+-+-+----+--
-M:+++++++++++++-
-N:+-+-+-+----+-+
+# ABCDEFGHIJKLMNOP
+A:++++++++++++++++
+B:-+-+-+-+-+++++-+
+C:--++++++++++++++
+D:---+-+-+-+++++-+
+E:----++++++++++++
+F:-----+-+-+++++-+
+G:------++++++++++
+H:-------+-+++++-+
+I:--------++++++++
+J:---------+++++-+
+K:----------++++-+
+L:-----------+++++
+M:------------++++
+N:-------------+++
+O:--------------++
+P:---------------+
+
+* add
+# ABCDEFGHIJKLMNOP
+A:ABCDEFGHIJKLMNOP
+B:BBDDFFHHJJKLMNPP
+C:CDCDEFGHIJKLMNOP
+D:DDDDFFHHJJKLMNPP
+E:EFEFEFGHIJKLMNOP
+F:FFFFFFHHJJKLMNPP
+G:GHGHGHGHIJKLMNOP
+H:HHHHHHHHJJKLMNPP
+I:IJIJIJIJIJKLMNOP
+J:JJJJJJJJJJKLMNPP
+K:KKKKKKKKKKKLMNPP
+L:LLLLLLLLLLLLMNOP
+M:MMMMMMMMMMMMMNOP
+N:NNNNNNNNNNNNNNOP
+O:OPOPOPOPOPPPPPOP
+P:PPPPPPPPPPPPPPPP
+
+
+* ???
+# ABCDEFGHIJKLMNOP
+A:----------------
+B:----------------
+C:----------------
+D:----------------
+E:----------------
+F:----------------
+G:----------------
+H:----------------
+I:----------------
+J:----------------
+K:----------------
+L:----------------
+M:----------------
+N:----------------
+O:----------------
+P:----------------

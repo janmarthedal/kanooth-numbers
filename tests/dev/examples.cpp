@@ -235,6 +235,10 @@ int main()
   std::cout << s << std::endl;
   div(t, r, s);
   std::cout << t << std::endl;
+  sub(t, t, 4);
+  std::cout << t << std::endl;
+  div(t, 3, 7);
+  std::cout << t << std::endl;
 
   return 0;
 }
