@@ -207,7 +207,7 @@ template <typename Op, typename N, typename V1, typename V2>
 struct evaluator_rvv<Op, numb<N>, V1, V2>
   : public numb_evaluator_rvv<Op, numb<N>, typename binary_result<Op, V1, V2>::type, V1, V2> {};
 
-
+  
 template <typename N, typename R, typename V1, typename V2>
 struct function_divrem<numb<N>, R, V1, V2> {
   inline R operator()(numb<N>& q, const V1& v1, const V2& v2) const {

@@ -122,7 +122,7 @@ public:
 
   template <typename T>
   inline void mul(const numb& v1, const T& v2) {
-    _mul_num(v2);
+    _mul_num(v1, v2);
   }
 
   template <typename T>
@@ -133,6 +133,21 @@ public:
   inline void div(const numb& v1, const numb& v2) {
     _mul_num(v1, v2.denominator);
     _div_num(*this, v2.numerator);
+  }
+
+  template <typename T>
+  inline void div(const numb& v1, const T& v2) {
+    _div_num(v1, v2);
+  }
+
+  template <typename T>
+  inline void div(const T& v1, const numb& v2) {
+    div(numb(v1), v2);
+  }
+  
+  template <typename T1, typename T2>
+  inline void div(const T1& v1, const T2& v2) {
+    div(numb(v1), v2);
   }
 
   inline void add(const numb& v1, const numb& v2) {

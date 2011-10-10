@@ -60,6 +60,13 @@ struct evaluator_rv<ops::unary::floor, N, numb<ratnum<N, D> > > {
   }
 };
 
+template <typename N, typename D, typename V1, typename V2>
+struct evaluator_rvv<ops::binary::div, numb<ratnum<N, D> >, V1, V2> {
+  inline void operator()(numb<ratnum<N, D> >& r, const V1& v1, const V2& v2) const {
+    r.div(v1, v2);
+  }
+};
+    
 /*
 template <typename N, typename D>
 struct evaluator_rv<ops::unary::trunc, T, numb<posfloatnum<T, E, P> > >
@@ -70,31 +77,6 @@ template <typename T, typename E, std::size_t P>
 struct evaluator_rv<ops::unary::round, T, numb<posfloatnum<T, E, P> > > {
   inline void operator()(T& r, const numb<posfloatnum<T, E, P> >& v) const {
     numb<posfloatnum<T, E, P> >::round(r, v);
-  }
-};
-
-template <typename N, typename D>
-template <typename T, typename E, std::size_t P>
-struct unary_result2<ops::unary::sqrt, numb<posfloatnum<T, E, P> > >
-        : public set_type<numb<posfloatnum<T, E, P> > > {};
-
-template <typename N, typename D>
-template <typename T, typename E, std::size_t P>
-struct function_v<ops::unary::sqrt, numb<posfloatnum<T, E, P> > > {
-  typedef typename unary_result<ops::unary::sqrt, numb<posfloatnum<T, E, P> > >::type return_type;
-  inline return_type operator()(const numb<posfloatnum<T, E, P> >& v) const {
-    return_type t;
-    t.sqrt(v);
-    return t;
-  }
-};
-
-
-
-template <typename T, typename E, std::size_t P>
-struct show_binary_eval<numb<posfloatnum<T, E, P> > > {
-  inline std::ostream& operator()(std::ostream& os, const numb<posfloatnum<T, E, P> >& n) const {
-    return n.show_binary(os);
   }
 };
 

@@ -239,6 +239,8 @@ int main()
   std::cout << t << std::endl;
   div(t, 3, 7);
   std::cout << t << std::endl;
+  add(t, t, 2);
+  std::cout << t << std::endl;
 
   return 0;
 }
