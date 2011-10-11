@@ -87,16 +87,6 @@ struct evaluator_rv<ops::unary::abs, N, numb<intnum<N> > > {
   }
 };
 
-template <typename Op, typename T>
-struct function_v_fallback {
-  typedef typename unary_result<Op, T>::type return_type;
-  inline const return_type operator()(const T& v) const {
-    return_type r;
-    evaluator_rv<Op, return_type, T>()(r, v);
-    return r;
-  }
-};
-
 
 template <typename T>
 struct function_v<ops::unary::abs, numb<intnum<T> > >

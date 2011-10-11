@@ -75,6 +75,16 @@ struct binary_result<ops::binary::rem, numb<natnum<T> >, int>
 
 /*****************************************/
 
+template <typename Op, typename T>
+struct function_v_fallback {
+  typedef typename unary_result<Op, T>::type return_type;
+  inline const return_type operator()(const T& v) const {
+    return_type r;
+    evaluator_rv<Op, return_type, T>()(r, v);
+    return r;
+  }
+};
+
 template <typename T>
 struct function_v<ops::unary::abs, numb<natnum<T> > > {
   inline const numb<natnum<T> >& operator()(const numb<natnum<T> >& v) const {

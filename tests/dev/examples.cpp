@@ -162,7 +162,7 @@ void bits1()
   std::cout << c << std::endl;
 }
 
-void bits2()
+/*void bits2()
 {
   integer a = -2, b = 7, c;
 
@@ -174,7 +174,7 @@ void bits2()
   std::cout << c << std::endl;
   bitwise_and(c, -2, 7);
   std::cout << c << std::endl;
-}
+}*/
 
 
 void t(short v) {  std::cout << "short " << v << std::endl; }
@@ -228,7 +228,7 @@ void check_rounding()
   }
 }
 
-int main()
+/*void check_rational()
 {
   rational_number r = 2, s = -4, t;
   std::cout << r << std::endl;
@@ -240,7 +240,40 @@ int main()
   div(t, 3, 7);
   std::cout << t << std::endl;
   add(t, t, 2);
-  std::cout << t << std::endl;
+  std::cout << t << std::endl;  
+}*/
 
+template <typename T>
+class A {
+protected:
+  T a;
+};
+
+template <typename T>
+class B : public A<T> {
+  typedef A<T> parent;
+public:
+  void foo(T v) {
+    parent::a = v;
+  }
+};
+
+
+int main()
+{
+  integer a;
+  natural_number n = 2u;
+  set(a, n);
+  std::cout << a << std::endl;
+  negate(a, n);
+  std::cout << a << std::endl;
+  abs(n, a);
+  std::cout << n << std::endl;
+  sub(a, a, n);
+  std::cout << a << std::endl;
+  
+  //B<int> b;
+  //b.foo(1);
+  
   return 0;
 }
