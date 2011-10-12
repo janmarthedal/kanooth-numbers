@@ -21,6 +21,8 @@ DEPS= \
   ${BASE}/kanooth/numbers/detail/positive_float/pos_float_abst.hpp \
   ${BASE}/kanooth/numbers/detail/rational_number/rat_num_impl.hpp \
   ${BASE}/kanooth/numbers/detail/rational_number/rat_num_abst.hpp \
+  ${BASE}/kanooth/numbers/detail/floating_point/float_impl.hpp \
+  ${BASE}/kanooth/numbers/detail/floating_point/float_abst.hpp \
   ${BASE}/kanooth/numbers/detail/memory/array_allocator.hpp \
   ${BASE}/kanooth/numbers/detail/memory/digit_array.hpp \
   ${BASE}/kanooth/numbers/detail/natural_number/nat_num_impl.hpp \

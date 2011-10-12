@@ -17,6 +17,7 @@
 #include <kanooth/numbers/integer.hpp>
 #include <kanooth/numbers/rational_number.hpp>
 #include <kanooth/numbers/positive_float.hpp>
+#include <kanooth/numbers/floating_point.hpp>
 #include <kanooth/numbers/common_functions.hpp>
 #include <kanooth/numbers/number_theory.hpp>
 
@@ -240,26 +241,10 @@ void check_rounding()
   div(t, 3, 7);
   std::cout << t << std::endl;
   add(t, t, 2);
-  std::cout << t << std::endl;  
+  std::cout << t << std::endl;
 }*/
 
-template <typename T>
-class A {
-protected:
-  T a;
-};
-
-template <typename T>
-class B : public A<T> {
-  typedef A<T> parent;
-public:
-  void foo(T v) {
-    parent::a = v;
-  }
-};
-
-
-int main()
+void check_integer()
 {
   integer a;
   natural_number n = 2u;
@@ -271,9 +256,16 @@ int main()
   std::cout << n << std::endl;
   sub(a, a, n);
   std::cout << a << std::endl;
-  
-  //B<int> b;
-  //b.foo(1);
-  
+}
+
+
+int main()
+{
+  check_integer();
+
+  floating_point f = -2;
+
+  std::cout << f << std::endl;
+
   return 0;
 }

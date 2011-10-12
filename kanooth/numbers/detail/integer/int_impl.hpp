@@ -31,8 +31,8 @@ namespace numbers {
 namespace detail {
 
 template <typename NUM>
-class sign_wrapper {
-protected:
+class numb<intnum<NUM> > {
+private:
   NUM num;
   bool positive;
 
@@ -50,21 +50,21 @@ protected:
   template <typename T1, typename T2>
   void _add(const T1& n1, bool p1, const T2& n2, bool p2) {
     if (p1 == p2) {
+      positive = p1;
       kanooth::numbers::add(num, n1, n2);
-      positive = p1;
     } else if (kanooth::numbers::is_greater_or_equal(n1, n2)) {
-      kanooth::numbers::sub(num, n1, n2);
       positive = p1;
+      kanooth::numbers::sub(num, n1, n2);
     } else {
-      kanooth::numbers::sub(num, n2, n1);
       positive = p2;
+      kanooth::numbers::sub(num, n2, n1);
     }
   }
 
   template <typename T1, typename T2>
   inline void _mul(const T1& n1, bool p1, const T2& n2, bool p2) {
-    kanooth::numbers::mul(num, n1, n2);
     positive = p1 == p2;
+    kanooth::numbers::mul(num, n1, n2);
   }
 
   /* comparisons */
@@ -85,11 +85,103 @@ protected:
     return _cmp(v1, p1, kanooth::to_unsigned(p2 ? v2 : -v2), p2);
   }
 
-public:
-  sign_wrapper() {}
-  sign_wrapper(const NUM& n, bool pos=true) : num(n), positive(pos) {}
+  /* quotrem, div, rem floor */
 
-  inline void set(const sign_wrapper& v) {
+  static void quotrem_floor_num(numb& q, numb& r, const NUM& v1, bool p1, const NUM& v2, bool p2) {
+    kanooth::numbers::divrem(q.num, r.num, v1, v2);
+    if (p1 != p2 && r.num) {
+      kanooth::numbers::add(q.num, q.num, 1u);
+      kanooth::numbers::sub(r.num, v2, r.num);
+    }
+    q.positive = p1 == p2;
+    r.positive = p2;
+  }
+
+  void div_floor_num(const NUM& v1, bool p1, const NUM& v2, bool p2) {
+    positive = p1 == p2;
+    if (!positive) {
+      NUM rnum;
+      kanooth::numbers::divrem(num, rnum, v1, v2);
+      if (rnum)
+        kanooth::numbers::add(num, num, 1u);
+    } else
+      kanooth::numbers::div(num, v1, v2);
+  }
+
+  void rem_floor_num(const NUM& v1, bool p1, const NUM& v2, bool p2) {
+    kanooth::numbers::rem(num, v1, v2);
+    positive = p2;
+    if (p1 != p2 && num)
+      kanooth::numbers::sub(num, v2, num);
+  }
+
+  template <typename T>
+  T quotrem_floor_int(const NUM& v1, bool p1, T v2) {
+    typedef typename kanooth::make_unsigned<T>::type unsigned_type;
+    bool p2 = v2 >= 0;
+    unsigned_type v2u = p2 ? v2 : -v2;
+    unsigned_type ru = kanooth::numbers::divrem(num, v1, v2u);
+    positive = p1 == p2;
+    if (!positive && ru) {
+      kanooth::numbers::add(num, num, 1u);
+      ru = v2u - ru;
+    }
+    return (T) (p2 ? ru : -ru);
+  }
+
+  template <typename T>
+  void div_floor_int(const NUM& v1, bool p1, T v2) {
+    typedef typename kanooth::make_unsigned<T>::type unsigned_type;
+    bool p2 = v2 >= 0;
+    unsigned_type v2u = p2 ? v2 : -v2;
+    positive = p1 == p2;
+    if (!positive) {
+      unsigned_type ru = kanooth::numbers::divrem(num, v1, v2u);
+      if (ru)
+        kanooth::numbers::add(num, num, 1u);
+    } else
+      kanooth::numbers::div(num, v1, v2u);
+  }
+
+  template <typename T1, typename T2>
+  void _div_floor(const T1& v1, bool p1, const T2& v2, bool p2) {
+    positive = p1 == p2;
+    if (!positive) {
+      T1 r;
+      kanooth::numbers::divrem(num, r, v1, v2);
+      if (!kanooth::numbers::is_zero(r))
+        kanooth::numbers::add(num, num, 1u);
+    } else
+      kanooth::numbers::div(num, v1, v2);
+  }
+
+  template <typename T>
+  static T rem_floor_int(const NUM& v1, bool p1, T v2) {
+    typedef typename kanooth::make_unsigned<T>::type unsigned_type;
+    bool p2 = v2 >= 0;
+    unsigned_type v2u = p2 ? v2 : -v2;
+    unsigned_type ru = kanooth::numbers::rem(v1, v2u);
+    if (p1 != p2 && ru) ru = v2u - ru;
+    return (T) (p2 ? ru : -ru);
+  }
+
+public:
+  numb() {}
+
+  template <typename V>
+  numb(const V& v) {
+    kanooth::numbers::set(*this, v);
+  }
+
+  template <typename V>
+  numb& operator=(const V& v) {
+    kanooth::numbers::set(*this, v);
+    return *this;
+  }
+
+  numb(const NUM& n, bool pos=true) : num(n), positive(pos) {}
+
+  inline void set(const numb& v) {
     set_num(v.num, v.positive);
   }
   inline void set(const NUM& n) {
@@ -100,8 +192,11 @@ public:
     set_int(v);
   }
 
-  inline void negate(const sign_wrapper& v) {
+  inline void negate(const numb& v) {
     set_num(v.num, !v.positive);
+  }
+  inline void negate(const NUM& v) {
+    set_num(v, false);
   }
   inline bool is_zero() const {
     return !num;
@@ -115,10 +210,10 @@ public:
   inline operator bool() const {
     return !is_zero();
   }
-  static inline void abs(NUM& r, const sign_wrapper& v) {
+  static inline void abs(NUM& r, const numb& v) {
     kanooth::numbers::set(r, v.num);
   }
-  inline void abs(const sign_wrapper& v) {
+  inline void abs(const numb& v) {
     set_num(v.num, false);
   }
 
@@ -144,109 +239,6 @@ public:
   inline signed cmp(const T& v) const {
     return _cmp(num, positive, kanooth::numbers::abs(v), !kanooth::numbers::is_negative(v));
   }
-
-};  
-
-template <typename NUM>
-class numb<intnum<NUM> > : public sign_wrapper<NUM> {
-private:
-  typedef sign_wrapper<NUM> P;
-
-  /* quotrem, div, rem floor */
-
-  static void quotrem_floor_num(numb& q, numb& r, const NUM& v1, bool p1, const NUM& v2, bool p2) {
-    kanooth::numbers::divrem(q.num, r.num, v1, v2);
-    if (p1 != p2 && r.num) {
-      kanooth::numbers::add(q.num, q.num, 1u);
-      kanooth::numbers::sub(r.num, v2, r.num);
-    }
-    q.positive = p1 == p2;
-    r.positive = p2;
-  }
-
-  void div_floor_num(const NUM& v1, bool p1, const NUM& v2, bool p2) {
-    P::positive = p1 == p2;
-    if (!P::positive) {
-      NUM rnum;
-      kanooth::numbers::divrem(P::num, rnum, v1, v2);
-      if (rnum)
-        kanooth::numbers::add(P::num, P::num, 1u);
-    } else
-      kanooth::numbers::div(P::num, v1, v2);
-  }
-
-  void rem_floor_num(const NUM& v1, bool p1, const NUM& v2, bool p2) {
-    kanooth::numbers::rem(P::num, v1, v2);
-    P::positive = p2;
-    if (p1 != p2 && P::num)
-      kanooth::numbers::sub(P::num, v2, P::num);
-  }
-
-  template <typename T>
-  T quotrem_floor_int(const NUM& v1, bool p1, T v2) {
-    typedef typename kanooth::make_unsigned<T>::type unsigned_type;
-    bool p2 = v2 >= 0;
-    unsigned_type v2u = p2 ? v2 : -v2;
-    unsigned_type ru = kanooth::numbers::divrem(P::num, v1, v2u);
-    P::positive = p1 == p2;
-    if (!P::positive && ru) {
-      kanooth::numbers::add(P::num, P::num, 1u);
-      ru = v2u - ru;
-    }
-    return (T) (p2 ? ru : -ru);
-  }
-
-  template <typename T>
-  void div_floor_int(const NUM& v1, bool p1, T v2) {
-    typedef typename kanooth::make_unsigned<T>::type unsigned_type;
-    bool p2 = v2 >= 0;
-    unsigned_type v2u = p2 ? v2 : -v2;
-    P::positive = p1 == p2;
-    if (!P::positive) {
-      unsigned_type ru = kanooth::numbers::divrem(P::num, v1, v2u);
-      if (ru)
-        kanooth::numbers::add(P::num, P::num, 1u);
-    } else
-      kanooth::numbers::div(P::num, v1, v2u);
-  }
-
-  template <typename T1, typename T2>
-  void _div_floor(const T1& v1, bool p1, const T2& v2, bool p2) {
-    P::positive = p1 == p2;
-    if (!P::positive) {
-      T1 r;
-      kanooth::numbers::divrem(P::num, r, v1, v2);
-      if (!kanooth::numbers::is_zero(r))
-        kanooth::numbers::add(P::num, P::num, 1u);
-    } else
-      kanooth::numbers::div(P::num, v1, v2);
-  }
-
-  template <typename T>
-  static T rem_floor_int(const NUM& v1, bool p1, T v2) {
-    typedef typename kanooth::make_unsigned<T>::type unsigned_type;
-    bool p2 = v2 >= 0;
-    unsigned_type v2u = p2 ? v2 : -v2;
-    unsigned_type ru = kanooth::numbers::rem(v1, v2u);
-    if (p1 != p2 && ru) ru = v2u - ru;
-    return (T) (p2 ? ru : -ru);
-  }
-
-public:
-  numb() {}
-
-  template <typename V>
-  numb(const V& v) {
-    kanooth::numbers::set(*this, v);
-  }
-  
-  template <typename V>
-  numb& operator=(const V& v) {
-    kanooth::numbers::set(*this, v);
-    return *this;
-  }
-  
-  numb(const NUM& n, bool pos=true) : sign_wrapper<NUM>(n, pos) {}
 
   template <typename V1, typename V2>
   inline void div(const V1& v1, const V2& v2) {
@@ -280,23 +272,23 @@ public:
 
   template <typename V1, typename V2>
   inline void bitwise_and_pos(const V1& v1, const V2& v2) {
-    kanooth::numbers::bitwise_and(P::num, kanooth::numbers::abs(v1), kanooth::numbers::abs(v2));
-    P::positive = true;
+    kanooth::numbers::bitwise_and(num, kanooth::numbers::abs(v1), kanooth::numbers::abs(v2));
+    positive = true;
   }
   template <typename V1, typename V2>
   inline void bitwise_or_pos(const V1& v1, const V2& v2) {
-    kanooth::numbers::bitwise_or(P::num, kanooth::numbers::abs(v1), kanooth::numbers::abs(v2));
-    P::positive = true;
+    kanooth::numbers::bitwise_or(num, kanooth::numbers::abs(v1), kanooth::numbers::abs(v2));
+    positive = true;
   }
   template <typename V1, typename V2>
   inline void bitwise_xor_pos(const V1& v1, const V2& v2) {
-    kanooth::numbers::bitwise_xor(P::num, kanooth::numbers::abs(v1), kanooth::numbers::abs(v2));
-    P::positive = true;
+    kanooth::numbers::bitwise_xor(num, kanooth::numbers::abs(v1), kanooth::numbers::abs(v2));
+    positive = true;
   }
   template <typename V1, typename V2>
   inline void bitwise_and_not_pos(const V1& v1, const V2& v2) {
-    kanooth::numbers::bitwise_and_not(P::num, kanooth::numbers::abs(v1), kanooth::numbers::abs(v2));
-    P::positive = true;
+    kanooth::numbers::bitwise_and_not(num, kanooth::numbers::abs(v1), kanooth::numbers::abs(v2));
+    positive = true;
   }
 };
 

@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   kanooth/numbers/detail/integer/int_abst.hpp
  * Author: Jan Marthedal Rasmussen
  *
@@ -8,8 +8,6 @@
  * Use, modification and distribution are subject to the
  * Boost Software License, Version 1.0. (See accompanying file
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
- *
- * $Id$
  */
 
 #ifndef _KANOOTH_NUMBERS_DETAIL_INT_ABST_HPP
@@ -35,19 +33,16 @@ template <typename T>
 struct is_integral<numbers::detail::numb<numbers::detail::intnum<T> > > : public true_type {};
 
 template <typename T>
-struct make_unsigned<numbers::detail::numb<numbers::detail::intnum<T> > > {
-  typedef T type;
-};
+struct make_unsigned<numbers::detail::numb<numbers::detail::intnum<T> > >
+  : public set_type<T> {};
 
 template <typename T>
-struct make_signed<numbers::detail::numb<numbers::detail::intnum<T> > > {
-  typedef numbers::detail::numb<numbers::detail::intnum<T> > type;
-};
+struct make_signed<numbers::detail::numb<numbers::detail::intnum<T> > >
+  : public set_type<numbers::detail::numb<numbers::detail::intnum<T> > > {};
 
 template <typename T>
-struct make_signed<numbers::detail::numb<numbers::detail::natnum<T> > > {
-  typedef numbers::detail::numb<numbers::detail::intnum<numbers::detail::numb<numbers::detail::natnum<T> > > > type;
-};
+struct make_signed<numbers::detail::numb<numbers::detail::natnum<T> > >
+  : public set_type<numbers::detail::numb<numbers::detail::intnum<numbers::detail::numb<numbers::detail::natnum<T> > > > > {};
 
 namespace numbers {
 namespace detail {

@@ -1,8 +1,8 @@
 /*
- * File:   kanooth/numbers/positive_float.hpp
+ * File:   kanooth/numbers/floating_point.hpp
  * Author: Jan Marthedal Rasmussen
  *
- * Created 2011-08-24 08:39Z
+ * Created 2011-10-12 08:39Z
  *
  * (C) Copyright Jan Marthedal Rasmussen 2009-2011
  * Use, modification and distribution are subject to the
@@ -10,20 +10,20 @@
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-#ifndef _KANOOTH_NUMBERS_POSITIVE_FLOAT_HPP
-#define _KANOOTH_NUMBERS_POSITIVE_FLOAT_HPP
+#ifndef _KANOOTH_NUMBERS_FLOATING_POINT_HPP
+#define _KANOOTH_NUMBERS_FLOATING_POINT_HPP
 
-#include <kanooth/numbers/natural_number.hpp>
-#include <kanooth/numbers/detail/positive_float/pos_float_impl.hpp>
+#include <kanooth/numbers/positive_float.hpp>
+#include <kanooth/numbers/detail/floating_point/float_impl.hpp>
 #include <kanooth/numbers/detail/default_ops.hpp>
 
 namespace kanooth {
 namespace numbers {
 
-typedef detail::numb<detail::posfloatnum<natural_number, std::ptrdiff_t, 64> > positive_float;
+typedef detail::numb<detail::floatnum<positive_float> > floating_point;
 
 } // namespace kanooth
 } // namespace numbers
 
 
-#endif // _KANOOTH_NUMBERS_POSITIVE_FLOAT_HPP
+#endif // _KANOOTH_NUMBERS_FLOATING_POINT_HPP
