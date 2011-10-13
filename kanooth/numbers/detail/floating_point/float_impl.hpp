@@ -25,40 +25,55 @@ class numb<floatnum<NUM> > {
 private:
   NUM num;
   bool positive;
+  round_mode rounding;
 
-  template <typename T>
-  void set_num(const T& v) {
-    positive = !kanooth::numbers::is_negative(v);
-    kanooth::numbers::set(num, kanooth::numbers::abs(v));
+  void set_positive(bool pos) {
+    positive = pos;
+    if (pos) {
+      num.set_rounding_mode(rounding);
+    } else {
+      switch (rounding) {
+        case TRUNC: num.set_rounding_mode(CEIL); break;
+        case FLOOR: num.set_rounding_mode(CEIL); break;
+        case CEIL : num.set_rounding_mode(FLOOR); break;
+        case ROUND: num.set_rounding_mode(ROUND); break;
+      }
+    }
   }
-
+  
   template <typename T1, typename T2>
   void _add(const T1& n1, bool p1, const T2& n2, bool p2) {
     if (p1 == p2) {
-      positive = p1;
+      set_positive(p1);
       kanooth::numbers::add(num, n1, n2);
     } else if (kanooth::numbers::is_greater_or_equal(n1, n2)) {
-      positive = p1;
+      set_positive(p1);
       kanooth::numbers::sub(num, n1, n2);
     } else {
-      positive = p2;
+      set_positive(p2);
       kanooth::numbers::sub(num, n2, n1);
     }
   }
 
   template <typename T1, typename T2>
   inline void _mul(const T1& n1, bool p1, const T2& n2, bool p2) {
-    positive = p1 == p2;
+    set_positive(p1 == p2);
     kanooth::numbers::mul(num, n1, n2);
+  }
+
+  template <typename T1, typename T2>
+  inline void _div(const T1& n1, bool p1, const T2& n2, bool p2) {
+    set_positive(p1 == p2);
+    kanooth::numbers::div(num, n1, n2);
   }
 
   /* comparisons */
 
   template <typename T>
   static int _cmp(const NUM& v1, bool p1, const T& v2, bool p2) {
-    if (!v1)
-      return !v2 ? 0 : p2 ? -1 : 1;
-    if (!v2 || p1 != p2)
+    if (kanooth::numbers::is_zero(v1))
+      return kanooth::numbers::is_zero(v2) ? 0 : p2 ? -1 : 1;
+    if (kanooth::numbers::is_zero(v2) || p1 != p2)
       return p1 ? 1 : -1;
     int c = kanooth::numbers::compare(v1, v2);
     return p1 ? c : -c;
@@ -78,31 +93,26 @@ public:
     return *this;
   }
 
-  numb(const NUM& n, bool pos=true) : NUM(n), positive(pos) {}
-
   inline void set(const numb& v) {
+    set_positive(v.positive);
     kanooth::numbers::set(num, v.num);
-    positive = v.positive;
-  }
-  inline void set(const NUM& n) {
-    kanooth::numbers::set(num, n);
-    positive = true;
   }
   template <typename T>
   inline void set(T v) {
+    set_positive(!kanooth::numbers::is_negative(v));
     kanooth::numbers::set(num, kanooth::numbers::abs(v));
-    positive = !kanooth::numbers::is_negative(v);
   }
 
   inline void negate(const numb& v) {
+    set_positive(!v.positive);
     kanooth::numbers::set(num, v.num);
-    positive = !v.positive;
   }
   template <typename T>
   inline void negate(const T& v) {
+    set_positive(kanooth::numbers::is_negative(v));
     kanooth::numbers::set(num, kanooth::numbers::abs(v));
-    positive = kanooth::numbers::is_negative(v);
   }
+
   inline bool is_zero() const {
     return !num;
   }
@@ -119,7 +129,8 @@ public:
     kanooth::numbers::set(r, v.num);
   }
   inline void abs(const numb& v) {
-    set_num(v.num);
+    set_positive(true);
+    kanooth::numbers::set(num, v.num);
   }
 
   template <typename V1, typename V2>
@@ -140,13 +151,16 @@ public:
          kanooth::numbers::abs(v2), !kanooth::numbers::is_negative(v2));
   }
 
-  template <typename T>
-  inline signed cmp(const T& v) const {
-    return _cmp(num, positive, kanooth::numbers::abs(v), !kanooth::numbers::is_negative(v));
-  }
-
   template <typename V1, typename V2>
   inline void div(const V1& v1, const V2& v2) {
+    _div(kanooth::numbers::abs(v1), !kanooth::numbers::is_negative(v1),
+         kanooth::numbers::abs(v2), !kanooth::numbers::is_negative(v2));
+  }
+
+  template <typename T>
+  inline signed cmp(const T& v) const {
+    return _cmp(num, positive,
+                kanooth::numbers::abs(v), !kanooth::numbers::is_negative(v));
   }
 
 };

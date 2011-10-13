@@ -40,6 +40,11 @@ struct is_integral<numbers::detail::numb<numbers::detail::posfloatnum<T, E, P> >
         : public false_type {};
 
 namespace numbers {
+  
+enum round_mode {
+  TRUNC, FLOOR, CEIL, ROUND
+};
+  
 namespace detail {
 
 template <typename T, typename E, std::size_t P>

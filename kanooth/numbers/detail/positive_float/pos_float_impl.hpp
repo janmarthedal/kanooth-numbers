@@ -31,10 +31,6 @@ std::size_t ceil_multiple(std::size_t x, unsigned a)
 
 template <typename NUM, typename EXP, std::size_t DEFPREC>
 class numb<posfloatnum<NUM, EXP, DEFPREC> > {
-public:
-  enum round_mode {
-    FLOOR, CEIL, ROUND
-  };
 private:
   NUM num;
   EXP exponent;
@@ -271,8 +267,8 @@ public:
       std::size_t numeratorbits = ybits + destbits;
       std::ptrdiff_t numeratorshift = numeratorbits - xbits;
       NUM tmp;
-      kanooth::numbers::bit_shift_left(tmp, xval, numeratorshift);
-      kanooth::numbers::div(num, tmp, yval);
+      kanooth::numbers::bit_shift_left(tmp, get_num(xval), numeratorshift);
+      kanooth::numbers::div(num, tmp, get_num(yval));
       exponent = xexp - numeratorshift - yexp;
     }
     normalize();

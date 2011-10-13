@@ -263,8 +263,9 @@ int main()
 {
   check_integer();
 
-  floating_point f = -2;
-
+  floating_point f = -2, g = 3;
+  //positive_float f = 2u, g = 3u;
+  div(f, f, g);
   std::cout << f << std::endl;
 
   return 0;
