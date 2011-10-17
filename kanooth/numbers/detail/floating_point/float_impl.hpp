@@ -29,16 +29,12 @@ private:
 
   void set_positive(bool pos) {
     positive = pos;
-    if (pos) {
+    if (pos || rounding == TRUNC || rounding == ROUND)
       num.set_rounding_mode(rounding);
-    } else {
-      switch (rounding) {
-        case TRUNC: num.set_rounding_mode(CEIL); break;
-        case FLOOR: num.set_rounding_mode(CEIL); break;
-        case CEIL : num.set_rounding_mode(FLOOR); break;
-        case ROUND: num.set_rounding_mode(ROUND); break;
-      }
-    }
+    else if (rounding == FLOOR)
+      num.set_rounding_mode(CEIL);
+    else //if (rounding == CEIL)
+      num.set_rounding_mode(FLOOR);
   }
   
   template <typename T1, typename T2>
@@ -91,6 +87,14 @@ public:
   numb& operator=(const V& v) {
     kanooth::numbers::set(*this, v);
     return *this;
+  }
+
+  void set_precision(std::size_t prec) {
+    num.set_precision(prec);
+  }
+
+  void set_rounding_mode(round_mode mode) {
+    rounding = mode;
   }
 
   inline void set(const numb& v) {

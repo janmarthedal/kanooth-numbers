@@ -104,7 +104,7 @@ inline std::ostream& operator<<(std::ostream& os, numb<posfloatnum<T, E, P> > f)
   T n;
   floor(n, f);
   os << n << ".";
-  for (int k=10; k > 0; k--) {
+  for (int k=24; k > 0; k--) {
     kanooth::numbers::sub(f, f, n);
     kanooth::numbers::mul(f, f, 10u);
     floor(n, f);

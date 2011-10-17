@@ -259,13 +259,20 @@ void check_integer()
 }
 
 
+#include <limits>
+
 int main()
 {
+  std::cout << std::numeric_limits<float>::digits << std::endl;
+  std::cout << std::numeric_limits<double>::digits << std::endl;
+  std::cout << std::numeric_limits<long double>::digits << std::endl;
+  
   check_integer();
 
-  floating_point f = -2, g = 3;
+  floating_point f = 2, g = 3;
   //positive_float f = 2u, g = 3u;
-  div(f, f, g);
+  f.set_rounding_mode(CEIL);
+  add(f, f, g);
   std::cout << f << std::endl;
 
   return 0;
