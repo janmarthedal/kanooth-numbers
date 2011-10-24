@@ -1,24 +1,13 @@
-==Version 0.3==
-Comparing all types
-abs: integer -> nat_num?
+Floating point numbers
+* Automatic precision
+* Output formatting
+
+==Other==
 Optimize multiplying numbers, use mul_int as special case
 Optimize rem_int (no need to compute quotient)
 Random numbers
-Bitwise ops for nat num
-Bitwise ops for integers
-Integer square root
 Binary gcd
-Number of trailing zero bits
 Continued fractions functions
-
-==Version 0.4==
-Rational numbers
-
-==Version 0.5==
-Floating point numbers
-
-==Future==
-
 Modulo numbers
 Interval floating point numbers
 Bounded rational numbers
