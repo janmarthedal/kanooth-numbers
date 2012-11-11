@@ -109,6 +109,7 @@ public:
     multiply_sequences(xp, xp+xn, yp, yp+yn, rp);
   }
 
+  // y != 0
   template <typename T>
   static inline T quotrem_1(T* z1, const T* x1, std::size_t n, T y) {
     T* z2 = z1 + n;
