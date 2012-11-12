@@ -15,12 +15,16 @@ namespace numbers {
         
 template <typename T = unsigned long, typename Allocator = std::allocator<T>, typename LOWLEVEL = lowlevel::generic<Allocator> >
 class natural_number : private Allocator::template rebind<T>::other {
+
     typedef typename Allocator::template rebind<T>::other allocator_type;
     typedef typename allocator_type::value_type digit_type;
     typedef typename allocator_type::pointer digit_ptr;
     typedef typename allocator_type::size_type size_type;
+
 public:
+
     natural_number() : digit_array(0), digits(0), allocated(0) {}
+
     natural_number(unsigned long v) {
         if (v) {
             allocate(1);
@@ -31,6 +35,7 @@ public:
             digit_array = 0;
         }
     }
+
     natural_number(const natural_number& other) {
         if (this == &other) return;
         if (other.digits) {
@@ -42,6 +47,7 @@ public:
             digit_array = 0;
         }
     }
+
     natural_number(const char* s) : digits(0), allocated(0), digit_array(0) {
         while (*s) {
             multiply(*this, 10u);
@@ -49,31 +55,39 @@ public:
             ++s;
         }        
     }
+
     natural_number& operator=(unsigned long v) {
         natural_number(v).swap(*this);
         return *this;
     }
-    natural_number& operator=(const natural_number& other) {
-        natural_number(other).swap(*this);
+
+    // http://cpp-next.com/archive/2009/08/want-speed-pass-by-value/
+    natural_number& operator=(natural_number other) {
+        swap(other);
         return *this;
     }
+
     natural_number& operator=(const char* s) {
         natural_number(s).swap(*this);
         return *this;
     }
+
     ~natural_number() {
         if (allocated) {
             allocator().deallocate(digit_array, allocated);
         }
     }
+
     void swap(natural_number& other) {
         std::swap(digit_array, other.digit_array);
         std::swap(digits, other.digits);
         std::swap(allocated, other.allocated);
     }
+
     bool is_zero() const {
         return digits == 0;
     }
+
     void add(const natural_number& a, const natural_number& b) {
         size_type max_digits = std::max(a.digits, b.digits) + 1;
         if (allocated < max_digits) {
@@ -84,6 +98,7 @@ public:
             add_helper(a, b);
         }
     }
+
     void add(const natural_number& a, unsigned long b) {
         if (sizeof(unsigned long) <= sizeof(digit_type)) {
             size_type max_digits = a.digits + 1;
@@ -98,6 +113,7 @@ public:
             throw std::runtime_error("not implemented yet");
         }
     }
+
     void subtract(const natural_number& a, const natural_number& b) {
         size_type max_digits = a.digits;
         if (allocated < max_digits) {
@@ -108,6 +124,7 @@ public:
             subtract_helper(a, b);
         }
     }
+
     void multiply(const natural_number& a, const natural_number& b) {
         if (a.is_zero() || b.is_zero()) {
             natural_number().swap(*this);
@@ -122,6 +139,7 @@ public:
             }
         }
     }
+
     void multiply(const natural_number& a, unsigned long b) {
         if (sizeof(unsigned long) <= sizeof(digit_type)) {
             size_type res_digits = a.digits + 1;
@@ -136,6 +154,7 @@ public:
             throw std::runtime_error("not implemented yet");
         }
     }
+
     void divide(const natural_number& a, const natural_number& b) {
         if (b.is_zero())
             throw std::overflow_error("division by zero");
@@ -155,6 +174,7 @@ public:
             }
         }
     }
+
     void modulus(const natural_number& a, const natural_number& b) {
         if (b.is_zero())
             throw std::overflow_error("division by zero");
@@ -174,6 +194,7 @@ public:
             }
         }        
     }
+
     unsigned long quotrem(const natural_number& a, unsigned long b) {
         if (!b)
             throw std::overflow_error("division by zero");
@@ -190,6 +211,7 @@ public:
             throw std::runtime_error("not implemented yet");
         }
     }
+
     std::string str(std::streamsize /*digits*/, std::ios_base::fmtflags f) const {
         if (is_zero())
             return "0";
@@ -204,26 +226,33 @@ public:
         }
         return std::string(begin, end);
     }
+
 private:
+
     natural_number(size_type min_size, bool) {
+        assert(min_size >= 1);
         allocate(min_size);
     }
-    void set_digits_1(size_type max_digits) {
+
+    inline void set_digits_1(size_type max_digits) {
         assert(max_digits >= 1);
         digits = max_digits;
         if (!digit_array[digits-1])
             --digits;
     }
-    void set_digits_n(size_type max_digits) {
+
+    inline void set_digits_n(size_type max_digits) {
         digits = max_digits;
         while (digits && !digit_array[digits-1])
             --digits;
     }
-    void set_digits_carry(size_type base_digits, digit_type carry) {
+
+    inline void set_digits_carry(size_type base_digits, digit_type carry) {
         digits = base_digits;
         if (carry)
             digit_array[digits++] = carry;
     }
+
     void add_helper(const natural_number& a, const natural_number& b) {
         if (a.digits >= b.digits) {
             LOWLEVEL::add(digit_array, a.digit_array, a.digits, b.digit_array, b.digits);
@@ -233,14 +262,17 @@ private:
             set_digits_1(b.digits + 1);
         }
     }
+    
     void add_helper(const natural_number& a, digit_type b) {
         digit_type carry = LOWLEVEL::add_1(digit_array, a.digit_array, a.digits, b);
         set_digits_carry(a.digits, carry);
     }
+    
     void subtract_helper(const natural_number& a, const natural_number& b) {
         LOWLEVEL::sub(digit_array, a.digit_array, a.digits, b.digit_array, b.digits);
         set_digits_n(a.digits);
     }
+    
     void multiply_helper(const natural_number& a, const natural_number& b) {
         if (a.digits >= b.digits) {
             LOWLEVEL::mul(digit_array, a.digit_array, a.digits, b.digit_array, b.digits);
@@ -249,20 +281,24 @@ private:
         }
         set_digits_1(a.digits + b.digits);
     }
+    
     void multiply_helper(const natural_number& a, digit_type b) {
         digit_type carry = LOWLEVEL::mul_1(digit_array, a.digit_array, a.digits, b);
         set_digits_carry(a.digits, carry);
     }
+    
     static void quotrem_helper(natural_number& q, natural_number& r, const natural_number& a, const natural_number& b) {
         LOWLEVEL::quotrem(q.digit_array, r.digit_array, a.digit_array, a.digits, b.digit_array, b.digits);
         q.set_digits_1(a.digits - b.digits + 1);
         r.set_digits_n(b.digits);
     }
+    
     digit_type quotrem_helper(const natural_number& a, digit_type b) {
         T r = LOWLEVEL::quotrem_1(digit_array, a.digit_array, a.digits, b);
         set_digits_1(a.digits);
         return r;
     }
+    
     void allocate(size_type size) {
         allocated = size;
         digit_array = allocator().allocate(allocated);

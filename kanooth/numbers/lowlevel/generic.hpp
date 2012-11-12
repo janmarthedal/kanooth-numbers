@@ -13,6 +13,7 @@
 #ifndef _KANOOTH_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HPP_
 #define _KANOOTH_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HPP_
 
+#include <cassert>
 #include <kanooth/number_bits.hpp>
 
 namespace kanooth {
@@ -23,7 +24,6 @@ template <typename A = std::allocator<void> >
 class generic {
 public:
 
-  // n >= 0
   template <typename T>
   static inline void copy_forward(T* z1, const T* x1, const std::size_t n)
   {
@@ -31,7 +31,6 @@ public:
       std::copy(x1, x1 + n, z1);
   }
 
-  // n >= 0
   template <typename T>
   static inline void copy_backward(T* z1, const T* x1, const std::size_t n)
   {
@@ -45,7 +44,6 @@ public:
     std::fill_n(rp, n, 0);
   }
 
-  // n >= 0
   template <typename T>
   static inline T add_1(T* rp, const T* xp, std::size_t n, const T y)
   {
@@ -61,16 +59,15 @@ public:
     return 0;
   }
 
-  // xn >= yn >= 0
   template <typename T>
   static T add(T* rp, const T* xp, const std::size_t xn,
                const T* yp, const std::size_t yn)
   {
+    assert(xn >= yn);
     T carry = add_n(rp, xp, yp, yn);
     return add_1(rp + yn, xp + yn, xn - yn, carry);    
   }
 
-  // n >= 0
   template <typename T>
   static inline T sub_1(T* rp, const T* xp, std::size_t n, const T y)
   {
@@ -86,32 +83,33 @@ public:
     return 0;
   }
 
-  // xn >= yn >= 0
   template <typename T>
   static T sub(T* rp, const T* xp, const std::size_t xn,
                const T* yp, const std::size_t yn)
   {
+    assert(xn >= yn);
     T borrow = sub_n(rp, xp, yp, yn);
     return sub_1(rp + yn, xp + yn, xn - yn, borrow);
   }
 
-  // n >= 0
   template <typename T>
   static inline T mul_1(T* rp, const T* xp, std::size_t n, const T y) {
     return multiply_sequence_with_digit(xp, xp+n, rp, y);
   }
 
-  // xn >= yn >= 1
-  // {rp, xn+yn}, {xp, xn} don't overlap, {rp, xn+yn}, {yp, yn} don't overlap
   template <typename T>
   static inline void mul(T* rp, const T* xp, const std::size_t xn,
                          const T* yp, const std::size_t yn) {
+    assert(yn >= 1);
+    assert(xn >= yn);
+    assert(rp+xn+yn <= xp || rp >= xp+xn);
+    assert(rp+xn+yn <= yp || rp >= yp+yn);
     multiply_sequences(xp, xp+xn, yp, yp+yn, rp);
   }
 
-  // y != 0
   template <typename T>
   static inline T quotrem_1(T* z1, const T* x1, std::size_t n, T y) {
+    assert(y != 0);
     T* z2 = z1 + n;
     unsigned s = nlz(y);
     if (s) {
@@ -129,11 +127,17 @@ public:
     }
   }
 
-  // un >= vn >= 1, vp[vn-1] != 0
-  // {qp, un-vn+1}, {rp, vn}, {up, un}, {vp, vn} do not overlap
   template <typename T>
   static void quotrem(T* q1, T* r1, const T* u1, const std::size_t un,
                       const T* v1, const std::size_t vn) {
+    assert(vn >= 1);
+    assert(un >= vn);
+    assert(v1[vn-1] != 0);
+    assert(q1+un-vn+1 <= r1 || q1 >= r1+vn);
+    assert(q1+un-vn+1 <= u1 || q1 >= u1+un);
+    assert(q1+un-vn+1 <= v1 || q1 >= v1+vn);
+    assert(r1+vn <= u1 || r1 >= u1+un);
+    assert(r1+vn <= v1 || r1 >= v1+vn);
     if (vn == 1)
       r1[0] = quotrem_1(q1, u1, un, v1[0]);
     else {  // vn >= 2
@@ -178,9 +182,12 @@ public:
     }
   }
 
-  // n > 0, z1 >= x1, 1 <= count < digit_bits
   template <typename T>
   static T lshift(T* z1, const T* x1, const std::size_t n, const unsigned count) {
+    assert(n != 0);
+    assert(z1 >= x1);
+    assert(count >= 1);
+    assert(count < kanooth::number_bits<T>::value);
     const unsigned int rcount = kanooth::number_bits<T>::value - count;
     T* z2 = z1 + n;
     const T* x2 = x1 + n;
@@ -195,9 +202,12 @@ public:
     return r;
   }
 
-  // n > 0, z1 <= x1, 1 <= count < digit_bits
   template <typename T>
   static T rshift(T* z1, const T* x1, std::size_t n, unsigned count) {
+    assert(n != 0);
+    assert(z1 <= x1);
+    assert(count >= 1);
+    assert(count < kanooth::number_bits<T>::value);
     const unsigned int rcount = kanooth::number_bits<T>::value - count;
     const T* x2 = x1 + n;
     T xl, xh = *x1++;
@@ -251,7 +261,6 @@ public:
 
 private:
 
-  // n >= 0
   template <typename T>
   static inline T add_n(T* rp, const T* xp, const T* yp, std::size_t n)
   {
@@ -272,7 +281,6 @@ private:
     return carry ? 1 : 0;
   }
 
-  // n >= 0
   template <typename T>
   static inline T sub_n(T* rp, const T* xp, const T* yp, std::size_t n)
   {
@@ -293,7 +301,6 @@ private:
     return borrow ? 1 : 0;
   }
 
-  // n >= 0
   template <typename T>
   static inline T inc(T* rp, const T* xp, std::size_t n)
   {
@@ -308,7 +315,6 @@ private:
     return 0;
   }
 
-  // n >= 0
   template <typename T>
   static inline T dec(T* rp, const T* xp, std::size_t n)
   {
@@ -365,11 +371,12 @@ private:
     return k;
   }
 
-  // Assumes ufirst != ulast and vfirst != vlast
   template <typename T>
   static inline void multiply_sequences(const T* ufirst, const T* ulast,
       const T* vfirst, const T* vlast, T* wfirst)
   {
+    assert(ufirst < ulast);
+    assert(vfirst < vlast);
     T *wlast = wfirst + (ulast - ufirst);
     *wlast++ = multiply_sequence_with_digit(ufirst, ulast, wfirst++, *vfirst++);
     while (vfirst != vlast)
@@ -389,7 +396,6 @@ private:
     return s;
   }
 
-  // Assumes nlz(v) = 0
   template <typename T>
   static void double_div_normalized(T uhigh, T ulow, T v, T& quot, T& rem)
   {
@@ -403,6 +409,7 @@ private:
     const T u0 = ulow & lowmask;
     T q1, q0, r;
 
+    assert(v & (T(1) << (digitbits-1)));  // nlz(v) == 0
     q1 = uhigh / v1;
     r  = uhigh % v1;
     while ((q1 & highmask) || q1*v0 > ((r << halfbits) | u1)) {

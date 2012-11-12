@@ -27,11 +27,6 @@
 
 namespace kanooth {
 
-  template <typename T, T val>
-  struct integral_constant {
-    static const T value = val;
-  };
-
 #ifdef KANOOTH_USE_BOOST
 
   template <typename T>
