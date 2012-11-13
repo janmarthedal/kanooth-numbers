@@ -61,9 +61,9 @@ public:
         return *this;
     }
 
-    // http://cpp-next.com/archive/2009/08/want-speed-pass-by-value/
-    natural_number& operator=(natural_number other) {
-        swap(other);
+    // Consider http://cpp-next.com/archive/2009/08/want-speed-pass-by-value/ ?
+    natural_number& operator=(const natural_number& other) {
+        natural_number(other).swap(*this);
         return *this;
     }
 
@@ -91,7 +91,7 @@ public:
     void add(const natural_number& a, const natural_number& b) {
         size_type max_digits = std::max(a.digits, b.digits) + 1;
         if (allocated < max_digits) {
-            natural_number other(max_digits, false);
+            natural_number other(max_digits, digit_unit);
             other.add_helper(a, b);
             swap(other);
         } else {
@@ -103,7 +103,7 @@ public:
         if (sizeof(unsigned long) <= sizeof(digit_type)) {
             size_type max_digits = a.digits + 1;
             if (allocated < max_digits) {
-                natural_number other(max_digits, false);
+                natural_number other(max_digits, digit_unit);
                 other.add_helper(a, b);
                 swap(other);
             } else {
@@ -117,7 +117,7 @@ public:
     void subtract(const natural_number& a, const natural_number& b) {
         size_type max_digits = a.digits;
         if (allocated < max_digits) {
-            natural_number other(max_digits, false);
+            natural_number other(max_digits, digit_unit);
             other.subtract_helper(a, b);
             swap(other);
         } else {
@@ -131,7 +131,7 @@ public:
         } else {
             size_type res_digits = a.digits + b.digits;
             if (allocated < res_digits || this == &a || this == &b) {
-                natural_number other(res_digits, false);
+                natural_number other(res_digits, digit_unit);
                 other.multiply_helper(a, b);
                 swap(other);
             } else {
@@ -144,7 +144,7 @@ public:
         if (sizeof(unsigned long) <= sizeof(digit_type)) {
             size_type res_digits = a.digits + 1;
             if (allocated < res_digits) {
-                natural_number other(res_digits, false);
+                natural_number other(res_digits, digit_unit);
                 other.multiply_helper(a, b);
                 swap(other);
             } else {
@@ -163,10 +163,10 @@ public:
         } else if (&a == &b) {
             natural_number(1u).swap(*this);
         } else {
-            natural_number r(b.digits, false);  // work space only
+            natural_number r(b.digits, digit_unit);  // work space only
             size_type res_digits = a.digits - b.digits + 1;
             if (allocated < res_digits || this == &a || this == &b) {
-                natural_number other(res_digits, false);
+                natural_number other(res_digits, digit_unit);
                 quotrem_helper(other, r, a, b);
                 swap(other);
             } else {
@@ -175,18 +175,22 @@ public:
         }
     }
 
+    inline void divide(const natural_number& a, unsigned long b) {
+        quotrem(a, b);
+    }
+
     void modulus(const natural_number& a, const natural_number& b) {
         if (b.is_zero())
             throw std::overflow_error("division by zero");
         else if (a.digits < b.digits) {
             *this = a;
         } else if (&a == &b) {
-            *this = 0u;
+            *this = 0lu;
         } else {
-            natural_number q(a.digits - b.digits + 1, false);  // work space only
+            natural_number q(a.digits - b.digits + 1, digit_unit);  // work space only
             size_type res_digits = b.digits;
             if (allocated < res_digits || this == &a || this == &b) {
-                natural_number other(res_digits, false);
+                natural_number other(res_digits, digit_unit);
                 quotrem_helper(q, other, a, b);
                 swap(other);
             } else {
@@ -195,13 +199,21 @@ public:
         }        
     }
 
+    static unsigned long modulus(const natural_number& a, unsigned long b) {
+        natural_number q(a.digits, digit_unit);
+        return q.quotrem(a, b);
+    }
+    
     unsigned long quotrem(const natural_number& a, unsigned long b) {
         if (!b)
             throw std::overflow_error("division by zero");
-        else if (sizeof(unsigned long) <= sizeof(digit_type)) {
+        else if (a.is_zero()) {
+            natural_number().swap(*this);
+            return b;
+        } else if (sizeof(unsigned long) <= sizeof(digit_type)) {
             size_type res_digits = a.digits;
             if (allocated < res_digits) {
-                natural_number other(res_digits, false);
+                natural_number other(res_digits, digit_unit);
                 digit_type r = other.quotrem_helper(a, static_cast<digit_type>(b));
                 swap(other);
                 return static_cast<unsigned long>(r);
@@ -210,6 +222,12 @@ public:
         } else {
             throw std::runtime_error("not implemented yet");
         }
+    }
+    
+    int compare(const natural_number& a) const {
+        if (digits < a.digits) return -1;
+        if (digits > a.digits) return 1;
+        return LOWLEVEL::comp(digit_array, a.digit_array, digits);
     }
 
     std::string str(std::streamsize /*digits*/, std::ios_base::fmtflags f) const {
@@ -229,7 +247,11 @@ public:
 
 private:
 
-    natural_number(size_type min_size, bool) {
+    enum size_request {
+        digit_unit
+    };
+    
+    natural_number(size_type min_size, size_request) : digits(0) {
         assert(min_size >= 1);
         allocate(min_size);
     }

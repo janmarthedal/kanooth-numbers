@@ -109,6 +109,7 @@ public:
 
   template <typename T>
   static inline T quotrem_1(T* z1, const T* x1, std::size_t n, T y) {
+    assert(n != 0);
     assert(y != 0);
     T* z2 = z1 + n;
     unsigned s = nlz(y);
