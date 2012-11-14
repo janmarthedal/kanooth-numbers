@@ -199,9 +199,45 @@ public:
         }        
     }
 
-    static unsigned long modulus(const natural_number& a, unsigned long b) {
-        natural_number q(a.digits, digit_unit);
-        return q.quotrem(a, b);
+    unsigned long modulus(unsigned long b) const {
+        natural_number q(digits, digit_unit);
+        return q.quotrem(*this, b);
+    }
+    
+    static void quotrem(natural_number& q, natural_number& r, const natural_number& a, const natural_number& b) {
+        if (&q == &r)
+            throw std::invalid_argument("q must be different from r");
+        if (b.is_zero())
+            throw std::overflow_error("division by zero");
+        else if (a.digits < b.digits) {
+            q = 0lu;
+            r = a;
+        } else if (&a == &b) {
+            q = 1lu;
+            r = 0lu;
+        } else {
+            size_type q_res_digits = a.digits - b.digits + 1;
+            size_type r_res_digits = b.digits;
+            bool temp_q_needed = q.allocated < q_res_digits || &q == &a || &q == &b;
+            bool temp_r_needed = r.allocated < r_res_digits || &r == &a || &r == &b;
+            if (temp_q_needed) {
+                natural_number temp_q(q_res_digits, digit_unit);
+                if (temp_r_needed) {
+                    natural_number temp_r(r_res_digits, digit_unit);
+                    quotrem_helper(temp_q, temp_r, a, b);
+                    r.swap(temp_r);
+                } else {
+                    quotrem_helper(temp_q, r, a, b);
+                }
+                q.swap(temp_q);
+            } else if (temp_r_needed) {
+                natural_number temp_r(r_res_digits, digit_unit);
+                quotrem_helper(q, temp_r, a, b);
+                r.swap(temp_r);                
+            } else {
+                quotrem_helper(q, r, a, b);
+            }
+        }    
     }
     
     unsigned long quotrem(const natural_number& a, unsigned long b) {

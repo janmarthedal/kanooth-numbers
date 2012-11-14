@@ -107,12 +107,12 @@ public:
     }
     
     inline void modulus_truncate(const integer_base& a, unsigned long b) {
-        number = base_type::modulus(a.number, b);
+        number = a.number.modulus(b);
         positive = a.positive;
     }
     
     inline void modulus_truncate(const integer_base& a, signed long b) {
-        number = base_type::modulus(a.number, static_cast<unsigned long>(b >= 0 ? b : -b));
+        number = a.number.modulus(static_cast<unsigned long>(b >= 0 ? b : -b));
         positive = a.positive;
     }
     
