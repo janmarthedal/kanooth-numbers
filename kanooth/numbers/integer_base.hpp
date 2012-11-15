@@ -32,14 +32,22 @@ public:
     }
     
     integer_base& operator=(long v) {
-        integer_base(v).swap(*this);
+        number = static_cast<unsigned long>(v >= 0 ? v : -v);
+        positive = v >= 0;
         return *this;
     }
     
     integer_base& operator=(unsigned long v) {
-        integer_base(v).swap(*this);
+        number = v;
+        positive = true;
         return *this;
     }
+    
+    integer_base& operator=(const integer_base& other) {
+        number = other.number;
+        positive = other.positive;
+        return *this;
+    }    
     
     inline bool is_zero() const {
         return number.is_zero();

@@ -127,7 +127,7 @@ public:
 
     void multiply(const natural_number& a, const natural_number& b) {
         if (a.is_zero() || b.is_zero()) {
-            natural_number().swap(*this);
+            *this = 0lu;
         } else {
             size_type res_digits = a.digits + b.digits;
             if (allocated < res_digits || this == &a || this == &b) {
@@ -159,9 +159,9 @@ public:
         if (b.is_zero())
             throw std::overflow_error("division by zero");
         else if (a.digits < b.digits) {
-            natural_number().swap(*this);
+            *this = 0lu;
         } else if (&a == &b) {
-            natural_number(1u).swap(*this);
+            *this = 1lu;
         } else {
             natural_number r(b.digits, digit_unit);  // work space only
             size_type res_digits = a.digits - b.digits + 1;
@@ -313,11 +313,11 @@ private:
 
     void add_helper(const natural_number& a, const natural_number& b) {
         if (a.digits >= b.digits) {
-            LOWLEVEL::add(digit_array, a.digit_array, a.digits, b.digit_array, b.digits);
-            set_digits_1(a.digits + 1);
+            digit_type carry = LOWLEVEL::add(digit_array, a.digit_array, a.digits, b.digit_array, b.digits);
+            set_digits_carry(a.digits, carry);
         } else {
-            LOWLEVEL::add(digit_array, b.digit_array, b.digits, a.digit_array, a.digits);
-            set_digits_1(b.digits + 1);
+            digit_type carry = LOWLEVEL::add(digit_array, b.digit_array, b.digits, a.digit_array, a.digits);
+            set_digits_carry(b.digits, carry);
         }
     }
     
