@@ -8,7 +8,7 @@ template <typename N>
 class integer_base {
     
     typedef N base_type;
-    
+
 public:
     
     integer_base() {}
@@ -145,7 +145,7 @@ public:
         number.swap(other.number);
         std::swap(positive, other.positive);
     }
-    
+
 private:
     
     inline int sign() const {

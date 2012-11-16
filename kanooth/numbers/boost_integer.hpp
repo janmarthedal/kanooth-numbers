@@ -128,70 +128,39 @@ inline void eval_modulus(kanooth_integer& r, const kanooth_integer& a, unsigned 
 inline void eval_modulus(kanooth_integer& r, const kanooth_integer& a, signed long b)
 { r.data().modulus_truncate(a.data(), b); }
 
-
-/*
-inline void eval_divide(kanooth_integer& t, const kanooth_integer& o)
-{
-    if (eval_is_zero(o))
-        BOOST_THROW_EXCEPTION(std::overflow_error("Division by zero."));
-    t.data().divide(o.data());
-}
-inline void eval_modulus(kanooth_integer& t, const kanooth_integer& o)
-{
-    t.data().modulus(o.data());
-}
-inline void eval_divide(kanooth_integer& t, const kanooth_integer& p, const kanooth_integer& o)
-{
-   if(eval_is_zero(o))
-      BOOST_THROW_EXCEPTION(std::overflow_error("Division by zero."));
-   t.data().divide(p.data(), o.data());
-}
-inline void eval_modulus(kanooth_integer& t, const kanooth_integer& p, const kanooth_integer& o)
-{
-   t.data().modulus(p.data(), o.data());
-}
-*/
-
 inline bool eval_eq(const kanooth_integer& a, const kanooth_integer& b)
-{
-   return a.data().compare(b.data()) == 0;
-}
+{ return a.data().compare(b.data()) == 0; }
+
 template <class T>
 inline typename enable_if<mpl::contains<kanooth_integer::native_types, T>, bool>::type
 eval_eq(const kanooth_integer& a, T b)
-{
-   return a.data().compare(b) == 0;
-}
+{ return a.data().compare(b) == 0; }
 
 inline bool eval_lt(const kanooth_integer& a, const kanooth_integer& b)
-{
-   return a.data().compare(b.data()) < 0;
-}
+{ return a.data().compare(b.data()) < 0; }
+
 template <class T>
 inline typename enable_if<mpl::contains<kanooth_integer::native_types, T>, bool>::type
 eval_lt(const kanooth_integer& a, T b)
-{
-   return a.data().compare(b) < 0;
-}
+{ return a.data().compare(b) < 0; }
 
 inline bool eval_gt(const kanooth_integer& a, const kanooth_integer& b)
-{
-   return a.data().compare(b.data()) > 0;
-}
+{ return a.data().compare(b.data()) > 0; }
 template <class T>
 inline typename enable_if<mpl::contains<kanooth_integer::native_types, T>, bool>::type
 eval_gt(const kanooth_integer& a, T b)
-{
-   return a.data().compare(b) > 0;
-}
+{ return a.data().compare(b) > 0; }
 
+} // namespace backends
+} // namespace multiprecision
+} // namespace boost
 
-} //namespace backends
+namespace kanooth {
+namespace numbers {
 
-typedef number<backends::kanooth_integer> boost_integer;
+typedef boost::multiprecision::number<boost::multiprecision::backends::kanooth_integer> boost_integer;
 
-}  // namespace multiprecision
-}  // namespace boost
-
+} // namespace numbers
+} // namespace kanooth
 
 #endif
