@@ -20,7 +20,6 @@ namespace kanooth {
 namespace numbers {
 namespace lowlevel {
 
-template <typename A = std::allocator<void> >
 class generic {
 public:
 
@@ -108,85 +107,54 @@ public:
   }
 
   template <typename T>
-  static inline T quotrem_1(T* z1, const T* x1, std::size_t n, T y) {
+  static inline T quotrem_1(T* z1, T top_digit, const T* x1, std::size_t n, T y) {
     assert(n != 0);
     assert(y != 0);
+    assert(y & (T(1) << (kanooth::number_bits<T>::value - 1)));  // nlz(y) == 0
     T* z2 = z1 + n;
-    unsigned s = nlz(y);
-    if (s) {
-      T r = lshift(z1, x1, n, s);
-      y <<= s;
-      while (z2-- != z1)
-        double_div_normalized(r, *z2, y, *z2, r);
-      return r >> s;
-    } else {
-      const T* x2 = x1 + n;
-      T r = 0;
-      while (x2 != x1)
-        double_div_normalized(r, *--x2, y, *--z2, r);
-      return r;
-    }
+    const T* x2 = x1 + n;
+    T r = top_digit;
+    while (x2 != x1)
+      double_div_normalized(r, *--x2, y, *--z2, r);
+    return r;
   }
 
+  // u1[un..0] divided by v1[vn-1..0]
+  // on exit: quotient in q1, remainder in u1
   template <typename T>
-  static void quotrem(T* q1, T* r1, const T* u1, const std::size_t un,
+  static void quotrem(T* q1, T* u1, const std::size_t un,
                       const T* v1, const std::size_t vn) {
     assert(vn >= 1);
     assert(un >= vn);
-    assert(v1[vn-1] != 0);
-    assert(q1+un-vn+1 <= r1 || q1 >= r1+vn);
-    assert(q1+un-vn+1 <= u1 || q1 >= u1+un);
+    assert(v1[vn-1] & (T(1) << (kanooth::number_bits<T>::value - 1)));
+    assert(u1[un] < v1[vn-1]);  // note: u1[un] must be well-defined
+    assert(q1+un-vn+1 <= u1 || q1 >= u1+un+1);
     assert(q1+un-vn+1 <= v1 || q1 >= v1+vn);
-    assert(r1+vn <= u1 || r1 >= u1+un);
-    assert(r1+vn <= v1 || r1 >= v1+vn);
+    assert(u1+un+1 <= v1 || u1 >= v1+vn);
     if (vn == 1)
-      r1[0] = quotrem_1(q1, u1, un, v1[0]);
+      u1[0] = quotrem_1(q1, u1[un], u1, un, v1[0]);
     else {  // vn >= 2
-      typename A::template rebind<T>::other alloc;
-      T* t1 = alloc.allocate(un+1);
-      T* w1alloc;
-      const T* w1;
-      unsigned shift = nlz(v1[vn-1]);
-      // normalize
-      if (shift) {
-        w1alloc = alloc.allocate(vn);
-        t1[un] = lshift(t1, u1, un, shift);
-        lshift(w1alloc, v1, vn, shift);
-        w1 = w1alloc;
-      } else {
-        std::copy(u1, u1+un, t1);
-        t1[un] = 0;
-        w1 = v1;
-      }
-      T wn1 = w1[vn-1], wn2 = w1[vn-2];
+      T wn1 = v1[vn-1], wn2 = v1[vn-2];
       T tjn, qh, k;
 
       for (int j=un-vn; j >= 0; --j) {
-        tjn = t1[j+vn];
-        qh = calc_qh(tjn, t1[j+vn-1], t1[j+vn-2], wn1, wn2);
-        k = sequence_mult_digit_sub(t1+j, t1+j+vn, w1, qh);
-        t1[j+vn] = tjn - k;
+        tjn = u1[j+vn];
+        qh = calc_qh(tjn, u1[j+vn-1], u1[j+vn-2], wn1, wn2);
+        k = sequence_mult_digit_sub(u1+j, u1+j+vn, v1, qh);
+        u1[j+vn] = tjn - k;
         if (k > tjn) {   // qh too big?
-          t1[j+vn] += add_n(t1+j, t1+j, w1, vn);
+          u1[j+vn] += add_n(u1+j, u1+j, v1, vn);
           --qh;
         }
         q1[j] = qh;
       }
-
-      // denormalize
-      if (shift) {
-        alloc.deallocate(w1alloc, vn);
-        rshift(r1, t1, vn, shift);
-      } else
-        std::copy(t1, t1+vn, r1);
-      alloc.deallocate(t1, un+1);
     }
   }
 
   template <typename T>
   static T lshift(T* z1, const T* x1, const std::size_t n, const unsigned count) {
     assert(n != 0);
-    assert(z1 >= x1);
+    assert(z1+n <= x1 || z1 >= x1);
     assert(count >= 1);
     assert(count < kanooth::number_bits<T>::value);
     const unsigned int rcount = kanooth::number_bits<T>::value - count;
@@ -206,7 +174,7 @@ public:
   template <typename T>
   static T rshift(T* z1, const T* x1, std::size_t n, unsigned count) {
     assert(n != 0);
-    assert(z1 <= x1);
+    assert(z1 <= x1 || z1 >= x1+n);
     assert(count >= 1);
     assert(count < kanooth::number_bits<T>::value);
     const unsigned int rcount = kanooth::number_bits<T>::value - count;
@@ -382,19 +350,6 @@ private:
     *wlast++ = multiply_sequence_with_digit(ufirst, ulast, wfirst++, *vfirst++);
     while (vfirst != vlast)
       *wlast++ = multiply_add_sequence_with_digit(ufirst, ulast, wfirst++, *vfirst++);
-  }
-
-  template <typename T>
-  static unsigned nlz(T v)
-  {
-    const unsigned int digitbits = kanooth::number_bits<T>::value;
-    const T mask = ((T) 1) << (digitbits - 1);
-    unsigned s = 0;
-    while (!(v & mask)) {
-      v <<= 1;
-      ++s;
-    }
-    return s;
   }
 
   template <typename T>

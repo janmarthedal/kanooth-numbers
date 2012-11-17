@@ -12,8 +12,23 @@
 
 namespace kanooth {
 namespace numbers {
+
+// TODO move to own file
+template <typename T>
+unsigned nlz(T v)
+{
+    const unsigned int digitbits = kanooth::number_bits<T>::value;
+    const T mask = ((T) 1) << (digitbits - 1);
+    unsigned s = 0;
+    while (!(v & mask)) {
+        v <<= 1;
+        ++s;
+    }
+    return s;
+}
+
         
-template <typename T = unsigned long, typename Allocator = std::allocator<T>, typename LowLevel = lowlevel::generic<Allocator> >
+template <typename T = unsigned long, typename LowLevel = lowlevel::generic, typename Allocator = std::allocator<T> >
 class natural_number : private Allocator::template rebind<T>::other {
 
     typedef typename Allocator::template rebind<T>::other allocator_type;
@@ -41,7 +56,7 @@ public:
         if (other.digits) {
             allocate(other.digits);
             digits = other.digits;
-            std::copy(other.digit_array, other.digit_array + other.digits, digit_array);
+            LowLevel::copy_forward(digit_array, other.digit_array, other.digits);
         } else {
             digits = allocated = 0;
             digit_array = 0;
@@ -190,23 +205,8 @@ public:
     }
 
     void divide(const natural_number& a, const natural_number& b) {
-        if (b.is_zero())
-            throw std::overflow_error("division by zero");
-        else if (a.digits < b.digits) {
-            *this = 0lu;
-        } else if (&a == &b) {
-            *this = 1lu;
-        } else {
-            natural_number r(b.digits, digit_unit);  // work space only
-            size_type res_digits = a.digits - b.digits + 1;
-            if (allocated < res_digits || this == &a || this == &b) {
-                natural_number other(res_digits, digit_unit);
-                quotrem_number(other, r, a, b);
-                swap(other);
-            } else {
-                quotrem_number(*this, r, a, b);
-            }
-        }
+        natural_number r(a.digits + 1);
+        quotrem(*this, r, a, b);
     }
 
     inline void divide(const natural_number& a, unsigned long b) {
@@ -214,23 +214,8 @@ public:
     }
 
     void modulus(const natural_number& a, const natural_number& b) {
-        if (b.is_zero())
-            throw std::overflow_error("division by zero");
-        else if (a.digits < b.digits) {
-            *this = a;
-        } else if (&a == &b) {
-            *this = 0lu;
-        } else {
-            natural_number q(a.digits - b.digits + 1, digit_unit);  // work space only
-            size_type res_digits = b.digits;
-            if (allocated < res_digits || this == &a || this == &b) {
-                natural_number other(res_digits, digit_unit);
-                quotrem_number(q, other, a, b);
-                swap(other);
-            } else {
-                quotrem_number(q, *this, a, b);
-            }
-        }        
+        natural_number q(a.digits - b.digits + 1);
+        quotrem(q, *this, a, b);
     }
 
     unsigned long modulus(unsigned long b) const {
@@ -246,30 +231,66 @@ public:
         else if (a.digits < b.digits) {
             q = 0lu;
             r = a;
-        } else if (&a == &b) {
+        } else if (&a == &b) {  // necessary?
             q = 1lu;
             r = 0lu;
         } else {
+            unsigned shift = nlz(b.digit_array[b.digits-1]);
             size_type q_res_digits = a.digits - b.digits + 1;
-            size_type r_res_digits = b.digits;
-            bool temp_q_needed = q.allocated < q_res_digits || &q == &a || &q == &b;
-            bool temp_r_needed = r.allocated < r_res_digits || &r == &a || &r == &b;
-            if (temp_q_needed) {
-                natural_number temp_q(q_res_digits, digit_unit);
-                if (temp_r_needed) {
-                    natural_number temp_r(r_res_digits, digit_unit);
-                    quotrem_number(temp_q, temp_r, a, b);
-                    r.swap(temp_r);
+            size_type r_res_digits = a.digits + 1;  // note: auxilliary digit
+            if (r.allocated >= r_res_digits && (&r != &b || shift != 0)) {
+                r.digits = a.digits;
+                if (shift) {
+                    natural_number denom(b.digits, digit_unit);
+                    r.digit_array[a.digits] = LowLevel::lshift(r.digit_array, a.digit_array, a.digits, shift);
+                    LowLevel::lshift(denom.digit_array, b.digit_array, b.digits, shift);
+                    denom.digits = b.digits;
+                    if (q.allocated < q_res_digits) {
+                        natural_number quot(q_res_digits, digit_unit);
+                        quotrem_number(quot, r, denom, shift);
+                        quot.swap(q);
+                    } else {
+                        quotrem_number(q, r, denom, shift);
+                    }
                 } else {
-                    quotrem_number(temp_q, r, a, b);
+                    // if &r == &a no copying will be done
+                    LowLevel::copy_forward(r.digit_array, a.digit_array, a.digits);
+                    r.digit_array[a.digits] = 0;
+                    if (q.allocated < q_res_digits || &q == &b) {
+                        natural_number quot(q_res_digits, digit_unit);
+                        quotrem_number(quot, r, b, 0);
+                        quot.swap(q);
+                    } else {
+                        quotrem_number(q, r, b, 0);
+                    }
                 }
-                q.swap(temp_q);
-            } else if (temp_r_needed) {
-                natural_number temp_r(r_res_digits, digit_unit);
-                quotrem_number(q, temp_r, a, b);
-                r.swap(temp_r);                
             } else {
-                quotrem_number(q, r, a, b);
+                natural_number num(r_res_digits, digit_unit);
+                num.digits = a.digits;
+                if (shift) {
+                    natural_number denom(b.digits, digit_unit);
+                    num.digit_array[a.digits] = LowLevel::lshift(num.digit_array, a.digit_array, a.digits, shift);
+                    LowLevel::lshift(denom.digit_array, b.digit_array, b.digits, shift);
+                    denom.digits = b.digits;
+                    if (q.allocated < q_res_digits) {
+                        natural_number quot(q_res_digits, digit_unit);
+                        quotrem_number(quot, num, denom, shift);
+                        quot.swap(q);
+                    } else {
+                        quotrem_number(q, num, denom, shift);
+                    }
+                } else {
+                    LowLevel::copy_forward(num.digit_array, a.digit_array, a.digits);
+                    num.digit_array[a.digits] = 0;
+                    if (q.allocated < q_res_digits || &q == &b) {
+                        natural_number quot(q_res_digits, digit_unit);
+                        quotrem_number(quot, num, b, 0);
+                        quot.swap(q);
+                    } else {
+                        quotrem_number(q, num, b, 0);
+                    }                
+                }
+                num.swap(r);
             }
         }    
     }
@@ -282,13 +303,29 @@ public:
             return b;
         } else if (sizeof(unsigned long) <= sizeof(digit_type)) {
             size_type res_digits = a.digits;
-            if (allocated < res_digits) {
-                natural_number other(res_digits, digit_unit);
-                digit_type r = other.quotrem_digit(a, static_cast<digit_type>(b));
-                swap(other);
-                return static_cast<unsigned long>(r);
-            } else
-                return quotrem_digit(a, b);
+            digit_type denom = b, remainder;
+            unsigned shift = nlz(denom);
+            if (shift) {
+                denom <<= shift;
+                natural_number num(a.digits, digit_unit);
+                digit_type top_digit = LowLevel::lshift(num.digit_array, a.digit_array, a.digits, shift);
+                num.digits = a.digits;
+                if (allocated < res_digits) {
+                    natural_number tmp_q(res_digits, digit_unit);
+                    remainder = tmp_q.quotrem_digit(top_digit, num, denom);
+                    swap(tmp_q);
+                } else
+                    remainder = quotrem_digit(top_digit, num, denom);
+                remainder >>= shift;
+            } else {
+                if (allocated < res_digits) {
+                    natural_number tmp_q(res_digits, digit_unit);
+                    remainder = tmp_q.quotrem_digit(0, a, denom);
+                    swap(tmp_q);
+                } else
+                    remainder = quotrem_digit(0, a, denom);
+            }
+            return remainder;
         } else {
             throw std::runtime_error("not implemented yet");
         }
@@ -384,14 +421,16 @@ private:
         set_digits_carry(a.digits, carry);
     }
     
-    static void quotrem_number(natural_number& q, natural_number& r, const natural_number& a, const natural_number& b) {
-        LowLevel::quotrem(q.digit_array, r.digit_array, a.digit_array, a.digits, b.digit_array, b.digits);
-        q.set_digits_1(a.digits - b.digits + 1);
-        r.set_digits_n(b.digits);
+    static void quotrem_number(natural_number& q, natural_number& num, const natural_number& denom, unsigned shift) {
+        LowLevel::quotrem(q.digit_array, num.digit_array, num.digits, denom.digit_array, denom.digits);
+        q.set_digits_1(num.digits - denom.digits + 1);
+        if (shift)
+            LowLevel::rshift(num.digit_array, num.digit_array, denom.digits, shift);
+        num.set_digits_n(denom.digits);  // num is now the remainder
     }
     
-    digit_type quotrem_digit(const natural_number& a, digit_type b) {
-        T r = LowLevel::quotrem_1(digit_array, a.digit_array, a.digits, b);
+    digit_type quotrem_digit(digit_type top_digit, const natural_number& a, digit_type b) {
+        T r = LowLevel::quotrem_1(digit_array, top_digit, a.digit_array, a.digits, b);
         set_digits_1(a.digits);
         return r;
     }
