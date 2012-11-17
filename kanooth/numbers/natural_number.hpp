@@ -236,61 +236,13 @@ public:
             r = 0lu;
         } else {
             unsigned shift = nlz(b.digit_array[b.digits-1]);
-            size_type q_res_digits = a.digits - b.digits + 1;
             size_type r_res_digits = a.digits + 1;  // note: auxilliary digit
             if (r.allocated >= r_res_digits && (&r != &b || shift != 0)) {
-                r.digits = a.digits;
-                if (shift) {
-                    natural_number denom(b.digits, digit_unit);
-                    r.digit_array[a.digits] = LowLevel::lshift(r.digit_array, a.digit_array, a.digits, shift);
-                    LowLevel::lshift(denom.digit_array, b.digit_array, b.digits, shift);
-                    denom.digits = b.digits;
-                    if (q.allocated < q_res_digits) {
-                        natural_number quot(q_res_digits, digit_unit);
-                        quotrem_number(quot, r, denom, shift);
-                        quot.swap(q);
-                    } else {
-                        quotrem_number(q, r, denom, shift);
-                    }
-                } else {
-                    // if &r == &a no copying will be done
-                    LowLevel::copy_forward(r.digit_array, a.digit_array, a.digits);
-                    r.digit_array[a.digits] = 0;
-                    if (q.allocated < q_res_digits || &q == &b) {
-                        natural_number quot(q_res_digits, digit_unit);
-                        quotrem_number(quot, r, b, 0);
-                        quot.swap(q);
-                    } else {
-                        quotrem_number(q, r, b, 0);
-                    }
-                }
+                quotrem_number_step1(q, r, a, b, shift);
             } else {
-                natural_number num(r_res_digits, digit_unit);
-                num.digits = a.digits;
-                if (shift) {
-                    natural_number denom(b.digits, digit_unit);
-                    num.digit_array[a.digits] = LowLevel::lshift(num.digit_array, a.digit_array, a.digits, shift);
-                    LowLevel::lshift(denom.digit_array, b.digit_array, b.digits, shift);
-                    denom.digits = b.digits;
-                    if (q.allocated < q_res_digits) {
-                        natural_number quot(q_res_digits, digit_unit);
-                        quotrem_number(quot, num, denom, shift);
-                        quot.swap(q);
-                    } else {
-                        quotrem_number(q, num, denom, shift);
-                    }
-                } else {
-                    LowLevel::copy_forward(num.digit_array, a.digit_array, a.digits);
-                    num.digit_array[a.digits] = 0;
-                    if (q.allocated < q_res_digits || &q == &b) {
-                        natural_number quot(q_res_digits, digit_unit);
-                        quotrem_number(quot, num, b, 0);
-                        quot.swap(q);
-                    } else {
-                        quotrem_number(q, num, b, 0);
-                    }                
-                }
-                num.swap(r);
+                natural_number rem(r_res_digits, digit_unit);
+                quotrem_number_step1(q, rem, a, b, shift);
+                rem.swap(r);
             }
         }    
     }
@@ -421,7 +373,37 @@ private:
         set_digits_carry(a.digits, carry);
     }
     
-    static void quotrem_number(natural_number& q, natural_number& num, const natural_number& denom, unsigned shift) {
+    static void quotrem_number_step1(natural_number& q, natural_number& rem, const natural_number& a, const natural_number& b, unsigned shift) {
+        assert(rem.allocated >= a.digits + 1);
+        assert(&rem != &b || shift != 0);  // if &rem == &b but shift != 0 then a temporary instead of b will be used as denominator
+        rem.digits = a.digits;
+        if (shift) {
+            natural_number denom(b.digits, digit_unit);
+            rem.digit_array[a.digits] = LowLevel::lshift(rem.digit_array, a.digit_array, a.digits, shift);
+            LowLevel::lshift(denom.digit_array, b.digit_array, b.digits, shift);
+            denom.digits = b.digits;
+            quotrem_number_step2(q, rem, denom, shift);
+        } else {
+            LowLevel::copy_forward(rem.digit_array, a.digit_array, a.digits);
+            rem.digit_array[a.digits] = 0;
+            quotrem_number_step2(q, rem, b, 0);
+        }
+    }
+
+    static void quotrem_number_step2(natural_number& quot, natural_number& num, const natural_number& denom, unsigned shift) {
+        assert(denom.digit_array[denom.digits-1] & (digit_type(1) << (kanooth::number_bits<digit_type>::value - 1)));  // denominator normalized
+        assert(&num != &denom);
+        size_type q_res_digits = num.digits - denom.digits + 1;
+        if (quot.allocated < q_res_digits || &quot == &denom) {
+            natural_number tmp_quot(q_res_digits, digit_unit);
+            quotrem_number_step3(tmp_quot, num, denom, shift);
+            tmp_quot.swap(quot);
+        } else {
+            quotrem_number_step3(quot, num, denom, shift);
+        }
+    }
+
+    static void quotrem_number_step3(natural_number& q, natural_number& num, const natural_number& denom, unsigned shift) {
         LowLevel::quotrem(q.digit_array, num.digit_array, num.digits, denom.digit_array, denom.digits);
         q.set_digits_1(num.digits - denom.digits + 1);
         if (shift)
