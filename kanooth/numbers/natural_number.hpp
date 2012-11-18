@@ -262,7 +262,6 @@ public:
                 num.digits = a.digits;
                 digit_type top_digit = LowLevel::lshift(num.digit_array, a.digit_array, a.digits, shift);
                 remainder = quotrem_digit_step1(top_digit, num, denom);
-                swap(num);
                 remainder >>= shift;
             } else {
                 remainder = quotrem_digit_step1(0, a, denom);
@@ -402,21 +401,22 @@ private:
         num.set_digits_n(denom.digits);  // num is now the remainder
     }
     
-    digit_type quotrem_digit_step1(digit_type top_digit, const natural_number& num, digit_type b) {
-        assert(b & (digit_type(1) << (kanooth::number_bits<digit_type>::value - 1)));  // denominator normalized
+    digit_type quotrem_digit_step1(digit_type top_digit, const natural_number& num, digit_type denom) {
+        assert(denom & (digit_type(1) << (kanooth::number_bits<digit_type>::value - 1)));  // denominator normalized
         size_type res_digits = num.digits;
         if (allocated < res_digits) {
             natural_number quot(res_digits, digit_unit);
-            remainder = quot.quotrem_digit_step2(top_digit, num, denom);
+            digit_type remainder = quot.quotrem_digit_step2(top_digit, num, denom);
             swap(quot);
+            return remainder;
         } else
-            remainder = quotrem_digit_step2(top_digit, num, denom);
+            return quotrem_digit_step2(top_digit, num, denom);
     }
 
-    digit_type quotrem_digit_step2(digit_type top_digit, const natural_number& num, digit_type b) {
-        T r = LowLevel::quotrem_1(digit_array, top_digit, num.digit_array, num.digits, b);
+    digit_type quotrem_digit_step2(digit_type top_digit, const natural_number& num, digit_type denom) {
+        T remainder = LowLevel::quotrem_1(digit_array, top_digit, num.digit_array, num.digits, denom);
         set_digits_1(num.digits);
-        return r;
+        return remainder;
     }
     
     void allocate(size_type size) {
