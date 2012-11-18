@@ -236,7 +236,7 @@ public:
             r = 0lu;
         } else {
             unsigned shift = nlz(b.digit_array[b.digits-1]);
-            size_type r_res_digits = a.digits + 1;  // note: auxilliary digit
+            size_type r_res_digits = a.digits + 1;  // note: auxiliary digit
             if (r.allocated >= r_res_digits && (&r != &b || shift != 0)) {
                 quotrem_number_step1(q, r, a, b, shift);
             } else {
@@ -254,28 +254,18 @@ public:
             *this = 0lu;
             return b;
         } else if (sizeof(unsigned long) <= sizeof(digit_type)) {
-            size_type res_digits = a.digits;
             digit_type denom = b, remainder;
             unsigned shift = nlz(denom);
             if (shift) {
                 denom <<= shift;
                 natural_number num(a.digits, digit_unit);
-                digit_type top_digit = LowLevel::lshift(num.digit_array, a.digit_array, a.digits, shift);
                 num.digits = a.digits;
-                if (allocated < res_digits) {
-                    natural_number tmp_q(res_digits, digit_unit);
-                    remainder = tmp_q.quotrem_digit(top_digit, num, denom);
-                    swap(tmp_q);
-                } else
-                    remainder = quotrem_digit(top_digit, num, denom);
+                digit_type top_digit = LowLevel::lshift(num.digit_array, a.digit_array, a.digits, shift);
+                remainder = quotrem_digit_step1(top_digit, num, denom);
+                swap(num);
                 remainder >>= shift;
             } else {
-                if (allocated < res_digits) {
-                    natural_number tmp_q(res_digits, digit_unit);
-                    remainder = tmp_q.quotrem_digit(0, a, denom);
-                    swap(tmp_q);
-                } else
-                    remainder = quotrem_digit(0, a, denom);
+                remainder = quotrem_digit_step1(0, a, denom);
             }
             return remainder;
         } else {
@@ -375,7 +365,7 @@ private:
     
     static void quotrem_number_step1(natural_number& q, natural_number& rem, const natural_number& a, const natural_number& b, unsigned shift) {
         assert(rem.allocated >= a.digits + 1);
-        assert(&rem != &b || shift != 0);  // if &rem == &b but shift != 0 then a temporary instead of b will be used as denominator
+        assert(&rem != &b || shift != 0);  // &rem == &b is ok when shift != 0 since a temporary instead of b will be used as denominator
         rem.digits = a.digits;
         if (shift) {
             natural_number denom(b.digits, digit_unit);
@@ -384,6 +374,7 @@ private:
             denom.digits = b.digits;
             quotrem_number_step2(q, rem, denom, shift);
         } else {
+            // the following will then do nothing if &rem == &a
             LowLevel::copy_forward(rem.digit_array, a.digit_array, a.digits);
             rem.digit_array[a.digits] = 0;
             quotrem_number_step2(q, rem, b, 0);
@@ -411,9 +402,20 @@ private:
         num.set_digits_n(denom.digits);  // num is now the remainder
     }
     
-    digit_type quotrem_digit(digit_type top_digit, const natural_number& a, digit_type b) {
-        T r = LowLevel::quotrem_1(digit_array, top_digit, a.digit_array, a.digits, b);
-        set_digits_1(a.digits);
+    digit_type quotrem_digit_step1(digit_type top_digit, const natural_number& num, digit_type b) {
+        assert(b & (digit_type(1) << (kanooth::number_bits<digit_type>::value - 1)));  // denominator normalized
+        size_type res_digits = num.digits;
+        if (allocated < res_digits) {
+            natural_number quot(res_digits, digit_unit);
+            remainder = quot.quotrem_digit_step2(top_digit, num, denom);
+            swap(quot);
+        } else
+            remainder = quotrem_digit_step2(top_digit, num, denom);
+    }
+
+    digit_type quotrem_digit_step2(digit_type top_digit, const natural_number& num, digit_type b) {
+        T r = LowLevel::quotrem_1(digit_array, top_digit, num.digit_array, num.digits, b);
+        set_digits_1(num.digits);
         return r;
     }
     
