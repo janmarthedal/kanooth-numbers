@@ -10,6 +10,9 @@ class integer_base {
     typedef N base_type;
 
 public:
+
+    integer_base& data() { return *this; }
+    const integer_base& data() const { return *this; }
     
     integer_base() {}
 
