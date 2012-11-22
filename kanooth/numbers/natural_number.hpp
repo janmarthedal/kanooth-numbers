@@ -27,7 +27,8 @@ unsigned nlz(T v)
     return s;
 }
 
-        
+
+
 template <typename T = unsigned long, typename LowLevel = lowlevel::generic, typename Allocator = std::allocator<T> >
 class natural_number : private Allocator::template rebind<T>::other {
 
@@ -35,6 +36,7 @@ class natural_number : private Allocator::template rebind<T>::other {
     typedef typename allocator_type::value_type digit_type;
     typedef typename allocator_type::pointer digit_ptr;
     typedef typename allocator_type::size_type size_type;
+    static const unsigned digit_bits = kanooth::number_bits<digit_type>::value;
 
 public:
 
@@ -52,7 +54,6 @@ public:
     }
 
     natural_number(const natural_number& other) {
-        if (this == &other) return;
         if (other.digits) {
             allocate(other.digits);
             digits = other.digits;
@@ -272,6 +273,84 @@ public:
         }
     }
     
+    void bitwise_and(const natural_number& a, const natural_number& b) {
+        size_type res_digits = std::min(a.digits, b.digits);
+        if (allocated < res_digits) {
+            natural_number tmp(res_digits, digit_unit);
+            tmp.bitwise_and_helper(a, b);
+            swap(tmp);
+        } else {
+            bitwise_and_helper(a, b);
+        }
+    }
+
+    void bitwise_or(const natural_number& a, const natural_number& b) {
+        size_type res_digits = std::max(a.digits, b.digits);
+        if (allocated < res_digits) {
+            natural_number tmp(res_digits, digit_unit);
+            tmp.bitwise_or_step1(a, b);
+            swap(tmp);
+        } else {
+            bitwise_or_step1(a, b);
+        }
+    }
+
+    void bitwise_xor(const natural_number& a, const natural_number& b) {
+        size_type res_digits = std::max(a.digits, b.digits);
+        if (allocated < res_digits) {
+            natural_number tmp(res_digits, digit_unit);
+            tmp.bitwise_xor_step1(a, b);
+            swap(tmp);
+        } else {
+            bitwise_xor_step1(a, b);
+        }
+    }
+
+    void bitwise_and_not(const natural_number& a, const natural_number& b) {
+        size_type res_digits = a.digits;
+        if (allocated < res_digits) {
+            natural_number tmp(res_digits, digit_unit);
+            tmp.bitwise_and_not_helper(a, b);
+            swap(tmp);
+        } else {
+            bitwise_and_not_helper(a, b);
+        }
+    }
+
+    void left_shift(const natural_number& a, unsigned long count) {
+        if (a.is_zero())
+            *this = 0ul;
+        else if (!count)
+            *this = a;
+        else {
+            size_type res_digits = a.digits + count/digit_bits + 1;
+            if (allocated < res_digits) {
+                natural_number tmp(res_digits, digit_unit);
+                tmp.left_shift_helper(a, count);
+                swap(tmp);
+            } else {
+                left_shift_helper(a, count);
+            }
+        }
+    }
+
+    void right_shift(const natural_number& a, unsigned long count) {
+        if (a.is_zero() || count >= a.digits*digit_bits)
+            *this = 0ul;
+        else if (!count)
+            *this = a;
+        else {
+            size_type res_digits = a.digits - count/digit_bits;
+            if (allocated < res_digits) {
+                natural_number tmp(res_digits, digit_unit);
+                tmp.right_shift_helper(a, count);
+                swap(tmp);
+            } else {
+                right_shift_helper(a, count);
+            }
+        }
+    }
+
     int compare(const natural_number& a) const {
         if (digits < a.digits) return -1;
         if (digits > a.digits) return 1;
@@ -281,7 +360,7 @@ public:
     std::string str(std::streamsize /*digits*/, std::ios_base::fmtflags f) const {
         if (is_zero())
             return "0";
-        unsigned max_decimals = (digits * kanooth::number_bits<digit_type>::value) / 3 + 1;
+        unsigned max_decimals = (digits * digit_bits) / 3 + 1;
         char chars[max_decimals];
         char *end = chars + max_decimals;
         char *begin = end;
@@ -381,7 +460,7 @@ private:
     }
 
     static void quotrem_number_step2(natural_number& quot, natural_number& num, const natural_number& denom, unsigned shift) {
-        assert(denom.digit_array[denom.digits-1] & (digit_type(1) << (kanooth::number_bits<digit_type>::value - 1)));  // denominator normalized
+        assert(denom.digit_array[denom.digits-1] & (digit_type(1) << (digit_bits - 1)));  // denominator normalized
         assert(&num != &denom);
         size_type q_res_digits = num.digits - denom.digits + 1;
         if (quot.allocated < q_res_digits || &quot == &denom) {
@@ -402,7 +481,7 @@ private:
     }
     
     digit_type quotrem_digit_step1(digit_type top_digit, const natural_number& num, digit_type denom) {
-        assert(denom & (digit_type(1) << (kanooth::number_bits<digit_type>::value - 1)));  // denominator normalized
+        assert(denom & (digit_type(1) << (digit_bits - 1)));  // denominator normalized
         size_type res_digits = num.digits;
         if (allocated < res_digits) {
             natural_number quot(res_digits, digit_unit);
@@ -417,6 +496,76 @@ private:
         T remainder = LowLevel::quotrem_1(digit_array, top_digit, num.digit_array, num.digits, denom);
         set_digits_1(num.digits);
         return remainder;
+    }
+    
+    void bitwise_and_helper(const natural_number& a, const natural_number& b) {
+        size_type res_digits = std::min(a.digits, b.digits);        
+        LowLevel::bitwise_and(digit_array, a.digit_array, b.digit_array, res_digits);
+        set_digits_n(res_digits);
+    }
+    
+    void bitwise_or_step2(const natural_number& a, const natural_number& b) {
+        assert(a.digits >= b.digits);
+        LowLevel::bitwise_or(digit_array, a.digit_array, b.digit_array, b.digits);
+        LowLevel::copy_forward(digit_array + b.digits, a.digit_array + b.digits, a.digits - b.digits);
+        digits = a.digits;
+    }
+    
+    void bitwise_or_step1(const natural_number& a, const natural_number& b) {
+        if (a.digits >= b.digits)
+            bitwise_or_step2(a, b);
+        else
+            bitwise_or_step2(b, a);
+    }
+    
+    void bitwise_xor_step2(const natural_number& a, const natural_number& b) {
+        assert(a.digits >= b.digits);
+        LowLevel::bitwise_xor(digit_array, a.digit_array, b.digit_array, b.digits);
+        LowLevel::copy_forward(digit_array + b.digits, a.digit_array + b.digits, a.digits - b.digits);
+        digits = a.digits;
+    }
+    
+    void bitwise_xor_step1(const natural_number& a, const natural_number& b) {
+        if (a.digits >= b.digits)
+            bitwise_xor_step2(a, b);
+        else
+            bitwise_xor_step2(b, a);
+    }
+    
+    void bitwise_and_not_helper(const natural_number& a, const natural_number& b) {
+        if (a.digits <= b.digits) {
+            LowLevel::bitwise_and_not(digit_array, a.digit_array, b.digit_array, a.digits);
+        } else {
+            LowLevel::bitwise_and_not(digit_array, a.digit_array, b.digit_array, b.digits);
+            LowLevel::copy_forward(digit_array + b.digits, a.digit_array + b.digits, a.digits - b.digits);
+        }
+        set_digits_n(a.digits);
+    }
+    
+    void left_shift_helper(const natural_number& a, unsigned long count) {
+        assert(count != 0);
+        size_type whole = count / digit_bits;
+        count %= digit_bits;
+        if (count) {
+            digit_array[a.digits + whole] = LowLevel::lshift(digit_array + whole, a.digit_array, a.digits, count);
+        } else {
+            LowLevel::copy_forward(digit_array + whole, a.digit_array, a.digits);
+            digit_array[a.digits + whole] = 0;
+        }
+        LowLevel::fill_zero(digit_array, whole);
+        set_digits_1(a.digits + whole + 1);
+    }
+    
+    void right_shift_helper(const natural_number& a, unsigned long count) {
+        assert(count != 0);
+        size_type whole = count / digit_bits;
+        count %= digit_bits;
+        if (count) {
+            LowLevel::rshift(digit_array, a.digit_array + whole, a.digits - whole, count);
+        } else {
+            LowLevel::copy_backward(digit_array, a.digit_array + whole, a.digits - whole);
+        }
+        set_digits_1(a.digits - whole);
     }
     
     void allocate(size_type size) {

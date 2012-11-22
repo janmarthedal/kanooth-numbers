@@ -12,9 +12,9 @@ class integer_base {
 public:
     
     integer_base() {}
-    
+
     integer_base(long v) : number(v < 0 ? -v : v), positive(v >= 0) {}
-    
+
     integer_base(unsigned long v, bool pos = true) : number(v), positive(pos) {}
     
     integer_base(const base_type& other, bool pos) : number(other), positive(pos) {}
@@ -61,6 +61,15 @@ public:
         return !number.is_zero() && !positive;
     }
     
+    inline void negate() {
+        positive = !positive;
+    }
+
+    inline void twos_complement() {
+        negate();
+        subtract(*this, 1ul);
+    }
+
     inline void add(const integer_base& a, const integer_base& b) {
         add_helper1(a, b.number, b.positive);
     }
@@ -123,7 +132,112 @@ public:
         number = a.number.modulus(static_cast<unsigned long>(b >= 0 ? b : -b));
         positive = a.positive;
     }
+
+    static inline unsigned long integer_modulus(const integer_base& a, unsigned long b) {
+        return a.number.modulus(b);
+    }
     
+    static inline void quotrem(integer_base& q, integer_base& r, const integer_base& a, const integer_base& b) {
+        base_type::quotrem(q.number, r.number, a.number, b.number);
+        q.positive = a.positive == b.positive;
+        r.positive = a.positive;
+    }
+
+    inline void bitwise_and(const integer_base& a, const integer_base& b) {
+        if (a.is_zero() || b.is_zero())
+            *this = 0ul;
+        else if (a.positive) {
+            if (b.positive) {
+                number.bitwise_and(a.number, b.number);
+                positive = true;
+            } else {
+                integer_base tb = b;
+                tb.twos_complement();
+                number.bitwise_and_not(a.number, tb.number);
+                positive = true;
+            }
+        } else {
+            integer_base ta = a;
+            ta.twos_complement();
+            if (b.positive) {
+                number.bitwise_and_not(b.number, ta.number);
+                positive = true;
+            } else {
+                integer_base tb = b;
+                tb.twos_complement();
+                number.bitwise_or(ta.number, tb.number);
+                positive = true;
+                twos_complement();
+            }
+        }
+    }
+
+    inline void bitwise_or(const integer_base& a, const integer_base& b) {
+        if (a.is_zero())
+            *this = b;
+        else if (b.is_zero())
+            *this = a;
+        else if (a.positive && b.positive) {
+            number.bitwise_or(a.number, b.number);
+            positive = true;
+        } else {
+            if (a.positive) {         // b negative
+                integer_base tb = b;
+                tb.twos_complement();
+                number.bitwise_and_not(tb.number, a.number);
+            } else if (b.positive) {  // a negative
+                integer_base ta = a;
+                ta.twos_complement();
+                number.bitwise_and_not(ta.number, b.number);
+            } else {                  // both negative
+                integer_base ta = a, tb = b;
+                ta.twos_complement();
+                tb.twos_complement();
+                number.bitwise_and(ta.number, tb.number);
+            }
+            positive = true;
+            twos_complement();
+        }
+    }
+
+    inline void bitwise_xor(const integer_base& a, const integer_base& b) {
+        if (a.is_zero())
+            *this = b;
+        else if (b.is_zero())
+            *this = a;
+        else if (a.positive == b.positive) {
+            if (a.positive) {
+                number.bitwise_xor(a.number, b.number);
+            } else {
+                integer_base ta = a, tb = b;
+                ta.twos_complement();
+                tb.twos_complement();
+                number.bitwise_xor(ta.number, tb.number);
+            }
+            positive = true;
+        } else {
+            if (a.positive) {
+                integer_base tb = b;
+                tb.twos_complement();
+                number.bitwise_xor(a.number, tb.number);
+            } else {
+                integer_base ta = a;
+                ta.twos_complement();
+                number.bitwise_xor(ta.number, b.number);
+            }
+            positive = true;
+            twos_complement();
+        }
+    }
+
+    inline void left_shift(const integer_base& a, unsigned long count) {
+        number.left_shift(a.number, count);
+    }
+
+    inline void right_shift(const integer_base& a, unsigned long count) {
+        number.right_shift(a.number, count);
+    }
+
     inline int compare(const integer_base& a) const {
         return compare_helper(a.number, a.sign());
     }
