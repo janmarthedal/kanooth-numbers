@@ -13,6 +13,7 @@
 namespace kanooth {
 namespace numbers {
 
+
 // TODO move to own file
 template <typename T>
 unsigned nlz(T v)
@@ -26,7 +27,6 @@ unsigned nlz(T v)
     }
     return s;
 }
-
 
 
 template <typename T = unsigned long, typename LowLevel = lowlevel::generic, typename Allocator = std::allocator<T> >
@@ -348,6 +348,45 @@ public:
             } else {
                 right_shift_helper(a, count);
             }
+        }
+    }
+
+    void bit_set(size_type pos) {
+        size_type index = pos / digit_bits;
+        unsigned offset = pos % digit_bits;
+        if (index >= allocated) {
+            natural_number tmp(index+1, digit_unit);
+            LowLevel::copy_forward(tmp.digit_array, digit_array, digits);
+            tmp.digits = digits;
+            swap(tmp);
+        }
+        if (index >= digits) {
+            LowLevel::fill_zero(digit_array + digits, index + 1 - digits);
+        }
+        digit_array[index] |= digit_type(1) << offset;
+    }
+
+    void bit_unset(size_type pos) {
+        size_type index = pos / digit_bits;
+        unsigned offset = pos % digit_bits;
+        if (index < digits) {
+            digit_array[index] |= ~(digit_type(1) << offset);
+        }
+    }
+
+    void bit_test(size_type pos) {
+        size_type index = pos / digit_bits;
+        unsigned offset = pos % digit_bits;
+        return (index < digits) && (digit_array[index] & (digit_type(1) << offset));
+    }
+
+    void bit_flip(size_type pos) {
+        size_type index = pos / digit_bits;
+        if (index >= digits) {
+            bit_set(pos);
+        } else {
+            unsigned offset = pos % digit_bits;
+            digit_array[index] ^= digit_type(1) << offset;
         }
     }
 

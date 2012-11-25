@@ -212,4 +212,57 @@ typedef boost::multiprecision::number<boost::multiprecision::backends::kanooth_i
 } // namespace numbers
 } // namespace kanooth
 
+namespace std {
+
+template<boost::multiprecision::expression_template_option ExpressionTemplates>
+class numeric_limits<boost::multiprecision::number<boost::multiprecision::backends::kanooth_integer, ExpressionTemplates> >
+{
+   typedef boost::multiprecision::number<boost::multiprecision::backends::kanooth_integer, ExpressionTemplates> number_type;
+public:
+   BOOST_STATIC_CONSTEXPR bool is_specialized = true;
+   //
+   // Largest and smallest numbers are bounded only by available memory, set
+   // to zero:
+   //
+   static number_type (min)() BOOST_NOEXCEPT
+   {
+      return number_type();
+   }
+   static number_type (max)() BOOST_NOEXCEPT
+   {
+      return number_type();
+   }
+   static number_type lowest() BOOST_NOEXCEPT { return (min)(); }
+   BOOST_STATIC_CONSTEXPR int digits = INT_MAX;
+   BOOST_STATIC_CONSTEXPR int digits10 = (INT_MAX / 1000) * 301L;
+   BOOST_STATIC_CONSTEXPR int max_digits10 = digits10 + 2;
+   BOOST_STATIC_CONSTEXPR bool is_signed = true;
+   BOOST_STATIC_CONSTEXPR bool is_integer = true;
+   BOOST_STATIC_CONSTEXPR bool is_exact = true;
+   BOOST_STATIC_CONSTEXPR int radix = 2;
+   static number_type epsilon() BOOST_NOEXCEPT { return number_type(); }
+   static number_type round_error() BOOST_NOEXCEPT { return number_type(); }
+   BOOST_STATIC_CONSTEXPR int min_exponent = 0;
+   BOOST_STATIC_CONSTEXPR int min_exponent10 = 0;
+   BOOST_STATIC_CONSTEXPR int max_exponent = 0;
+   BOOST_STATIC_CONSTEXPR int max_exponent10 = 0;
+   BOOST_STATIC_CONSTEXPR bool has_infinity = false;
+   BOOST_STATIC_CONSTEXPR bool has_quiet_NaN = false;
+   BOOST_STATIC_CONSTEXPR bool has_signaling_NaN = false;
+   BOOST_STATIC_CONSTEXPR float_denorm_style has_denorm = denorm_absent;
+   BOOST_STATIC_CONSTEXPR bool has_denorm_loss = false;
+   static number_type infinity() BOOST_NOEXCEPT { return number_type(); }
+   static number_type quiet_NaN() BOOST_NOEXCEPT { return number_type(); }
+   static number_type signaling_NaN() BOOST_NOEXCEPT { return number_type(); }
+   static number_type denorm_min() BOOST_NOEXCEPT { return number_type(); }
+   BOOST_STATIC_CONSTEXPR bool is_iec559 = false;
+   BOOST_STATIC_CONSTEXPR bool is_bounded = false;
+   BOOST_STATIC_CONSTEXPR bool is_modulo = false;
+   BOOST_STATIC_CONSTEXPR bool traps = false;
+   BOOST_STATIC_CONSTEXPR bool tinyness_before = false;
+   BOOST_STATIC_CONSTEXPR float_round_style round_style = round_toward_zero;
+};
+
+} // namespace std
+
 #endif // KANOOTH_NUMBERS_BOOST_INTEGER_HPP

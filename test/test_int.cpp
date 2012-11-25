@@ -1,8 +1,11 @@
 #include <boost/multiprecision/gmp.hpp>
 #include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
 #include <boost/detail/lightweight_test.hpp>
+
 #include <kanooth/numbers/boost_integer.hpp>
+
+#include <boost/multiprecision/random.hpp>
+
 
 template <class T>
 T generate_random(unsigned bits_wanted)
@@ -10,20 +13,10 @@ T generate_random(unsigned bits_wanted)
    static boost::random::mt19937 gen;
    typedef boost::random::mt19937::result_type random_type;
 
-   T max_val;
-   unsigned digits;
-   if(std::numeric_limits<T>::is_bounded && (bits_wanted == std::numeric_limits<T>::digits))
-   {
-      max_val = (std::numeric_limits<T>::max)();
-      digits = std::numeric_limits<T>::digits;
-   }
-   else
-   {
-      max_val = T(1) << bits_wanted;
-      digits = bits_wanted;
-   }
-
+   T max_val = T(1) << bits_wanted;
+   unsigned digits = bits_wanted;
    unsigned bits_per_r_val = std::numeric_limits<random_type>::digits - 1;
+
    while((random_type(1) << bits_per_r_val) > (gen.max)()) --bits_per_r_val;
 
    unsigned terms_needed = digits / bits_per_r_val + 1;
@@ -271,7 +264,7 @@ struct tester
       }
       /*{
          // We have to take care that our powers don't grow too large, otherwise this takes "forever",
-         // also don't test for modulo types, as these may give a diffferent result from arbitrary
+         // also don't test for modulo types, as these may give a different result from arbitrary
          // precision types:
          BOOST_TEST_EQ(mpz_int(pow(d, ui % 19)).str(), test_type(pow(d1, ui % 19)).str());
          BOOST_TEST_EQ(mpz_int(powm(a, b, c)).str(), test_type(powm(a1, b1, c1)).str());
@@ -288,8 +281,10 @@ struct tester
 
       BOOST_TEST_EQ(Number(), 0);
 
-      for(int i = 0; i < 10000; ++i)
+      for(int i = 0; i < 1000; ++i)
       {
+          std::cout << i << std::endl;
+          
          a = generate_random<mpz_int>(1000);
          b = generate_random<mpz_int>(512);
          c = generate_random<mpz_int>(256);
@@ -349,10 +344,23 @@ struct tester
    }
 };
 
+void test_random()
+{
+    typedef kanooth::numbers::boost_integer test_type;
+    //typedef boost::multiprecision::mpz_int test_type;
+    
+    test_type min, max("123456789000000000000000000000000000000000000000000000000000000");
+    
+    boost::random::mt19937 gen;
+    boost::random::uniform_int_distribution<test_type> rand(min, max);
+
+    std::cout << rand(gen) << std::endl;    
+}
+
 int main()
 {
     typedef kanooth::numbers::boost_integer test_type;
-    
+
     tester<test_type> t1;
     t1.test();
 
