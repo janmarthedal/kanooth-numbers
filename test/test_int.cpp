@@ -361,8 +361,17 @@ int main()
 {
     typedef kanooth::numbers::boost_integer test_type;
 
-    tester<test_type> t1;
-    t1.test();
+    test_type x, y, z;
+    
+    bit_set(x, 100);
+    bit_set(y, 50);
+    z = y * y;
+    
+    std::cout << x << std::endl;
+    std::cout << z << std::endl;
+    
+    //tester<test_type> t1;
+    //t1.test();
 
     return boost::report_errors();
 }

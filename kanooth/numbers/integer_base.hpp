@@ -241,6 +241,22 @@ public:
         number.right_shift(a.number, count);
     }
 
+    inline bool bit_test(unsigned pos) const {
+        return number.bit_test(pos);
+    }
+
+    inline void bit_set(unsigned pos) {
+        number.bit_set(pos);
+    }
+
+    inline void bit_unset(unsigned pos) {
+        number.bit_unset(pos);
+    }
+
+    inline void bit_flip(unsigned pos) {
+        number.bit_flip(pos);
+    }
+
     inline int compare(const integer_base& a) const {
         return compare_helper(a.number, a.sign());
     }

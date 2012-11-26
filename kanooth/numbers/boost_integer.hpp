@@ -177,6 +177,26 @@ inline void eval_right_shift(kanooth_integer& r, kanooth_integer& u, unsigned lo
    r.right_shift(u, v);
 }
 
+inline bool eval_bit_test(const kanooth_integer& u, unsigned pos)
+{
+    return u.bit_test(pos);
+}
+
+inline void eval_bit_set(kanooth_integer& u, unsigned pos)
+{
+    u.bit_set(pos);
+}
+
+inline void eval_bit_unset(kanooth_integer& u, unsigned pos)
+{
+    u.bit_unset(pos);
+}
+
+inline void eval_bit_flip(kanooth_integer& u, unsigned pos)
+{
+    u.bit_flip(pos);
+}
+
 inline bool eval_eq(const kanooth_integer& a, const kanooth_integer& b)
 { return a.compare(b) == 0; }
 

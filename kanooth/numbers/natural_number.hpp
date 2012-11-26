@@ -362,6 +362,7 @@ public:
         }
         if (index >= digits) {
             LowLevel::fill_zero(digit_array + digits, index + 1 - digits);
+            digits = index + 1;
         }
         digit_array[index] |= digit_type(1) << offset;
     }
@@ -370,11 +371,11 @@ public:
         size_type index = pos / digit_bits;
         unsigned offset = pos % digit_bits;
         if (index < digits) {
-            digit_array[index] |= ~(digit_type(1) << offset);
+            digit_array[index] &= ~(digit_type(1) << offset);
         }
     }
 
-    void bit_test(size_type pos) {
+    bool bit_test(size_type pos) const {
         size_type index = pos / digit_bits;
         unsigned offset = pos % digit_bits;
         return (index < digits) && (digit_array[index] & (digit_type(1) << offset));
