@@ -28,6 +28,20 @@ unsigned nlz(T v)
     return s;
 }
 
+namespace {
+
+template <typename T, unsigned N>
+struct pow10 {
+    static const T value = T(10) * pow10<T, N-1>::value;
+};
+
+template <typename T>
+struct pow10<T, 0> {
+    static const T value = 1;
+};
+
+}
+
 
 template <typename T = unsigned long, typename LowLevel = lowlevel::generic, typename Allocator = std::allocator<T> >
 class natural_number : private Allocator::template rebind<T>::other {
@@ -400,14 +414,28 @@ public:
     std::string str(std::streamsize /*digits*/, std::ios_base::fmtflags f) const {
         if (is_zero())
             return "0";
+        typedef unsigned long unit_type;
+        const unsigned log10 = std::numeric_limits<digit_type>::digits10;
+        const unit_type pow10_max = pow10<unit_type, std::numeric_limits<digit_type>::digits10>::value;
         unsigned max_decimals = (digits * digit_bits) / 3 + 1;
         char chars[max_decimals];
         char *end = chars + max_decimals;
         char *begin = end;
         natural_number n = *this;
-        while (!n.is_zero()) {
-            unsigned long d = n.quotrem(n, 10u);
-            *--begin = d + '0';
+        while (true) {
+            unit_type r = n.quotrem(n, pow10_max);
+            if (n.is_zero()) {
+                while (r) {
+                    *--begin = (r % 10) + '0';
+                    r /= 10;
+                }
+                break;
+            } else {
+                for (unsigned k = log10; k; --k) {
+                    *--begin = (r % 10) + '0';
+                    r /= 10;
+                }
+            }
         }
         return std::string(begin, end);
     }

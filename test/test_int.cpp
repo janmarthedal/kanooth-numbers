@@ -363,8 +363,8 @@ int main()
 
     test_type x, y, z;
     
-    bit_set(x, 100);
-    bit_set(y, 50);
+    bit_set(x, 1000);
+    bit_set(y, 500);
     z = y * y;
     
     std::cout << x << std::endl;
