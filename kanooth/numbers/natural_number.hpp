@@ -6,6 +6,7 @@
 #include <string>
 #include <stdexcept>
 #include <cassert>
+#include <cstring>  // strlen
 
 #include <kanooth/number_bits.hpp>
 #include <kanooth/numbers/lowlevel/generic.hpp>
@@ -51,6 +52,8 @@ class natural_number : private Allocator::template rebind<T>::other {
     typedef typename allocator_type::pointer digit_ptr;
     typedef typename allocator_type::size_type size_type;
     static const unsigned digit_bits = kanooth::number_bits<digit_type>::value;
+    static const unsigned digit_decimals = std::numeric_limits<digit_type>::digits10;
+    static const digit_type digit_largest_pow10 = pow10<digit_type, std::numeric_limits<digit_type>::digits10>::value;
 
 public:
 
@@ -82,11 +85,58 @@ public:
 
     natural_number(const char* s) : digits(0), allocated(0), digit_array(0)
     {
-        while (*s) {
+#if 0
+         while (*s) {
             multiply(*this, 10u);
             add(*this, static_cast<unsigned long>(*s - '0'));
             ++s;
-        }        
+        }
+#elif 0
+        unsigned chunk_size;
+        digit_type chunk_value;
+        while (true) {
+            chunk_size = 0;
+            chunk_value = 0;
+            while (*s && chunk_size < digit_decimals) {
+                chunk_value = 10*chunk_value + (*s - '0');
+                ++chunk_size;
+                ++s;
+            }
+            if (chunk_size < digit_decimals)
+                break;
+            multiply(*this, digit_largest_pow10);
+            add(*this, chunk_value);
+        }
+        digit_type pow10 = 1;
+        while (chunk_size--)
+            pow10 *= 10;
+        multiply(*this, pow10);
+        add(*this, chunk_value);
+#else
+        // max_bits = floor(decimals*log(10)/log(2)) + 1 <= floor(decimals*10/3) + 1
+        const unsigned max_digits = (10*std::strlen(s)/3)/digit_bits + 1;
+        unsigned chunk_size;
+        digit_type chunk_value;
+        allocate(max_digits + 1);  // extra digit for multiplying
+        while (true) {
+            chunk_size = 0;
+            chunk_value = 0;
+            while (*s && chunk_size < digit_decimals) {
+                chunk_value = 10*chunk_value + (*s - '0');
+                ++chunk_size;
+                ++s;
+            }
+            if (chunk_size < digit_decimals)
+                break;
+            multiply_digit(*this, digit_largest_pow10);
+            add_digit(*this, chunk_value);
+        }
+        digit_type pow10 = 1;
+        while (chunk_size--)
+            pow10 *= 10;
+        multiply_digit(*this, pow10);
+        add_digit(*this, chunk_value);
+#endif
     }
 
     natural_number& operator=(unsigned long v)
@@ -435,15 +485,13 @@ public:
     {
         if (is_zero())
             return "0";
-        const unsigned digit_decimals = std::numeric_limits<digit_type>::digits10;
-        const digit_type pow10_max = pow10<digit_type, std::numeric_limits<digit_type>::digits10>::value;
         unsigned max_decimals = (digits * digit_bits) / 3 + 1;
         char chars[max_decimals];
         char *end = chars + max_decimals;
         char *begin = end;
         natural_number n = *this;
         while (true) {
-            digit_type r = n.quotrem_digit(n, pow10_max);
+            digit_type r = n.quotrem_digit(n, digit_largest_pow10);
             if (n.is_zero()) {
                 while (r) {
                     *--begin = (r % 10) + '0';

@@ -361,14 +361,17 @@ int main()
 {
     typedef kanooth::numbers::boost_integer test_type;
 
-    test_type x, y, z;
+    std::string st1 = "10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831652624386837205668069376";
+    test_type x(st1);
+    std::string st2 = x.str();
     
-    bit_set(x, 1000);
-    bit_set(y, 500);
-    z = y * y;
-    
-    std::cout << x << std::endl;
-    std::cout << z << std::endl;
+    if (st1 == st2)
+        std::cout << "Match" << std::endl;
+    else {
+        std::cout << "Mismatch" << std::endl;
+        std::cout << st1 << std::endl;
+        std::cout << st2 << std::endl;
+    }
     
     //tester<test_type> t1;
     //t1.test();
