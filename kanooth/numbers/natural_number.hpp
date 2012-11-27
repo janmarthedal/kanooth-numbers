@@ -83,36 +83,8 @@ public:
         }
     }
 
-    natural_number(const char* s) : digits(0), allocated(0), digit_array(0)
+    natural_number(const char* s) : digits(0)
     {
-#if 0
-         while (*s) {
-            multiply(*this, 10u);
-            add(*this, static_cast<unsigned long>(*s - '0'));
-            ++s;
-        }
-#elif 0
-        unsigned chunk_size;
-        digit_type chunk_value;
-        while (true) {
-            chunk_size = 0;
-            chunk_value = 0;
-            while (*s && chunk_size < digit_decimals) {
-                chunk_value = 10*chunk_value + (*s - '0');
-                ++chunk_size;
-                ++s;
-            }
-            if (chunk_size < digit_decimals)
-                break;
-            multiply(*this, digit_largest_pow10);
-            add(*this, chunk_value);
-        }
-        digit_type pow10 = 1;
-        while (chunk_size--)
-            pow10 *= 10;
-        multiply(*this, pow10);
-        add(*this, chunk_value);
-#else
         // max_bits = floor(decimals*log(10)/log(2)) + 1 <= floor(decimals*10/3) + 1
         const unsigned max_digits = (10*std::strlen(s)/3)/digit_bits + 1;
         unsigned chunk_size;
@@ -136,7 +108,6 @@ public:
             pow10 *= 10;
         multiply_digit(*this, pow10);
         add_digit(*this, chunk_value);
-#endif
     }
 
     natural_number& operator=(unsigned long v)
