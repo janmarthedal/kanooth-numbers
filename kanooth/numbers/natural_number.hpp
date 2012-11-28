@@ -86,28 +86,32 @@ public:
     natural_number(const char* s) : digits(0)
     {
         // max_bits = floor(decimals*log(10)/log(2)) + 1 <= floor(decimals*10/3) + 1
-        const unsigned max_digits = (10*std::strlen(s)/3)/digit_bits + 1;
+        unsigned length = std::strlen(s);
+        const unsigned max_digits = (10 * length / 3) / digit_bits + 1;
         unsigned chunk_size;
         digit_type chunk_value;
         allocate(max_digits + 1);  // extra digit for multiplying
-        while (true) {
-            chunk_size = 0;
+        while (length >= digit_decimals) {
             chunk_value = 0;
-            while (*s && chunk_size < digit_decimals) {
+            for (chunk_size = digit_decimals; chunk_size != 0; --chunk_size) {
                 chunk_value = 10*chunk_value + (*s - '0');
-                ++chunk_size;
                 ++s;
             }
-            if (chunk_size < digit_decimals)
-                break;
             multiply_digit(*this, digit_largest_pow10);
             add_digit(*this, chunk_value);
+            length -= digit_decimals;
         }
-        digit_type pow10 = 1;
-        while (chunk_size--)
-            pow10 *= 10;
-        multiply_digit(*this, pow10);
-        add_digit(*this, chunk_value);
+        if (length) {
+            digit_type pow10 = 1;
+            chunk_value = 0;
+            while (length--) {
+                chunk_value = 10*chunk_value + (*s - '0');
+                pow10 *= 10;
+                ++s;
+            }
+            multiply_digit(*this, pow10);
+            add_digit(*this, chunk_value);
+        }
     }
 
     natural_number& operator=(unsigned long v)
