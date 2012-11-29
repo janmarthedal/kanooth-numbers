@@ -1,7 +1,7 @@
 #include <boost/multiprecision/gmp.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/detail/lightweight_test.hpp>
-#include <kanooth/numbers/boost_integer.hpp>
+#include <kanooth/numbers/boost_natnum.hpp>
 #include <kanooth/numbers/generate_random_bits_number.hpp>
 #include <ctime>
 
@@ -15,7 +15,7 @@ struct tester
     unsigned last_error_count;
 
     ref_type a, b, c, d;
-    int si;
+    signed si;
     unsigned ui;
     test_type a1, b1, c1, d1;
 
@@ -28,30 +28,22 @@ struct tester
         BOOST_TEST_EQ(ref_type(a+b).str(), test_type(a1 + b1).str());
         BOOST_TEST_EQ((ref_type(a)+=b).str(), (test_type(a1) += b1).str());
         BOOST_TEST_EQ((ref_type(b)+=a).str(), (test_type(b1) += a1).str());
-        BOOST_TEST_EQ(ref_type(a-b).str(), test_type(a1 - b1).str());
-        BOOST_TEST_EQ(ref_type(ref_type(-a)+b).str(), test_type(test_type(-a1) + b1).str());
-        BOOST_TEST_EQ(ref_type(ref_type(-a)-b).str(), test_type(test_type(-a1) - b1).str());
+        if (a >= b) {
+            BOOST_TEST_EQ(ref_type(a-b).str(), test_type(a1 - b1).str());
+            BOOST_TEST_EQ((ref_type(a)-=b).str(), (test_type(a1) -= b1).str());
+        } else {
+            BOOST_TEST_EQ(ref_type(b-a).str(), test_type(b1 - a1).str());            
+            BOOST_TEST_EQ((ref_type(b)-=a).str(), (test_type(b1) -= a1).str());
+        }
         BOOST_TEST_EQ(ref_type(c * d).str(), test_type(c1 * d1).str());
         BOOST_TEST_EQ((ref_type(c)*=d).str(), (test_type(c1) *= d1).str());
         BOOST_TEST_EQ((ref_type(d)*=c).str(), (test_type(d1) *= c1).str());
-        BOOST_TEST_EQ(ref_type(c * -d).str(), test_type(c1 * -d1).str());
-        BOOST_TEST_EQ(ref_type(-c * d).str(), test_type(-c1 * d1).str());
-        BOOST_TEST_EQ((ref_type(c)*=-d).str(), (test_type(c1) *= -d1).str());
-        BOOST_TEST_EQ((ref_type(-d)*=c).str(), (test_type(-d1) *= c1).str());
         BOOST_TEST_EQ(ref_type(b * c).str(), test_type(b1 * c1).str());
         BOOST_TEST_EQ(ref_type(a / b).str(), test_type(a1 / b1).str());
         BOOST_TEST_EQ((ref_type(a)/=b).str(), (test_type(a1) /= b1).str());
-        BOOST_TEST_EQ(ref_type(a / -b).str(), test_type(a1 / -b1).str());
-        BOOST_TEST_EQ(ref_type(-a / b).str(), test_type(-a1 / b1).str());
-        BOOST_TEST_EQ((ref_type(a)/=-b).str(), (test_type(a1) /= -b1).str());
-        BOOST_TEST_EQ((ref_type(-a)/=b).str(), (test_type(-a1) /= b1).str());
         BOOST_TEST_EQ(ref_type(a / d).str(), test_type(a1 / d1).str());
         BOOST_TEST_EQ(ref_type(a % b).str(), test_type(a1 % b1).str());
         BOOST_TEST_EQ((ref_type(a)%=b).str(), (test_type(a1) %= b1).str());
-        BOOST_TEST_EQ(ref_type(a % -b).str(), test_type(a1 % -b1).str());
-        BOOST_TEST_EQ((ref_type(a)%=-b).str(), (test_type(a1) %= -b1).str());
-        BOOST_TEST_EQ(ref_type(-a % b).str(), test_type(-a1 % b1).str());
-        BOOST_TEST_EQ((ref_type(-a)%=b).str(), (test_type(-a1) %= b1).str());
         BOOST_TEST_EQ(ref_type(a % d).str(), test_type(a1 % d1).str());
         BOOST_TEST_EQ((ref_type(a)%=d).str(), (test_type(a1) %= d1).str());
     }
@@ -61,28 +53,10 @@ struct tester
         // bitwise ops:
         BOOST_TEST_EQ(ref_type(a|b).str(), test_type(a1 | b1).str());
         BOOST_TEST_EQ((ref_type(a)|=b).str(), (test_type(a1) |= b1).str());
-        BOOST_TEST_EQ(ref_type(-a|b).str(), test_type(-a1 | b1).str());
-        BOOST_TEST_EQ((ref_type(-a)|=b).str(), (test_type(-a1) |= b1).str());
-        BOOST_TEST_EQ(ref_type(a|-b).str(), test_type(a1 | -b1).str());
-        BOOST_TEST_EQ((ref_type(a)|=-b).str(), (test_type(a1) |= -b1).str());
-        BOOST_TEST_EQ(ref_type(-a|-b).str(), test_type(-a1 | -b1).str());
-        BOOST_TEST_EQ((ref_type(-a)|=-b).str(), (test_type(-a1) |= -b1).str());
         BOOST_TEST_EQ(ref_type(a&b).str(), test_type(a1 & b1).str());
         BOOST_TEST_EQ((ref_type(a)&=b).str(), (test_type(a1) &= b1).str());
-        BOOST_TEST_EQ(ref_type(-a&b).str(), test_type(-a1 & b1).str());
-        BOOST_TEST_EQ((ref_type(-a)&=b).str(), (test_type(-a1) &= b1).str());
-        BOOST_TEST_EQ(ref_type(a&-b).str(), test_type(a1 & -b1).str());
-        BOOST_TEST_EQ((ref_type(a)&=-b).str(), (test_type(a1) &= -b1).str());
-        BOOST_TEST_EQ(ref_type(-a&-b).str(), test_type(-a1 & -b1).str());
-        BOOST_TEST_EQ((ref_type(-a)&=-b).str(), (test_type(-a1) &= -b1).str());
         BOOST_TEST_EQ(ref_type(a^b).str(), test_type(a1 ^ b1).str());
         BOOST_TEST_EQ((ref_type(a)^=b).str(), (test_type(a1) ^= b1).str());
-        BOOST_TEST_EQ(ref_type(-a^b).str(), test_type(-a1 ^ b1).str());
-        BOOST_TEST_EQ((ref_type(-a)^=b).str(), (test_type(-a1) ^= b1).str());
-        BOOST_TEST_EQ(ref_type(a^-b).str(), test_type(a1 ^ -b1).str());
-        BOOST_TEST_EQ((ref_type(a)^=-b).str(), (test_type(a1) ^= -b1).str());
-        BOOST_TEST_EQ(ref_type(-a^-b).str(), test_type(-a1 ^ -b1).str());
-        BOOST_TEST_EQ((ref_type(-a)^=-b).str(), (test_type(-a1) ^= -b1).str());
         // Shift ops:
         for(unsigned i = 0; i < 128; ++i)
         {
@@ -90,17 +64,11 @@ struct tester
             BOOST_TEST_EQ(ref_type(a >> i).str(), test_type(a1 >> i).str());
         }
         // gcd/lcm
-        BOOST_TEST_EQ(ref_type(gcd(a, b)).str(), test_type(gcd(a1, b1)).str());
-        BOOST_TEST_EQ(ref_type(lcm(c, d)).str(), test_type(lcm(c1, d1)).str());
-        BOOST_TEST_EQ(ref_type(gcd(-a, b)).str(), test_type(gcd(-a1, b1)).str());
-        BOOST_TEST_EQ(ref_type(lcm(-c, d)).str(), test_type(lcm(-c1, d1)).str());
-        BOOST_TEST_EQ(ref_type(gcd(-a, -b)).str(), test_type(gcd(-a1, -b1)).str());
-        BOOST_TEST_EQ(ref_type(lcm(-c, -d)).str(), test_type(lcm(-c1, -d1)).str());
-        BOOST_TEST_EQ(ref_type(gcd(a, -b)).str(), test_type(gcd(a1, -b1)).str());
-        BOOST_TEST_EQ(ref_type(lcm(c, -d)).str(), test_type(lcm(c1, -d1)).str());
+        //BOOST_TEST_EQ(ref_type(gcd(a, b)).str(), test_type(gcd(a1, b1)).str());
+        //BOOST_TEST_EQ(ref_type(lcm(c, d)).str(), test_type(lcm(c1, d1)).str());
     }
 
-    void t3()
+    /*void t3()
     {
         // Now check operations involving signed integers:
         BOOST_TEST_EQ(ref_type(a + si).str(), test_type(a1 + si).str());
@@ -238,7 +206,7 @@ struct tester
         BOOST_TEST_EQ(ref_type(powm(a, b, c)).str(), test_type(powm(a1, b1, c1)).str());
         BOOST_TEST_EQ(ref_type(powm(a, b, ui)).str(), test_type(powm(a1, b1, ui)).str());
         BOOST_TEST_EQ(ref_type(powm(a, ui, c)).str(), test_type(powm(a1, ui, c1)).str());
-    }
+    }*/
 
     void test()
     {
@@ -275,9 +243,9 @@ struct tester
 
             t1();
             t2();
-            t3();
+            /*t3();
             t4();
-            t5();
+            t5();*/
 
             if(last_error_count != (unsigned)boost::detail::test_errors())
             {
@@ -292,27 +260,6 @@ struct tester
                 std::cout << "c1   = " << c1 << std::endl;
                 std::cout << "d    = " << d << std::endl;
                 std::cout << "d1   = " << d1 << std::endl;
-                std::cout << "a + b   = " << a+b << std::endl;
-                std::cout << "a1 + b1 = " << a1+b1 << std::endl;
-                std::cout << std::dec;
-                std::cout << "a - b   = " << a-b << std::endl;
-                std::cout << "a1 - b1 = " << a1-b1 << std::endl;
-                std::cout << "-a + b   = " << ref_type(-a)+b << std::endl;
-                std::cout << "-a1 + b1 = " << test_type(-a1)+b1 << std::endl;
-                std::cout << "-a - b   = " << ref_type(-a)-b << std::endl;
-                std::cout << "-a1 - b1 = " << test_type(-a1)-b1 << std::endl;
-                std::cout << "c*d    = " << c*d << std::endl;
-                std::cout << "c1*d1  = " << c1*d1 << std::endl;
-                std::cout << "b*c    = " << b*c << std::endl;
-                std::cout << "b1*c1  = " << b1*c1 << std::endl;
-                std::cout << "a/b    = " << a/b << std::endl;
-                std::cout << "a1/b1  = " << a1/b1 << std::endl;
-                std::cout << "a/d    = " << a/d << std::endl;
-                std::cout << "a1/d1  = " << a1/d1 << std::endl;
-                std::cout << "a%b    = " << a%b << std::endl;
-                std::cout << "a1%b1  = " << a1%b1 << std::endl;
-                std::cout << "a%d    = " << a%d << std::endl;
-                std::cout << "a1%d1  = " << a1%d1 << std::endl;
             }
 
         }
@@ -322,7 +269,7 @@ struct tester
 
 int main()
 {
-    typedef kanooth::numbers::boost_integer test_type;
+    typedef kanooth::numbers::boost_natnum test_type;
 
     tester<test_type> maintest;
     maintest.test();
