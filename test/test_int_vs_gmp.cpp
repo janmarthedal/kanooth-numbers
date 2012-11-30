@@ -29,6 +29,7 @@ struct tester
         BOOST_TEST_EQ((ref_type(a)+=b).str(), (test_type(a1) += b1).str());
         BOOST_TEST_EQ((ref_type(b)+=a).str(), (test_type(b1) += a1).str());
         BOOST_TEST_EQ(ref_type(a-b).str(), test_type(a1 - b1).str());
+        BOOST_TEST_EQ((ref_type(a)-=b).str(), (test_type(a1) -= b1).str());
         BOOST_TEST_EQ(ref_type(ref_type(-a)+b).str(), test_type(test_type(-a1) + b1).str());
         BOOST_TEST_EQ(ref_type(ref_type(-a)-b).str(), test_type(test_type(-a1) - b1).str());
         BOOST_TEST_EQ(ref_type(c * d).str(), test_type(c1 * d1).str());
@@ -232,7 +233,7 @@ struct tester
             BOOST_TEST_EQ(bit_test(a, i), bit_test(a1, i));
         }
         // We have to take care that our powers don't grow too large, otherwise this takes "forever",
-        // also don't test for modulo types, as these may give a different result from arbitrary
+        // also don't test for modulo types, as these may give a diffferent result from arbitrary
         // precision types:
         BOOST_TEST_EQ(ref_type(pow(d, ui % 19)).str(), test_type(pow(d1, ui % 19)).str());
         BOOST_TEST_EQ(ref_type(powm(a, b, c)).str(), test_type(powm(a1, b1, c1)).str());
@@ -292,27 +293,6 @@ struct tester
                 std::cout << "c1   = " << c1 << std::endl;
                 std::cout << "d    = " << d << std::endl;
                 std::cout << "d1   = " << d1 << std::endl;
-                std::cout << "a + b   = " << a+b << std::endl;
-                std::cout << "a1 + b1 = " << a1+b1 << std::endl;
-                std::cout << std::dec;
-                std::cout << "a - b   = " << a-b << std::endl;
-                std::cout << "a1 - b1 = " << a1-b1 << std::endl;
-                std::cout << "-a + b   = " << ref_type(-a)+b << std::endl;
-                std::cout << "-a1 + b1 = " << test_type(-a1)+b1 << std::endl;
-                std::cout << "-a - b   = " << ref_type(-a)-b << std::endl;
-                std::cout << "-a1 - b1 = " << test_type(-a1)-b1 << std::endl;
-                std::cout << "c*d    = " << c*d << std::endl;
-                std::cout << "c1*d1  = " << c1*d1 << std::endl;
-                std::cout << "b*c    = " << b*c << std::endl;
-                std::cout << "b1*c1  = " << b1*c1 << std::endl;
-                std::cout << "a/b    = " << a/b << std::endl;
-                std::cout << "a1/b1  = " << a1/b1 << std::endl;
-                std::cout << "a/d    = " << a/d << std::endl;
-                std::cout << "a1/d1  = " << a1/d1 << std::endl;
-                std::cout << "a%b    = " << a%b << std::endl;
-                std::cout << "a1%b1  = " << a1%b1 << std::endl;
-                std::cout << "a%d    = " << a%d << std::endl;
-                std::cout << "a1%d1  = " << a1%d1 << std::endl;
             }
 
         }
@@ -322,10 +302,8 @@ struct tester
 
 int main()
 {
-    typedef kanooth::numbers::boost_integer test_type;
-
-    tester<test_type> maintest;
-    maintest.test();
+    tester<kanooth::numbers::boost_integer> test_int;
+    test_int.test();
 
     return boost::report_errors();
 }

@@ -15,7 +15,7 @@ struct tester
     unsigned last_error_count;
 
     ref_type a, b, c, d;
-    signed si;
+    int si;
     unsigned ui;
     test_type a1, b1, c1, d1;
 
@@ -32,8 +32,8 @@ struct tester
             BOOST_TEST_EQ(ref_type(a-b).str(), test_type(a1 - b1).str());
             BOOST_TEST_EQ((ref_type(a)-=b).str(), (test_type(a1) -= b1).str());
         } else {
-            BOOST_TEST_EQ(ref_type(b-a).str(), test_type(b1 - a1).str());            
-            BOOST_TEST_EQ((ref_type(b)-=a).str(), (test_type(b1) -= a1).str());
+            BOOST_TEST_EQ(ref_type(b-a).str(), test_type(b1 - a1).str());
+            BOOST_TEST_EQ((ref_type(b)-=a).str(), (test_type(b1) -= a1).str());            
         }
         BOOST_TEST_EQ(ref_type(c * d).str(), test_type(c1 * d1).str());
         BOOST_TEST_EQ((ref_type(c)*=d).str(), (test_type(c1) *= d1).str());
@@ -64,51 +64,35 @@ struct tester
             BOOST_TEST_EQ(ref_type(a >> i).str(), test_type(a1 >> i).str());
         }
         // gcd/lcm
-        //BOOST_TEST_EQ(ref_type(gcd(a, b)).str(), test_type(gcd(a1, b1)).str());
-        //BOOST_TEST_EQ(ref_type(lcm(c, d)).str(), test_type(lcm(c1, d1)).str());
+        /*BOOST_TEST_EQ(ref_type(gcd(a, b)).str(), test_type(gcd(a1, b1)).str());
+        BOOST_TEST_EQ(ref_type(lcm(c, d)).str(), test_type(lcm(c1, d1)).str());
+        BOOST_TEST_EQ(ref_type(gcd(-a, b)).str(), test_type(gcd(-a1, b1)).str());
+        BOOST_TEST_EQ(ref_type(lcm(-c, d)).str(), test_type(lcm(-c1, d1)).str());
+        BOOST_TEST_EQ(ref_type(gcd(-a, -b)).str(), test_type(gcd(-a1, -b1)).str());
+        BOOST_TEST_EQ(ref_type(lcm(-c, -d)).str(), test_type(lcm(-c1, -d1)).str());
+        BOOST_TEST_EQ(ref_type(gcd(a, -b)).str(), test_type(gcd(a1, -b1)).str());
+        BOOST_TEST_EQ(ref_type(lcm(c, -d)).str(), test_type(lcm(c1, -d1)).str());*/
     }
 
-    /*void t3()
+    void t3()
     {
         // Now check operations involving signed integers:
         BOOST_TEST_EQ(ref_type(a + si).str(), test_type(a1 + si).str());
-        BOOST_TEST_EQ(ref_type(a + -si).str(), test_type(a1 + -si).str());
-        BOOST_TEST_EQ(ref_type(-a + si).str(), test_type(-a1 + si).str());
         BOOST_TEST_EQ(ref_type(si + a).str(), test_type(si + a1).str());
         BOOST_TEST_EQ((ref_type(a)+=si).str(), (test_type(a1) += si).str());
-        BOOST_TEST_EQ((ref_type(a)+=-si).str(), (test_type(a1) += -si).str());
-        BOOST_TEST_EQ((ref_type(-a)+=si).str(), (test_type(-a1) += si).str());
-        BOOST_TEST_EQ((ref_type(-a)+=-si).str(), (test_type(-a1) += -si).str());
-        BOOST_TEST_EQ(ref_type(a - si).str(), test_type(a1 - si).str());
-        BOOST_TEST_EQ(ref_type(a - -si).str(), test_type(a1 - -si).str());
-        BOOST_TEST_EQ(ref_type(-a - si).str(), test_type(-a1 - si).str());
-        BOOST_TEST_EQ(ref_type(si - a).str(), test_type(si - a1).str());
-        BOOST_TEST_EQ((ref_type(a)-=si).str(), (test_type(a1) -= si).str());
-        BOOST_TEST_EQ((ref_type(a)-=-si).str(), (test_type(a1) -= -si).str());
-        BOOST_TEST_EQ((ref_type(-a)-=si).str(), (test_type(-a1) -= si).str());
-        BOOST_TEST_EQ((ref_type(-a)-=-si).str(), (test_type(-a1) -= -si).str());
+        if (a >= si) {
+            BOOST_TEST_EQ(ref_type(a - si).str(), test_type(a1 - si).str());
+            BOOST_TEST_EQ((ref_type(a)-=si).str(), (test_type(a1) -= si).str());
+        } else {
+            //BOOST_TEST_EQ(ref_type(si - a).str(), test_type(si - a1).str());
+        }
         BOOST_TEST_EQ(ref_type(b * si).str(), test_type(b1 * si).str());
-        BOOST_TEST_EQ(ref_type(b * -si).str(), test_type(b1 * -si).str());
-        BOOST_TEST_EQ(ref_type(-b * si).str(), test_type(-b1 * si).str());
         BOOST_TEST_EQ(ref_type(si * b).str(), test_type(si * b1).str());
         BOOST_TEST_EQ((ref_type(a)*=si).str(), (test_type(a1) *= si).str());
-        BOOST_TEST_EQ((ref_type(a)*=-si).str(), (test_type(a1) *= -si).str());
-        BOOST_TEST_EQ((ref_type(-a)*=si).str(), (test_type(-a1) *= si).str());
-        BOOST_TEST_EQ((ref_type(-a)*=-si).str(), (test_type(-a1) *= -si).str());
         BOOST_TEST_EQ(ref_type(a / si).str(), test_type(a1 / si).str());
-        BOOST_TEST_EQ(ref_type(a / -si).str(), test_type(a1 / -si).str());
-        BOOST_TEST_EQ(ref_type(-a / si).str(), test_type(-a1 / si).str());
         BOOST_TEST_EQ((ref_type(a)/=si).str(), (test_type(a1) /= si).str());
-        BOOST_TEST_EQ((ref_type(a)/=-si).str(), (test_type(a1) /= -si).str());
-        BOOST_TEST_EQ((ref_type(-a)/=si).str(), (test_type(-a1) /= si).str());
-        BOOST_TEST_EQ((ref_type(-a)/=-si).str(), (test_type(-a1) /= -si).str());
         BOOST_TEST_EQ(ref_type(a % si).str(), test_type(a1 % si).str());
-        BOOST_TEST_EQ(ref_type(a % -si).str(), test_type(a1 % -si).str());
-        BOOST_TEST_EQ(ref_type(-a % si).str(), test_type(-a1 % si).str());
         BOOST_TEST_EQ((ref_type(a)%=si).str(), (test_type(a1) %= si).str());
-        BOOST_TEST_EQ((ref_type(a)%=-si).str(), (test_type(a1) %= -si).str());
-        BOOST_TEST_EQ((ref_type(-a)%=si).str(), (test_type(-a1) %= si).str());
-        BOOST_TEST_EQ((ref_type(-a)%=-si).str(), (test_type(-a1) %= -si).str());
         BOOST_TEST_EQ(ref_type(a|si).str(), test_type(a1 | si).str());
         BOOST_TEST_EQ((ref_type(a)|=si).str(), (test_type(a1) |= si).str());
         BOOST_TEST_EQ(ref_type(a&si).str(), test_type(a1 & si).str());
@@ -118,50 +102,31 @@ struct tester
         BOOST_TEST_EQ(ref_type(si|a).str(), test_type(si|a1).str());
         BOOST_TEST_EQ(ref_type(si&a).str(), test_type(si&a1).str());
         BOOST_TEST_EQ(ref_type(si^a).str(), test_type(si^a1).str());
-        BOOST_TEST_EQ(ref_type(gcd(a, si)).str(), test_type(gcd(a1, si)).str());
+        /*BOOST_TEST_EQ(ref_type(gcd(a, si)).str(), test_type(gcd(a1, si)).str());
         BOOST_TEST_EQ(ref_type(gcd(si, b)).str(), test_type(gcd(si, b1)).str());
         BOOST_TEST_EQ(ref_type(lcm(c, si)).str(), test_type(lcm(c1, si)).str());
-        BOOST_TEST_EQ(ref_type(lcm(si, d)).str(), test_type(lcm(si, d1)).str());
-        BOOST_TEST_EQ(ref_type(gcd(-a, si)).str(), test_type(gcd(-a1, si)).str());
-        BOOST_TEST_EQ(ref_type(gcd(-si, b)).str(), test_type(gcd(-si, b1)).str());
-        BOOST_TEST_EQ(ref_type(lcm(-c, si)).str(), test_type(lcm(-c1, si)).str());
-        BOOST_TEST_EQ(ref_type(lcm(-si, d)).str(), test_type(lcm(-si, d1)).str());
-        BOOST_TEST_EQ(ref_type(gcd(-a, -si)).str(), test_type(gcd(-a1, -si)).str());
-        BOOST_TEST_EQ(ref_type(gcd(-si, -b)).str(), test_type(gcd(-si, -b1)).str());
-        BOOST_TEST_EQ(ref_type(lcm(-c, -si)).str(), test_type(lcm(-c1, -si)).str());
-        BOOST_TEST_EQ(ref_type(lcm(-si, -d)).str(), test_type(lcm(-si, -d1)).str());
-        BOOST_TEST_EQ(ref_type(gcd(a, -si)).str(), test_type(gcd(a1, -si)).str());
-        BOOST_TEST_EQ(ref_type(gcd(si, -b)).str(), test_type(gcd(si, -b1)).str());
-        BOOST_TEST_EQ(ref_type(lcm(c, -si)).str(), test_type(lcm(c1, -si)).str());
-        BOOST_TEST_EQ(ref_type(lcm(si, -d)).str(), test_type(lcm(si, -d1)).str());
+        BOOST_TEST_EQ(ref_type(lcm(si, d)).str(), test_type(lcm(si, d1)).str());*/
     }
 
     void t4()
     {
         // Now check operations involving unsigned integers:
         BOOST_TEST_EQ(ref_type(a + ui).str(), test_type(a1 + ui).str());
-        BOOST_TEST_EQ(ref_type(-a + ui).str(), test_type(-a1 + ui).str());
         BOOST_TEST_EQ(ref_type(ui + a).str(), test_type(ui + a1).str());
         BOOST_TEST_EQ((ref_type(a)+=ui).str(), (test_type(a1) += ui).str());
-        BOOST_TEST_EQ((ref_type(-a)+=ui).str(), (test_type(-a1) += ui).str());
-        BOOST_TEST_EQ(ref_type(a - ui).str(), test_type(a1 - ui).str());
-        BOOST_TEST_EQ(ref_type(-a - ui).str(), test_type(-a1 - ui).str());
-        BOOST_TEST_EQ(ref_type(ui - a).str(), test_type(ui - a1).str());
-        BOOST_TEST_EQ((ref_type(a)-=ui).str(), (test_type(a1) -= ui).str());
-        BOOST_TEST_EQ((ref_type(-a)-=ui).str(), (test_type(-a1) -= ui).str());
+        if (a >= ui) {
+            BOOST_TEST_EQ(ref_type(a - ui).str(), test_type(a1 - ui).str());
+            BOOST_TEST_EQ((ref_type(a)-=ui).str(), (test_type(a1) -= ui).str());
+        } else {
+            //BOOST_TEST_EQ(ref_type(ui - a).str(), test_type(ui - a1).str());
+        }
         BOOST_TEST_EQ(ref_type(b * ui).str(), test_type(b1 * ui).str());
-        BOOST_TEST_EQ(ref_type(-b * ui).str(), test_type(-b1 * ui).str());
         BOOST_TEST_EQ(ref_type(ui * b).str(), test_type(ui * b1).str());
         BOOST_TEST_EQ((ref_type(a)*=ui).str(), (test_type(a1) *= ui).str());
-        BOOST_TEST_EQ((ref_type(-a)*=ui).str(), (test_type(-a1) *= ui).str());
         BOOST_TEST_EQ(ref_type(a / ui).str(), test_type(a1 / ui).str());
-        BOOST_TEST_EQ(ref_type(-a / ui).str(), test_type(-a1 / ui).str());
         BOOST_TEST_EQ((ref_type(a)/=ui).str(), (test_type(a1) /= ui).str());
-        BOOST_TEST_EQ((ref_type(-a)/=ui).str(), (test_type(-a1) /= ui).str());
         BOOST_TEST_EQ(ref_type(a % ui).str(), test_type(a1 % ui).str());
-        BOOST_TEST_EQ(ref_type(-a % ui).str(), test_type(-a1 % ui).str());
         BOOST_TEST_EQ((ref_type(a)%=ui).str(), (test_type(a1) %= ui).str());
-        BOOST_TEST_EQ((ref_type(-a)%=ui).str(), (test_type(-a1) %= ui).str());
         BOOST_TEST_EQ(ref_type(a|ui).str(), test_type(a1 | ui).str());
         BOOST_TEST_EQ((ref_type(a)|=ui).str(), (test_type(a1) |= ui).str());
         BOOST_TEST_EQ(ref_type(a&ui).str(), test_type(a1 & ui).str());
@@ -171,17 +136,13 @@ struct tester
         BOOST_TEST_EQ(ref_type(ui|a).str(), test_type(ui|a1).str());
         BOOST_TEST_EQ(ref_type(ui&a).str(), test_type(ui&a1).str());
         BOOST_TEST_EQ(ref_type(ui^a).str(), test_type(ui^a1).str());
-        BOOST_TEST_EQ(ref_type(gcd(a, ui)).str(), test_type(gcd(a1, ui)).str());
+        /*BOOST_TEST_EQ(ref_type(gcd(a, ui)).str(), test_type(gcd(a1, ui)).str());
         BOOST_TEST_EQ(ref_type(gcd(ui, b)).str(), test_type(gcd(ui, b1)).str());
         BOOST_TEST_EQ(ref_type(lcm(c, ui)).str(), test_type(lcm(c1, ui)).str());
-        BOOST_TEST_EQ(ref_type(lcm(ui, d)).str(), test_type(lcm(ui, d1)).str());
-        BOOST_TEST_EQ(ref_type(gcd(-a, ui)).str(), test_type(gcd(-a1, ui)).str());
-        BOOST_TEST_EQ(ref_type(lcm(-c, ui)).str(), test_type(lcm(-c1, ui)).str());
-        BOOST_TEST_EQ(ref_type(gcd(ui, -b)).str(), test_type(gcd(ui, -b1)).str());
-        BOOST_TEST_EQ(ref_type(lcm(ui, -d)).str(), test_type(lcm(ui, -d1)).str());
+        BOOST_TEST_EQ(ref_type(lcm(ui, d)).str(), test_type(lcm(ui, d1)).str());*/
     }
 
-    void t5()
+    /*void t5()
     {
         //
         // Now integer functions:
@@ -200,7 +161,7 @@ struct tester
             BOOST_TEST_EQ(bit_test(a, i), bit_test(a1, i));
         }
         // We have to take care that our powers don't grow too large, otherwise this takes "forever",
-        // also don't test for modulo types, as these may give a different result from arbitrary
+        // also don't test for modulo types, as these may give a diffferent result from arbitrary
         // precision types:
         BOOST_TEST_EQ(ref_type(pow(d, ui % 19)).str(), test_type(pow(d1, ui % 19)).str());
         BOOST_TEST_EQ(ref_type(powm(a, b, c)).str(), test_type(powm(a1, b1, c1)).str());
@@ -243,14 +204,14 @@ struct tester
 
             t1();
             t2();
-            /*t3();
+            t3();
             t4();
-            t5();*/
+            //t5();
 
             if(last_error_count != (unsigned)boost::detail::test_errors())
             {
                 last_error_count = boost::detail::test_errors();
-                std::cout << std::hex << std::showbase;
+                //std::cout << std::hex << std::showbase;
 
                 std::cout << "a    = " << a << std::endl;
                 std::cout << "a1   = " << a1 << std::endl;
@@ -269,10 +230,8 @@ struct tester
 
 int main()
 {
-    typedef kanooth::numbers::boost_natnum test_type;
-
-    tester<test_type> maintest;
-    maintest.test();
+    tester<kanooth::numbers::boost_natnum> test_int;
+    test_int.test();
 
     return boost::report_errors();
 }

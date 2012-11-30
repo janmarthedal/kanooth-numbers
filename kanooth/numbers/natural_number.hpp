@@ -276,10 +276,15 @@ public:
         quotrem(q, *this, a, b);
     }
 
-    unsigned long modulus(unsigned long b) const
+    void modulus(const natural_number& a, unsigned long b)
     {
-        natural_number q(digits, digit_unit);
-        return q.quotrem(*this, b);
+        *this = integer_modulus(a, b);
+    }
+
+    static unsigned long integer_modulus(const natural_number& a, unsigned long b)
+    {
+        natural_number q(a.digits, digit_unit);
+        return q.quotrem(a, b);
     }
     
     static void quotrem(natural_number& q, natural_number& r, const natural_number& a, const natural_number& b)
@@ -454,6 +459,19 @@ public:
         if (digits < a.digits) return -1;
         if (digits > a.digits) return 1;
         return LowLevel::comp(digit_array, a.digit_array, digits);
+    }
+
+    int compare(unsigned long u) const
+    {
+        if (sizeof(unsigned long) <= sizeof(digit_type)) {
+            if (is_zero())
+                return u == 0 ? 0 : -1;
+            if (digits > 1)
+                return 1;
+            return digit_array[0] < u ? -1 : digit_array[0] > u ? 1 : 0;
+        } else {
+            throw std::runtime_error("not implemented yet");            
+        }
     }
 
     std::string str(std::streamsize /*digits*/, std::ios_base::fmtflags f) const

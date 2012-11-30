@@ -1,10 +1,12 @@
-#ifndef KANOOTH_NUMBERS_BOOST_INTEGER_HPP
-#define KANOOTH_NUMBERS_BOOST_INTEGER_HPP
+#ifndef KANOOTH_NUMBERS_BOOST_NATNUM_HPP
+#define KANOOTH_NUMBERS_BOOST_NATNUM_HPP
 
 #include <boost/multiprecision/number.hpp>
 #include <boost/multiprecision/detail/integer_ops.hpp>
 #include <boost/multiprecision/detail/digits.hpp>
 #include <boost/mpl/contains.hpp>
+#include <boost/mpl/or.hpp>
+#include <boost/type_traits/make_unsigned.hpp>
 #include <boost/cstdint.hpp>
 #include <limits>
 
@@ -15,210 +17,318 @@ namespace boost {
 namespace multiprecision {
 namespace backends {
 
+template <typename B>
 struct kanooth_natnum;
 
 } // namespace backends
 
-template<>
-struct number_category<backends::kanooth_natnum> : public mpl::int_<number_kind_integer>{};
+template <typename B>
+struct number_category<backends::kanooth_natnum<B> > : public mpl::int_<number_kind_integer> {};
 
 namespace backends {
 
-struct kanooth_natnum : public kanooth::numbers::natural_number<>
+template <typename B>
+class kanooth_natnum : public kanooth::numbers::natural_number<B>
 {
-    // needed by front-end
-    typedef mpl::list<long>            signed_types;
-    typedef mpl::list<unsigned long>   unsigned_types;
-    typedef mpl::list<>                float_types;
-    // extra
-    typedef mpl::list<unsigned long, long> native_types;
+public:
+    typedef mpl::list<long>          signed_types;
+    typedef mpl::list<unsigned long> unsigned_types;
+    typedef mpl::list<>              float_types;
 
-    kanooth_natnum() : natural_number() {}
+    template <typename T, typename R>
+    struct if_supported_int
+        : public enable_if<mpl::or_<mpl::contains<unsigned_types, T>,
+                                    mpl::contains<signed_types, T> >, R> {};
+
+    kanooth_natnum() : base_type() {}
     //kanooth_natnum(long v) : integer_base(v) {}
-    kanooth_natnum(unsigned long v) : natural_number(v) {}
-    kanooth_natnum(const char* s) : natural_number(s) {}
+    kanooth_natnum(unsigned long v) : base_type(v) {}
+    kanooth_natnum(const char* s) : base_type(s) {}
+
+private:
+    typedef kanooth::numbers::natural_number<B> base_type;
 };
 
-inline bool eval_is_zero(const kanooth_natnum& val)
-{ return val.is_zero(); }
-
-inline void eval_add(kanooth_natnum& r, const kanooth_natnum& a)
-{ r.add(r, a); }
-inline void eval_add(kanooth_natnum& r, unsigned long a)
-{ r.add(r, a); }
-//inline void eval_add(kanooth_natnum& r, signed long a)
-//{ r.add(r, a); }
-inline void eval_add(kanooth_natnum& r, const kanooth_natnum& a, const kanooth_natnum& b)
-{ r.add(a, b); }
-inline void eval_add(kanooth_natnum& r, const kanooth_natnum& a, unsigned long b)
-{ r.add(a, b); }
-//inline void eval_add(kanooth_natnum& r, const kanooth_natnum& a, signed long b)
-//{ r.add(a, b); }
-
-inline void eval_subtract(kanooth_natnum& r, const kanooth_natnum& a)
-{ r.subtract(r, a); }
-inline void eval_subtract(kanooth_natnum& r, unsigned long a)
-{ r.subtract(r, a); }
-//inline void eval_subtract(kanooth_natnum& r, signed long a)
-//{ r.subtract(r, a); }
-inline void eval_subtract(kanooth_natnum& r, const kanooth_natnum& a, const kanooth_natnum& b)
-{ r.subtract(a, b); }
-inline void eval_subtract(kanooth_natnum& r, const kanooth_natnum& a, unsigned long b)
-{ r.subtract(a, b); }
-//inline void eval_subtract(kanooth_natnum& r, const kanooth_natnum& a, signed long b)
-//{ r.subtract(a, b); }
-
-inline void eval_multiply(kanooth_natnum& r, const kanooth_natnum& a)
-{ r.multiply(r, a); }
-inline void eval_multiply(kanooth_natnum& r, unsigned long a)
-{ r.multiply(r, a); }
-//inline void eval_multiply(kanooth_natnum& r, signed long a)
-//{ r.multiply(r, a); }
-inline void eval_multiply(kanooth_natnum& r, const kanooth_natnum& a, const kanooth_natnum& b)
-{ r.multiply(a, b); }
-inline void eval_multiply(kanooth_natnum& r, const kanooth_natnum& a, unsigned long b)
-{ r.multiply(a, b); }
-//inline void eval_multiply(kanooth_natnum& r, const kanooth_natnum& a, signed long b)
-//{ r.multiply(a, b); }
-
-inline void eval_divide(kanooth_natnum& r, const kanooth_natnum& a)
-{ r.divide(r, a); }
-inline void eval_divide(kanooth_natnum& r, unsigned long a)
-{ r.divide(r, a); }
-//inline void eval_divide(kanooth_natnum& r, signed long a)
-//{ r.divide(r, a); }
-inline void eval_divide(kanooth_natnum& r, const kanooth_natnum& a, const kanooth_natnum& b)
-{ r.divide(a, b); }
-inline void eval_divide(kanooth_natnum& r, const kanooth_natnum& a, unsigned long b)
-{ r.divide(a, b); }
-//inline void eval_divide(kanooth_natnum& r, const kanooth_natnum& a, signed long b)
-//{ r.divide(a, b); }
-
-inline void eval_modulus(kanooth_natnum& r, const kanooth_natnum& a)
-{ r.modulus(r, a); }
-inline void eval_modulus(kanooth_natnum& r, unsigned long a)
-{ r.modulus(r, a); }
-//inline void eval_modulus(kanooth_natnum& r, signed long a)
-//{ r.modulus(r, a); }
-inline void eval_modulus(kanooth_natnum& r, const kanooth_natnum& a, const kanooth_natnum& b)
-{ r.modulus(a, b); }
-inline void eval_modulus(kanooth_natnum& r, const kanooth_natnum& a, unsigned long b)
-{ r.modulus(a, b); }
-//inline void eval_modulus(kanooth_natnum& r, const kanooth_natnum& a, signed long b)
-//{ r.modulus(a, b); }
-
-inline void eval_qr(const kanooth_natnum& x, const kanooth_natnum& y, kanooth_natnum& q, kanooth_natnum& r) {
-    kanooth_natnum::quotrem(q, r, x, y);
+namespace {
+    template <typename T>
+    typename boost::make_unsigned<T>::type to_unsigned(T v)
+    {
+        return static_cast<typename boost::make_unsigned<T>::type>(v);
+    }
 }
 
-template <class Integer>
-inline typename enable_if<is_unsigned<Integer>, Integer>::type eval_integer_modulus(const kanooth_natnum& x, Integer val)
+template <typename B>
+inline bool eval_is_zero(const kanooth_natnum<B>& val)
+{ return val.is_zero(); }
+
+template <typename B>
+inline void eval_add(kanooth_natnum<B>& r, const kanooth_natnum<B>& a)
+{
+    r.add(r, a);
+}
+template <typename B>
+inline void eval_add(kanooth_natnum<B>& r, const kanooth_natnum<B>& a, const kanooth_natnum<B>& b)
+{
+    r.add(a, b);
+}
+template <typename B>
+inline void eval_subtract(kanooth_natnum<B>& r, const kanooth_natnum<B>& a)
+{
+    r.subtract(r, a);
+}
+template <typename B>
+inline void eval_subtract(kanooth_natnum<B>& r, const kanooth_natnum<B>& a, const kanooth_natnum<B>& b)
+{
+    r.subtract(a, b);
+}
+template <typename B>
+inline void eval_multiply(kanooth_natnum<B>& r, const kanooth_natnum<B>& a)
+{
+    r.multiply(r, a);
+}
+template <typename B>
+inline void eval_multiply(kanooth_natnum<B>& r, const kanooth_natnum<B>& a, const kanooth_natnum<B>& b)
+{
+    r.multiply(a, b);
+}
+template <typename B>
+inline void eval_divide(kanooth_natnum<B>& r, const kanooth_natnum<B>& a)
+{
+    r.divide(r, a);
+}
+template <typename B>
+inline void eval_divide(kanooth_natnum<B>& r, const kanooth_natnum<B>& a, const kanooth_natnum<B>& b)
+{
+    r.divide(a, b);
+}
+template <typename B>
+inline void eval_modulus(kanooth_natnum<B>& r, const kanooth_natnum<B>& a)
+{
+    r.modulus(r, a);
+}
+template <typename B>
+inline void eval_modulus(kanooth_natnum<B>& r, const kanooth_natnum<B>& a, const kanooth_natnum<B>& b)
+{
+    r.modulus(a, b);
+}
+
+
+template <typename B, typename T>
+inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
+eval_add(kanooth_natnum<B>& r, T a)
+{
+    r.add(r, to_unsigned(a));
+}
+
+template <typename B, typename T>
+inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
+eval_subtract(kanooth_natnum<B>& r, T a)
+{
+    r.subtract(r, to_unsigned(a));
+}
+
+template <typename B, typename T>
+inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
+eval_multiply(kanooth_natnum<B>& r, T a)
+{
+    r.multiply(r, to_unsigned(a));
+}
+
+template <typename B, typename T>
+inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
+eval_divide(kanooth_natnum<B>& r, T a)
+{
+    r.divide(r, to_unsigned(a));
+}
+
+template <typename B, typename T>
+inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
+eval_modulus(kanooth_natnum<B>& r, T a)
+{
+    r.modulus(r, to_unsigned(a));
+}
+
+template <typename B, typename T>
+inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
+eval_add(kanooth_natnum<B>& r, kanooth_natnum<B>& a, T b)
+{
+    r.add(a, to_unsigned(a));
+}
+
+template <typename B, typename T>
+inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
+eval_subtract(kanooth_natnum<B>& r, kanooth_natnum<B>& a, T b)
+{
+    r.subtract(a, to_unsigned(a));
+}
+
+template <typename B, typename T>
+inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
+eval_multiply(kanooth_natnum<B>& r, kanooth_natnum<B>& a, T b)
+{
+    r.multiply(a, to_unsigned(a));
+}
+
+template <typename B, typename T>
+inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
+eval_divide(kanooth_natnum<B>& r, kanooth_natnum<B>& a, T b)
+{
+    r.divide(a, to_unsigned(a));
+}
+
+template <typename B, typename T>
+inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
+eval_modulus(kanooth_natnum<B>& r, kanooth_natnum<B>& a, T b)
+{
+    r.modulus(a, to_unsigned(a));
+}
+
+
+template <typename B, typename T>
+inline void eval_qr(const kanooth_natnum<B>& x, const kanooth_natnum<B>& y, kanooth_natnum<B>& q, kanooth_natnum<B>& r)
+{
+    kanooth_natnum<B>::quotrem(q, r, x, y);
+}
+
+template <typename B, class Integer>
+inline typename enable_if<is_unsigned<Integer>, Integer>::type eval_integer_modulus(const kanooth_natnum<B>& x, Integer val)
 {
     if ((sizeof(Integer) <= sizeof(long)) || (val <= (std::numeric_limits<unsigned long>::max)())) {
-        return kanooth_natnum::modulus(x, static_cast<unsigned long>(val));
+        return kanooth_natnum<B>::modulus(x, static_cast<unsigned long>(val));
     } else {
         return default_ops::eval_integer_modulus(x, val);
     }
 }
-template <class Integer>
-inline typename enable_if<is_signed<Integer>, Integer>::type eval_integer_modulus(const kanooth_natnum& x, Integer val)
+
+template <typename B, class Integer>
+inline typename enable_if<is_signed<Integer>, Integer>::type eval_integer_modulus(const kanooth_natnum<B>& x, Integer val)
 {
    typedef typename make_unsigned<Integer>::type unsigned_type;
    return eval_integer_modulus(x, static_cast<unsigned_type>(std::abs(val)));
 }
 
-inline void eval_bitwise_and(kanooth_natnum& result, const kanooth_natnum& v)
+template <typename B>
+inline void eval_bitwise_and(kanooth_natnum<B>& result, const kanooth_natnum<B>& v)
 {
    result.bitwise_and(result, v);
 }
 
-inline void eval_bitwise_or(kanooth_natnum& result, const kanooth_natnum& v)
+template <typename B>
+inline void eval_bitwise_or(kanooth_natnum<B>& result, const kanooth_natnum<B>& v)
 {
    result.bitwise_or(result, v);
 }
 
-inline void eval_bitwise_xor(kanooth_natnum& result, const kanooth_natnum& v)
+template <typename B>
+inline void eval_bitwise_xor(kanooth_natnum<B>& result, const kanooth_natnum<B>& v)
 {
    result.bitwise_xor(result, v);
 }
 
-inline void eval_bitwise_and(kanooth_natnum& result, const kanooth_natnum& u, const kanooth_natnum& v)
+template <typename B>
+inline void eval_bitwise_and(kanooth_natnum<B>& result, const kanooth_natnum<B>& u, const kanooth_natnum<B>& v)
 {
    result.bitwise_and(u, v);
 }
 
-inline void eval_bitwise_or(kanooth_natnum& result, const kanooth_natnum& u, const kanooth_natnum& v)
+template <typename B>
+inline void eval_bitwise_or(kanooth_natnum<B>& result, const kanooth_natnum<B>& u, const kanooth_natnum<B>& v)
 {
    result.bitwise_or(u, v);
 }
 
-inline void eval_bitwise_xor(kanooth_natnum& result, const kanooth_natnum& u, const kanooth_natnum& v)
+template <typename B>
+inline void eval_bitwise_xor(kanooth_natnum<B>& result, const kanooth_natnum<B>& u, const kanooth_natnum<B>& v)
 {
    result.bitwise_xor(u, v);
 }
 
-inline void eval_left_shift(kanooth_natnum& r, unsigned long v)
+template <typename B>
+inline void eval_left_shift(kanooth_natnum<B>& r, unsigned long v)
 {
    r.left_shift(r, v);
 }
 
-inline void eval_left_shift(kanooth_natnum& r, kanooth_natnum& u, unsigned long v)
+template <typename B>
+inline void eval_left_shift(kanooth_natnum<B>& r, kanooth_natnum<B>& u, unsigned long v)
 {
    r.left_shift(u, v);
 }
 
-inline void eval_right_shift(kanooth_natnum& r, unsigned long v)
+template <typename B>
+inline void eval_right_shift(kanooth_natnum<B>& r, unsigned long v)
 {
    r.right_shift(r, v);
 }
 
-inline void eval_right_shift(kanooth_natnum& r, kanooth_natnum& u, unsigned long v)
+template <typename B>
+inline void eval_right_shift(kanooth_natnum<B>& r, kanooth_natnum<B>& u, unsigned long v)
 {
    r.right_shift(u, v);
 }
 
-inline bool eval_bit_test(const kanooth_natnum& u, unsigned pos)
+template <typename B>
+inline bool eval_bit_test(const kanooth_natnum<B>& u, unsigned pos)
 {
     return u.bit_test(pos);
 }
 
-inline void eval_bit_set(kanooth_natnum& u, unsigned pos)
+template <typename B>
+inline void eval_bit_set(kanooth_natnum<B>& u, unsigned pos)
 {
     u.bit_set(pos);
 }
 
-inline void eval_bit_unset(kanooth_natnum& u, unsigned pos)
+template <typename B>
+inline void eval_bit_unset(kanooth_natnum<B>& u, unsigned pos)
 {
     u.bit_unset(pos);
 }
 
-inline void eval_bit_flip(kanooth_natnum& u, unsigned pos)
+template <typename B>
+inline void eval_bit_flip(kanooth_natnum<B>& u, unsigned pos)
 {
     u.bit_flip(pos);
 }
 
-inline bool eval_eq(const kanooth_natnum& a, const kanooth_natnum& b)
-{ return a.compare(b) == 0; }
+template <typename B>
+inline bool eval_eq(const kanooth_natnum<B>& a, const kanooth_natnum<B>& b)
+{
+    return a.compare(b) == 0;
+}
 
-template <class T>
-inline typename enable_if<mpl::contains<kanooth_natnum::native_types, T>, bool>::type
-eval_eq(const kanooth_natnum& a, T b)
-{ return a.compare(b) == 0; }
+template <typename B, typename T>
+inline typename kanooth_natnum<B>::template if_supported_int<T, bool>::type
+eval_eq(const kanooth_natnum<B>& a, T b)
+{
+    return a.compare(to_unsigned(b)) == 0;
+}
 
-inline bool eval_lt(const kanooth_natnum& a, const kanooth_natnum& b)
-{ return a.compare(b) < 0; }
+template <typename B>
+inline bool eval_lt(const kanooth_natnum<B>& a, const kanooth_natnum<B>& b)
+{
+    return a.compare(b) < 0;
+}
 
-template <class T>
-inline typename enable_if<mpl::contains<kanooth_natnum::native_types, T>, bool>::type
-eval_lt(const kanooth_natnum& a, T b)
-{ return a.compare(b) < 0; }
+template <typename B, typename T>
+inline typename kanooth_natnum<B>::template if_supported_int<T, bool>::type
+eval_lt(const kanooth_natnum<B>& a, T b)
+{
+    return a.compare(b) < 0;
+}
 
-inline bool eval_gt(const kanooth_natnum& a, const kanooth_natnum& b)
-{ return a.compare(b) > 0; }
-template <class T>
-inline typename enable_if<mpl::contains<kanooth_natnum::native_types, T>, bool>::type
-eval_gt(const kanooth_natnum& a, T b)
-{ return a.compare(b) > 0; }
+template <typename B>
+inline bool eval_gt(const kanooth_natnum<B>& a, const kanooth_natnum<B>& b)
+{
+    return a.compare(b) > 0;
+}
+
+template <typename B, typename T>
+inline typename kanooth_natnum<B>::template if_supported_int<T, bool>::type
+eval_gt(const kanooth_natnum<B>& a, T b)
+{
+    return a.compare(b) > 0;
+}
 
 } // namespace backends
 } // namespace multiprecision
@@ -227,17 +337,17 @@ eval_gt(const kanooth_natnum& a, T b)
 namespace kanooth {
 namespace numbers {
 
-typedef boost::multiprecision::number<boost::multiprecision::backends::kanooth_natnum> boost_natnum;
+typedef boost::multiprecision::number<boost::multiprecision::backends::kanooth_natnum<unsigned long> > boost_natnum;
 
 } // namespace numbers
 } // namespace kanooth
 
 namespace std {
 
-template<boost::multiprecision::expression_template_option ExpressionTemplates>
-class numeric_limits<boost::multiprecision::number<boost::multiprecision::backends::kanooth_natnum, ExpressionTemplates> >
+template <typename B, boost::multiprecision::expression_template_option ExpressionTemplates>
+class numeric_limits<boost::multiprecision::number<boost::multiprecision::backends::kanooth_natnum<B>, ExpressionTemplates> >
 {
-   typedef boost::multiprecision::number<boost::multiprecision::backends::kanooth_natnum, ExpressionTemplates> number_type;
+   typedef boost::multiprecision::number<boost::multiprecision::backends::kanooth_natnum<B>, ExpressionTemplates> number_type;
 public:
    BOOST_STATIC_CONSTEXPR bool is_specialized = true;
    //
@@ -285,4 +395,4 @@ public:
 
 } // namespace std
 
-#endif // KANOOTH_NUMBERS_BOOST_INTEGER_HPP
+#endif // KANOOTH_NUMBERS_BOOST_NATNUM_HPP

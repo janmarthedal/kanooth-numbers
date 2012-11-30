@@ -127,17 +127,17 @@ public:
     }
     
     inline void modulus_truncate(const integer_base& a, unsigned long b) {
-        number = a.number.modulus(b);
+        number.modulus(a.number, b);
         positive = a.positive;
     }
     
     inline void modulus_truncate(const integer_base& a, signed long b) {
-        number = a.number.modulus(static_cast<unsigned long>(b >= 0 ? b : -b));
+        number.modulus(a.number, static_cast<unsigned long>(b >= 0 ? b : -b));
         positive = a.positive;
     }
 
     static inline unsigned long integer_modulus(const integer_base& a, unsigned long b) {
-        return a.number.modulus(b);
+        return base_type::integer_modulus(a.number, b);
     }
     
     static inline void quotrem(integer_base& q, integer_base& r, const integer_base& a, const integer_base& b) {
