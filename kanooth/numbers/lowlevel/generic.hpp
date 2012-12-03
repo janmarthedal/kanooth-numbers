@@ -20,420 +20,391 @@ namespace kanooth {
 namespace numbers {
 namespace lowlevel {
 
+template <typename T>
 class generic {
 public:
+    
+    typedef T digit_type;
+    static const unsigned digit_bits = kanooth::number_bits<digit_type>::value;
 
-  template <typename T>
-  static inline void copy_forward(T* z1, const T* x1, const std::size_t n)
-  {
-    if (n && z1 != x1)
-      std::copy(x1, x1 + n, z1);
-  }
-
-  template <typename T>
-  static inline void copy_backward(T* z1, const T* x1, const std::size_t n)
-  {
-    if (n && z1 != x1)
-      std::copy_backward(x1, x1 + n, z1 + n);
-  }
-
-  template <typename T>
-  static inline void fill_zero(T* rp, const std::size_t n)
-  {
-    std::fill_n(rp, n, 0);
-  }
-
-  template <typename T>
-  static inline T add_1(T* rp, const T* xp, std::size_t n, const T y)
-  {
-    if (!n) return y;
-    if (y) {
-      T z = *xp + y;
-      *rp = z;
-      ++rp; ++xp; --n;
-      if (z < y)
-        return inc(rp, xp, n);
+    static inline void copy_forward(digit_type* z1, const digit_type* x1, const std::size_t n)
+    {
+      if (n && z1 != x1)
+        std::copy(x1, x1 + n, z1);
     }
-    copy_forward(rp, xp, n);
-    return 0;
-  }
 
-  template <typename T>
-  static T add(T* rp, const T* xp, const std::size_t xn,
-               const T* yp, const std::size_t yn)
-  {
-    assert(xn >= yn);
-    T carry = add_n(rp, xp, yp, yn);
-    return add_1(rp + yn, xp + yn, xn - yn, carry);    
-  }
-
-  template <typename T>
-  static inline T sub_1(T* rp, const T* xp, std::size_t n, const T y)
-  {
-    if (!n) return y;
-    if (y) {
-      T x = *xp;
-      *rp = x - y;
-      ++rp; ++xp; --n;
-      if (x < y)
-        return dec(rp, xp, n);
+    static inline void copy_backward(digit_type* z1, const digit_type* x1, const std::size_t n)
+    {
+      if (n && z1 != x1)
+        std::copy_backward(x1, x1 + n, z1 + n);
     }
-    copy_forward(rp, xp, n);
-    return 0;
-  }
 
-  template <typename T>
-  static T sub(T* rp, const T* xp, const std::size_t xn,
-               const T* yp, const std::size_t yn)
-  {
-    assert(xn >= yn);
-    T borrow = sub_n(rp, xp, yp, yn);
-    return sub_1(rp + yn, xp + yn, xn - yn, borrow);
-  }
+    static inline void fill_zero(digit_type* rp, const std::size_t n)
+    {
+      std::fill_n(rp, n, 0);
+    }
 
-  template <typename T>
-  static inline T mul_1(T* rp, const T* xp, std::size_t n, const T y) {
-    return multiply_sequence_with_digit(xp, xp+n, rp, y);
-  }
+    static inline digit_type add_1(digit_type* rp, const digit_type* xp, std::size_t n, const digit_type y)
+    {
+      if (!n) return y;
+      if (y) {
+        digit_type z = *xp + y;
+        *rp = z;
+        ++rp; ++xp; --n;
+        if (z < y)
+          return inc(rp, xp, n);
+      }
+      copy_forward(rp, xp, n);
+      return 0;
+    }
 
-  template <typename T>
-  static inline void mul(T* rp, const T* xp, const std::size_t xn,
-                         const T* yp, const std::size_t yn) {
-    assert(yn >= 1);
-    assert(xn >= yn);
-    assert(rp+xn+yn <= xp || rp >= xp+xn);
-    assert(rp+xn+yn <= yp || rp >= yp+yn);
-    multiply_sequences(xp, xp+xn, yp, yp+yn, rp);
-  }
+    static digit_type add(digit_type* rp, const digit_type* xp, const std::size_t xn,
+                 const digit_type* yp, const std::size_t yn)
+    {
+      assert(xn >= yn);
+      digit_type carry = add_n(rp, xp, yp, yn);
+      return add_1(rp + yn, xp + yn, xn - yn, carry);    
+    }
 
-  template <typename T>
-  static inline T quotrem_1(T* z1, T top_digit, const T* x1, std::size_t n, T y) {
-    assert(n != 0);
-    assert(y != 0);
-    assert(y & (T(1) << (kanooth::number_bits<T>::value - 1)));  // nlz(y) == 0
-    T* z2 = z1 + n;
-    const T* x2 = x1 + n;
-    T r = top_digit;
-    while (x2 != x1)
-      double_div_normalized(r, *--x2, y, *--z2, r);
-    return r;
-  }
+    static inline digit_type sub_1(digit_type* rp, const digit_type* xp, std::size_t n, const digit_type y)
+    {
+      if (!n) return y;
+      if (y) {
+        digit_type x = *xp;
+        *rp = x - y;
+        ++rp; ++xp; --n;
+        if (x < y)
+          return dec(rp, xp, n);
+      }
+      copy_forward(rp, xp, n);
+      return 0;
+    }
 
-  // u1[un..0] divided by v1[vn-1..0]
-  // on exit: quotient in q1, remainder in u1
-  template <typename T>
-  static void quotrem(T* q1, T* u1, const std::size_t un,
-                      const T* v1, const std::size_t vn) {
-    assert(vn >= 1);
-    assert(un >= vn);
-    assert(v1[vn-1] & (T(1) << (kanooth::number_bits<T>::value - 1)));
-    assert(u1[un] < v1[vn-1]);  // note: u1[un] must be well-defined
-    assert(q1+un-vn+1 <= u1 || q1 >= u1+un+1);
-    assert(q1+un-vn+1 <= v1 || q1 >= v1+vn);
-    assert(u1+un+1 <= v1 || u1 >= v1+vn);
-    if (vn == 1)
-      u1[0] = quotrem_1(q1, u1[un], u1, un, v1[0]);
-    else {  // vn >= 2
-      T wn1 = v1[vn-1], wn2 = v1[vn-2];
-      T tjn, qh, k;
+    static digit_type sub(digit_type* rp, const digit_type* xp, const std::size_t xn,
+                 const digit_type* yp, const std::size_t yn)
+    {
+      assert(xn >= yn);
+      digit_type borrow = sub_n(rp, xp, yp, yn);
+      return sub_1(rp + yn, xp + yn, xn - yn, borrow);
+    }
 
-      for (int j=un-vn; j >= 0; --j) {
-        tjn = u1[j+vn];
-        qh = calc_qh(tjn, u1[j+vn-1], u1[j+vn-2], wn1, wn2);
-        k = sequence_mult_digit_sub(u1+j, u1+j+vn, v1, qh);
-        u1[j+vn] = tjn - k;
-        if (k > tjn) {   // qh too big?
-          u1[j+vn] += add_n(u1+j, u1+j, v1, vn);
-          --qh;
+    static inline digit_type mul_1(digit_type* rp, const digit_type* xp, std::size_t n, const digit_type y) {
+      return multiply_sequence_with_digit(xp, xp+n, rp, y);
+    }
+
+    static inline void mul(digit_type* rp, const digit_type* xp, const std::size_t xn,
+                           const digit_type* yp, const std::size_t yn) {
+      assert(yn >= 1);
+      assert(xn >= yn);
+      assert(rp+xn+yn <= xp || rp >= xp+xn);
+      assert(rp+xn+yn <= yp || rp >= yp+yn);
+      multiply_sequences(xp, xp+xn, yp, yp+yn, rp);
+    }
+
+    static inline digit_type quotrem_1(digit_type* z1, digit_type top_digit, const digit_type* x1, std::size_t n, digit_type y) {
+      assert(n != 0);
+      assert(y != 0);
+      assert(y & (digit_type(1) << (digit_bits - 1)));  // nlz(y) == 0
+      digit_type* z2 = z1 + n;
+      const digit_type* x2 = x1 + n;
+      digit_type r = top_digit;
+      while (x2 != x1)
+        double_div_normalized(r, *--x2, y, *--z2, r);
+      return r;
+    }
+
+    // u1[un..0] divided by v1[vn-1..0]
+    // on exit: quotient in q1, remainder in u1
+    static void quotrem(digit_type* q1, digit_type* u1, const std::size_t un,
+                        const digit_type* v1, const std::size_t vn) {
+      assert(vn >= 1);
+      assert(un >= vn);
+      assert(v1[vn-1] & (digit_type(1) << (digit_bits - 1)));
+      assert(u1[un] < v1[vn-1]);  // note: u1[un] must be well-defined
+      assert(q1+un-vn+1 <= u1 || q1 >= u1+un+1);
+      assert(q1+un-vn+1 <= v1 || q1 >= v1+vn);
+      assert(u1+un+1 <= v1 || u1 >= v1+vn);
+      if (vn == 1)
+        u1[0] = quotrem_1(q1, u1[un], u1, un, v1[0]);
+      else {  // vn >= 2
+        digit_type wn1 = v1[vn-1], wn2 = v1[vn-2];
+        digit_type tjn, qh, k;
+
+        for (int j=un-vn; j >= 0; --j) {
+          tjn = u1[j+vn];
+          qh = calc_qh(tjn, u1[j+vn-1], u1[j+vn-2], wn1, wn2);
+          k = sequence_mult_digit_sub(u1+j, u1+j+vn, v1, qh);
+          u1[j+vn] = tjn - k;
+          if (k > tjn) {   // qh too big?
+            u1[j+vn] += add_n(u1+j, u1+j, v1, vn);
+            --qh;
+          }
+          q1[j] = qh;
         }
-        q1[j] = qh;
       }
     }
-  }
 
-  template <typename T>
-  static T lshift(T* z1, const T* x1, const std::size_t n, const unsigned count) {
-    assert(n != 0);
-    assert(z1+n <= x1 || z1 >= x1);
-    assert(count >= 1);
-    assert(count < kanooth::number_bits<T>::value);
-    const unsigned int rcount = kanooth::number_bits<T>::value - count;
-    T* z2 = z1 + n;
-    const T* x2 = x1 + n;
-    T xl = *--x2, xh;
-    T r = xl >> rcount;
-    while (x2 != x1) {
-      xh = xl;
-      xl = *--x2;
-      *--z2 = (xh << count) | (xl >> rcount);
+    static digit_type lshift(digit_type* z1, const digit_type* x1, const std::size_t n, const unsigned count) {
+      assert(n != 0);
+      assert(z1+n <= x1 || z1 >= x1);
+      assert(count >= 1);
+      assert(count < digit_bits);
+      const unsigned int rcount = digit_bits - count;
+      digit_type* z2 = z1 + n;
+      const digit_type* x2 = x1 + n;
+      digit_type xl = *--x2, xh;
+      digit_type r = xl >> rcount;
+      while (x2 != x1) {
+        xh = xl;
+        xl = *--x2;
+        *--z2 = (xh << count) | (xl >> rcount);
+      }
+      *--z2 = xl << count;
+      return r;
     }
-    *--z2 = xl << count;
-    return r;
-  }
 
-  template <typename T>
-  static T rshift(T* z1, const T* x1, std::size_t n, unsigned count) {
-    assert(n != 0);
-    assert(z1 <= x1 || z1 >= x1+n);
-    assert(count >= 1);
-    assert(count < kanooth::number_bits<T>::value);
-    const unsigned int rcount = kanooth::number_bits<T>::value - count;
-    const T* x2 = x1 + n;
-    T xl, xh = *x1++;
-    T r = xh << rcount;
-    while (x1 != x2) {
-      xl = xh;
-      xh = *x1++;
-      *z1++ = (xh << rcount) | (xl >> count);
+    static digit_type rshift(digit_type* z1, const digit_type* x1, std::size_t n, unsigned count) {
+      assert(n != 0);
+      assert(z1 <= x1 || z1 >= x1+n);
+      assert(count >= 1);
+      assert(count < digit_bits);
+      const unsigned int rcount = digit_bits - count;
+      const digit_type* x2 = x1 + n;
+      digit_type xl, xh = *x1++;
+      digit_type r = xh << rcount;
+      while (x1 != x2) {
+        xl = xh;
+        xh = *x1++;
+        *z1++ = (xh << rcount) | (xl >> count);
+      }
+      *z1++ = xh >> count;
+      return r;
     }
-    *z1++ = xh >> count;
-    return r;
-  }
 
-  template <typename T>
-  static int comp(const T* xp, const T* yp, std::size_t n) {
-    if (xp == yp) return 0;
-    xp += n;
-    yp += n;
-    while (n--) {
-      T x = *--xp;
-      T y = *--yp;
-      if (x < y) return -1;
-      if (x > y) return 1;
+    static int comp(const digit_type* xp, const digit_type* yp, std::size_t n) {
+      if (xp == yp) return 0;
+      xp += n;
+      yp += n;
+      while (n--) {
+        digit_type x = *--xp;
+        digit_type y = *--yp;
+        if (x < y) return -1;
+        if (x > y) return 1;
+      }
+      return 0;
     }
-    return 0;
-  }
 
-  template <typename T>
-  static void bitwise_and(T* zp, const T* xp, const T* yp, std::size_t n) {
-    while (n--)
-      *zp++ = *xp++ & *yp++;
-  }
+    static void bitwise_and(digit_type* zp, const digit_type* xp, const digit_type* yp, std::size_t n) {
+      while (n--)
+        *zp++ = *xp++ & *yp++;
+    }
 
-  template <typename T>
-  static void bitwise_or(T* zp, const T* xp, const T* yp, std::size_t n) {
-    while (n--)
-      *zp++ = *xp++ | *yp++;
-  }
+    static void bitwise_or(digit_type* zp, const digit_type* xp, const digit_type* yp, std::size_t n) {
+      while (n--)
+        *zp++ = *xp++ | *yp++;
+    }
 
-  template <typename T>
-  static void bitwise_xor(T* zp, const T* xp, const T* yp, std::size_t n) {
-    while (n--)
-      *zp++ = *xp++ ^ *yp++;
-  }
+    static void bitwise_xor(digit_type* zp, const digit_type* xp, const digit_type* yp, std::size_t n) {
+      while (n--)
+        *zp++ = *xp++ ^ *yp++;
+    }
 
-  template <typename T>
-  static void bitwise_and_not(T* zp, const T* xp, const T* yp, std::size_t n) {
-    while (n--)
-      *zp++ = *xp++ & ~*yp++;
-  }
+    static void bitwise_and_not(digit_type* zp, const digit_type* xp, const digit_type* yp, std::size_t n) {
+      while (n--)
+        *zp++ = *xp++ & ~*yp++;
+    }
 
 private:
 
-  template <typename T>
-  static inline T add_n(T* rp, const T* xp, const T* yp, std::size_t n)
-  {
-    T lx, ly, lz;
-    bool carry = false;
-    while (n--) {
-      lx = *xp++;
-      ly = *yp++;
-      if (carry) {
-        lz = lx + ly + 1;
-        carry = lz <= lx;
-      } else {
-        lz = lx + ly;
-        carry = lz < lx;
+    static inline digit_type add_n(digit_type* rp, const digit_type* xp, const digit_type* yp, std::size_t n)
+    {
+      digit_type lx, ly, lz;
+      bool carry = false;
+      while (n--) {
+        lx = *xp++;
+        ly = *yp++;
+        if (carry) {
+          lz = lx + ly + 1;
+          carry = lz <= lx;
+        } else {
+          lz = lx + ly;
+          carry = lz < lx;
+        }
+        *rp++ = lz;
       }
-      *rp++ = lz;
+      return carry ? 1 : 0;
     }
-    return carry ? 1 : 0;
-  }
 
-  template <typename T>
-  static inline T sub_n(T* rp, const T* xp, const T* yp, std::size_t n)
-  {
-    T lx, ly, lz;
-    bool borrow = false;
-    while (n--) {
-      lx = *xp++;
-      ly = *yp++;
-      if (borrow) {
-        lz = lx - ly - 1;
-        borrow = lx <= ly;
-      } else {
-        lz = lx - ly;
-        borrow = lx < ly;
+    static inline digit_type sub_n(digit_type* rp, const digit_type* xp, const digit_type* yp, std::size_t n)
+    {
+      digit_type lx, ly, lz;
+      bool borrow = false;
+      while (n--) {
+        lx = *xp++;
+        ly = *yp++;
+        if (borrow) {
+          lz = lx - ly - 1;
+          borrow = lx <= ly;
+        } else {
+          lz = lx - ly;
+          borrow = lx < ly;
+        }
+        *rp++ = lz;
       }
-      *rp++ = lz;
+      return borrow ? 1 : 0;
     }
-    return borrow ? 1 : 0;
-  }
 
-  template <typename T>
-  static inline T inc(T* rp, const T* xp, std::size_t n)
-  {
-    while (n && *xp == T(-1)) {
-      *rp = 0;
+    static inline digit_type inc(digit_type* rp, const digit_type* xp, std::size_t n)
+    {
+      while (n && *xp == digit_type(-1)) {
+        *rp = 0;
+        ++rp; ++xp; --n;
+      }
+      if (!n) return 1;
+      *rp = *xp + 1;
       ++rp; ++xp; --n;
+      copy_forward(rp, xp, n);
+      return 0;
     }
-    if (!n) return 1;
-    *rp = *xp + 1;
-    ++rp; ++xp; --n;
-    copy_forward(rp, xp, n);
-    return 0;
-  }
 
-  template <typename T>
-  static inline T dec(T* rp, const T* xp, std::size_t n)
-  {
-    while (n && !*xp) {
-      *rp = T(-1);
+    static inline digit_type dec(digit_type* rp, const digit_type* xp, std::size_t n)
+    {
+      while (n && !*xp) {
+        *rp = digit_type(-1);
+        ++rp; ++xp; --n;
+      }
+      if (!n) return 1;
+      *rp = *xp - 1;
       ++rp; ++xp; --n;
+      copy_forward(rp, xp, n);
+      return 0;
     }
-    if (!n) return 1;
-    *rp = *xp - 1;
-    ++rp; ++xp; --n;
-    copy_forward(rp, xp, n);
-    return 0;
-  }
 
-  template <typename T>
-  static inline void double_mult_add_add(const T u, const T v, const T a1, const T a2, T& low, T& high)
-  {
-    const unsigned int halfbits = kanooth::number_bits<T>::value / 2;
-    const T lowmask = (((T) 1) << halfbits) - 1;
-    T u1 = u >> halfbits, u0 = u & lowmask;
-    T v1 = v >> halfbits, v0 = v & lowmask;
-    T r  = u0*v0 + (a1 & lowmask) + (a2 & lowmask);
-    T s  = u1*v0 + (a1 >> halfbits) + (r >> halfbits);
-    T t  = u0*v1 + (s & lowmask) + (a2 >> halfbits);
-    high = u1*v1 + (s >> halfbits) + (t >> halfbits);
-    low  = (t << halfbits) | (r & lowmask);
-  }
-
-  template <typename T>
-  static inline void double_mult_add(const T u, const T v, const T a, T& low, T& high)
-  {
-    double_mult_add_add(u, v, a, T(0), low, high);
-  }
-
-  template <typename T>
-  static inline T multiply_sequence_with_digit(const T* first, const T* last, T* dst, T v)
-  {
-    T k = 0;
-    while (first != last) {
-      double_mult_add(*first++, v, k, *dst, k);
-      dst++;
+    static inline void double_mult_add_add(const digit_type u, const digit_type v, const digit_type a1, const digit_type a2, digit_type& low, digit_type& high)
+    {
+      const unsigned int halfbits = digit_bits / 2;
+      const digit_type lowmask = (digit_type(1) << halfbits) - 1;
+      digit_type u1 = u >> halfbits, u0 = u & lowmask;
+      digit_type v1 = v >> halfbits, v0 = v & lowmask;
+      digit_type r  = u0*v0 + (a1 & lowmask) + (a2 & lowmask);
+      digit_type s  = u1*v0 + (a1 >> halfbits) + (r >> halfbits);
+      digit_type t  = u0*v1 + (s & lowmask) + (a2 >> halfbits);
+      high = u1*v1 + (s >> halfbits) + (t >> halfbits);
+      low  = (t << halfbits) | (r & lowmask);
     }
-    return k;
-  }
 
-  template <typename T>
-  static inline T multiply_add_sequence_with_digit(const T* first, const T* last, T* dst, T v)
-  {
-    T k = 0;
-    while (first != last) {
-      double_mult_add_add(*first++, v, *dst, k, *dst, k);
-      dst++;
+    static inline void double_mult_add(const digit_type u, const digit_type v, const digit_type a, digit_type& low, digit_type& high)
+    {
+      double_mult_add_add(u, v, a, digit_type(0), low, high);
     }
-    return k;
-  }
 
-  template <typename T>
-  static inline void multiply_sequences(const T* ufirst, const T* ulast,
-      const T* vfirst, const T* vlast, T* wfirst)
-  {
-    assert(ufirst < ulast);
-    assert(vfirst < vlast);
-    T *wlast = wfirst + (ulast - ufirst);
-    *wlast++ = multiply_sequence_with_digit(ufirst, ulast, wfirst++, *vfirst++);
-    while (vfirst != vlast)
-      *wlast++ = multiply_add_sequence_with_digit(ufirst, ulast, wfirst++, *vfirst++);
-  }
-
-  template <typename T>
-  static void double_div_normalized(T uhigh, T ulow, T v, T& quot, T& rem)
-  {
-    const unsigned int digitbits = kanooth::number_bits<T>::value;
-    const unsigned int halfbits = digitbits / 2;
-    const T lowmask = (((T) 1) << halfbits) - 1;
-    const T highmask = lowmask << halfbits;
-    const T v1 = v >> halfbits;
-    const T v0 = v & lowmask;
-    const T u1 = ulow >> halfbits;
-    const T u0 = ulow & lowmask;
-    T q1, q0, r;
-
-    assert(v & (T(1) << (digitbits-1)));  // nlz(v) == 0
-    q1 = uhigh / v1;
-    r  = uhigh % v1;
-    while ((q1 & highmask) || q1*v0 > ((r << halfbits) | u1)) {
-      --q1;
-      r += v1;
-      if (r & highmask) break;
+    static inline digit_type multiply_sequence_with_digit(const digit_type* first, const digit_type* last, digit_type* dst, digit_type v)
+    {
+      digit_type k = 0;
+      while (first != last) {
+        double_mult_add(*first++, v, k, *dst, k);
+        dst++;
+      }
+      return k;
     }
-    r = ((r << halfbits) | u1) - q1*v0;
-    q0 = r / v1;
-    r = r % v1;
-    while ((q0 & highmask) || q0*v0 > ((r << halfbits) | u0)) {
-      --q0;
-      r += v1;
-      if (r & highmask) break;
+
+    static inline digit_type multiply_add_sequence_with_digit(const digit_type* first, const digit_type* last, digit_type* dst, digit_type v)
+    {
+      digit_type k = 0;
+      while (first != last) {
+        double_mult_add_add(*first++, v, *dst, k, *dst, k);
+        dst++;
+      }
+      return k;
     }
-    r = ((r << halfbits) | u0) - q0*v0;
 
-    quot = (q1 << halfbits) | q0;
-    rem = r;
-  }
+    static inline void multiply_sequences(const digit_type* ufirst, const digit_type* ulast,
+        const digit_type* vfirst, const digit_type* vlast, digit_type* wfirst)
+    {
+      assert(ufirst < ulast);
+      assert(vfirst < vlast);
+      digit_type *wlast = wfirst + (ulast - ufirst);
+      *wlast++ = multiply_sequence_with_digit(ufirst, ulast, wfirst++, *vfirst++);
+      while (vfirst != vlast)
+        *wlast++ = multiply_add_sequence_with_digit(ufirst, ulast, wfirst++, *vfirst++);
+    }
 
-  template <typename T>
-  static inline T mult_sub_sub(T& w, const T u, const T v, T k)
-  {
-    T wt;
-    double_mult_add(u, v, k, wt, k);
-    if (wt > w) ++k;
-    w -= wt;
-    return k;
-  }
+    static void double_div_normalized(digit_type uhigh, digit_type ulow, digit_type v, digit_type& quot, digit_type& rem)
+    {
+      const unsigned int halfbits = digit_bits / 2;
+      const digit_type lowmask = (((digit_type) 1) << halfbits) - 1;
+      const digit_type highmask = lowmask << halfbits;
+      const digit_type v1 = v >> halfbits;
+      const digit_type v0 = v & lowmask;
+      const digit_type u1 = ulow >> halfbits;
+      const digit_type u0 = ulow & lowmask;
+      digit_type q1, q0, r;
 
-  template <typename T>
-  static T sequence_mult_digit_sub(T* ufirst, T* ulast, const T* vfirst, T q)
-  {
-    T k = 0;
-    while (ufirst != ulast)
-      k = mult_sub_sub(*ufirst++, *vfirst++, q, k);
-    return k;
-  }
+      assert(v & (digit_type(1) << (digit_bits-1)));  // nlz(v) == 0
+      q1 = uhigh / v1;
+      r  = uhigh % v1;
+      while ((q1 & highmask) || q1*v0 > ((r << halfbits) | u1)) {
+        --q1;
+        r += v1;
+        if (r & highmask) break;
+      }
+      r = ((r << halfbits) | u1) - q1*v0;
+      q0 = r / v1;
+      r = r % v1;
+      while ((q0 & highmask) || q0*v0 > ((r << halfbits) | u0)) {
+        --q0;
+        r += v1;
+        if (r & highmask) break;
+      }
+      r = ((r << halfbits) | u0) - q0*v0;
 
-  template <typename T>
-  static inline void double_mult(const T u, const T v, T& low, T& high)
-  {
-    double_mult_add_add(u, v, T(0), T(0), low, high);
-  }
+      quot = (q1 << halfbits) | q0;
+      rem = r;
+    }
 
-  template <typename T>
-  static inline T calc_qh(T ujn, T ujn1, T ujn2, T vn1, T vn2)
-  {
-    T qh, rh, high, low;
+    static inline digit_type mult_sub_sub(digit_type& w, const digit_type u, const digit_type v, digit_type k)
+    {
+      digit_type wt;
+      double_mult_add(u, v, k, wt, k);
+      if (wt > w) ++k;
+      w -= wt;
+      return k;
+    }
 
-    if (ujn == vn1) {
-      qh = T(-1);
-      rh = ujn1 + vn1;
-      if (rh < vn1) return qh;
-    } else
-      double_div_normalized(ujn, ujn1, vn1, qh, rh);
+    static digit_type sequence_mult_digit_sub(digit_type* ufirst, digit_type* ulast, const digit_type* vfirst, digit_type q)
+    {
+      digit_type k = 0;
+      while (ufirst != ulast)
+        k = mult_sub_sub(*ufirst++, *vfirst++, q, k);
+      return k;
+    }
 
-    double_mult(qh, vn2, low, high);
-    while (high > rh || (high == rh && low > ujn2)) {
-      --qh;
-      rh += vn1;
-      if (rh < vn1) break;  // overflow
+    static inline void double_mult(const digit_type u, const digit_type v, digit_type& low, digit_type& high)
+    {
+      double_mult_add_add(u, v, digit_type(0), digit_type(0), low, high);
+    }
+
+    static inline digit_type calc_qh(digit_type ujn, digit_type ujn1, digit_type ujn2, digit_type vn1, digit_type vn2)
+    {
+      digit_type qh, rh, high, low;
+
+      if (ujn == vn1) {
+        qh = digit_type(-1);
+        rh = ujn1 + vn1;
+        if (rh < vn1) return qh;
+      } else
+        double_div_normalized(ujn, ujn1, vn1, qh, rh);
+
       double_mult(qh, vn2, low, high);
-    }
+      while (high > rh || (high == rh && low > ujn2)) {
+        --qh;
+        rh += vn1;
+        if (rh < vn1) break;  // overflow
+        double_mult(qh, vn2, low, high);
+      }
 
-    return qh;
-  }
+      return qh;
+    }
 
 };
 

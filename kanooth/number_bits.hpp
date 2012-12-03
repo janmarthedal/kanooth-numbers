@@ -10,8 +10,8 @@
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-#ifndef _KANOOTH_TYPE_TRAITS_HPP_
-#define _KANOOTH_TYPE_TRAITS_HPP_
+#ifndef KANOOTH_NUMBER_BITS_HPP
+#define KANOOTH_NUMBER_BITS_HPP
 
 #ifdef KANOOTH_USE_BOOST
 #include <boost/integer_traits.hpp>
@@ -45,4 +45,4 @@ namespace kanooth {
 
 } // namespace kanooth
 
-#endif // _KANOOTH_TYPE_TRAITS_HPP_
+#endif // KANOOTH_NUMBER_BITS_HPP

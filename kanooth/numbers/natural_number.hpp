@@ -43,13 +43,14 @@ namespace {
 
 }
 
+typedef kanooth::numbers::lowlevel::generic<unsigned long> best_low_level;
 
-template <typename T = unsigned long, typename LowLevel = lowlevel::generic, typename Allocator = std::allocator<T> >
-class natural_number : private Allocator::template rebind<T>::other {
+template <typename LowLevel = best_low_level, typename Allocator = std::allocator<void> >
+class natural_number : private Allocator::template rebind<typename LowLevel::digit_type>::other
+{
 
-    typedef typename Allocator::template rebind<T>::other allocator_type;
-    typedef typename allocator_type::value_type digit_type;
-    typedef typename allocator_type::pointer digit_ptr;
+    typedef typename LowLevel::digit_type digit_type;
+    typedef typename Allocator::template rebind<digit_type>::other allocator_type;
     typedef typename allocator_type::size_type size_type;
     static const unsigned digit_bits = kanooth::number_bits<digit_type>::value;
     static const unsigned digit_decimals = std::numeric_limits<digit_type>::digits10;
@@ -121,9 +122,15 @@ public:
     }
 
     // http://cpp-next.com/archive/2009/08/want-speed-pass-by-value/
-    natural_number& operator=(natural_number other)
+    natural_number& operator=(const natural_number& other)
     {
-        swap(other);
+        if (this == &other) {
+        } else if (allocated >= other.digits) {
+            LowLevel::copy_forward(digit_array, other.digit_array, other.digits);
+            digits = other.digits;
+        } else {
+            natural_number(other).swap(*this);
+        }
         return *this;
     }
 
@@ -381,7 +388,9 @@ public:
         else if (!count)
             *this = a;
         else {
-            size_type res_digits = a.digits + count/digit_bits + 1;
+            size_type res_digits = a.digits + count/digit_bits;
+            if (a.digit_array[a.digits-1] >> (digit_bits - (count % digit_bits)))
+                ++res_digits;
             if (allocated < res_digits) {
                 natural_number tmp(res_digits, digit_unit);
                 tmp.left_shift_helper(a, count);
@@ -655,7 +664,7 @@ private:
 
     digit_type quotrem_digit_step2(digit_type top_digit, const natural_number& num, digit_type denom)
     {
-        T remainder = LowLevel::quotrem_1(digit_array, top_digit, num.digit_array, num.digits, denom);
+        digit_type remainder = LowLevel::quotrem_1(digit_array, top_digit, num.digit_array, num.digits, denom);
         set_digits_1(num.digits);
         return remainder;
     }
@@ -715,14 +724,18 @@ private:
         assert(count != 0);
         size_type whole = count / digit_bits;
         count %= digit_bits;
+        size_type new_digits = a.digits + whole;
         if (count) {
-            digit_array[a.digits + whole] = LowLevel::lshift(digit_array + whole, a.digit_array, a.digits, count);
+            digit_type top_digit = LowLevel::lshift(digit_array + whole, a.digit_array, a.digits, count);
+            if (top_digit) {
+                digit_array[a.digits + whole] = top_digit;
+                ++new_digits;
+            }
         } else {
             LowLevel::copy_forward(digit_array + whole, a.digit_array, a.digits);
-            digit_array[a.digits + whole] = 0;
         }
         LowLevel::fill_zero(digit_array, whole);
-        set_digits_1(a.digits + whole + 1);
+        digits = new_digits;
     }
     
     void right_shift_helper(const natural_number& a, unsigned long count)
@@ -745,7 +758,7 @@ private:
     }
     
     allocator_type& allocator() { return *this; }
-    digit_ptr digit_array;
+    digit_type* digit_array;
     size_type digits;
     size_type allocated;
 };

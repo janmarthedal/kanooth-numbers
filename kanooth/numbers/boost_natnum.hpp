@@ -337,7 +337,7 @@ eval_gt(const kanooth_natnum<B>& a, T b)
 namespace kanooth {
 namespace numbers {
 
-typedef boost::multiprecision::number<boost::multiprecision::backends::kanooth_natnum<unsigned long> > boost_natnum;
+typedef boost::multiprecision::number<boost::multiprecision::backends::kanooth_natnum<> > boost_natnum;
 
 } // namespace numbers
 } // namespace kanooth
