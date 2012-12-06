@@ -152,35 +152,35 @@ template <typename B, typename T>
 inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
 eval_add(kanooth_natnum<B>& r, kanooth_natnum<B>& a, T b)
 {
-    r.add(a, to_unsigned(a));
+    r.add(a, to_unsigned(b));
 }
 
 template <typename B, typename T>
 inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
 eval_subtract(kanooth_natnum<B>& r, kanooth_natnum<B>& a, T b)
 {
-    r.subtract(a, to_unsigned(a));
+    r.subtract(a, to_unsigned(b));
 }
 
 template <typename B, typename T>
 inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
 eval_multiply(kanooth_natnum<B>& r, kanooth_natnum<B>& a, T b)
 {
-    r.multiply(a, to_unsigned(a));
+    r.multiply(a, to_unsigned(b));
 }
 
 template <typename B, typename T>
 inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
 eval_divide(kanooth_natnum<B>& r, kanooth_natnum<B>& a, T b)
 {
-    r.divide(a, to_unsigned(a));
+    r.divide(a, to_unsigned(b));
 }
 
 template <typename B, typename T>
 inline typename kanooth_natnum<B>::template if_supported_int<T, void>::type
 eval_modulus(kanooth_natnum<B>& r, kanooth_natnum<B>& a, T b)
 {
-    r.modulus(a, to_unsigned(a));
+    r.modulus(a, to_unsigned(b));
 }
 
 
@@ -194,7 +194,7 @@ template <typename B, class Integer>
 inline typename enable_if<is_unsigned<Integer>, Integer>::type eval_integer_modulus(const kanooth_natnum<B>& x, Integer val)
 {
     if ((sizeof(Integer) <= sizeof(long)) || (val <= (std::numeric_limits<unsigned long>::max)())) {
-        return kanooth_natnum<B>::modulus(x, static_cast<unsigned long>(val));
+        return kanooth_natnum<B>::integer_modulus(x, static_cast<unsigned long>(val));
     } else {
         return default_ops::eval_integer_modulus(x, val);
     }
@@ -337,7 +337,7 @@ eval_gt(const kanooth_natnum<B>& a, T b)
 namespace kanooth {
 namespace numbers {
 
-typedef boost::multiprecision::number<boost::multiprecision::backends::kanooth_natnum<> > boost_natnum;
+typedef boost::multiprecision::number<boost::multiprecision::backends::kanooth_natnum<best_low_level> > boost_natnum;
 
 } // namespace numbers
 } // namespace kanooth

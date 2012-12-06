@@ -1,5 +1,5 @@
 /*
- * File:   kanooth/numbers/detail/lowlevel/generic.hpp
+ * File:   kanooth/numbers/detail/lowlevel/generic_has_double.hpp
  * Author: Jan Marthedal Rasmussen
  *
  * Created 2009-12-15 12:00Z
@@ -10,22 +10,25 @@
  * LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  */
 
-#ifndef _KANOOTH_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HPP_
-#define _KANOOTH_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HPP_
+#ifndef _KANOOTH_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HAS_DOUBLE_HPP_
+#define _KANOOTH_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HAS_DOUBLE_HPP_
 
 #include <cassert>
 #include <kanooth/number_bits.hpp>
+#include <kanooth/make_signed.hpp>
 
 namespace kanooth {
 namespace numbers {
 namespace lowlevel {
 
-template <typename T>
-class generic {
+template <typename BASE, typename DOUBLE>
+class generic_has_double {
 public:
     
-    typedef T digit_type;
-    static const unsigned digit_bits = kanooth::number_bits<digit_type>::value;
+    typedef BASE digit_type;
+    typedef DOUBLE double_type;
+    typedef typename kanooth::make_signed<double_type>::type signed_double_type;
+    static const unsigned digit_bits = number_bits<digit_type>::value;
 
     static inline void copy_forward(digit_type* z1, const digit_type* x1, const std::size_t n)
     {
@@ -48,10 +51,12 @@ public:
     {
       if (!n) return y;
       if (y) {
-        digit_type z = *xp + y;
-        *rp = z;
-        ++rp; ++xp; --n;
-        if (z < y)
+        double_type z = static_cast<double_type>(*xp) + static_cast<double_type>(y);
+        *rp = static_cast<digit_type>(z);
+        ++rp;
+        ++xp;
+        --n;
+        if (z >> digit_bits)
           return inc(rp, xp, n);
       }
       copy_forward(rp, xp, n);
@@ -63,7 +68,7 @@ public:
     {
       assert(xn >= yn);
       digit_type carry = add_n(rp, xp, yp, yn);
-      return add_1(rp + yn, xp + yn, xn - yn, carry);    
+      return add_1(rp + yn, xp + yn, xn - yn, carry);
     }
 
     static inline digit_type sub_1(digit_type* rp, const digit_type* xp, std::size_t n, const digit_type y)
@@ -102,46 +107,48 @@ public:
     }
 
     static inline digit_type quotrem_1(digit_type* z1, digit_type top_digit, const digit_type* x1, std::size_t n, digit_type y) {
-      assert(n != 0);
-      assert(y != 0);
-      assert(y & (digit_type(1) << (digit_bits - 1)));  // nlz(y) == 0
-      digit_type* z2 = z1 + n;
-      const digit_type* x2 = x1 + n;
-      digit_type r = top_digit;
-      while (x2 != x1)
-        double_div_normalized(r, *--x2, y, *--z2, r);
-      return r;
+        assert(n != 0);
+        assert(y != 0);
+        assert(y & (digit_type(1) << (digit_bits - 1)));  // nlz(y) == 0
+        digit_type* z2 = z1 + n;
+        const digit_type* x2 = x1 + n;
+        double_type r = top_digit;
+        while (x2 != x1) {
+            r = (r << digit_bits) | *--x2;
+            *--z2 = r / y;
+            r %= y;
+        }
+        return r;
     }
 
     // u1[un..0] divided by v1[vn-1..0]
     // on exit: quotient in q1, remainder in u1
     static void quotrem(digit_type* q1, digit_type* u1, const std::size_t un,
                         const digit_type* v1, const std::size_t vn) {
-      assert(vn >= 1);
-      assert(un >= vn);
-      assert(v1[vn-1] & (digit_type(1) << (digit_bits - 1)));
-      assert(u1[un] < v1[vn-1]);  // note: u1[un] must be well-defined
-      assert(q1+un-vn+1 <= u1 || q1 >= u1+un+1);
-      assert(q1+un-vn+1 <= v1 || q1 >= v1+vn);
-      assert(u1+un+1 <= v1 || u1 >= v1+vn);
-      if (vn == 1)
-        u1[0] = quotrem_1(q1, u1[un], u1, un, v1[0]);
-      else {  // vn >= 2
+        assert(vn >= 2);
+        assert(un >= vn);
+        assert(v1[vn-1] & (digit_type(1) << (digit_bits - 1)));
+        assert(u1[un] < v1[vn-1]);  // note: u1[un] must be well-defined
+        assert(q1+un-vn+1 <= u1 || q1 >= u1+un+1);
+        assert(q1+un-vn+1 <= v1 || q1 >= v1+vn);
+        assert(u1+un+1 <= v1 || u1 >= v1+vn);
+
         digit_type wn1 = v1[vn-1], wn2 = v1[vn-2];
         digit_type tjn, qh, k;
 
         for (int j=un-vn; j >= 0; --j) {
-          tjn = u1[j+vn];
-          qh = calc_qh(tjn, u1[j+vn-1], u1[j+vn-2], wn1, wn2);
-          k = sequence_mult_digit_sub(u1+j, u1+j+vn, v1, qh);
-          u1[j+vn] = tjn - k;
-          if (k > tjn) {   // qh too big?
-            u1[j+vn] += add_n(u1+j, u1+j, v1, vn);
-            --qh;
-          }
-          q1[j] = qh;
+            tjn = u1[j+vn];
+            qh = calc_qh(tjn, u1[j+vn-1], u1[j+vn-2], wn1, wn2);
+            k = sequence_mult_digit_sub(u1+j, u1+j+vn, v1, qh);
+            if (k > tjn) {   // if we subtracted too much then qh is one too large
+                digit_type k2 = add_n(u1+j, u1+j, v1, vn);
+                assert(tjn - k + k2 == 0);
+                --qh;
+            } else
+                assert(k == tjn);
+            u1[j+vn] = 0;
+            q1[j] = qh;
         }
-      }
     }
 
     static digit_type lshift(digit_type* z1, const digit_type* x1, const std::size_t n, const unsigned count) {
@@ -218,51 +225,45 @@ private:
 
     static inline digit_type add_n(digit_type* rp, const digit_type* xp, const digit_type* yp, std::size_t n)
     {
-      digit_type lx, ly, lz;
-      bool carry = false;
-      while (n--) {
-        lx = *xp++;
-        ly = *yp++;
-        if (carry) {
-          lz = lx + ly + 1;
-          carry = lz <= lx;
-        } else {
-          lz = lx + ly;
-          carry = lz < lx;
+        double_type carry = 0;
+        while (n--) {
+            carry += static_cast<double_type>(*xp) + static_cast<double_type>(*yp);
+            *rp = static_cast<digit_type>(carry);
+            carry >>= digit_bits;
+            ++rp;
+            ++xp;
+            ++yp;
         }
-        *rp++ = lz;
-      }
-      return carry ? 1 : 0;
+        return static_cast<digit_type>(carry);
     }
 
     static inline digit_type sub_n(digit_type* rp, const digit_type* xp, const digit_type* yp, std::size_t n)
     {
-      digit_type lx, ly, lz;
-      bool borrow = false;
-      while (n--) {
-        lx = *xp++;
-        ly = *yp++;
-        if (borrow) {
-          lz = lx - ly - 1;
-          borrow = lx <= ly;
-        } else {
-          lz = lx - ly;
-          borrow = lx < ly;
+        double_type carry = 0;
+        while (n--) {
+            carry += static_cast<double_type>(*xp) - static_cast<double_type>(*yp);
+            *rp = static_cast<digit_type>(carry);
+            carry = static_cast<signed_double_type>(carry) >> digit_bits;
+            ++xp;
+            ++yp;
+            ++rp;
         }
-        *rp++ = lz;
-      }
-      return borrow ? 1 : 0;
+        return carry ? 1 : 0;
     }
 
     static inline digit_type inc(digit_type* rp, const digit_type* xp, std::size_t n)
     {
       while (n && *xp == digit_type(-1)) {
         *rp = 0;
-        ++rp; ++xp; --n;
+        ++rp;
+        ++xp;
+        --n;
       }
       if (!n) return 1;
       *rp = *xp + 1;
-      ++rp; ++xp; --n;
+      ++rp;
+      ++xp;
+      --n;
       copy_forward(rp, xp, n);
       return 0;
     }
@@ -280,130 +281,87 @@ private:
       return 0;
     }
 
-    static inline void double_mult_add_add(const digit_type u, const digit_type v, const digit_type a1, const digit_type a2, digit_type& low, digit_type& high)
-    {
-      const unsigned int halfbits = digit_bits / 2;
-      const digit_type lowmask = (digit_type(1) << halfbits) - 1;
-      digit_type u1 = u >> halfbits, u0 = u & lowmask;
-      digit_type v1 = v >> halfbits, v0 = v & lowmask;
-      digit_type r  = u0*v0 + (a1 & lowmask) + (a2 & lowmask);
-      digit_type s  = u1*v0 + (a1 >> halfbits) + (r >> halfbits);
-      digit_type t  = u0*v1 + (s & lowmask) + (a2 >> halfbits);
-      high = u1*v1 + (s >> halfbits) + (t >> halfbits);
-      low  = (t << halfbits) | (r & lowmask);
-    }
-
-    static inline void double_mult_add(const digit_type u, const digit_type v, const digit_type a, digit_type& low, digit_type& high)
-    {
-      double_mult_add_add(u, v, a, digit_type(0), low, high);
-    }
-
     static inline digit_type multiply_sequence_with_digit(const digit_type* first, const digit_type* last, digit_type* dst, digit_type v)
     {
-      digit_type k = 0;
-      while (first != last) {
-        double_mult_add(*first++, v, k, *dst, k);
-        dst++;
-      }
-      return k;
+        double_type k = 0;
+        while (first != last) {
+            k += static_cast<double_type>(*first) * static_cast<double_type>(v);
+            *dst = static_cast<digit_type>(k);
+            k >>= digit_bits;
+            ++first;
+            ++dst;
+        }
+        return static_cast<digit_type>(k);
     }
 
     static inline digit_type multiply_add_sequence_with_digit(const digit_type* first, const digit_type* last, digit_type* dst, digit_type v)
     {
-      digit_type k = 0;
-      while (first != last) {
-        double_mult_add_add(*first++, v, *dst, k, *dst, k);
-        dst++;
-      }
-      return k;
+        double_type k = 0;
+        while (first != last) {
+            k += static_cast<double_type>(*first) * static_cast<double_type>(v) + *dst;
+            *dst = static_cast<digit_type>(k);
+            k >>= digit_bits;
+            ++first;
+            ++dst;
+        }
+        return static_cast<digit_type>(k);
     }
 
     static inline void multiply_sequences(const digit_type* ufirst, const digit_type* ulast,
         const digit_type* vfirst, const digit_type* vlast, digit_type* wfirst)
     {
-      assert(ufirst < ulast);
-      assert(vfirst < vlast);
-      digit_type *wlast = wfirst + (ulast - ufirst);
-      *wlast++ = multiply_sequence_with_digit(ufirst, ulast, wfirst++, *vfirst++);
-      while (vfirst != vlast)
-        *wlast++ = multiply_add_sequence_with_digit(ufirst, ulast, wfirst++, *vfirst++);
+        assert(ufirst < ulast);
+        assert(vfirst < vlast);
+        digit_type *wlast = wfirst + (ulast - ufirst);
+        *wlast++ = multiply_sequence_with_digit(ufirst, ulast, wfirst++, *vfirst++);
+        while (vfirst != vlast)
+            *wlast++ = multiply_add_sequence_with_digit(ufirst, ulast, wfirst++, *vfirst++);
     }
 
-    static void double_div_normalized(digit_type uhigh, digit_type ulow, digit_type v, digit_type& quot, digit_type& rem)
+    static inline digit_type sequence_mult_digit_sub(digit_type* ufirst, digit_type* ulast, const digit_type* vfirst, digit_type q)
     {
-      const unsigned int halfbits = digit_bits / 2;
-      const digit_type lowmask = (((digit_type) 1) << halfbits) - 1;
-      const digit_type highmask = lowmask << halfbits;
-      const digit_type v1 = v >> halfbits;
-      const digit_type v0 = v & lowmask;
-      const digit_type u1 = ulow >> halfbits;
-      const digit_type u0 = ulow & lowmask;
-      digit_type q1, q0, r;
-
-      assert(v & (digit_type(1) << (digit_bits-1)));  // nlz(v) == 0
-      q1 = uhigh / v1;
-      r  = uhigh % v1;
-      while ((q1 & highmask) || q1*v0 > ((r << halfbits) | u1)) {
-        --q1;
-        r += v1;
-        if (r & highmask) break;
-      }
-      r = ((r << halfbits) | u1) - q1*v0;
-      q0 = r / v1;
-      r = r % v1;
-      while ((q0 & highmask) || q0*v0 > ((r << halfbits) | u0)) {
-        --q0;
-        r += v1;
-        if (r & highmask) break;
-      }
-      r = ((r << halfbits) | u0) - q0*v0;
-
-      quot = (q1 << halfbits) | q0;
-      rem = r;
-    }
-
-    static inline digit_type mult_sub_sub(digit_type& w, const digit_type u, const digit_type v, digit_type k)
-    {
-      digit_type wt;
-      double_mult_add(u, v, k, wt, k);
-      if (wt > w) ++k;
-      w -= wt;
-      return k;
-    }
-
-    static digit_type sequence_mult_digit_sub(digit_type* ufirst, digit_type* ulast, const digit_type* vfirst, digit_type q)
-    {
-      digit_type k = 0;
-      while (ufirst != ulast)
-        k = mult_sub_sub(*ufirst++, *vfirst++, q, k);
-      return k;
-    }
-
-    static inline void double_mult(const digit_type u, const digit_type v, digit_type& low, digit_type& high)
-    {
-      double_mult_add_add(u, v, digit_type(0), digit_type(0), low, high);
+        double_type k1 = 0, k2 = 0;
+        while (ufirst != ulast) {
+            k1 += static_cast<double_type>(*vfirst) * static_cast<double_type>(q);
+            k2 += static_cast<double_type>(*ufirst) - static_cast<digit_type>(k1);
+            *ufirst = static_cast<digit_type>(k2);
+            k1 >>= digit_bits;
+            k2 = static_cast<signed_double_type>(k2) >> digit_bits;
+            ++ufirst;
+            ++vfirst;
+        }
+        return static_cast<digit_type>(k1 - k2);
     }
 
     static inline digit_type calc_qh(digit_type ujn, digit_type ujn1, digit_type ujn2, digit_type vn1, digit_type vn2)
     {
-      digit_type qh, rh, high, low;
+        digit_type qh, rh, high, low;
+        double_type dbl;
 
-      if (ujn == vn1) {
-        qh = digit_type(-1);
-        rh = ujn1 + vn1;
-        if (rh < vn1) return qh;
-      } else
-        double_div_normalized(ujn, ujn1, vn1, qh, rh);
+        if (ujn == vn1) {
+            qh = digit_type(-1);
+            rh = ujn1 + vn1;
+            if (rh < vn1) return qh;
+        } else {
+            dbl = (static_cast<double_type>(ujn) << digit_bits) | ujn1;
+            qh = dbl / vn1;
+            rh = dbl % vn1;
+        }
 
-      double_mult(qh, vn2, low, high);
-      while (high > rh || (high == rh && low > ujn2)) {
-        --qh;
-        rh += vn1;
-        if (rh < vn1) break;  // overflow
-        double_mult(qh, vn2, low, high);
-      }
+        dbl = static_cast<double_type>(qh) * static_cast<double_type>(vn2);
+        low = static_cast<digit_type>(dbl);
+        high = dbl >> digit_bits;
+        
+        while (high > rh || (high == rh && low > ujn2)) {
+            --qh;
+            rh += vn1;
+            if (rh < vn1) break;  // overflow
+            dbl = static_cast<double_type>(qh) * static_cast<double_type>(vn2);
+            low = static_cast<digit_type>(dbl);
+            high = dbl >> digit_bits;
+        }
 
-      return qh;
+        return qh;
     }
 
 };
@@ -412,4 +370,4 @@ private:
 } // namespace numbers
 } // namespace kanooth
 
-#endif // _KANOOTH_NUMBERS_DETAIL_LOWLEVEL_HPP_
+#endif // _KANOOTH_NUMBERS_DETAIL_LOWLEVEL_GENERIC_HAS_DOUBLE_HPP_

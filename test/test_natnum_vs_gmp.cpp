@@ -4,6 +4,8 @@
 #include <kanooth/numbers/boost_natnum.hpp>
 #include <kanooth/numbers/generate_random_bits_number.hpp>
 #include <ctime>
+#include <kanooth/numbers/integer_binary_logarithm.hpp>
+
 
 template <class Number>
 struct tester
@@ -142,7 +144,7 @@ struct tester
         BOOST_TEST_EQ(ref_type(lcm(ui, d)).str(), test_type(lcm(ui, d1)).str());*/
     }
 
-    /*void t5()
+    void t5()
     {
         //
         // Now integer functions:
@@ -161,13 +163,13 @@ struct tester
             BOOST_TEST_EQ(bit_test(a, i), bit_test(a1, i));
         }
         // We have to take care that our powers don't grow too large, otherwise this takes "forever",
-        // also don't test for modulo types, as these may give a diffferent result from arbitrary
+        // also don't test for modulo types, as these may give a different result from arbitrary
         // precision types:
         BOOST_TEST_EQ(ref_type(pow(d, ui % 19)).str(), test_type(pow(d1, ui % 19)).str());
         BOOST_TEST_EQ(ref_type(powm(a, b, c)).str(), test_type(powm(a1, b1, c1)).str());
         BOOST_TEST_EQ(ref_type(powm(a, b, ui)).str(), test_type(powm(a1, b1, ui)).str());
         BOOST_TEST_EQ(ref_type(powm(a, ui, c)).str(), test_type(powm(a1, ui, c1)).str());
-    }*/
+    }
 
     void test()
     {
@@ -206,7 +208,7 @@ struct tester
             t2();
             t3();
             t4();
-            //t5();
+            t5();
 
             if(last_error_count != (unsigned)boost::detail::test_errors())
             {

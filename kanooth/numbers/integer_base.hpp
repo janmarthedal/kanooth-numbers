@@ -16,7 +16,7 @@ public:
     
     integer_base() {}
 
-    integer_base(long v) : number(v < 0 ? -v : v), positive(v >= 0) {}
+    integer_base(long v) : number(static_cast<unsigned long>(v < 0 ? -v : v)), positive(v >= 0) {}
 
     integer_base(unsigned long v, bool pos = true) : number(v), positive(pos) {}
     
