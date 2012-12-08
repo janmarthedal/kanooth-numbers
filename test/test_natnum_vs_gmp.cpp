@@ -3,9 +3,9 @@
 #include <boost/detail/lightweight_test.hpp>
 #include <kanooth/numbers/boost_natnum.hpp>
 #include <kanooth/numbers/generate_random_bits_number.hpp>
-#include <ctime>
 #include <kanooth/numbers/integer_binary_logarithm.hpp>
-
+#include <kanooth/numbers/least_significant_bit.hpp>
+#include <ctime>
 
 template <class Number>
 struct tester
@@ -60,20 +60,14 @@ struct tester
         BOOST_TEST_EQ(ref_type(a^b).str(), test_type(a1 ^ b1).str());
         BOOST_TEST_EQ((ref_type(a)^=b).str(), (test_type(a1) ^= b1).str());
         // Shift ops:
-        for(unsigned i = 0; i < 128; ++i)
+        for (unsigned i = 0; i < 128; ++i)
         {
             BOOST_TEST_EQ(ref_type(a << i).str(), test_type(a1 << i).str());
             BOOST_TEST_EQ(ref_type(a >> i).str(), test_type(a1 >> i).str());
         }
         // gcd/lcm
-        /*BOOST_TEST_EQ(ref_type(gcd(a, b)).str(), test_type(gcd(a1, b1)).str());
+        BOOST_TEST_EQ(ref_type(gcd(a, b)).str(), test_type(gcd(a1, b1)).str());
         BOOST_TEST_EQ(ref_type(lcm(c, d)).str(), test_type(lcm(c1, d1)).str());
-        BOOST_TEST_EQ(ref_type(gcd(-a, b)).str(), test_type(gcd(-a1, b1)).str());
-        BOOST_TEST_EQ(ref_type(lcm(-c, d)).str(), test_type(lcm(-c1, d1)).str());
-        BOOST_TEST_EQ(ref_type(gcd(-a, -b)).str(), test_type(gcd(-a1, -b1)).str());
-        BOOST_TEST_EQ(ref_type(lcm(-c, -d)).str(), test_type(lcm(-c1, -d1)).str());
-        BOOST_TEST_EQ(ref_type(gcd(a, -b)).str(), test_type(gcd(a1, -b1)).str());
-        BOOST_TEST_EQ(ref_type(lcm(c, -d)).str(), test_type(lcm(c1, -d1)).str());*/
     }
 
     void t3()
@@ -104,10 +98,10 @@ struct tester
         BOOST_TEST_EQ(ref_type(si|a).str(), test_type(si|a1).str());
         BOOST_TEST_EQ(ref_type(si&a).str(), test_type(si&a1).str());
         BOOST_TEST_EQ(ref_type(si^a).str(), test_type(si^a1).str());
-        /*BOOST_TEST_EQ(ref_type(gcd(a, si)).str(), test_type(gcd(a1, si)).str());
+        BOOST_TEST_EQ(ref_type(gcd(a, si)).str(), test_type(gcd(a1, si)).str());
         BOOST_TEST_EQ(ref_type(gcd(si, b)).str(), test_type(gcd(si, b1)).str());
         BOOST_TEST_EQ(ref_type(lcm(c, si)).str(), test_type(lcm(c1, si)).str());
-        BOOST_TEST_EQ(ref_type(lcm(si, d)).str(), test_type(lcm(si, d1)).str());*/
+        BOOST_TEST_EQ(ref_type(lcm(si, d)).str(), test_type(lcm(si, d1)).str());
     }
 
     void t4()
@@ -138,10 +132,10 @@ struct tester
         BOOST_TEST_EQ(ref_type(ui|a).str(), test_type(ui|a1).str());
         BOOST_TEST_EQ(ref_type(ui&a).str(), test_type(ui&a1).str());
         BOOST_TEST_EQ(ref_type(ui^a).str(), test_type(ui^a1).str());
-        /*BOOST_TEST_EQ(ref_type(gcd(a, ui)).str(), test_type(gcd(a1, ui)).str());
+        BOOST_TEST_EQ(ref_type(gcd(a, ui)).str(), test_type(gcd(a1, ui)).str());
         BOOST_TEST_EQ(ref_type(gcd(ui, b)).str(), test_type(gcd(ui, b1)).str());
         BOOST_TEST_EQ(ref_type(lcm(c, ui)).str(), test_type(lcm(c1, ui)).str());
-        BOOST_TEST_EQ(ref_type(lcm(ui, d)).str(), test_type(lcm(ui, d1)).str());*/
+        BOOST_TEST_EQ(ref_type(lcm(ui, d)).str(), test_type(lcm(ui, d1)).str());
     }
 
     void t5()

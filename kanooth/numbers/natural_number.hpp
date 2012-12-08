@@ -11,6 +11,7 @@
 #include <kanooth/number_bits.hpp>
 #include <kanooth/fixed_width_ints.hpp>
 #include <kanooth/numbers/integer_binary_logarithm.hpp>
+#include <kanooth/numbers/least_significant_bit.hpp>
 
 #if defined(KANOOTH_HAS_INT128_T)
 
@@ -375,6 +376,49 @@ public:
         if (digits < a.digits) return -1;
         if (digits > a.digits) return 1;
         return LowLevel::comp(digit_array, a.digit_array, digits);
+    }
+
+    unsigned lsb() const
+    {
+        if (is_zero()) {
+            return -1;
+        } else {
+            digit_type* dp = digit_array;
+            while (!*dp) {
+                ++dp;
+            }
+            return (dp - digit_array) * digit_bits + least_significant_bit(*dp);
+        }        
+    }
+    
+    void gcd(const natural_number& a, const natural_number& b)
+    {
+        if (a.is_zero()) {
+            *this = b;
+        } else if (b.is_zero()) {
+            *this = a;
+        } else {
+            natural_number u(a), v(b);
+
+            unsigned us = u.lsb();
+            unsigned vs = v.lsb();
+            unsigned shift = (std::min)(us, vs);
+            u.right_shift(u, us);
+            v.right_shift(v, vs);
+
+            do {
+                int c = u.compare(v);
+                if (c == 0)
+                    break;
+                if (c > 0)
+                    u.swap(v);
+                v.subtract(v, u);
+                vs = v.lsb();
+                v.right_shift(v, vs);
+            } while (true);
+
+            left_shift(u, shift);
+        }        
     }
 
     std::string str(std::streamsize /*digits*/, std::ios_base::fmtflags f) const

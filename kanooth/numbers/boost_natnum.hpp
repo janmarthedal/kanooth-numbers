@@ -250,7 +250,7 @@ inline void eval_left_shift(kanooth_natnum<B>& r, unsigned long v)
 }
 
 template <typename B>
-inline void eval_left_shift(kanooth_natnum<B>& r, kanooth_natnum<B>& u, unsigned long v)
+inline void eval_left_shift(kanooth_natnum<B>& r, const kanooth_natnum<B>& u, unsigned long v)
 {
    r.left_shift(u, v);
 }
@@ -262,7 +262,7 @@ inline void eval_right_shift(kanooth_natnum<B>& r, unsigned long v)
 }
 
 template <typename B>
-inline void eval_right_shift(kanooth_natnum<B>& r, kanooth_natnum<B>& u, unsigned long v)
+inline void eval_right_shift(kanooth_natnum<B>& r, const kanooth_natnum<B>& u, unsigned long v)
 {
    r.right_shift(u, v);
 }
@@ -289,6 +289,32 @@ template <typename B>
 inline void eval_bit_flip(kanooth_natnum<B>& u, unsigned pos)
 {
     u.bit_flip(pos);
+}
+
+template <typename B>
+inline unsigned eval_lsb(const kanooth_natnum<B>& u)
+{
+    return u.lsb();
+}
+
+template <typename B>
+inline void eval_gcd(kanooth_natnum<B>& result, const kanooth_natnum<B>& a, const kanooth_natnum<B>& b)
+{
+    result.gcd(a, b);
+}
+
+template <typename B>
+void eval_lcm(kanooth_natnum<B>& result, const kanooth_natnum<B>& a, const kanooth_natnum<B>& b)
+{
+    kanooth_natnum<B> t;
+    eval_gcd(t, a, b);
+
+    if (eval_is_zero(t)) {
+        result = 0ul;
+    } else {
+        eval_divide(result, a, t);
+        eval_multiply(result, b);
+    }
 }
 
 template <typename B>

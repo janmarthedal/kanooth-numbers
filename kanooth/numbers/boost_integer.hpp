@@ -189,6 +189,12 @@ inline void eval_qr(const kanooth_integer<N>& x, const kanooth_integer<N>& y, ka
     kanooth_integer<N>::quotrem(q, r, x, y);
 }
 
+template <typename N>
+inline void eval_gcd(kanooth_integer<N>& result, const kanooth_integer<N>& a, const kanooth_integer<N>& b)
+{
+    result.gcd(a, b);
+}
+
 template <typename N, class Integer>
 inline typename enable_if<is_unsigned<Integer>, Integer>::type eval_integer_modulus(const kanooth_integer<N>& x, Integer val)
 {
