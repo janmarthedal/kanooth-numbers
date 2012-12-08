@@ -1,9 +1,23 @@
 #ifndef KANOOTH_NUMBERS_INTEGER_BASE_HPP
 #define KANOOTH_NUMBERS_INTEGER_BASE_HPP
 
+#include <kanooth/config.hpp>
+#include <kanooth/is_signed.hpp>
+#include <kanooth/make_unsigned.hpp>
+
 namespace kanooth {
 namespace numbers {
-        
+
+    namespace {
+
+        template <typename T>
+        typename make_unsigned<T>::type abs_int(T v)
+        {
+            return static_cast<typename make_unsigned<T>::type>(v < 0 ? -v : v);
+        }
+
+    }
+    
 template <typename N>
 class integer_base {
     
@@ -94,85 +108,30 @@ public:
 
     inline void add(const integer_base& a, const integer_base& b)
     {
-        add_helper1(a, b.number, b.positive);
-    }
-    
-    inline void add(const integer_base& a, unsigned long b)
-    {
-        add_helper2(a, b, true);
-    }
-    
-    inline void add(const integer_base& a, signed long b)
-    {
-        add_helper2(a, static_cast<unsigned long>(b >= 0 ? b : -b), b >= 0);
+        add_number(a, b.number, b.positive);
     }
     
     inline void subtract(const integer_base& a, const integer_base& b)
     {
-        add_helper1(a, b.number, !b.positive);
-    }
-    
-    inline void subtract(const integer_base& a, unsigned long b)
-    {
-        add_helper2(a, b, false);
-    }
-    
-    inline void subtract(const integer_base& a, signed long b)
-    {
-        add_helper2(a, static_cast<unsigned long>(b >= 0 ? b : -b), !(b >= 0));
+        add_number(a, b.number, !b.positive);
     }
     
     inline void multiply(const integer_base& a, const integer_base& b)
     {
-        multiply_helper(a, b.number, b.positive);
-    }
-    
-    inline void multiply(const integer_base& a, unsigned long b)
-    {
-        multiply_helper(a, b, true);
-    }
-    
-    inline void multiply(const integer_base& a, signed long b)
-    {
-        multiply_helper(a, static_cast<unsigned long>(b >= 0 ? b : -b), b >= 0);
+        number.multiply(a.number, b.number);
+        positive = a.positive == b.positive;
     }
     
     inline void divide_truncate(const integer_base& a, const integer_base& b)
     {
-        divide_truncate_helper(a, b.number, b.positive);
-    }
-    
-    inline void divide_truncate(const integer_base& a, unsigned long b)
-    {
-        divide_truncate_helper(a, b, true);
-    }
-    
-    inline void divide_truncate(const integer_base& a, signed long b)
-    {
-        divide_truncate_helper(a, static_cast<unsigned long>(b >= 0 ? b : -b), b >= 0);
+        number.divide(a.number, b.number);
+        positive = a.positive == b.positive;
     }
     
     inline void modulus_truncate(const integer_base& a, const integer_base& b)
     {
         number.modulus(a.number, b.number);
         positive = a.positive;
-    }
-    
-    inline void modulus_truncate(const integer_base& a, unsigned long b)
-    {
-        number.modulus(a.number, b);
-        positive = a.positive;
-    }
-    
-    inline void modulus_truncate(const integer_base& a, signed long b)
-    {
-        number.modulus(a.number, static_cast<unsigned long>(b >= 0 ? b : -b));
-        positive = a.positive;
-    }
-
-    static inline unsigned long integer_modulus(const integer_base& a, unsigned long b)
-    {
-        return base_type::integer_modulus(a.number, b);
     }
     
     static inline void quotrem(integer_base& q, integer_base& r, const integer_base& a, const integer_base& b)
@@ -335,6 +294,120 @@ public:
         std::swap(positive, other.positive);
     }
 
+    inline void add(const integer_base& a, unsigned long b)
+    {
+        add_int(a, b);
+    }
+    
+    inline void add(const integer_base& a, signed long b)
+    {
+        add_int(a, b);
+    }
+
+    inline void subtract(const integer_base& a, unsigned long b)
+    {
+        subtract_int(a, b);
+    }
+    
+    inline void subtract(const integer_base& a, signed long b)
+    {
+        subtract_int(a, b);
+    }
+    
+    inline void multiply(const integer_base& a, unsigned long b)
+    {
+        multiply_int(a, b);
+    }
+    
+    inline void multiply(const integer_base& a, signed long b)
+    {
+        multiply_int(a, b);
+    }
+    
+    inline void divide_truncate(const integer_base& a, unsigned long b)
+    {
+        divide_truncate_int(a, b);
+    }
+    
+    inline void divide_truncate(const integer_base& a, signed long b)
+    {
+        divide_truncate_int(a, b);
+    }
+    
+    inline void modulus_truncate(const integer_base& a, unsigned long b)
+    {
+        modulus_truncate_int(a, b);
+    }
+    
+    inline void modulus_truncate(const integer_base& a, signed long b)
+    {
+        modulus_truncate_int(a, b);
+    }
+
+    static inline unsigned long integer_modulus(const integer_base& a, unsigned long b)
+    {
+        return base_type::integer_modulus(a.number, b);
+    }
+    
+#ifdef KANOOTH_HAS_LONG_LONG
+    
+    inline void add(const integer_base& a, unsigned long long b)
+    {
+        add_int(a, b);
+    }
+    
+    inline void add(const integer_base& a, signed long long b)
+    {
+        add_int(a, b);
+    }
+
+    inline void subtract(const integer_base& a, unsigned long long b)
+    {
+        subtract_int(a, b);
+    }
+    
+    inline void subtract(const integer_base& a, signed long long b)
+    {
+        subtract_int(a, b);
+    }
+    
+    inline void multiply(const integer_base& a, unsigned long long b)
+    {
+        multiply_int(a, b);
+    }
+    
+    inline void multiply(const integer_base& a, signed long long b)
+    {
+        multiply_int(a, b);
+    }
+    
+    inline void divide_truncate(const integer_base& a, unsigned long long b)
+    {
+        divide_truncate_int(a, b);
+    }
+    
+    inline void divide_truncate(const integer_base& a, signed long long b)
+    {
+        divide_truncate_int(a, b);
+    }
+    
+    inline void modulus_truncate(const integer_base& a, unsigned long long b)
+    {
+        modulus_truncate_int(a, b);
+    }
+    
+    inline void modulus_truncate(const integer_base& a, signed long long b)
+    {
+        modulus_truncate_int(a, b);
+    }
+
+    static inline unsigned long long integer_modulus(const integer_base& a, unsigned long long b)
+    {
+        return base_type::integer_modulus(a.number, b);
+    }
+    
+#endif
+    
 private:
     
     inline int sign() const
@@ -342,7 +415,7 @@ private:
         return number.is_zero() ? 0 : positive ? 1 : -1;
     }
     
-    void add_helper1(const integer_base& a, const base_type& b_number, bool b_positive)
+    void add_number(const integer_base& a, const base_type& b_number, bool b_positive)
     {
         if (a.positive == b_positive) {
             positive = a.positive;
@@ -355,9 +428,23 @@ private:
             number.subtract(b_number, a.number);
         }
     }
-    
-    void add_helper2(const integer_base& a, unsigned long b, bool b_positive)
+
+    template <typename T>
+    inline void add_int(const integer_base& a, T b)
     {
+        add_int_helper(a, abs_int(b), b >= 0);
+    }
+    
+    template <typename T>
+    inline void subtract_int(const integer_base& a, T b)
+    {
+        add_int_helper(a, abs_int(b), b < 0);
+    }
+    
+    template <typename T>
+    void add_int_helper(const integer_base& a, T b, bool b_positive)
+    {
+        //STATIC_ASSERT(is_unsigned<T>::value)
         if (a.positive == b_positive) {
             positive = a.positive;
             number.add(a.number, b);
@@ -371,17 +458,24 @@ private:
     }
     
     template <typename T>
-    void multiply_helper(const integer_base& a, const T& b, bool b_positive)
+    void multiply_int(const integer_base& a, const T& b)
     {
-        number.multiply(a.number, b);
-        positive = a.positive == b_positive;
+        number.multiply(a.number, abs_int(b));
+        positive = a.positive == (b >= 0);
     }
     
     template <typename T>
-    void divide_truncate_helper(const integer_base& a, const T& b, bool b_positive)
+    void divide_truncate_int(const integer_base& a, const T& b)
     {
-        number.divide(a.number, b);
-        positive = a.positive == b_positive;
+        number.divide(a.number, abs_int(b));
+        positive = a.positive == (b >= 0);
+    }
+    
+    template <typename T>
+    inline void modulus_truncate_int(const integer_base& a, T b)
+    {
+        number.modulus(a.number, abs_int(b));
+        positive = a.positive;
     }
     
     template <typename T>
