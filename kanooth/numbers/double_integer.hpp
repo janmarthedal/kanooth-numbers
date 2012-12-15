@@ -28,6 +28,10 @@ public:
     double_integer(T v) : low(v), high()
     {
     }
+
+    double_integer(T h, T l) : low(l), high(h)
+    {
+    }
     
     double_integer& operator=(T v)
     {
@@ -79,40 +83,44 @@ public:
 
     double_integer& operator*=(const double_integer& rhs)
     {
-        base_type a0 = low & low_half_mask;
-        base_type a1 = low >> half_base_bits;
-        base_type a2 = high & low_half_mask;
-        base_type a3 = high >> half_base_bits;
-        base_type b0 = rhs.low & low_half_mask;
-        base_type b1 = rhs.low >> half_base_bits;
-        base_type b2 = rhs.high & low_half_mask;
-        base_type b3 = rhs.high >> half_base_bits;
+        return *this = mult
+    }
+
+    std::string str() const
+    {
+        std::stringstream ss;
+        if (base_bits == 8) {
+            ss << (unsigned)high << "|" << (unsigned)low;
+        } else {
+            ss << high << "|" << low;
+        }
+        return ss.str();
+    }
+    
+    void multiply(const double_integer& a, const double_integer& b)
+    {
+        base_type a0 = a.low & low_half_mask;
+        base_type a1 = a.low >> half_base_bits;
+        base_type b0 = b.low & low_half_mask;
+        base_type b1 = b.low >> half_base_bits;
 
         base_type k = a0 * b0;
         low = k & low_half_mask;
-        k = (k >> half_base_bits) + a0 * b1;
+        k >>= half_base_bits;
+        k += a0 * b1;
         low |= k << half_base_bits;
         high = k >> half_base_bits;
         
         k = a1 * b0 + (low >> half_base_bits);
         low = (low & low_half_mask) | (k << half_base_bits);
-        high += k >> half_base_bits;
-        
-        high += a0 * b2 +  a1 * b1 + a2 * b0;
-        
-        high += (a0 * b3 + a1 * b2 + a2 * b1 + a3 * b0) << half_base_bits;
 
-        return *this;
+        high += k >> half_base_bits;        
+        high += a1 * b1;
+        high += a.low * b.high + a.high * b.low;
     }
-    
-    std::string str() const
-    {
-        std::stringstream ss;
-        ss << high << "|" << low;
-        return ss.str();
-    }
-    
+
 private:
+    
     T low, high;
 };
 
@@ -141,8 +149,8 @@ double_integer<T> operator-(const double_integer<T>& a, const double_integer<T>&
 template <typename T>
 double_integer<T> operator*(const double_integer<T>& a, const double_integer<T>& b)
 {
-    double_integer<T> r = a;
-    r *= b;
+    double_integer<T> r;
+    r.multiply(a, b);
     return r;
 }
 

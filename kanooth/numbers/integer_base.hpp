@@ -276,11 +276,56 @@ public:
         return compare_helper(static_cast<unsigned long>(a >= 0 ? a : -a), a == 0 ? 0 : a < 0 ? -1 : 1);
     }    
 
+#if 1
     inline void gcd(const integer_base& a, const integer_base& b)
     {
         number.gcd(a.number, b.number);
         positive = true;
     }
+#endif
+
+#if 0
+    void gcd(const integer_base& a, const integer_base& b)
+    {
+        if (a.is_zero()) {
+            number = b.number;
+        } else if (b.is_zero()) {
+            number = a.number;
+        } else {
+            integer_base u, v, w;
+            int c = 0;
+
+            unsigned us = a.number.lsb();
+            unsigned vs = b.number.lsb();
+            unsigned shift = (std::min)(us, vs);
+            u.number.right_shift(a.number, us);
+            u.positive = a.positive;
+            v.number.right_shift(b.number, vs);
+            v.positive = b.positive;
+
+            while (!v.is_zero()) {
+                vs = v.number.lsb();
+                v.number.right_shift(v.number, vs);
+                c += vs;
+                if (c > 0) {
+                    u.swap(v);
+                    c = -c;
+                }
+                w.add(u, v);
+                w.number.right_shift(w.number, 1);
+                if (w.number.lsb() != 0) {
+                    v = w;
+                } else {
+                    v.subtract(w, v);
+                }
+            }
+
+            number.left_shift(u.number, shift);
+        }
+        positive = true;
+    }
+#endif
+
     
     std::string str(std::streamsize size, std::ios_base::fmtflags f) const
     {

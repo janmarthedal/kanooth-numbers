@@ -73,6 +73,7 @@ class number_category<boost::uint64_t> : public mpl::int_<number_kind_integer>{}
 
 }}
 
+
 template <class T, int Type>
 struct tester
 {
@@ -639,8 +640,8 @@ void test_int_ops(tester<Number, N>& t, const char* type, unsigned precision, co
    report_result(cat, type, "|(int)", precision, t.test_or_int());
    report_result(cat, type, "&(int)", precision, t.test_and_int());
    report_result(cat, type, "^(int)", precision, t.test_xor_int());
-   //report_result(cat, type, "gcd", precision, t.test_gcd());
-   //report_result(cat, type, "powm", precision, t.test_powm());
+   report_result(cat, type, "gcd", precision, t.test_gcd());
+   report_result(cat, type, "powm", precision, t.test_powm());
 }
 template <class Number, int N, class U>
 void test_int_ops(tester<Number, N>& t, const char* type, unsigned precision, const U&)
@@ -666,16 +667,16 @@ void test(const char* type, unsigned precision)
    //
    /*report_result(cat, type, "+", precision, t.test_add());
    report_result(cat, type, "-", precision, t.test_subtract());
-   report_result(cat, type, "*", precision, t.test_multiply());
-   report_result(cat, type, "/", precision, t.test_divide());
-   report_result(cat, type, "str", precision, t.test_str());
+   report_result(cat, type, "*", precision, t.test_multiply());*/
+   //report_result(cat, type, "/", precision, t.test_divide());
+   /*report_result(cat, type, "str", precision, t.test_str());
    // integer ops:
    report_result(cat, type, "+(int)", precision, t.test_add_int());
    report_result(cat, type, "-(int)", precision, t.test_subtract_int());
    report_result(cat, type, "*(int)", precision, t.test_multiply_int());
    report_result(cat, type, "/(int)", precision, t.test_divide_int());
    // construction and destruction:
-   report_result(cat, type, "construct", precision, t.test_construct());
+   /*report_result(cat, type, "construct", precision, t.test_construct());
    report_result(cat, type, "construct(unsigned)", precision, t.test_construct_unsigned());
    report_result(cat, type, "construct(unsigned long long)", precision, t.test_construct_unsigned_ll());
    test_int_ops(t, type, precision, typename boost::multiprecision::number_category<Number>::type());

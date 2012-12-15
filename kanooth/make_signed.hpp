@@ -15,6 +15,8 @@ template <typename T> struct make_signed : boost::make_signed<T> {};
 #else
 
   template <typename T> struct make_signed {};
+  template <> struct make_signed<unsigned char> : public detail::set_type<signed char> {};
+  template <> struct make_signed<signed char> : public detail::set_type<signed char> {};
   template <> struct make_signed<unsigned short> : public detail::set_type<signed short> {};
   template <> struct make_signed<signed short> : public detail::set_type<signed short> {};
   template <> struct make_signed<unsigned int> : public detail::set_type<signed int> {};

@@ -114,7 +114,8 @@ public:
         const digit_type* x2 = x1 + n;
         double_type r = top_digit;
         while (x2 != x1) {
-            r = (r << digit_bits) | *--x2;
+            r <<= digit_bits;
+            r |= *--x2;
             *--z2 = r / y;
             r %= y;
         }
@@ -156,7 +157,7 @@ public:
       assert(z1+n <= x1 || z1 >= x1);
       assert(count >= 1);
       assert(count < digit_bits);
-      const unsigned int rcount = digit_bits - count;
+      const unsigned rcount = digit_bits - count;
       digit_type* z2 = z1 + n;
       const digit_type* x2 = x1 + n;
       digit_type xl = *--x2, xh;
@@ -175,7 +176,7 @@ public:
       assert(z1 <= x1 || z1 >= x1+n);
       assert(count >= 1);
       assert(count < digit_bits);
-      const unsigned int rcount = digit_bits - count;
+      const unsigned rcount = digit_bits - count;
       const digit_type* x2 = x1 + n;
       digit_type xl, xh = *x1++;
       digit_type r = xh << rcount;

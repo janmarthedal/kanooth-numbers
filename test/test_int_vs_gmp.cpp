@@ -2,8 +2,10 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/detail/lightweight_test.hpp>
 #include <kanooth/numbers/boost_integer.hpp>
+//#include <boost/multiprecision/cpp_int.hpp>
 #include <kanooth/numbers/generate_random_bits_number.hpp>
 #include <ctime>
+
 
 template <class Number>
 struct tester
@@ -303,6 +305,7 @@ struct tester
 int main()
 {
     tester<kanooth::numbers::boost_integer> test_int;
+    //tester<boost::multiprecision::cpp_int> test_int;
     test_int.test();
 
     return boost::report_errors();

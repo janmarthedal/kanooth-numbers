@@ -9,24 +9,27 @@
 #include <cstring>  // strlen
 
 #include <kanooth/number_bits.hpp>
+#include <kanooth/make_signed.hpp>
 #include <kanooth/fixed_width_ints.hpp>
 #include <kanooth/numbers/integer_binary_logarithm.hpp>
 #include <kanooth/numbers/least_significant_bit.hpp>
 
-#if defined(KANOOTH_HAS_INT128_T)
+#if 0//defined(KANOOTH_HAS_INT128_T)
 
 #include <kanooth/numbers/lowlevel/generic_has_double.hpp>
 typedef kanooth::numbers::lowlevel::generic_has_double<kanooth::uint64_t, kanooth::uint128_t> best_low_level;
 
-#elif defined(KANOOTH_HAS_INT64_T)
+#elif 0//defined(KANOOTH_HAS_INT64_T)
 
 #include <kanooth/numbers/lowlevel/generic_has_double.hpp>
 typedef kanooth::numbers::lowlevel::generic_has_double<kanooth::uint32_t, kanooth::uint64_t> best_low_level;
 
 #else
 
+//#include <kanooth/numbers/lowlevel/generic_has_double.hpp>
+//typedef kanooth::numbers::lowlevel::generic_has_double<kanooth::uint16_t, kanooth::uint32_t> best_low_level;
 #include <kanooth/numbers/lowlevel/generic_has_double.hpp>
-typedef kanooth::numbers::lowlevel::generic_has_double<kanooth::uint16_t, kanooth::uint32_t> best_low_level;
+typedef kanooth::numbers::lowlevel::generic_has_double<kanooth::uint8_t, kanooth::uint16_t> best_low_level;
 
 //#include <kanooth/numbers/lowlevel/generic_sim_double.hpp>
 //typedef kanooth::numbers::lowlevel::generic_sim_double<unsigned long> best_low_level;
@@ -382,15 +385,31 @@ public:
     {
         if (is_zero()) {
             return -1;
-        } else {
-            digit_type* dp = digit_array;
-            while (!*dp) {
-                ++dp;
-            }
-            return (dp - digit_array) * digit_bits + least_significant_bit(*dp);
-        }        
+        }
+        const digit_type* dp = digit_array;
+        /*while (!*dp) {
+            ++dp;
+        }*/
+        while (true) {
+            digit_type d = *dp++;
+            if (d) break;
+        }
+        unsigned v = dp - digit_array;
+        v *= digit_bits;
+        v += least_significant_bit(*dp);
+        return v;
+        //return (dp - digit_array) * digit_bits + least_significant_bit(*dp);
     }
     
+    inline unsigned binary_logarithm() const
+    {
+        if (digits == 0) {
+            return -1;
+        }
+        return integer_binary_logarithm(digit_array[digits - 1]) + digit_bits * (digits - 1);
+    }
+    
+#if 1
     void gcd(const natural_number& a, const natural_number& b)
     {
         if (a.is_zero()) {
@@ -398,15 +417,15 @@ public:
         } else if (b.is_zero()) {
             *this = a;
         } else {
-            natural_number u(a), v(b);
+            natural_number u, v;
 
-            unsigned us = u.lsb();
-            unsigned vs = v.lsb();
+            unsigned us = a.lsb();
+            unsigned vs = b.lsb();
             unsigned shift = (std::min)(us, vs);
-            u.right_shift(u, us);
-            v.right_shift(v, vs);
+            u.right_shift(a, us);
+            v.right_shift(b, vs);
 
-            do {
+            while (true) {
                 int c = u.compare(v);
                 if (c == 0)
                     break;
@@ -415,12 +434,126 @@ public:
                 v.subtract(v, u);
                 vs = v.lsb();
                 v.right_shift(v, vs);
-            } while (true);
+            }
 
             left_shift(u, shift);
         }        
     }
+#endif
 
+#if 0
+    void gcd(const natural_number& a, const natural_number& b)
+    {
+        if (a.is_zero()) {
+            *this = b;
+        } else if (b.is_zero()) {
+            *this = a;
+        } else {
+            typedef typename make_signed<digit_type>::type signed_digit_type;
+            natural_number u, v;
+            digit_type ulow, vlow;
+            signed_digit_type M11, M12, M21, M22;
+
+            unsigned us = a.lsb();
+            unsigned vs = b.lsb();
+            unsigned shift = (std::min)(us, vs);
+            u.right_shift(a, us);
+            v.right_shift(b, vs);
+            
+            natural_number t11(u.digits+1, digit_unit), t12(v.digits+1, digit_unit);
+            natural_number t21(u.digits+1, digit_unit), t22(v.digits+1, digit_unit);
+
+            while (true) {
+                us = u.binary_logarithm();
+                vs = v.binary_logarithm();
+                if ((std::min)(us, vs) <= digit_bits)
+                    break;
+                int bit_diff = static_cast<int>(us) - static_cast<int>(vs);
+                ulow = u.digit_array[0];
+                vlow = v.digit_array[0];
+                assert((ulow & 1) != 0);
+                assert((vlow & 1) != 0);
+                M11 = 1, M12 = 0, M21 = 0, M22 = 1;
+                for (digit_type mask = 1; mask; mask <<= 1) {
+                    if (ulow & mask) {
+                        if (vlow & mask) {
+                            if (bit_diff >= 0) { // u largest
+                                M11 -= M21;
+                                M12 -= M22;
+                                ulow -= vlow;
+                                vlow <<= 1;
+                                --bit_diff;
+                                M21 *= 2;  M22 *= 2;                        
+                            } else {             // v largest
+                                M21 -= M11;
+                                M22 -= M12;
+                                vlow -= ulow;
+                                ulow <<= 1;
+                                ++bit_diff;
+                                M11 *= 2;  M12 *= 2;
+                            }
+                        } else {
+                            ulow <<= 1;
+                            ++bit_diff;
+                            M11 *= 2;  M12 *= 2;
+                        }
+                    } else if (vlow & mask) {
+                        vlow <<= 1;
+                        --bit_diff;
+                        M21 *= 2;  M22 *= 2;                        
+                    } else {
+                        M11 *= 2;  M12 *= 2;
+                        M21 *= 2;  M22 *= 2;                        
+                    }
+                }
+                t11.multiply_digit(u, static_cast<digit_type>(M11 < 0 ? -M11 : M11));
+                t12.multiply_digit(v, static_cast<digit_type>(M12 < 0 ? -M12 : M12));
+                t21.multiply_digit(u, static_cast<digit_type>(M21 < 0 ? -M21 : M21));
+                t22.multiply_digit(v, static_cast<digit_type>(M22 < 0 ? -M22 : M22));
+                if ((M11 < 0) == (M12 < 0)) {
+                    u.add(t11, t12);
+                } else if (t11.compare(t12) > 0) {
+                    u.subtract(t11, t12);
+                } else {
+                    u.subtract(t12, t11);
+                }
+                if ((M21 < 0) == (M22 < 0)) {
+                    v.add(t21, t22);
+                } else if (t21.compare(t22) > 0) {
+                    v.subtract(t21, t22);
+                } else {
+                    v.subtract(t22, t21);
+                }
+                if (u.is_zero()) {
+                    left_shift(v, shift);
+                    return;
+                }
+                if (v.is_zero()) {
+                    left_shift(u, shift);
+                    return;
+                }
+                us = u.lsb();
+                vs = v.lsb();
+                u.right_shift(u, us);
+                v.right_shift(v, vs);
+            }
+
+            while (true) {
+                int c = u.compare(v);
+                if (c == 0)
+                    break;
+                if (c > 0)
+                    u.swap(v);
+                v.subtract(v, u);
+                vs = v.lsb();
+                v.right_shift(v, vs);
+            }
+
+            left_shift(u, shift);
+        }        
+    }
+#endif
+    
     std::string str(std::streamsize /*digits*/, std::ios_base::fmtflags f) const
     {
         if (is_zero())
@@ -508,6 +641,11 @@ public:
         return q.quotrem_int(a, b);
     }
     
+    inline static unsigned long long integer_bitwise_and(const natural_number& a, unsigned long long b)
+    {
+        return integer_bitwise_and_int(a, b);
+    }
+    
 #ifdef KANOOTH_HAS_LONG_LONG
 
     // *********************************************
@@ -569,6 +707,11 @@ public:
         natural_number q(a.digits, digit_unit);
         return q.quotrem_int(a, b);
     }
+
+    inline static unsigned long integer_bitwise_and(const natural_number& a, unsigned long b)
+    {
+        return integer_bitwise_and_int(a, b);
+    }
     
 #endif
 
@@ -615,9 +758,7 @@ private:
     T value_as() const {
         if (digits == 0) {
             return 0;
-        } else if (digits == 1 || sizeof(T) <= sizeof(digit_type)) {
-            return digit_array[0];
-        } else {  // digits > 1 && sizeof(T) > sizeof(digit_type)
+        } else if (digits > 1 && sizeof(T) > sizeof(digit_type)) {
             T r = 0;
             const unsigned max = ceil_div(sizeof(T), sizeof(digit_type));
             unsigned n = 0;
@@ -626,6 +767,8 @@ private:
                 ++n;
             }
             return r;
+        } else {
+            return digit_array[0];
         }
     }
 
@@ -679,11 +822,7 @@ private:
     template <typename T>
     void multiply_int(const natural_number& a, T b)
     {
-        if (b == 0) {
-            *this = 0lu;
-        } else if (b == 1) {
-            *this = a;
-        } else if (sizeof(T) <= sizeof(digit_type) || b <= digit_max()) {
+        if (sizeof(T) <= sizeof(digit_type) || b <= digit_max()) {
             size_type res_digits = a.digits + 1;
             if (allocated < res_digits) {
                 natural_number other(res_digits, digit_unit);
@@ -712,6 +851,20 @@ private:
             natural_number r;
             quotrem(*this, r, a, natural_number(b));
             return r.value_as<T>();
+        }
+    }
+
+    template <typename T>
+    static T integer_bitwise_and_int(const natural_number& a, T b)
+    {
+        if (a.is_zero()) {
+            return 0;
+        } else if (a.digits > 1 && sizeof(T) > sizeof(digit_type)) {
+            natural_number r;
+            r.bitwise_and(a, natural_number(b));
+            return r.value_as<T>();
+        } else {
+            return a.digit_array[0] & b;
         }
     }
     
@@ -827,8 +980,12 @@ private:
     
     void multiply_digit(const natural_number& a, digit_type b)
     {
-        digit_type carry = LowLevel::mul_1(digit_array, a.digit_array, a.digits, b);
-        set_digits_carry(a.digits, carry);
+        if (b) {
+            digit_type carry = LowLevel::mul_1(digit_array, a.digit_array, a.digits, b);
+            set_digits_carry(a.digits, carry);
+        } else {
+            digits = 0;
+        }
     }
     
     static void quotrem_number_step1(natural_number& q, natural_number& rem, const natural_number& a, const natural_number& b, unsigned shift)
