@@ -14,23 +14,24 @@
 #include <kanooth/numbers/integer_binary_logarithm.hpp>
 #include <kanooth/numbers/least_significant_bit.hpp>
 
-#if 0//defined(KANOOTH_HAS_INT128_T)
+#if defined(KANOOTH_HAS_INT128_T)
 
 #include <kanooth/numbers/lowlevel/generic_has_double.hpp>
 typedef kanooth::numbers::lowlevel::generic_has_double<kanooth::uint64_t, kanooth::uint128_t> best_low_level;
 
-#elif 0//defined(KANOOTH_HAS_INT64_T)
+#elif defined(KANOOTH_HAS_INT64_T)
 
 #include <kanooth/numbers/lowlevel/generic_has_double.hpp>
 typedef kanooth::numbers::lowlevel::generic_has_double<kanooth::uint32_t, kanooth::uint64_t> best_low_level;
 
 #else
 
-//#include <kanooth/numbers/lowlevel/generic_has_double.hpp>
-//typedef kanooth::numbers::lowlevel::generic_has_double<kanooth::uint16_t, kanooth::uint32_t> best_low_level;
 #include <kanooth/numbers/lowlevel/generic_has_double.hpp>
-typedef kanooth::numbers::lowlevel::generic_has_double<kanooth::uint8_t, kanooth::uint16_t> best_low_level;
+typedef kanooth::numbers::lowlevel::generic_has_double<kanooth::uint16_t, kanooth::uint32_t> best_low_level;
 
+// for debugging
+//#include <kanooth/numbers/lowlevel/generic_has_double.hpp>
+//typedef kanooth::numbers::lowlevel::generic_has_double<kanooth::uint8_t, kanooth::uint16_t> best_low_level;
 //#include <kanooth/numbers/lowlevel/generic_sim_double.hpp>
 //typedef kanooth::numbers::lowlevel::generic_sim_double<unsigned long> best_low_level;
 
@@ -387,18 +388,10 @@ public:
             return -1;
         }
         const digit_type* dp = digit_array;
-        /*while (!*dp) {
+        while (!*dp) {
             ++dp;
-        }*/
-        while (true) {
-            digit_type d = *dp++;
-            if (d) break;
         }
-        unsigned v = dp - digit_array;
-        v *= digit_bits;
-        v += least_significant_bit(*dp);
-        return v;
-        //return (dp - digit_array) * digit_bits + least_significant_bit(*dp);
+        return (dp - digit_array) * digit_bits + least_significant_bit(*dp);
     }
     
     inline unsigned binary_logarithm() const
