@@ -3,3 +3,4 @@ test_int_vs_gmp
 lowlevel_perf
 lowlevel_test
 performance_test
+perf.*

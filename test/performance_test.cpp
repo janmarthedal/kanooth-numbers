@@ -857,7 +857,7 @@ int main()
    test<kanooth::numbers::boost_integer>("kanooth_int", 1024);
    //test<kanooth::numbers::boost_integer>("kanooth_int", 8192);
 #endif
-   quickbook_results();
+   //quickbook_results();
    return 0;
 }
 

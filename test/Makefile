@@ -17,7 +17,13 @@ lowlevel_test: lowlevel_test.cpp
 performance_test: performance_test.cpp
 	g++ -O2 $< -o $@ -I .. -lboost_system -DTEST_CPP_INT -DTEST_KANOOTH_INT
 
+perf.csv: perf.txt
+	sed 's/   */,/g' < $< > $@
+
+perf.txt: performance_test
+	./$< | tee $@
+
 clean:
-	rm -f $(TARGETS)
+	rm -f $(TARGETS) perf.txt perf.csv
 
 .PHONY: all clean
