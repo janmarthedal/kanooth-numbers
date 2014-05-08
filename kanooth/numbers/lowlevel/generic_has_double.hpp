@@ -15,7 +15,7 @@
 
 #include <cassert>
 #include <kanooth/number_bits.hpp>
-#include <kanooth/make_signed.hpp>
+#include <kanooth/signed_right_shift.hpp>
 
 namespace kanooth {
 namespace numbers {
@@ -27,7 +27,6 @@ public:
     
     typedef BASE digit_type;
     typedef DOUBLE double_type;
-    typedef typename kanooth::make_signed<double_type>::type signed_double_type;
     static const unsigned digit_bits = number_bits<digit_type>::value;
 
     static inline void copy_forward(digit_type* z1, const digit_type* x1, const std::size_t n)
@@ -51,8 +50,9 @@ public:
     {
       if (!n) return y;
       if (y) {
-        double_type z = static_cast<double_type>(*xp) + static_cast<double_type>(y);
-        *rp = static_cast<digit_type>(z);
+        double_type z = *xp;
+        z += y;
+        *rp = z;
         ++rp;
         ++xp;
         --n;
@@ -228,8 +228,9 @@ private:
     {
         double_type carry = 0;
         while (n--) {
-            carry += static_cast<double_type>(*xp) + static_cast<double_type>(*yp);
-            *rp = static_cast<digit_type>(carry);
+            carry += *xp;
+            carry += *yp;
+            *rp = carry;
             carry >>= digit_bits;
             ++rp;
             ++xp;
@@ -242,9 +243,10 @@ private:
     {
         double_type carry = 0;
         while (n--) {
-            carry += static_cast<double_type>(*xp) - static_cast<double_type>(*yp);
-            *rp = static_cast<digit_type>(carry);
-            carry = static_cast<signed_double_type>(carry) >> digit_bits;
+            carry += *xp;
+            carry -= *yp;
+            *rp = carry;
+            carry = signed_right_shift(carry, digit_bits);
             ++xp;
             ++yp;
             ++rp;
@@ -286,8 +288,8 @@ private:
     {
         double_type k = 0;
         while (first != last) {
-            k += static_cast<double_type>(*first) * static_cast<double_type>(v);
-            *dst = static_cast<digit_type>(k);
+            k += static_cast<double_type>(*first) * v;
+            *dst = k;
             k >>= digit_bits;
             ++first;
             ++dst;
@@ -327,7 +329,7 @@ private:
             k2 += static_cast<double_type>(*ufirst) - static_cast<digit_type>(k1);
             *ufirst = static_cast<digit_type>(k2);
             k1 >>= digit_bits;
-            k2 = static_cast<signed_double_type>(k2) >> digit_bits;
+            k2 = signed_right_shift(k2, digit_bits);
             ++ufirst;
             ++vfirst;
         }

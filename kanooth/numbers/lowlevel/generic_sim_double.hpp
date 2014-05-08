@@ -15,6 +15,7 @@
 
 #include <cassert>
 #include <kanooth/number_bits.hpp>
+#include <kanooth/make_signed.hpp>
 
 namespace kanooth {
 namespace numbers {
@@ -25,7 +26,10 @@ class generic_sim_double {
 public:
     
     typedef T digit_type;
-    static const unsigned digit_bits = ::kanooth::number_bits<digit_type>::value;
+    typedef typename make_signed<digit_type>::type signed_digit_type;
+    static const unsigned digit_bits = number_bits<digit_type>::value;
+    static const unsigned digit_half_bits = digit_bits / 2;
+    static const digit_type digit_low_mask = (digit_type(1) << (digit_bits / 2)) - 1;
 
     static inline void copy_forward(digit_type* z1, const digit_type* x1, const std::size_t n)
     {
@@ -215,7 +219,7 @@ public:
 
 private:
 
-    static inline digit_type add_n(digit_type* rp, const digit_type* xp, const digit_type* yp, std::size_t n)
+    /*static inline digit_type add_n(digit_type* rp, const digit_type* xp, const digit_type* yp, std::size_t n)
     {
       digit_type lx, ly, lz;
       bool carry = false;
@@ -232,9 +236,27 @@ private:
         *rp++ = lz;
       }
       return carry ? 1 : 0;
+    }*/
+
+    static inline digit_type add_n(digit_type* rp, const digit_type* xp, const digit_type* yp, std::size_t n)
+    {
+      digit_type lx, ly, lz;
+      digit_type carry = 0;
+      while (n--) {
+        lx = *xp++;
+        ly = *yp++;
+        carry += (lx & digit_low_mask) + (ly & digit_low_mask);
+        lz = carry & digit_low_mask;
+        carry >>= digit_half_bits;
+        carry += (lx >> digit_half_bits) + (ly >> digit_half_bits);
+        lz |= carry << digit_half_bits;
+        carry >>= digit_half_bits;
+        *rp++ = lz;
+      }
+      return carry ? 1 : 0;
     }
 
-    static inline digit_type sub_n(digit_type* rp, const digit_type* xp, const digit_type* yp, std::size_t n)
+    /*static inline digit_type sub_n(digit_type* rp, const digit_type* xp, const digit_type* yp, std::size_t n)
     {
       digit_type lx, ly, lz;
       bool borrow = false;
@@ -251,6 +273,24 @@ private:
         *rp++ = lz;
       }
       return borrow ? 1 : 0;
+    }*/
+
+    static inline digit_type sub_n(digit_type* rp, const digit_type* xp, const digit_type* yp, std::size_t n)
+    {
+      digit_type lx, ly, lz;
+      digit_type carry = 0;
+      while (n--) {
+        lx = *xp++;
+        ly = *yp++;
+        carry += (lx & digit_low_mask) - (ly & digit_low_mask);
+        lz = carry & digit_low_mask;
+        carry = static_cast<signed_digit_type>(carry) >> digit_half_bits;
+        carry += (lx >> digit_half_bits) - (ly >> digit_half_bits);
+        lz |= carry << digit_half_bits;
+        carry = static_cast<signed_digit_type>(carry) >> digit_half_bits;
+        *rp++ = lz;
+      }
+      return carry ? 1 : 0;
     }
 
     static inline digit_type inc(digit_type* rp, const digit_type* xp, std::size_t n)
@@ -281,15 +321,13 @@ private:
 
     static inline void double_mult_add_add(const digit_type u, const digit_type v, const digit_type a1, const digit_type a2, digit_type& low, digit_type& high)
     {
-      const unsigned int halfbits = digit_bits / 2;
-      const digit_type lowmask = (digit_type(1) << halfbits) - 1;
-      digit_type u1 = u >> halfbits, u0 = u & lowmask;
-      digit_type v1 = v >> halfbits, v0 = v & lowmask;
-      digit_type r  = u0*v0 + (a1 & lowmask) + (a2 & lowmask);
-      digit_type s  = u1*v0 + (a1 >> halfbits) + (r >> halfbits);
-      digit_type t  = u0*v1 + (s & lowmask) + (a2 >> halfbits);
-      high = u1*v1 + (s >> halfbits) + (t >> halfbits);
-      low  = (t << halfbits) | (r & lowmask);
+      digit_type u1 = u >> digit_half_bits, u0 = u & digit_low_mask;
+      digit_type v1 = v >> digit_half_bits, v0 = v & digit_low_mask;
+      digit_type r  = u0*v0 + (a1 & digit_low_mask) + (a2 & digit_low_mask);
+      digit_type s  = u1*v0 + (a1 >> digit_half_bits) + (r >> digit_half_bits);
+      digit_type t  = u0*v1 + (s & digit_low_mask) + (a2 >> digit_half_bits);
+      high = u1*v1 + (s >> digit_half_bits) + (t >> digit_half_bits);
+      low  = (t << digit_half_bits) | (r & digit_low_mask);
     }
 
     static inline void double_mult_add(const digit_type u, const digit_type v, const digit_type a, digit_type& low, digit_type& high)
@@ -349,7 +387,7 @@ private:
       }
       r = ((r << halfbits) | u1) - q1*v0;
       q0 = r / v1;
-      r = r % v1;
+      r  = r % v1;
       while ((q0 & highmask) || q0*v0 > ((r << halfbits) | u0)) {
         --q0;
         r += v1;
