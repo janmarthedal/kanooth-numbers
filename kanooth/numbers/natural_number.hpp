@@ -402,7 +402,6 @@ public:
         return integer_binary_logarithm(digit_array[digits - 1]) + digit_bits * (digits - 1);
     }
     
-#if 1
     void gcd(const natural_number& a, const natural_number& b)
     {
         if (a.is_zero()) {
@@ -432,120 +431,6 @@ public:
             left_shift(u, shift);
         }        
     }
-#endif
-
-#if 0
-    void gcd(const natural_number& a, const natural_number& b)
-    {
-        if (a.is_zero()) {
-            *this = b;
-        } else if (b.is_zero()) {
-            *this = a;
-        } else {
-            typedef typename make_signed<digit_type>::type signed_digit_type;
-            natural_number u, v;
-            digit_type ulow, vlow;
-            signed_digit_type M11, M12, M21, M22;
-
-            unsigned us = a.lsb();
-            unsigned vs = b.lsb();
-            unsigned shift = (std::min)(us, vs);
-            u.right_shift(a, us);
-            v.right_shift(b, vs);
-            
-            natural_number t11(u.digits+1, digit_unit), t12(v.digits+1, digit_unit);
-            natural_number t21(u.digits+1, digit_unit), t22(v.digits+1, digit_unit);
-
-            while (true) {
-                us = u.binary_logarithm();
-                vs = v.binary_logarithm();
-                if ((std::min)(us, vs) <= digit_bits)
-                    break;
-                int bit_diff = static_cast<int>(us) - static_cast<int>(vs);
-                ulow = u.digit_array[0];
-                vlow = v.digit_array[0];
-                assert((ulow & 1) != 0);
-                assert((vlow & 1) != 0);
-                M11 = 1, M12 = 0, M21 = 0, M22 = 1;
-                for (digit_type mask = 1; mask; mask <<= 1) {
-                    if (ulow & mask) {
-                        if (vlow & mask) {
-                            if (bit_diff >= 0) { // u largest
-                                M11 -= M21;
-                                M12 -= M22;
-                                ulow -= vlow;
-                                vlow <<= 1;
-                                --bit_diff;
-                                M21 *= 2;  M22 *= 2;                        
-                            } else {             // v largest
-                                M21 -= M11;
-                                M22 -= M12;
-                                vlow -= ulow;
-                                ulow <<= 1;
-                                ++bit_diff;
-                                M11 *= 2;  M12 *= 2;
-                            }
-                        } else {
-                            ulow <<= 1;
-                            ++bit_diff;
-                            M11 *= 2;  M12 *= 2;
-                        }
-                    } else if (vlow & mask) {
-                        vlow <<= 1;
-                        --bit_diff;
-                        M21 *= 2;  M22 *= 2;                        
-                    } else {
-                        M11 *= 2;  M12 *= 2;
-                        M21 *= 2;  M22 *= 2;                        
-                    }
-                }
-                t11.multiply_digit(u, static_cast<digit_type>(M11 < 0 ? -M11 : M11));
-                t12.multiply_digit(v, static_cast<digit_type>(M12 < 0 ? -M12 : M12));
-                t21.multiply_digit(u, static_cast<digit_type>(M21 < 0 ? -M21 : M21));
-                t22.multiply_digit(v, static_cast<digit_type>(M22 < 0 ? -M22 : M22));
-                if ((M11 < 0) == (M12 < 0)) {
-                    u.add(t11, t12);
-                } else if (t11.compare(t12) > 0) {
-                    u.subtract(t11, t12);
-                } else {
-                    u.subtract(t12, t11);
-                }
-                if ((M21 < 0) == (M22 < 0)) {
-                    v.add(t21, t22);
-                } else if (t21.compare(t22) > 0) {
-                    v.subtract(t21, t22);
-                } else {
-                    v.subtract(t22, t21);
-                }
-                if (u.is_zero()) {
-                    left_shift(v, shift);
-                    return;
-                }
-                if (v.is_zero()) {
-                    left_shift(u, shift);
-                    return;
-                }
-                us = u.lsb();
-                vs = v.lsb();
-                u.right_shift(u, us);
-                v.right_shift(v, vs);
-            }
-
-            while (true) {
-                int c = u.compare(v);
-                if (c == 0)
-                    break;
-                if (c > 0)
-                    u.swap(v);
-                v.subtract(v, u);
-                vs = v.lsb();
-                v.right_shift(v, vs);
-            }
-
-            left_shift(u, shift);
-        }        
-    }
-#endif
     
     std::string str(std::streamsize /*digits*/, std::ios_base::fmtflags f) const
     {
@@ -572,6 +457,11 @@ public:
             }
         }
         return std::string(begin, end);
+    }
+
+    std::string to_string(std::ios_base::fmtflags f = std::ios_base::dec) const
+    {
+        return str(0, f);
     }
 
     // *********************************************
@@ -1158,4 +1048,3 @@ private:
 } // namespace kanooth
 
 #endif // KANOOTH_NUMBERS_NATURAL_NUMBER_HPP
-
