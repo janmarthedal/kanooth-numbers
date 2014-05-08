@@ -15,14 +15,8 @@
 
 #ifdef KANOOTH_USE_BOOST
 #include <boost/integer_traits.hpp>
-#ifdef BOOST_HAS_LONG_LONG
-#define KANOOTH_HAS_LONG_LONG
-#endif
 #else
 #include <limits>
-#ifdef __GNUC__
-#define KANOOTH_HAS_LONG_LONG
-#endif
 #endif
 
 namespace kanooth {

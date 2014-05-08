@@ -59,7 +59,9 @@ namespace {
 
 template <typename B>
 inline bool eval_is_zero(const kanooth_natnum<B>& val)
-{ return val.is_zero(); }
+{
+    return val.is_zero();
+}
 
 template <typename B>
 inline void eval_add(kanooth_natnum<B>& r, const kanooth_natnum<B>& a)
@@ -182,7 +184,6 @@ eval_modulus(kanooth_natnum<B>& r, kanooth_natnum<B>& a, T b)
 {
     r.modulus(a, to_unsigned(b));
 }
-
 
 template <typename B, typename T>
 inline void eval_qr(const kanooth_natnum<B>& x, const kanooth_natnum<B>& y, kanooth_natnum<B>& q, kanooth_natnum<B>& r)
