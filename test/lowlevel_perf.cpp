@@ -56,7 +56,7 @@ public:
             for (unsigned k = 0; k < count; ++k)
                 LOWLEVEL::add(c[k], a[k], length, b[k], length);        
         
-        return 0.000000001 * count * reps * length * digit_bits / timer.elapsed();
+        return 0.000000001 * count * reps * length * digit_bits / timer.seconds();
     }
     
     double test_sub()
@@ -68,7 +68,7 @@ public:
             for (unsigned k = 0; k < count; ++k)
                 LOWLEVEL::sub(c[k], a[k], length, b[k], length);        
         
-        return 0.000000001 * count * reps * length * digit_bits / timer.elapsed();
+        return 0.000000001 * count * reps * length * digit_bits / timer.seconds();
     }
     
     double test_mul_1()
@@ -80,7 +80,7 @@ public:
             for (unsigned k = 0; k < count; ++k)
                 LOWLEVEL::mul_1(c[k], a[k], length, b[k][0]);
         
-        return 0.000000001 * count * reps * length * digit_bits / timer.elapsed();
+        return 0.000000001 * count * reps * length * digit_bits / timer.seconds();
     }
     
     void run()

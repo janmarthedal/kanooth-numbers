@@ -9,9 +9,33 @@
 #  define _SCL_SECURE_NO_WARNINGS
 #endif
 
+#if !defined(TEST_MPF) && !defined(TEST_MPZ) && \
+   !defined(TEST_CPP_DEC_FLOAT) && !defined(TEST_MPFR) && !defined(TEST_MPQ) \
+   && !defined(TEST_TOMMATH) && !defined(TEST_TOMMATH_BOOST_RATIONAL) && !defined(TEST_MPZ_BOOST_RATIONAL)\
+   && !defined(TEST_CPP_INT) && !defined(TEST_CPP_INT_RATIONAL) && !defined(TEST_KANOOTH_INT)
+#  define TEST_MPF
+#  define TEST_MPZ
+#  define TEST_MPQ
+#  define TEST_MPFR
+#  define TEST_CPP_DEC_FLOAT
+#  define TEST_MPQ
+#  define TEST_TOMMATH
+#  define TEST_CPP_INT
+#  define TEST_CPP_INT_RATIONAL
+#  define TEST_KANOOTH_INT
+
+#ifdef _MSC_VER
+#pragma message("CAUTION!!: No backend type specified so testing everything.... this will take some time!!")
+#endif
+#ifdef __GNUC__
+#pragma warning "CAUTION!!: No backend type specified so testing everything.... this will take some time!!"
+#endif
+
+#endif
+
 #if defined(TEST_MPF) || defined(TEST_MPZ) || defined(TEST_MPQ) || defined(TEST_MPZ_BOOST_RATIONAL)
 #include <boost/multiprecision/gmp.hpp>
-#include <boost/multiprecision/rational_adapter.hpp>
+#include <boost/multiprecision/rational_adaptor.hpp>
 #endif
 #ifdef TEST_CPP_DEC_FLOAT
 #include <boost/multiprecision/cpp_dec_float.hpp>
@@ -21,7 +45,7 @@
 #endif
 #if defined(TEST_TOMMATH) || defined(TEST_TOMMATH_BOOST_RATIONAL)
 #include <boost/multiprecision/tommath.hpp>
-#include <boost/multiprecision/rational_adapter.hpp>
+#include <boost/multiprecision/rational_adaptor.hpp>
 #endif
 #if defined(TEST_CPP_INT) || defined(TEST_CPP_INT_RATIONAL)
 #include <boost/multiprecision/cpp_int.hpp>
@@ -72,7 +96,6 @@ template<>
 class number_category<boost::uint64_t> : public mpl::int_<number_kind_integer>{};
 
 }}
-
 
 template <class T, int Type>
 struct tester
@@ -306,7 +329,7 @@ struct tester
    {
       using boost::math::gcd;
       stopwatch<boost::chrono::high_resolution_clock> w;
-      for(unsigned i = 0; i < 100; ++i)
+      for(unsigned i = 0; i < 1000; ++i)
       {
          for(unsigned i = 0; i < b.size(); ++i)
             a[i] = gcd(b[i], c[i]);
@@ -660,23 +683,21 @@ void test(const char* type, unsigned precision)
    // we measure only algorithm performance, and not memory allocation effects.
    //
    t.test_multiply();
-   //report_result("integer", type, "<<", precision, t.test_left_shift());
-   report_result("integer", type, "gcd", precision, t.test_gcd());
    //
    // Now the actual tests:
    //
-   /*report_result(cat, type, "+", precision, t.test_add());
+   report_result(cat, type, "+", precision, t.test_add());
    report_result(cat, type, "-", precision, t.test_subtract());
-   report_result(cat, type, "*", precision, t.test_multiply());*/
-   //report_result(cat, type, "/", precision, t.test_divide());
-   /*report_result(cat, type, "str", precision, t.test_str());
+   report_result(cat, type, "*", precision, t.test_multiply());
+   report_result(cat, type, "/", precision, t.test_divide());
+   report_result(cat, type, "str", precision, t.test_str());
    // integer ops:
    report_result(cat, type, "+(int)", precision, t.test_add_int());
    report_result(cat, type, "-(int)", precision, t.test_subtract_int());
    report_result(cat, type, "*(int)", precision, t.test_multiply_int());
    report_result(cat, type, "/(int)", precision, t.test_divide_int());
    // construction and destruction:
-   /*report_result(cat, type, "construct", precision, t.test_construct());
+   report_result(cat, type, "construct", precision, t.test_construct());
    report_result(cat, type, "construct(unsigned)", precision, t.test_construct_unsigned());
    report_result(cat, type, "construct(unsigned long long)", precision, t.test_construct_unsigned_ll());
    test_int_ops(t, type, precision, typename boost::multiprecision::number_category<Number>::type());
@@ -688,7 +709,7 @@ void test(const char* type, unsigned precision)
    report_result(cat, type, "+=(unsigned long long)", precision, t.template test_inplace_add_hetero<unsigned long long>());
    report_result(cat, type, "-=(unsigned long long)", precision, t.template test_inplace_subtract_hetero<unsigned long long>());
    report_result(cat, type, "*=(unsigned long long)", precision, t.template test_inplace_multiply_hetero<unsigned long long>());
-   report_result(cat, type, "/=(unsigned long long)", precision, t.template test_inplace_divide_hetero<unsigned long long>());*/
+   report_result(cat, type, "/=(unsigned long long)", precision, t.template test_inplace_divide_hetero<unsigned long long>());
 }
 
 void quickbook_results()
@@ -791,14 +812,6 @@ int main()
    test<boost::multiprecision::cpp_int>("cpp_int", 256);
    test<boost::multiprecision::cpp_int>("cpp_int", 512);
    test<boost::multiprecision::cpp_int>("cpp_int", 1024);
-   //test<boost::multiprecision::cpp_int>("cpp_int", 8192);
-#endif
-#ifdef TEST_KANOOTH_INT
-   test<kanooth::numbers::boost_integer>("kanooth_int", 128);
-   test<kanooth::numbers::boost_integer>("kanooth_int", 256);
-   test<kanooth::numbers::boost_integer>("kanooth_int", 512);
-   test<kanooth::numbers::boost_integer>("kanooth_int", 1024);
-   //test<kanooth::numbers::boost_integer>("kanooth_int", 8192);
 #endif
 #ifdef TEST_CPP_INT_RATIONAL
    test<boost::multiprecision::cpp_rational>("cpp_rational", 128);
@@ -837,7 +850,14 @@ int main()
    test<boost::multiprecision::mpfr_float_100>("mpfr_float", 100);
    test<boost::multiprecision::mpfr_float_500>("mpfr_float", 500);
 #endif
-   //quickbook_results();
+#ifdef TEST_KANOOTH_INT
+   test<kanooth::numbers::boost_integer>("kanooth_int", 128);
+   test<kanooth::numbers::boost_integer>("kanooth_int", 256);
+   test<kanooth::numbers::boost_integer>("kanooth_int", 512);
+   test<kanooth::numbers::boost_integer>("kanooth_int", 1024);
+   //test<kanooth::numbers::boost_integer>("kanooth_int", 8192);
+#endif
+   quickbook_results();
    return 0;
 }
 

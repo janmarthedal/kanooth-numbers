@@ -6,6 +6,7 @@
 #include <kanooth/numbers/integer_binary_logarithm.hpp>
 #include <kanooth/numbers/least_significant_bit.hpp>
 #include <ctime>
+#include <boost/chrono.hpp>
 
 template <class Number>
 struct tester
