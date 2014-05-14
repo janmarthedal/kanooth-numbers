@@ -51,7 +51,7 @@ namespace {
     struct pow10<T, 0> {
         static const T value = 1;
     };
-    
+
     template <typename T>
     T ceil_div(T a, T b)
     {
@@ -242,9 +242,9 @@ public:
                 quotrem_number_step1(q, rem, a, b, shift);
                 rem.swap(r);
             }
-        }    
+        }
     }
-    
+
     void bitwise_and(const natural_number& a, const natural_number& b)
     {
         size_type res_digits = std::min(a.digits, b.digits);
@@ -393,7 +393,7 @@ public:
         }
         return (dp - digit_array) * digit_bits + least_significant_bit(*dp);
     }
-    
+
     inline unsigned binary_logarithm() const
     {
         if (digits == 0) {
@@ -401,7 +401,7 @@ public:
         }
         return integer_binary_logarithm(digit_array[digits - 1]) + digit_bits * (digits - 1);
     }
-    
+
     void gcd(const natural_number& a, const natural_number& b)
     {
         if (a.is_zero()) {
@@ -429,9 +429,9 @@ public:
             }
 
             left_shift(u, shift);
-        }        
+        }
     }
-    
+
     std::string str(std::streamsize /*digits*/, std::ios_base::fmtflags f) const
     {
         if (is_zero())
@@ -465,23 +465,88 @@ public:
     }
 
     // *********************************************
+    // unsigned rhs
+    // *********************************************
+
+    natural_number(unsigned v)
+    {
+        construct_from_int(v);
+    }
+
+    natural_number& operator=(unsigned v)
+    {
+        return set_to_int(v);
+    }
+
+    inline void convert_to(unsigned* result) const
+    {
+        *result = value_as<unsigned>();
+    }
+
+    inline int compare(unsigned u) const
+    {
+        return compare_int(u);
+    }
+
+    inline void add(const natural_number& a, unsigned b)
+    {
+        add_int(a, b);
+    }
+
+    inline void subtract(const natural_number& a, unsigned b)
+    {
+        subtract_int(a, b);
+    }
+
+    inline void multiply(const natural_number& a, unsigned b)
+    {
+        multiply_int(a, b);
+    }
+
+    inline void divide(const natural_number& a, unsigned b)
+    {
+        quotrem_int(a, b);
+    }
+
+    inline void modulus(const natural_number& a, unsigned b)
+    {
+        *this = integer_modulus(a, b);
+    }
+
+    inline unsigned quotrem(const natural_number& a, unsigned b)
+    {
+        return quotrem_int(a, b);
+    }
+
+    inline static unsigned integer_modulus(const natural_number& a, unsigned b)
+    {
+        natural_number q(a.digits, digit_unit);
+        return q.quotrem_int(a, b);
+    }
+
+    inline static unsigned integer_bitwise_and(const natural_number& a, unsigned b)
+    {
+        return integer_bitwise_and_int(a, b);
+    }
+
+    // *********************************************
     // unsigned long rhs
     // *********************************************
-    
+
     natural_number(unsigned long v)
     {
         construct_from_int(v);
     }
-    
+
     natural_number& operator=(unsigned long v)
     {
         return set_to_int(v);
     }
 
-    inline void convert_to(unsigned long* result) const {
+    inline void convert_to(unsigned long* result) const
+    {
         *result = value_as<unsigned long>();
     }
-    
 
     inline int compare(unsigned long u) const
     {
@@ -517,38 +582,39 @@ public:
     {
         return quotrem_int(a, b);
     }
-    
+
     inline static unsigned long integer_modulus(const natural_number& a, unsigned long b)
     {
         natural_number q(a.digits, digit_unit);
         return q.quotrem_int(a, b);
     }
-    
-    inline static unsigned long long integer_bitwise_and(const natural_number& a, unsigned long long b)
+
+    inline static unsigned long integer_bitwise_and(const natural_number& a, unsigned long b)
     {
         return integer_bitwise_and_int(a, b);
     }
-    
+
 #ifdef KANOOTH_HAS_LONG_LONG
 
     // *********************************************
     // unsigned long long rhs
     // *********************************************
-    
+
     natural_number(unsigned long long v)
     {
         construct_from_int(v);
     }
-    
+
     natural_number& operator=(unsigned long long v)
     {
         return set_to_int(v);
     }
 
-    inline void convert_to(unsigned long long* result) const {
+    inline void convert_to(unsigned long long* result) const
+    {
         *result = value_as<unsigned long long>();
     }
-    
+
 
     inline int compare(unsigned long long u) const
     {
@@ -584,18 +650,18 @@ public:
     {
         return quotrem_int(a, b);
     }
-    
+
     inline static unsigned long long integer_modulus(const natural_number& a, unsigned long long b)
     {
         natural_number q(a.digits, digit_unit);
         return q.quotrem_int(a, b);
     }
 
-    inline static unsigned long integer_bitwise_and(const natural_number& a, unsigned long b)
+    inline static unsigned long long integer_bitwise_and(const natural_number& a, unsigned long long b)
     {
         return integer_bitwise_and_int(a, b);
     }
-    
+
 #endif
 
 private:
@@ -604,7 +670,7 @@ private:
     {
         digit_unit
     };
-    
+
     natural_number(size_type min_size, size_request) : digits(0)
     {
         assert(min_size >= 1);
@@ -621,7 +687,7 @@ private:
     {
         if (!v) {
             digits = allocated = 0;
-            digit_array = 0;            
+            digit_array = 0;
         } else if (sizeof(T) <= sizeof(digit_type) || v <= digit_max()) {
             allocate(1);
             digits = 1;
@@ -658,7 +724,7 @@ private:
     // *******************************************************
     // template helpers for integer rhs
     // *******************************************************
-    
+
     template <typename T>
     void add_int(const natural_number& a, T b)
     {
@@ -750,14 +816,14 @@ private:
             return a.digit_array[0] & b;
         }
     }
-    
+
     // **********************
 
     inline bool size_ok(size_type min_digits)
     {
         return allocated >= min_digits;
     }
-    
+
     inline void set_digits_1(size_type max_digits)
     {
         assert(max_digits >= 1);
@@ -820,8 +886,8 @@ private:
             swap(t);
         }
         return *this;
-    }    
-    
+    }
+
     void add_number(const natural_number& a, const natural_number& b)
     {
         if (a.digits >= b.digits) {
@@ -832,13 +898,13 @@ private:
             set_digits_carry(b.digits, carry);
         }
     }
-    
+
     void add_digit(const natural_number& a, digit_type b)
     {
         digit_type carry = LowLevel::add_1(digit_array, a.digit_array, a.digits, b);
         set_digits_carry(a.digits, carry);
     }
-    
+
     void subtract_number(const natural_number& a, const natural_number& b)
     {
         LowLevel::sub(digit_array, a.digit_array, a.digits, b.digit_array, b.digits);
@@ -850,7 +916,7 @@ private:
         LowLevel::sub_1(digit_array, a.digit_array, a.digits, b);
         set_digits_n(a.digits);
     }
-    
+
     void multiply_number(const natural_number& a, const natural_number& b)
     {
         if (a.digits >= b.digits) {
@@ -860,7 +926,7 @@ private:
         }
         set_digits_1(a.digits + b.digits);
     }
-    
+
     void multiply_digit(const natural_number& a, digit_type b)
     {
         if (b) {
@@ -870,7 +936,7 @@ private:
             digits = 0;
         }
     }
-    
+
     static void quotrem_number_step1(natural_number& q, natural_number& rem, const natural_number& a, const natural_number& b, unsigned shift)
     {
         assert(rem.allocated >= a.digits + 1);
@@ -912,7 +978,7 @@ private:
             LowLevel::rshift(num.digit_array, num.digit_array, denom.digits, shift);
         num.set_digits_n(denom.digits);  // num is now the remainder
     }
-    
+
     digit_type quotrem_digit(const natural_number& a, digit_type denom)
     {
         digit_type remainder;
@@ -949,14 +1015,14 @@ private:
         set_digits_1(num.digits);
         return remainder;
     }
-    
+
     void bitwise_and_helper(const natural_number& a, const natural_number& b)
     {
-        size_type res_digits = std::min(a.digits, b.digits);        
+        size_type res_digits = std::min(a.digits, b.digits);
         LowLevel::bitwise_and(digit_array, a.digit_array, b.digit_array, res_digits);
         set_digits_n(res_digits);
     }
-    
+
     void bitwise_or_step2(const natural_number& a, const natural_number& b)
     {
         assert(a.digits >= b.digits);
@@ -964,7 +1030,7 @@ private:
         LowLevel::copy_forward(digit_array + b.digits, a.digit_array + b.digits, a.digits - b.digits);
         digits = a.digits;
     }
-    
+
     void bitwise_or_step1(const natural_number& a, const natural_number& b)
     {
         if (a.digits >= b.digits)
@@ -972,7 +1038,7 @@ private:
         else
             bitwise_or_step2(b, a);
     }
-    
+
     void bitwise_xor_step2(const natural_number& a, const natural_number& b)
     {
         assert(a.digits >= b.digits);
@@ -980,7 +1046,7 @@ private:
         LowLevel::copy_forward(digit_array + b.digits, a.digit_array + b.digits, a.digits - b.digits);
         digits = a.digits;
     }
-    
+
     void bitwise_xor_step1(const natural_number& a, const natural_number& b)
     {
         if (a.digits >= b.digits)
@@ -988,7 +1054,7 @@ private:
         else
             bitwise_xor_step2(b, a);
     }
-    
+
     void bitwise_and_not_helper(const natural_number& a, const natural_number& b)
     {
         if (a.digits <= b.digits) {
@@ -999,7 +1065,7 @@ private:
         }
         set_digits_n(a.digits);
     }
-    
+
     void left_shift_helper(const natural_number& a, unsigned long count)
     {
         assert(count != 0);
@@ -1018,7 +1084,7 @@ private:
         LowLevel::fill_zero(digit_array, whole);
         digits = new_digits;
     }
-    
+
     void right_shift_helper(const natural_number& a, unsigned long count)
     {
         assert(count != 0);
@@ -1031,13 +1097,13 @@ private:
         }
         set_digits_1(a.digits - whole);
     }
-    
+
     void allocate(size_type size)
     {
         allocated = size;
         digit_array = allocator().allocate(allocated);
     }
-    
+
     allocator_type& allocator() { return *this; }
     digit_type* digit_array;
     size_type digits;
