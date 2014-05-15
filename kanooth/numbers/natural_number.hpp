@@ -73,8 +73,9 @@ class natural_number : private Allocator::template rebind<typename LowLevel::dig
 
 public:
 
-    natural_number() : digit_array(0), digits(0), allocated(0)
+    natural_number()
     {
+        clear();
     }
 
     natural_number(const natural_number& other)
@@ -84,9 +85,14 @@ public:
             digits = other.digits;
             LowLevel::copy_forward(digit_array, other.digit_array, other.digits);
         } else {
-            digits = allocated = 0;
-            digit_array = 0;
+            clear();
         }
+    }
+
+    natural_number(natural_number&& other)
+            : digits(other.digits), allocated(other.allocated), digit_array(other.digit_array)
+    {
+        other.clear();
     }
 
     natural_number(const char* s) : digits(0)
@@ -130,6 +136,12 @@ public:
                 natural_number(other).swap(*this);
             }
         }
+        return *this;
+    }
+
+    natural_number& operator=(natural_number&& other)
+    {
+        other.swap(*this);
         return *this;
     }
 
@@ -697,8 +709,7 @@ private:
             digits = 0;
             while (v) {
                 digit_array[digits++] = v;
-                v >>= digit_bits-1;  // avoid
-                v >>= 1;             //   warning...
+                v >>= digit_bits;
             }
         }
     }
@@ -1102,6 +1113,12 @@ private:
     {
         allocated = size;
         digit_array = allocator().allocate(allocated);
+    }
+
+    inline void clear()
+    {
+        digits = allocated = 0;
+        digit_array = 0;
     }
 
     allocator_type& allocator() { return *this; }
