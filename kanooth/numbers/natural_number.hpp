@@ -143,7 +143,6 @@ public:
     }
 
 #if !defined(KANOOTH_NO_RVALUE_REFS)
-    bla
     natural_number& operator=(natural_number&& other)
     {
         other.swap(*this);

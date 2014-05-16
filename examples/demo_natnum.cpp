@@ -28,17 +28,20 @@ natnum fibonacci(unsigned n)
     return a;
 }
 
+natnum gcd(const natnum& a, const natnum& b)
+{
+    natnum r;
+    r.gcd(a, b);
+    return r;
+}
+
 int main()
 {
+    natnum a = "1856066132809047973900594119949", b = "103435020496695927794013500393";
+
     std::cout << "100! = " << factorial(100u).str() << std::endl;
-    
-    natnum a = "1856066132809047973900594119949", b = "103435020496695927794013500393", c;
-    c.gcd(a, b);
-    std::cout << "gcd(" << a.str() << "," << b.str() << ") = " << c.str() << std::endl;
-
+    std::cout << "gcd(" << a.str() << "," << b.str() << ") = " << gcd(a, b).str() << std::endl;
     std::cout << "200th fibonacci number = " << fibonacci(200u).str() << std::endl;
-
-    std::cout << __cplusplus << std::endl;
 
     return 0;
 }
