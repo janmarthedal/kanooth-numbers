@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cstring>  // strlen
 
+#include <kanooth/config.hpp>
 #include <kanooth/number_bits.hpp>
 #include <kanooth/make_signed.hpp>
 #include <kanooth/fixed_width_ints.hpp>
@@ -89,11 +90,13 @@ public:
         }
     }
 
+#if !defined(KANOOTH_NO_RVALUE_REFS)
     natural_number(natural_number&& other)
             : digits(other.digits), allocated(other.allocated), digit_array(other.digit_array)
     {
         other.clear();
     }
+#endif
 
     natural_number(const char* s) : digits(0)
     {
@@ -139,11 +142,14 @@ public:
         return *this;
     }
 
+#if !defined(KANOOTH_NO_RVALUE_REFS)
+    bla
     natural_number& operator=(natural_number&& other)
     {
         other.swap(*this);
         return *this;
     }
+#endif
 
     natural_number& operator=(const char* s)
     {
@@ -431,10 +437,8 @@ public:
 
             while (true) {
                 int c = u.compare(v);
-                if (c == 0)
-                    break;
-                if (c > 0)
-                    u.swap(v);
+                if (c == 0) break;
+                if (c > 0) u.swap(v);
                 v.subtract(v, u);
                 vs = v.lsb();
                 v.right_shift(v, vs);
@@ -444,7 +448,7 @@ public:
         }
     }
 
-    std::string str(std::streamsize /*digits*/, std::ios_base::fmtflags f) const
+    std::string str(std::streamsize /*digits*/, std::ios_base::fmtflags) const
     {
         if (is_zero())
             return "0";
@@ -471,9 +475,9 @@ public:
         return std::string(begin, end);
     }
 
-    std::string to_string(std::ios_base::fmtflags f = std::ios_base::dec) const
+    std::string str() const
     {
-        return str(0, f);
+        return str(0, std::ios_base::dec);
     }
 
     // *********************************************
