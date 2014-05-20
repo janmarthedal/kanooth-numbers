@@ -64,5 +64,5 @@ std::cout << (u.is_zero() ? "u is zero" : "u is nonzero") << std::endl;
 ```
 and compared to another natural number using `compare`:
 ```C++
-std::cout << "q is " << (q.compare(r) > 0 ? "larger than" : "smaller than or equal to") << " r" << std::endl;```
-
+std::cout << "q is " << (q.compare(r) > 0 ? "larger than" : "smaller than or equal to") << " r" << std::endl;
+```
