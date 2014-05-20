@@ -342,7 +342,7 @@ eval_gt(const kanooth_integer<N>& a, T b)
 namespace kanooth {
 namespace numbers {
 
-typedef boost::multiprecision::number<boost::multiprecision::backends::kanooth_integer<natural_number<> > > boost_integer;
+typedef boost::multiprecision::number<boost::multiprecision::backends::kanooth_integer<natural_number> > boost_integer;
 
 } // namespace numbers
 } // namespace kanooth

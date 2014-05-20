@@ -28,7 +28,7 @@ struct number_category<backends::kanooth_natnum<B> > : public mpl::int_<number_k
 namespace backends {
 
 template <typename B>
-class kanooth_natnum : public kanooth::numbers::natural_number<B>
+class kanooth_natnum : public kanooth::numbers::natural_number_base<B>
 {
 public:
     typedef mpl::list<long>          signed_types;
@@ -46,7 +46,7 @@ public:
     kanooth_natnum(const char* s) : base_type(s) {}
 
 private:
-    typedef kanooth::numbers::natural_number<B> base_type;
+    typedef kanooth::numbers::natural_number_base<B> base_type;
 };
 
 namespace {

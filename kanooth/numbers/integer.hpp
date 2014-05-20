@@ -7,7 +7,7 @@
 namespace kanooth {
 namespace numbers {
         
-typedef integer_base<natural_number<> > integer;
+typedef integer_base<natural_number> integer;
 
 } // namespace numbers
 } // namespace kanooth
