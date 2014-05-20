@@ -18,19 +18,51 @@ typedef kanooth::numbers::natural_number<> natnum;
 
 Here, we also made a `typedef`, which we will use in the following. A natural number can be constructed in a couple of ways:
 ```C++
-natnum a = 1u;
+natnum a = 12u;
 natnum b(123456789lu);
 natnum c = "1856066132809047973900594119949";
+natnum d("103435020496695927794013500393");
+natnum q, r;    // initialized to zero
 ```
-
 Note that only unsigned integer literals are compatible with `natural_number`.
 
 Arithmetic operations are executed by statements such as
 ```C++
-a.add(b, c);
+r.add(a, b);
 ```
-meaning that the sum of `b` and `c` will be put in `a`. An unsigned integer can also be used as the second parameter,
+meaning that the sum of `a` and `b` will be put in `r`. An unsigned integer can also be used as the second parameter,
 ```C++
-b.subtract(b, 1000u);
+r.subtract(r, 12u);
 ```
 Note that for `subtract` the result is undefined if the first parameter is smaller than the first.
+
+Any `natural_number` can be output using the `str()` method, which will return a `std::string`:
+```C++
+std::cout << "r = " << r << std::endl;
+```
+
+Other basic arithmetic operations available are examplified here:
+```C++
+r.multiply(r, r);
+std::cout << "r^2 = " << r.str() << std::endl;
+
+u.divide(b, a);
+v.modulus(b, a);
+std::cout << b.str() << " = " << u.str() << " * " << a.str() << " + " << v.str() << std::endl;
+```
+
+A special static method `natnum::quotrem` can combine the `divide` and `modulus` operations:
+```C++
+natnum::quotrem(q, r, b, a);
+std::cout << b.str() << " = " << q.str() << " * " << a.str() << " + " << r.str() << std::endl;
+```
+
+A natural number can be checked for zero-ness using `is_zero`:
+```C++
+u.subtract(u, u);
+std::cout << (u.is_zero() ? "u is zero" : "u is nonzero") << std::endl;
+```
+and compared to another natural number using `compare`:
+```C++
+std::cout << "q is " << (q.compare(r) > 0 ? "larger than" : "smaller than or equal to") << " r" << std::endl;```
+
