@@ -1,6 +1,8 @@
 # Kanooth Numbers
 
-A portable multiple-precision library in C++.
+A portable multiple-precision library in C++. The data types `natural_number` and `integer` are available and represent non-negative integers and integers, respectively.
+
+No operator overloading is implemented (other than assignment). To this end, the types `boost_natnum` and `boost_integer` make `natural_number` and `integer` available as backends for the [Boost Multiprecision](http://www.boost.org/doc/libs/release/libs/multiprecision/) library.
 
 ## Installation
 
