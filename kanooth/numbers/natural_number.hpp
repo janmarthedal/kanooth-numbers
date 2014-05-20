@@ -94,6 +94,7 @@ public:
     natural_number(natural_number&& other)
             : digits(other.digits), allocated(other.allocated), digit_array(other.digit_array)
     {
+        std::cout << "natnum rval const" << std::endl;
         other.clear();
     }
 #endif
@@ -145,6 +146,7 @@ public:
 #if !defined(KANOOTH_NO_RVALUE_REFS)
     natural_number& operator=(natural_number&& other)
     {
+        std::cout << "natnum rval assign" << std::endl;
         other.swap(*this);
         return *this;
     }
