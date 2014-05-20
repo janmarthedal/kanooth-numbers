@@ -310,6 +310,8 @@ public:
 
     std::string str(std::streamsize size, std::ios_base::fmtflags f) const
     {
+        if (number.is_zero())
+            return "0";
         std::string res = number.str(size, f);
         return positive ? res : "-" + res;
     }

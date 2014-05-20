@@ -51,19 +51,23 @@ v.modulus(b, a);
 std::cout << b.str() << " = " << u.str() << " * " << a.str() << " + " << v.str() << std::endl;
 ```
 
-A special static method `natnum::quotrem` can combine the `divide` and `modulus` operations:
+The static method `natnum::quotrem` can combine the `divide` and `modulus` operations:
 ```C++
 natural_number::quotrem(q, r, b, a);
 std::cout << b.str() << " = " << q.str() << " * " << a.str() << " + " << r.str() << std::endl;
 ```
+This is more efficient than the two seperate calls.
 
 A natural number can be checked for zero-ness using `is_zero`:
 ```C++
 u.subtract(u, u);
-std::cout << (u.is_zero() ? "u is zero" : "u is nonzero") << std::endl;
+std::cout << "u = " << u.str() << " is " << (u.is_zero() ? "zero" : "nonzero") << std::endl;
 ```
 and compared to another natural number using `compare`:
 ```C++
-std::cout << "q is " << (q.compare(r) > 0 ? "larger than" : "smaller than or equal to") << " r" << std::endl;
+std::cout << "q = " << q.str() << " " << (q.compare(r) > 0 ? ">" : "<=")
+          << " r = " << r.str() << std::endl;
 ```
+
+See examples of `natural_number` uses in `examples/demo_natnum.cpp`.
 

@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <kanooth/numbers/natural_number.hpp>
+#include "demo_common.hpp"
 
 using kanooth::numbers::natural_number;
 
@@ -26,25 +27,6 @@ natural_number fibonacci(unsigned n)
         a.swap(b);
     }
     return a;
-}
-
-natural_number gcd(const natural_number& a, const natural_number& b)
-{
-    natural_number r;
-    r.gcd(a, b);
-    return r;
-}
-
-natural_number power(natural_number y, natural_number x, unsigned n) {
-  if (n) {
-    while (n > 1) {
-      if (n & 1) y.multiply(y, x);
-      x.multiply(x, x);
-      n >>= 1;
-    }
-    y.multiply(y, x);
-  }
-  return y;
 }
 
 natural_number power_of_2(unsigned n) {
@@ -76,16 +58,16 @@ int main()
     std::cout << b.str() << " = " << q.str() << " * " << a.str() << " + " << r.str() << std::endl;
 
     u.subtract(u, u);
-    std::cout << (u.is_zero() ? "u is zero" : "u is nonzero") << std::endl;
+    std::cout << "u = " << u.str() << " is " << (u.is_zero() ? "zero" : "nonzero") << std::endl;
 
-    std::cout << "q is " << (q.compare(r) > 0 ? "larger than" : "smaller than or equal to") << " r" << std::endl;
+    std::cout << "q = " << q.str() << " " << (q.compare(r) > 0 ? ">" : "<=")
+              << " r = " << r.str() << std::endl;
 
     std::cout << "100! = " << factorial(100u).str() << std::endl;
     std::cout << "gcd(" << c.str() << "," << d.str() << ") = " << gcd(c, d).str() << std::endl;
     std::cout << "200th fibonacci number = " << fibonacci(200u).str() << std::endl;
-    std::cout << "3^100 = " << power(1u, 3u, 100).str() << std::endl;
+    std::cout << "3^100 = " << power(natural_number(1u), natural_number(3u), 100).str() << std::endl;
     std::cout << "2^120 = " << power_of_2(120).str() << std::endl;
 
     return 0;
 }
-
