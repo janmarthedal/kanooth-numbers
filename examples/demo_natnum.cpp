@@ -30,8 +30,8 @@ natural_number fibonacci(unsigned n)
 }
 
 natural_number power_of_2(unsigned n) {
-    natural_number r = 1u;
-    r.left_shift(r, n);
+    natural_number r;
+    r.bit_set(n);
     return r;
 }
 

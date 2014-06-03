@@ -807,7 +807,7 @@ private:
 
     // **********************
 
-    inline bool size_ok(size_type min_digits)
+    inline bool size_ok(size_type min_digits) const
     {
         return allocated >= min_digits;
     }
